@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, or } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import { tradeOffer, userCreature, creature, user } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -11,7 +11,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
   const db = createDb((env as unknown as Env).DB)
 
-  const [openTrades, myCreatures] = await Promise.all([
+  const [openTrades, pendingTrades, myCreatures] = await Promise.all([
     db
       .select({
         id: tradeOffer.id,
@@ -29,6 +29,27 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       .innerJoin(userCreature, eq(userCreature.id, tradeOffer.offeredCreatureId))
       .innerJoin(creature, eq(creature.id, userCreature.creatureId))
       .where(eq(tradeOffer.status, 'open'))
+      .all(),
+    // Pending trades where the current user is the offerer or receiver
+    db
+      .select({
+        id: tradeOffer.id,
+        offererId: tradeOffer.offererId,
+        receiverId: tradeOffer.receiverId,
+        offeredCreatureId: tradeOffer.offeredCreatureId,
+        receiverCreatureId: tradeOffer.receiverCreatureId,
+        createdAt: tradeOffer.createdAt,
+      })
+      .from(tradeOffer)
+      .where(
+        and(
+          eq(tradeOffer.status, 'pending'),
+          or(
+            eq(tradeOffer.offererId, session.user.id),
+            eq(tradeOffer.receiverId, session.user.id),
+          ),
+        ),
+      )
       .all(),
     db
       .select({
@@ -50,7 +71,69 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       .all(),
   ])
 
-  return { openTrades, myCreatures, userId: session.user.id }
+  // Hydrate pending trades with creature/user names
+  const pendingTradeIds = pendingTrades.flatMap((t) =>
+    [t.offeredCreatureId, t.receiverCreatureId].filter(Boolean) as string[],
+  )
+  const pendingUserIds = pendingTrades.flatMap((t) =>
+    [t.offererId, t.receiverId].filter(Boolean) as string[],
+  )
+
+  const [creatureDetails, userDetails] = await Promise.all([
+    pendingTradeIds.length > 0
+      ? db
+          .select({
+            ucId: userCreature.id,
+            name: creature.name,
+            rarity: creature.rarity,
+          })
+          .from(userCreature)
+          .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+          .all()
+          .then((rows) =>
+            Object.fromEntries(
+              rows
+                .filter((r) => pendingTradeIds.includes(r.ucId))
+                .map((r) => [r.ucId, { name: r.name, rarity: r.rarity }]),
+            ),
+          )
+      : {},
+    pendingUserIds.length > 0
+      ? db
+          .select({ id: user.id, name: user.name, image: user.image })
+          .from(user)
+          .all()
+          .then((rows) =>
+            Object.fromEntries(
+              rows
+                .filter((r) => pendingUserIds.includes(r.id))
+                .map((r) => [r.id, { name: r.name, image: r.image }]),
+            ),
+          )
+      : {},
+  ])
+
+  const hydratedPending = pendingTrades.map((t) => ({
+    ...t,
+    offererName: userDetails[t.offererId]?.name ?? 'Unknown',
+    offererImage: userDetails[t.offererId]?.image ?? null,
+    receiverName: t.receiverId ? (userDetails[t.receiverId]?.name ?? 'Unknown') : null,
+    receiverImage: t.receiverId ? (userDetails[t.receiverId]?.image ?? null) : null,
+    offeredCreatureName: t.offeredCreatureId
+      ? (creatureDetails[t.offeredCreatureId]?.name ?? 'Unknown')
+      : 'Unknown',
+    offeredCreatureRarity: t.offeredCreatureId
+      ? (creatureDetails[t.offeredCreatureId]?.rarity ?? 'common')
+      : 'common',
+    receiverCreatureName: t.receiverCreatureId
+      ? (creatureDetails[t.receiverCreatureId]?.name ?? 'Unknown')
+      : null,
+    receiverCreatureRarity: t.receiverCreatureId
+      ? (creatureDetails[t.receiverCreatureId]?.rarity ?? 'common')
+      : null,
+  }))
+
+  return { openTrades, pendingTrades: hydratedPending, myCreatures, userId: session.user.id }
 })
 
 export const Route = createFileRoute('/_app/trade')({
@@ -59,7 +142,7 @@ export const Route = createFileRoute('/_app/trade')({
 })
 
 function TradePage() {
-  const { openTrades, myCreatures, userId } = Route.useLoaderData()
+  const { openTrades, pendingTrades, myCreatures, userId } = Route.useLoaderData()
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -71,6 +154,7 @@ function TradePage() {
       </div>
       <TradeList
         trades={openTrades}
+        pendingTrades={pendingTrades}
         myCreatures={myCreatures}
         userId={userId}
       />

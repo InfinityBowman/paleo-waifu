@@ -123,8 +123,9 @@ export const tradeOffer = sqliteTable('trade_offer', {
   offererId: text('offerer_id').notNull().references(() => user.id),
   receiverId: text('receiver_id').references(() => user.id),
   offeredCreatureId: text('offered_creature_id').notNull().references(() => userCreature.id),
+  receiverCreatureId: text('receiver_creature_id').references(() => userCreature.id),
   wantedCreatureId: text('wanted_creature_id').references(() => creature.id),
-  status: text('status').notNull().default('open'),
+  status: text('status').notNull().default('open'), // open | pending | accepted | cancelled
   createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
   expiresAt: integer('expires_at', { mode: 'timestamp' }),
 })

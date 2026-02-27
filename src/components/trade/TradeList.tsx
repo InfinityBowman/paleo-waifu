@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { cn } from '@/lib/utils'
 import { RARITY_COLORS, RARITY_BORDER, type Rarity } from '@/lib/types'
-import { ArrowLeftRight, Plus, X, Loader2 } from 'lucide-react'
+import { ArrowLeftRight, Plus, X, Loader2, Check, Clock } from 'lucide-react'
 
 interface TradeItem {
   id: string
@@ -13,6 +13,21 @@ interface TradeItem {
   offeredCreatureRarity: string
   offeredCreatureImage: string | null
   wantedCreatureId: string | null
+  createdAt: Date | null
+}
+
+interface PendingTradeItem {
+  id: string
+  offererId: string
+  receiverId: string | null
+  offererName: string
+  offererImage: string | null
+  receiverName: string | null
+  receiverImage: string | null
+  offeredCreatureName: string
+  offeredCreatureRarity: string
+  receiverCreatureName: string | null
+  receiverCreatureRarity: string | null
   createdAt: Date | null
 }
 
@@ -27,10 +42,12 @@ interface MyCreature {
 
 export function TradeList({
   trades,
+  pendingTrades,
   myCreatures,
   userId,
 }: {
   trades: TradeItem[]
+  pendingTrades: PendingTradeItem[]
   myCreatures: MyCreature[]
   userId: string
 }) {
@@ -106,6 +123,40 @@ export function TradeList({
     }
   }
 
+  const handleConfirm = async (tradeId: string) => {
+    if (loading) return
+    setLoading(tradeId)
+
+    try {
+      const res = await fetch('/api/trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'confirm', tradeId }),
+      })
+
+      if (res.ok) router.invalidate()
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const handleReject = async (tradeId: string) => {
+    if (loading) return
+    setLoading(tradeId)
+
+    try {
+      const res = await fetch('/api/trade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reject', tradeId }),
+      })
+
+      if (res.ok) router.invalidate()
+    } finally {
+      setLoading(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -168,11 +219,11 @@ export function TradeList({
         </div>
       )}
 
-      {/* Confirmation dialog for accepting a trade */}
+      {/* Confirmation dialog for proposing a trade */}
       {pendingAccept && (
         <div className="rounded-lg border border-primary bg-primary/5 p-4">
           <p className="mb-3 text-sm font-medium">
-            Are you sure you want to accept this trade? This action cannot be undone.
+            Offer this creature? The trade owner will need to approve before it completes.
           </p>
           <div className="flex gap-2">
             <button
@@ -183,7 +234,7 @@ export function TradeList({
               {loading === pendingAccept.tradeId && (
                 <Loader2 className="h-4 w-4 animate-spin" />
               )}
-              Confirm Trade
+              Send Offer
             </button>
             <button
               onClick={() => setPendingAccept(null)}
@@ -191,6 +242,105 @@ export function TradeList({
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Pending trades awaiting confirmation */}
+      {pendingTrades.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="flex items-center gap-2 text-lg font-semibold">
+            <Clock className="h-4 w-4 text-amber-500" />
+            Pending Trades
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {pendingTrades.map((trade) => {
+              const iAmOfferer = trade.offererId === userId
+              const offeredRarity = trade.offeredCreatureRarity as Rarity
+              const receiverRarity = trade.receiverCreatureRarity as Rarity | null
+              return (
+                <div
+                  key={trade.id}
+                  className="rounded-lg border-2 border-amber-500/30 bg-card p-4"
+                >
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      {trade.offererImage ? (
+                        <img
+                          src={trade.offererImage}
+                          alt=""
+                          className="h-5 w-5 rounded-full"
+                        />
+                      ) : null}
+                      {trade.offererName}
+                    </div>
+                    <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold text-amber-500">
+                      PENDING
+                    </span>
+                  </div>
+
+                  <div className="mb-3 flex items-center gap-3">
+                    <div className="flex-1">
+                      <span
+                        className={cn(
+                          'text-[10px] font-semibold uppercase',
+                          RARITY_COLORS[offeredRarity],
+                        )}
+                      >
+                        {offeredRarity}
+                      </span>
+                      <div className="font-bold">{trade.offeredCreatureName}</div>
+                    </div>
+                    <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 text-right">
+                      {receiverRarity && (
+                        <span
+                          className={cn(
+                            'text-[10px] font-semibold uppercase',
+                            RARITY_COLORS[receiverRarity],
+                          )}
+                        >
+                          {receiverRarity}
+                        </span>
+                      )}
+                      <div className="font-bold">{trade.receiverCreatureName ?? '?'}</div>
+                      <div className="text-xs text-muted-foreground">
+                        from {trade.receiverName}
+                      </div>
+                    </div>
+                  </div>
+
+                  {iAmOfferer ? (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleConfirm(trade.id)}
+                        disabled={loading === trade.id}
+                        className="flex flex-1 items-center justify-center gap-1 rounded-md bg-green-600 py-1.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-50"
+                      >
+                        {loading === trade.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Check className="h-3.5 w-3.5" />
+                        )}
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleReject(trade.id)}
+                        disabled={loading === trade.id}
+                        className="flex flex-1 items-center justify-center gap-1 rounded-md border py-1.5 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-50"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                        Decline
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center text-xs text-muted-foreground">
+                      Waiting for {trade.offererName} to approve...
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

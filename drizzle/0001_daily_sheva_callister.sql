@@ -1,0 +1,1 @@
+ALTER TABLE `trade_offer` ADD `receiver_creature_id` text REFERENCES user_creature(id);

@@ -1,6 +1,6 @@
 export type Rarity = 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
 
-export type TradeStatus = 'open' | 'accepted' | 'cancelled' | 'expired'
+export type TradeStatus = 'open' | 'pending' | 'accepted' | 'cancelled' | 'expired'
 
 export const RARITY_ORDER: Record<Rarity, number> = {
   common: 0,

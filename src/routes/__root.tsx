@@ -6,6 +6,7 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
+import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -56,6 +57,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
         {children}
+        {import.meta.env.DEV && <DevAccountSwitcher />}
         <Scripts />
       </body>
     </html>
