@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
-import { eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
 import {
@@ -10,7 +10,7 @@ import {
   getFossils,
   refundFossils,
 } from '@/lib/gacha'
-import { banner } from '@/lib/db/schema'
+import { banner, userCreature } from '@/lib/db/schema'
 import {
   MULTI_PULL_COUNT,
   PULL_COST_MULTI,
@@ -62,7 +62,7 @@ export const Route = createFileRoute('/api/gacha')({
           const bannerRow = await db
             .select({ id: banner.id })
             .from(banner)
-            .where(eq(banner.id, bannerId))
+            .where(and(eq(banner.id, bannerId), eq(banner.isActive, true)))
             .get()
 
           if (!bannerRow) {
@@ -89,7 +89,7 @@ export const Route = createFileRoute('/api/gacha')({
             )
           }
 
-          // Execute pulls — refund on failure
+          // Execute pulls — clean up inserted creatures and refund on failure
           const results = []
           try {
             for (let i = 0; i < pullCount; i++) {
@@ -97,7 +97,13 @@ export const Route = createFileRoute('/api/gacha')({
               results.push(result)
             }
           } catch (err) {
-            // Refund the full cost since pulls failed partway
+            // Delete any creatures already inserted during this batch
+            const insertedIds = results.map((r) => r.userCreatureId)
+            if (insertedIds.length > 0) {
+              await db
+                .delete(userCreature)
+                .where(inArray(userCreature.id, insertedIds))
+            }
             await refundFossils(db, session.user.id, cost)
             const fossils = await getFossils(db, session.user.id)
             return new Response(

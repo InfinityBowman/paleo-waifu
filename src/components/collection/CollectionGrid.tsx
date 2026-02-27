@@ -1,14 +1,9 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
+import { Search, Skull, Star } from 'lucide-react'
 import { CreatureModal } from './CreatureModal'
-import type {Rarity} from '@/lib/types';
+import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import {
-  RARITY_BG,
-  RARITY_BORDER,
-  RARITY_COLORS
-  
-} from '@/lib/types'
+import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -71,7 +66,7 @@ export function CollectionGrid({
           <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">All Rarities</SelectItem>
             {rarities.map((r) => (
               <SelectItem key={r} value={r}>
@@ -84,7 +79,7 @@ export function CollectionGrid({
           <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">All Eras</SelectItem>
             {eras.map((e) => (
               <SelectItem key={e} value={e}>
@@ -110,34 +105,34 @@ export function CollectionGrid({
                 key={item.id}
                 onClick={() => setSelected(item)}
                 className={cn(
-                  'group relative overflow-hidden rounded-lg border-2 text-left transition-all hover:scale-[1.02]',
+                  'group relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1',
                   RARITY_BORDER[rarity],
                   RARITY_BG[rarity],
                 )}
               >
-                <div className="aspect-[3/4] p-2">
+                <div className="aspect-[3/4] overflow-hidden p-2">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}
                       alt={item.name}
-                      className="h-full w-full rounded object-cover"
+                      className="h-full w-full rounded object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl">
-                      🦖
+                    <div className="flex h-full w-full items-center justify-center">
+                      <Skull className="h-10 w-10 text-muted-foreground/30" />
                     </div>
                   )}
                 </div>
                 <div className="p-2 pt-0">
                   <span
                     className={cn(
-                      'text-[10px] font-semibold uppercase',
+                      'font-display text-[10px] font-semibold uppercase',
                       RARITY_COLORS[rarity],
                     )}
                   >
                     {rarity}
                   </span>
-                  <div className="text-sm font-bold leading-tight">
+                  <div className="font-display text-sm font-bold leading-tight">
                     {item.name}
                   </div>
                   <div className="text-[11px] text-muted-foreground">
@@ -145,7 +140,7 @@ export function CollectionGrid({
                   </div>
                 </div>
                 {item.isFavorite && (
-                  <div className="absolute right-1 top-1 text-amber-400">★</div>
+                  <Star className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-amber-400 text-amber-400" />
                 )}
               </button>
             )

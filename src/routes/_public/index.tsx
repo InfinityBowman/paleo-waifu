@@ -7,7 +7,7 @@ export const Route = createFileRoute('/_public/')({
 
 function LandingPage() {
   return (
-    <div className="min-h-screen">
+    <div className="flex min-h-screen flex-col">
       <Hero />
     </div>
   )

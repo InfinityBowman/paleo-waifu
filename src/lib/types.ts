@@ -47,6 +47,17 @@ export const RARITY_GLOW: Record<Rarity, string> = {
   legendary: 'shadow-amber-400/40',
 }
 
+export const RARITY_SHIMMER: Partial<Record<Rarity, string>> = {
+  rare: 'rarity-shimmer-rare',
+  epic: 'rarity-shimmer-epic',
+  legendary: 'rarity-shimmer-legendary',
+}
+
+export const RARITY_GLOW_ANIM: Partial<Record<Rarity, string>> = {
+  epic: 'rarity-glow-epic',
+  legendary: 'rarity-glow-legendary',
+}
+
 export const PULL_COST_SINGLE = 1
 export const PULL_COST_MULTI = 10
 export const MULTI_PULL_COUNT = 10

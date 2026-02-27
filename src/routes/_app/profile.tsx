@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
 import { count, eq, sql } from 'drizzle-orm'
+import { Bone, Dices, Handshake, Microscope } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { createDb } from '@/lib/db/client'
 import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -46,8 +48,9 @@ const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
       .get(),
   ])
 
+  const { email: _email, ...safeUser } = session.user
   return {
-    user: session.user,
+    user: safeUser,
     fossils: currencyRow?.fossils ?? 0,
     totalPulls: totalCreatures?.count ?? 0,
     uniqueSpecies: (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
@@ -72,29 +75,48 @@ function ProfilePage() {
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 flex items-center gap-4">
         <Avatar className="size-16">
-          {user.image ? (
-            <AvatarImage src={user.image} alt={user.name} />
-          ) : null}
+          {user.image ? <AvatarImage src={user.image} alt={user.name} /> : null}
           <AvatarFallback className="text-2xl font-bold">
             {user.name[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
         <div>
-          <h1 className="text-2xl font-bold">{user.name}</h1>
-          <p className="text-sm text-muted-foreground">{user.email}</p>
+          <h1 className="font-display text-2xl font-bold">{user.name}</h1>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label="Fossils" value={fossils} icon="🦴" />
-        <StatCard label="Total Pulls" value={totalPulls} icon="🎰" />
-        <StatCard
-          label="Species Found"
-          value={`${uniqueSpecies} / ${totalSpecies}`}
-          icon="🔬"
-          subtitle={`${completionPct}% complete`}
-        />
-        <StatCard label="Trades" value={tradeCount} icon="🤝" />
+        <StatCard label="Fossils" value={fossils} icon={Bone} />
+        <StatCard label="Total Pulls" value={totalPulls} icon={Dices} />
+        <Card
+          size="sm"
+          className="group transition-shadow hover:shadow-md sm:col-span-2"
+        >
+          <CardContent>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Microscope className="h-4 w-4" />
+                  Species Found
+                </div>
+                <div className="mt-1 font-display text-2xl font-bold">
+                  {uniqueSpecies} / {totalSpecies}
+                </div>
+                <div className="mt-0.5 text-xs text-muted-foreground">
+                  {completionPct}% complete
+                </div>
+              </div>
+              <Microscope className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
+            </div>
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-amber-400 transition-all duration-500"
+                style={{ width: `${completionPct}%` }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+        <StatCard label="Trades" value={tradeCount} icon={Handshake} />
       </div>
     </div>
   )
@@ -103,25 +125,25 @@ function ProfilePage() {
 function StatCard({
   label,
   value,
-  icon,
-  subtitle,
+  icon: Icon,
 }: {
   label: string
   value: string | number
-  icon: string
-  subtitle?: string
+  icon: LucideIcon
 }) {
   return (
-    <Card size="sm">
+    <Card size="sm" className="group transition-shadow hover:shadow-md">
       <CardContent>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>{icon}</span>
-          {label}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Icon className="h-4 w-4" />
+              {label}
+            </div>
+            <div className="mt-1 font-display text-2xl font-bold">{value}</div>
+          </div>
+          <Icon className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
         </div>
-        <div className="mt-1 text-2xl font-bold">{value}</div>
-        {subtitle && (
-          <div className="mt-0.5 text-xs text-muted-foreground">{subtitle}</div>
-        )}
       </CardContent>
     </Card>
   )

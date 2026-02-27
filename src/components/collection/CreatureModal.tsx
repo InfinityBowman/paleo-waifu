@@ -1,6 +1,7 @@
-import type {Rarity} from '@/lib/types';
+import { Skull, Sparkles } from 'lucide-react'
+import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS  } from '@/lib/types'
+import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/types'
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,18 @@ interface Creature {
   diet: string
   imageUrl: string | null
   description: string
+  period?: string | null
+  sizeMeters?: number | null
+  weightKg?: number | null
+  funFacts?: string | null
+}
+
+const RARITY_IMAGE_GRADIENT: Record<string, string> = {
+  common: 'from-neutral-500/10 to-background',
+  uncommon: 'from-green-500/10 to-background',
+  rare: 'from-blue-500/15 to-background',
+  epic: 'from-purple-500/20 to-background',
+  legendary: 'from-amber-500/20 to-background',
 }
 
 export function CreatureModal({
@@ -31,6 +44,18 @@ export function CreatureModal({
   if (!creature) return null
 
   const rarity = creature.rarity as Rarity
+  const shimmerClass = RARITY_SHIMMER[rarity]
+
+  let funFacts: Array<string> = []
+  if (creature.funFacts) {
+    try {
+      const parsed = JSON.parse(creature.funFacts)
+      if (Array.isArray(parsed)) funFacts = parsed
+    } catch {
+      // If not valid JSON, treat as single fact
+      funFacts = [creature.funFacts]
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -41,7 +66,21 @@ export function CreatureModal({
           RARITY_BORDER[rarity],
         )}
       >
-        <div className="aspect-square bg-gradient-to-b from-muted/30 to-background p-8">
+        <div
+          className={cn(
+            'relative aspect-square bg-gradient-to-b p-8',
+            RARITY_IMAGE_GRADIENT[rarity] ?? 'from-muted/30 to-background',
+          )}
+        >
+          {/* Shimmer overlay */}
+          {shimmerClass && (
+            <div
+              className={cn(
+                'pointer-events-none absolute inset-0 z-10',
+                shimmerClass,
+              )}
+            />
+          )}
           {creature.imageUrl ? (
             <img
               src={creature.imageUrl}
@@ -49,8 +88,8 @@ export function CreatureModal({
               className="h-full w-full rounded-lg object-contain"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center text-8xl">
-              🦖
+            <div className="flex h-full w-full items-center justify-center">
+              <Skull className="h-20 w-20 text-muted-foreground/20" />
             </div>
           )}
         </div>
@@ -59,34 +98,69 @@ export function CreatureModal({
           <Badge
             variant="secondary"
             className={cn(
-              'uppercase',
+              'font-display uppercase',
               RARITY_COLORS[rarity],
               'bg-transparent px-0',
             )}
           >
             {rarity}
           </Badge>
-          <DialogTitle className="mt-1 text-2xl font-bold">
+          <DialogTitle className="mt-1 font-display text-2xl font-bold">
             {creature.name}
           </DialogTitle>
           <DialogDescription className="italic">
             {creature.scientificName}
           </DialogDescription>
 
-          <div className="mt-4 flex gap-4 text-sm">
-            <div>
+          <div className="mt-4 flex flex-wrap gap-2 text-sm">
+            <span className="rounded-full bg-muted/50 px-3 py-1.5">
               <span className="text-muted-foreground">Era:</span>{' '}
               <span className="font-medium">{creature.era}</span>
-            </div>
-            <div>
+            </span>
+            <span className="rounded-full bg-muted/50 px-3 py-1.5">
               <span className="text-muted-foreground">Diet:</span>{' '}
               <span className="font-medium">{creature.diet}</span>
-            </div>
+            </span>
+            {creature.period && (
+              <span className="rounded-full bg-muted/50 px-3 py-1.5">
+                <span className="text-muted-foreground">Period:</span>{' '}
+                <span className="font-medium">{creature.period}</span>
+              </span>
+            )}
+            {creature.sizeMeters != null && (
+              <span className="rounded-full bg-muted/50 px-3 py-1.5">
+                <span className="text-muted-foreground">Size:</span>{' '}
+                <span className="font-medium">{creature.sizeMeters}m</span>
+              </span>
+            )}
+            {creature.weightKg != null && (
+              <span className="rounded-full bg-muted/50 px-3 py-1.5">
+                <span className="text-muted-foreground">Weight:</span>{' '}
+                <span className="font-medium">{creature.weightKg}kg</span>
+              </span>
+            )}
           </div>
 
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
             {creature.description}
           </p>
+
+          {funFacts.length > 0 && (
+            <div className="mt-4">
+              <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                Fun Facts
+              </div>
+              <ul className="space-y-1.5 text-sm text-muted-foreground">
+                {funFacts.map((fact, i) => (
+                  <li key={i} className="flex gap-2">
+                    <span className="mt-0.5 text-primary/60">•</span>
+                    <span>{fact}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

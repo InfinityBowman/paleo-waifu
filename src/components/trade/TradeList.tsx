@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { ArrowLeftRight, Check, Clock, Loader2, Plus, X } from 'lucide-react'
-import type {Rarity} from '@/lib/types';
+import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS  } from '@/lib/types'
+import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -181,7 +181,7 @@ export function TradeList({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Open Trades</h2>
+        <h2 className="font-display text-lg font-semibold">Open Trades</h2>
         <Button onClick={() => setCreating(!creating)} size="lg">
           <Plus className="h-4 w-4" />
           New Trade
@@ -191,30 +191,41 @@ export function TradeList({
       {creating && (
         <Card>
           <CardContent>
-            <h3 className="mb-3 font-medium">Select a creature to offer</h3>
+            <h3 className="font-display mb-3 font-medium">
+              Select a creature to offer
+            </h3>
             <div className="grid gap-2 sm:grid-cols-3 md:grid-cols-4">
-              {myCreatures.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedOffer(c.id)}
-                  className={cn(
-                    'rounded-lg border p-3 text-left text-sm transition-all',
-                    selectedOffer === c.id
-                      ? 'border-primary bg-primary/10'
-                      : 'hover:border-muted-foreground/30',
-                  )}
-                >
-                  <span
+              {myCreatures.map((c) => {
+                const rarity = c.rarity as Rarity
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSelectedOffer(c.id)}
                     className={cn(
-                      'text-[10px] font-semibold uppercase',
-                      RARITY_COLORS[c.rarity as Rarity],
+                      'relative rounded-xl border-2 p-3 text-left text-sm transition-all',
+                      selectedOffer === c.id
+                        ? 'border-primary bg-primary/10'
+                        : cn(
+                            'hover:border-muted-foreground/30',
+                            RARITY_BG[rarity],
+                          ),
                     )}
                   >
-                    {c.rarity}
-                  </span>
-                  <div className="font-medium">{c.name}</div>
-                </button>
-              ))}
+                    <span
+                      className={cn(
+                        'font-display text-[10px] font-semibold uppercase',
+                        RARITY_COLORS[rarity],
+                      )}
+                    >
+                      {c.rarity}
+                    </span>
+                    <div className="font-display font-medium">{c.name}</div>
+                    {selectedOffer === c.id && (
+                      <div className="absolute right-2 top-2 h-2 w-2 rounded-full bg-primary" />
+                    )}
+                  </button>
+                )
+              })}
             </div>
             <div className="mt-4 flex gap-2">
               <Button
@@ -273,7 +284,7 @@ export function TradeList({
       {/* Pending trades awaiting confirmation */}
       {pendingTrades.length > 0 && (
         <div className="space-y-4">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
+          <h2 className="font-display flex items-center gap-2 text-lg font-semibold">
             <Clock className="h-4 w-4 text-amber-500" />
             Pending Trades
           </h2>
@@ -309,13 +320,13 @@ export function TradeList({
                       <div className="flex-1">
                         <span
                           className={cn(
-                            'text-[10px] font-semibold uppercase',
+                            'font-display text-[10px] font-semibold uppercase',
                             RARITY_COLORS[offeredRarity],
                           )}
                         >
                           {offeredRarity}
                         </span>
-                        <div className="font-bold">
+                        <div className="font-display font-bold">
                           {trade.offeredCreatureName}
                         </div>
                       </div>
@@ -324,14 +335,14 @@ export function TradeList({
                         {receiverRarity && (
                           <span
                             className={cn(
-                              'text-[10px] font-semibold uppercase',
+                              'font-display text-[10px] font-semibold uppercase',
                               RARITY_COLORS[receiverRarity],
                             )}
                           >
                             {receiverRarity}
                           </span>
                         )}
-                        <div className="font-bold">
+                        <div className="font-display font-bold">
                           {trade.receiverCreatureName ?? '?'}
                         </div>
                         <div className="text-xs text-muted-foreground">
@@ -411,13 +422,13 @@ export function TradeList({
                     <div className="flex-1">
                       <span
                         className={cn(
-                          'text-[10px] font-semibold uppercase',
+                          'font-display text-[10px] font-semibold uppercase',
                           RARITY_COLORS[rarity],
                         )}
                       >
                         {rarity}
                       </span>
-                      <div className="font-bold">
+                      <div className="font-display font-bold">
                         {trade.offeredCreatureName}
                       </div>
                     </div>

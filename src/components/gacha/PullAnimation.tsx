@@ -1,33 +1,89 @@
+import { Pickaxe, Skull, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { CardReveal } from './CardReveal'
 import { useAppStore } from '@/store/appStore'
 
+function DustParticle({ delay }: { delay: string }) {
+  return (
+    <div
+      className="absolute bottom-8 text-xs text-muted-foreground/50"
+      style={{
+        animation: 'particle-rise 1.5s ease-out infinite',
+        animationDelay: delay,
+        left: `${30 + Math.random() * 40}%`,
+      }}
+    >
+      .
+    </div>
+  )
+}
+
 export function PullAnimation() {
-  const { pullResults, isPulling } = useAppStore()
+  const { pullResults, isPulling, clearPullResults } = useAppStore()
 
   if (isPulling) {
     return (
-      <div className="flex items-center justify-center rounded-lg border bg-card p-16">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 animate-bounce text-4xl">🥚</div>
-          <p className="text-muted-foreground animate-pulse">Excavating...</p>
+      <div className="relative flex items-center justify-center rounded-xl border bg-gradient-to-b from-card to-card/80 p-16">
+        <div className="absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,oklch(0.75_0.16_75/0.06)_0%,transparent_70%)]" />
+        <div className="relative flex flex-col items-center gap-4">
+          <div className="animate-dig text-4xl">
+            <Pickaxe className="h-12 w-12 text-primary" />
+          </div>
+          <p className="font-display text-lg text-muted-foreground">
+            Excavating
+            <span className="inline-flex w-6">
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: '0ms' }}
+              >
+                .
+              </span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: '150ms' }}
+              >
+                .
+              </span>
+              <span
+                className="animate-bounce"
+                style={{ animationDelay: '300ms' }}
+              >
+                .
+              </span>
+            </span>
+          </p>
+          {/* Dust particles */}
+          <DustParticle delay="0s" />
+          <DustParticle delay="0.3s" />
+          <DustParticle delay="0.6s" />
+          <DustParticle delay="0.9s" />
         </div>
       </div>
     )
   }
 
   if (pullResults.length === 0) {
-    return (
-      <div className="flex items-center justify-center rounded-lg border bg-card/50 p-16">
-        <p className="text-muted-foreground">
-          Select a banner and pull to discover creatures!
-        </p>
-      </div>
-    )
+    return null
   }
 
+  const isSingle = pullResults.length === 1
+
   return (
-    <div className="rounded-lg border bg-card p-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="relative rounded-xl border bg-gradient-to-b from-card to-card/90 p-6">
+      <button
+        onClick={clearPullResults}
+        className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground/50 transition-colors hover:bg-muted hover:text-muted-foreground"
+      >
+        <X className="h-4 w-4" />
+      </button>
+      <div
+        className={cn(
+          'grid gap-4',
+          isSingle
+            ? 'mx-auto max-w-[180px]'
+            : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5',
+        )}
+      >
         {pullResults.map((result, idx) => (
           <CardReveal
             key={result.userCreatureId}

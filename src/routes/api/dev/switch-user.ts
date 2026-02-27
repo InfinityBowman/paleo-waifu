@@ -1,100 +1,105 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { env } from 'cloudflare:workers'
-import { eq } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
-import { createDb } from '@/lib/db/client'
-import { session, user } from '@/lib/db/schema'
-import { ensureUserCurrency } from '@/lib/gacha'
 
-/** Sign a cookie value using HMAC-SHA256 (matches better-auth/better-call format) */
-async function signCookieValue(value: string, secret: string): Promise<string> {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  )
-  const sig = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(value),
-  )
-  const base64Sig = btoa(String.fromCharCode(...new Uint8Array(sig)))
-  return encodeURIComponent(`${value}.${base64Sig}`)
-}
+// In production builds, Vite replaces import.meta.env.DEV with false and
+// tree-shakes the handler body. The runtime check below is a defense-in-depth
+// guard in case the compile-time replacement is ever bypassed.
+
+const notFound = () => new Response('Not Found', { status: 404 })
 
 export const Route = createFileRoute('/api/dev/switch-user')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        if (!import.meta.env.DEV) {
-          return new Response('Not Found', { status: 404 })
-        }
+      POST: import.meta.env.DEV
+        ? async ({ request }) => {
+            // Runtime double-check — never allow in production
+            if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+              return notFound()
+            }
 
-        const body = (await request.json()) as { userId: string }
-        const { userId } = body
+            const { env } = await import('cloudflare:workers')
+            const { eq } = await import('drizzle-orm')
+            const { nanoid } = await import('nanoid')
+            const { createDb } = await import('@/lib/db/client')
+            const { session, user } = await import('@/lib/db/schema')
+            const { ensureUserCurrency } = await import('@/lib/gacha')
 
-        if (!userId?.startsWith('dev-user-')) {
-          return new Response(
-            JSON.stringify({ error: 'Invalid dev user ID' }),
-            { status: 400, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
+            const body = (await request.json()) as { userId: string }
+            const { userId } = body
 
-        const cfEnv = env as unknown as Env
-        const db = createDb(cfEnv.DB)
+            if (!userId?.startsWith('dev-user-')) {
+              return new Response(
+                JSON.stringify({ error: 'Invalid dev user ID' }),
+                { status: 400, headers: { 'Content-Type': 'application/json' } },
+              )
+            }
 
-        // Verify user exists
-        const userRow = await db
-          .select({ id: user.id })
-          .from(user)
-          .where(eq(user.id, userId))
-          .get()
+            const cfEnv = env as unknown as Env
+            const db = createDb(cfEnv.DB)
 
-        if (!userRow) {
-          return new Response(
-            JSON.stringify({
-              error: 'Dev user not found. Run pnpm db:seed:dev-users first.',
-            }),
-            { status: 404, headers: { 'Content-Type': 'application/json' } },
-          )
-        }
+            const userRow = await db
+              .select({ id: user.id })
+              .from(user)
+              .where(eq(user.id, userId))
+              .get()
 
-        // Ensure currency row exists
-        await ensureUserCurrency(db, userId)
+            if (!userRow) {
+              return new Response(
+                JSON.stringify({
+                  error: 'Dev user not found. Run pnpm db:seed:dev-users first.',
+                }),
+                { status: 404, headers: { 'Content-Type': 'application/json' } },
+              )
+            }
 
-        // Create a new session
-        const token = nanoid(32)
-        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+            await ensureUserCurrency(db, userId)
 
-        await db.insert(session).values({
-          id: nanoid(),
-          token,
-          userId,
-          expiresAt,
-          ipAddress: '127.0.0.1',
-          userAgent: 'dev-account-switcher',
-        })
+            const token = nanoid(32)
+            const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
-        // Sign the session token cookie (better-auth uses HMAC-SHA256 signed cookies)
-        const signedToken = await signCookieValue(token, cfEnv.AUTH_SECRET)
-        const cookieOpts = 'Path=/; HttpOnly; SameSite=Lax; Max-Age=604800'
-        const headers = new Headers({ 'Content-Type': 'application/json' })
-        headers.append(
-          'Set-Cookie',
-          `better-auth.session_token=${signedToken}; ${cookieOpts}`,
-        )
-        // Expire the session data cache cookie to prevent stale session
-        headers.append(
-          'Set-Cookie',
-          'better-auth.session_data=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
-        )
+            await db.insert(session).values({
+              id: nanoid(),
+              token,
+              userId,
+              expiresAt,
+              ipAddress: '127.0.0.1',
+              userAgent: 'dev-account-switcher',
+            })
 
-        return new Response(JSON.stringify({ success: true, userId }), {
-          headers,
-        })
-      },
+            /** Sign a cookie value using HMAC-SHA256 (matches better-auth format) */
+            async function signCookieValue(value: string, secret: string): Promise<string> {
+              const key = await crypto.subtle.importKey(
+                'raw',
+                new TextEncoder().encode(secret),
+                { name: 'HMAC', hash: 'SHA-256' },
+                false,
+                ['sign'],
+              )
+              const sig = await crypto.subtle.sign(
+                'HMAC',
+                key,
+                new TextEncoder().encode(value),
+              )
+              const base64Sig = btoa(String.fromCharCode(...new Uint8Array(sig)))
+              return encodeURIComponent(`${value}.${base64Sig}`)
+            }
+
+            const signedToken = await signCookieValue(token, cfEnv.AUTH_SECRET)
+            const cookieOpts = 'Path=/; HttpOnly; SameSite=Lax; Max-Age=604800'
+            const headers = new Headers({ 'Content-Type': 'application/json' })
+            headers.append(
+              'Set-Cookie',
+              `better-auth.session_token=${signedToken}; ${cookieOpts}`,
+            )
+            headers.append(
+              'Set-Cookie',
+              'better-auth.session_data=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0',
+            )
+
+            return new Response(JSON.stringify({ success: true, userId }), {
+              headers,
+            })
+          }
+        : notFound,
     },
   },
 })

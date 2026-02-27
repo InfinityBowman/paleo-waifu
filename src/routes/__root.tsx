@@ -55,7 +55,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-background text-foreground antialiased">
+      <body className="bg-noise min-h-screen bg-background text-foreground antialiased">
         {children}
         {import.meta.env.DEV && <DevAccountSwitcher />}
         <Scripts />

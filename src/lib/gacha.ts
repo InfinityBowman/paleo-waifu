@@ -14,10 +14,9 @@ import {
   HARD_PITY_THRESHOLD,
   NEW_USER_BONUS,
   RATE_UP_SHARE,
-  
-  SOFT_PITY_THRESHOLD
+  SOFT_PITY_THRESHOLD,
 } from './types'
-import type {Rarity} from './types';
+import type { Rarity } from './types'
 import type { Database } from './db/client'
 
 /** Ensure new user gets their starter Fossils */

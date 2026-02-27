@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/tooltip'
 
 const NAV_LINK_CLASS =
-  'flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground [&.active]:text-foreground'
+  'flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground [&.active]:text-primary'
 
 const MOBILE_NAV_LINK_CLASS =
   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground [&.active]:bg-accent [&.active]:text-foreground'
@@ -60,7 +60,10 @@ export function Nav() {
         <div className="flex h-14 items-center justify-between px-4">
           {/* Left: Logo + Desktop Nav */}
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center gap-2 text-lg font-bold">
+            <Link
+              to="/"
+              className="flex items-center gap-2 font-display text-lg font-bold"
+            >
               <Skull className="h-5 w-5 text-primary" />
               PaleoWaifu
             </Link>
@@ -155,7 +158,7 @@ export function Nav() {
               </SheetTrigger>
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
+                  <SheetTitle className="flex items-center gap-2 font-display">
                     <Skull className="h-5 w-5 text-primary" />
                     PaleoWaifu
                   </SheetTitle>

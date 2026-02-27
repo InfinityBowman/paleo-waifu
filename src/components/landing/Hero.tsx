@@ -1,5 +1,16 @@
 import { Link } from '@tanstack/react-router'
-import { BookOpen, Skull, Sparkles } from 'lucide-react'
+import {
+  Bone,
+  BookOpen,
+  Crown,
+  Gem,
+  Globe,
+  Leaf,
+  Mountain,
+  Shell,
+  Skull,
+  Sparkles,
+} from 'lucide-react'
 import { signIn, useSession } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 
@@ -11,22 +22,68 @@ function DiscordIcon({ className }: { className?: string }) {
   )
 }
 
+const FLOATING_ELEMENTS = [
+  {
+    icon: Skull,
+    className: 'absolute top-16 left-[10%] h-8 w-8 text-primary/15',
+    delay: '0s',
+  },
+  {
+    icon: Bone,
+    className: 'absolute top-24 right-[12%] h-6 w-6 text-primary/10',
+    delay: '0.5s',
+  },
+  {
+    icon: Leaf,
+    className: 'absolute bottom-20 left-[8%] h-6 w-6 text-green-500/10',
+    delay: '1s',
+  },
+  {
+    icon: Shell,
+    className: 'absolute bottom-28 right-[15%] h-8 w-8 text-blue-400/10',
+    delay: '1.5s',
+  },
+  {
+    icon: Mountain,
+    className: 'absolute top-40 left-[25%] h-5 w-5 text-muted-foreground/10',
+    delay: '0.7s',
+  },
+  {
+    icon: Gem,
+    className: 'absolute bottom-16 right-[30%] h-5 w-5 text-purple-400/10',
+    delay: '1.2s',
+  },
+]
+
 export function Hero() {
   const { data: session } = useSession()
 
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+    <section className="relative flex-1 overflow-hidden">
+      {/* Multi-layer background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-purple-500/5" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.75_0.16_75/0.12)_0%,transparent_70%)]" />
+
+      {/* Floating decorative elements */}
+      {FLOATING_ELEMENTS.map((el, i) => (
+        <el.icon
+          key={i}
+          className={`${el.className} animate-float pointer-events-none hidden sm:block`}
+          style={{ animationDelay: el.delay }}
+        />
+      ))}
+
       <div className="relative mx-auto max-w-4xl px-4 py-24 text-center sm:py-32">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border bg-card px-4 py-1.5 text-sm">
-          <Sparkles className="h-4 w-4 text-primary" />
+          <Sparkles className="h-4 w-4 animate-sparkle text-primary" />
           Prehistoric creatures, reimagined
         </div>
 
-        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl">
+        <h1 className="font-display text-5xl font-bold tracking-tight sm:text-7xl">
           Collect{' '}
-          <span className="bg-gradient-to-r from-amber-400 via-primary to-purple-400 bg-clip-text text-transparent">
+          <span className="relative bg-gradient-to-r from-amber-400 via-primary to-purple-400 bg-clip-text text-transparent">
             Prehistoric Waifus
+            <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-gradient-to-r from-amber-400/60 via-primary/60 to-purple-400/60 blur-sm" />
           </span>
         </h1>
 
@@ -38,47 +95,70 @@ export function Hero() {
 
         <div className="mt-10 flex items-center justify-center gap-4">
           {session ? (
-            <Button asChild size="lg" className="h-11 px-6">
+            <Button asChild size="lg" className="group h-12 px-6">
               <Link to="/gacha">
-                <Skull className="h-5 w-5" />
+                <Skull className="h-5 w-5 transition-transform group-hover:rotate-12" />
                 Start Pulling
+                <Sparkles className="h-4 w-4 text-primary-foreground/70" />
               </Link>
             </Button>
           ) : (
             <Button
               onClick={() => signIn.social({ provider: 'discord' })}
               size="lg"
-              className="h-11 bg-[#5865F2] px-6 text-white hover:bg-[#4752C4]"
+              className="group h-12 bg-[#5865F2] px-6 text-white hover:bg-[#4752C4]"
             >
-              <DiscordIcon className="h-5 w-5" />
+              <DiscordIcon className="h-5 w-5 transition-transform group-hover:rotate-[-8deg]" />
               Login with Discord
             </Button>
           )}
-          <Button asChild variant="outline" size="lg" className="h-11 px-6">
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+            className="group h-12 px-6"
+          >
             <Link to="/encyclopedia">
-              <BookOpen className="h-5 w-5" />
+              <BookOpen className="h-5 w-5 transition-transform group-hover:rotate-[-8deg]" />
               Encyclopedia
             </Link>
           </Button>
         </div>
 
-        <div className="mt-16 grid grid-cols-3 gap-8 text-center">
-          <div>
-            <div className="text-3xl font-bold text-primary">100+</div>
-            <div className="mt-1 text-sm text-muted-foreground">Creatures</div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary">5</div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              Rarity Tiers
+        <div className="mt-16 grid grid-cols-3 gap-6 sm:gap-8">
+          {[
+            {
+              value: '100+',
+              label: 'Creatures',
+              icon: Skull,
+              color: 'text-primary',
+            },
+            {
+              value: '5',
+              label: 'Rarity Tiers',
+              icon: Crown,
+              color: 'text-purple-400',
+            },
+            {
+              value: '3',
+              label: 'Geological Eras',
+              icon: Globe,
+              color: 'text-blue-400',
+            },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              className="group rounded-xl border bg-card/50 p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
+            >
+              <stat.icon className={`mb-1 h-6 w-6 ${stat.color}`} />
+              <div className="font-display text-3xl font-bold text-primary">
+                {stat.value}
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                {stat.label}
+              </div>
             </div>
-          </div>
-          <div>
-            <div className="text-3xl font-bold text-primary">3</div>
-            <div className="mt-1 text-sm text-muted-foreground">
-              Geological Eras
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

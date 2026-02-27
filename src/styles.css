@@ -2,6 +2,7 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 @import '@fontsource-variable/geist';
+@import '@fontsource-variable/fredoka';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -76,6 +77,7 @@
 
 @theme inline {
   --font-sans: 'Geist Variable', sans-serif;
+  --font-display: 'Fredoka Variable', sans-serif;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -129,35 +131,6 @@
   }
 }
 
-/* Card elevation system */
-.card-elevated {
-  box-shadow:
-    0 1px 2px oklch(0 0 0 / 0.04),
-    0 2px 8px oklch(0 0 0 / 0.03),
-    0 0 0 1px oklch(0 0 0 / 0.04);
-  transition:
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-.card-elevated:hover {
-  box-shadow:
-    0 2px 4px oklch(0 0 0 / 0.06),
-    0 4px 16px oklch(0 0 0 / 0.05),
-    0 0 0 1px oklch(0 0 0 / 0.06);
-}
-.dark .card-elevated {
-  box-shadow:
-    0 1px 2px oklch(0 0 0 / 0.2),
-    0 2px 8px oklch(0 0 0 / 0.15),
-    0 0 0 1px oklch(1 0 0 / 0.06);
-}
-.dark .card-elevated:hover {
-  box-shadow:
-    0 2px 4px oklch(0 0 0 / 0.3),
-    0 4px 16px oklch(0 0 0 / 0.2),
-    0 0 0 1px oklch(1 0 0 / 0.08);
-}
-
 /* Better scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
@@ -172,4 +145,189 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: oklch(0.6 0.01 260 / 0.4);
+}
+
+/* Display font utility */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Keyframes */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes sparkle-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(0.85);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 15px 2px var(--glow-color);
+  }
+  50% {
+    box-shadow: 0 0 25px 6px var(--glow-color);
+  }
+}
+
+@keyframes rarity-flash {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) rotateY(90deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05) rotateY(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateY(0deg);
+  }
+}
+
+@keyframes dig-shake {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-15deg);
+  }
+  40% {
+    transform: rotate(12deg);
+  }
+  60% {
+    transform: rotate(-8deg);
+  }
+  80% {
+    transform: rotate(5deg);
+  }
+}
+
+@keyframes particle-rise {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(0.5);
+  }
+}
+
+@keyframes count-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  60% {
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Animation utilities */
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+.animate-sparkle {
+  animation: sparkle-pulse 2s ease-in-out infinite;
+}
+.animate-glow {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+.animate-rarity-flash {
+  animation: rarity-flash 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.animate-dig {
+  animation: dig-shake 0.5s ease-in-out infinite;
+}
+.animate-count-in {
+  animation: count-in 0.4s ease-out forwards;
+}
+
+/* Rarity glow animations */
+.rarity-glow-epic {
+  --glow-color: oklch(0.6 0.25 300 / 0.4);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+.rarity-glow-legendary {
+  --glow-color: oklch(0.75 0.18 75 / 0.5);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Rarity shimmer overlays — use as a child div with pointer-events-none */
+.rarity-shimmer-rare {
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    oklch(0.7 0.15 250 / 0.15) 45%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+.rarity-shimmer-epic {
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    oklch(0.65 0.2 300 / 0.2) 45%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+.rarity-shimmer-legendary {
+  background: linear-gradient(
+    110deg,
+    transparent 25%,
+    oklch(0.8 0.16 75 / 0.25) 40%,
+    oklch(0.9 0.1 60 / 0.15) 50%,
+    transparent 65%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Subtle noise texture background */
+.bg-noise::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.025;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
 }

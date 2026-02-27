@@ -141,7 +141,27 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Atomically claim the trade as pending — prevents double-propose and self-trade
+          // Lock the acceptor's creature FIRST — verify ownership before touching the trade
+          const myLocked = await db
+            .update(userCreature)
+            .set({ isLocked: true })
+            .where(
+              and(
+                eq(userCreature.id, body.myCreatureId),
+                eq(userCreature.userId, userId),
+                eq(userCreature.isLocked, false),
+              ),
+            )
+            .returning({ id: userCreature.id })
+
+          if (myLocked.length === 0) {
+            return new Response(
+              JSON.stringify({ error: 'Your creature not found or locked' }),
+              { status: 400, headers: { 'Content-Type': 'application/json' } },
+            )
+          }
+
+          // Now atomically claim the trade as pending — prevents double-propose and self-trade
           const claimed = await db
             .update(tradeOffer)
             .set({
@@ -159,41 +179,17 @@ export const Route = createFileRoute('/api/trade')({
             .returning()
 
           if (claimed.length === 0) {
+            // Undo the lock since we couldn't claim the trade
+            await db
+              .update(userCreature)
+              .set({ isLocked: false })
+              .where(eq(userCreature.id, body.myCreatureId))
             return new Response(
               JSON.stringify({
                 error:
                   'Trade not found, not open, or you cannot accept your own trade',
               }),
               { status: 409, headers: { 'Content-Type': 'application/json' } },
-            )
-          }
-
-          // Lock the acceptor's creature
-          const myLocked = await db
-            .update(userCreature)
-            .set({ isLocked: true })
-            .where(
-              and(
-                eq(userCreature.id, body.myCreatureId),
-                eq(userCreature.userId, userId),
-                eq(userCreature.isLocked, false),
-              ),
-            )
-            .returning({ id: userCreature.id })
-
-          if (myLocked.length === 0) {
-            // Revert trade back to open
-            await db
-              .update(tradeOffer)
-              .set({
-                status: 'open',
-                receiverId: null,
-                receiverCreatureId: null,
-              })
-              .where(eq(tradeOffer.id, body.tradeId))
-            return new Response(
-              JSON.stringify({ error: 'Your creature not found or locked' }),
-              { status: 400, headers: { 'Content-Type': 'application/json' } },
             )
           }
 
@@ -234,6 +230,54 @@ export const Route = createFileRoute('/api/trade')({
                 status: 404,
                 headers: { 'Content-Type': 'application/json' },
               },
+            )
+          }
+
+          // Re-verify creature ownership at confirm time to prevent tampering
+          const [offererOwns, receiverOwns] = await Promise.all([
+            db
+              .select({ id: userCreature.id })
+              .from(userCreature)
+              .where(
+                and(
+                  eq(userCreature.id, trade.offeredCreatureId),
+                  eq(userCreature.userId, trade.offererId),
+                  eq(userCreature.isLocked, true),
+                ),
+              )
+              .get(),
+            db
+              .select({ id: userCreature.id })
+              .from(userCreature)
+              .where(
+                and(
+                  eq(userCreature.id, trade.receiverCreatureId),
+                  eq(userCreature.userId, trade.receiverId),
+                  eq(userCreature.isLocked, true),
+                ),
+              )
+              .get(),
+          ])
+
+          if (!offererOwns || !receiverOwns) {
+            // Integrity violation — cancel the trade and unlock creatures
+            await db
+              .update(tradeOffer)
+              .set({ status: 'cancelled' })
+              .where(eq(tradeOffer.id, body.tradeId))
+            await db
+              .update(userCreature)
+              .set({ isLocked: false })
+              .where(eq(userCreature.id, trade.offeredCreatureId))
+            if (trade.receiverCreatureId) {
+              await db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, trade.receiverCreatureId))
+            }
+            return new Response(
+              JSON.stringify({ error: 'Trade integrity error — trade cancelled' }),
+              { status: 409, headers: { 'Content-Type': 'application/json' } },
             )
           }
 

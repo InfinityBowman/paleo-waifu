@@ -1,3 +1,4 @@
+import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { env } from 'cloudflare:workers'
@@ -18,7 +19,7 @@ export const ensureSession = createServerFn({ method: 'GET' }).handler(
   async () => {
     const session = await getSession()
     if (!session) {
-      throw new Error('Unauthorized')
+      throw redirect({ to: '/' })
     }
     return session
   },

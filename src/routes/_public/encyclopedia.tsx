@@ -21,7 +21,7 @@ function EncyclopediaPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Encyclopedia</h1>
+        <h1 className="font-display text-3xl font-bold">Encyclopedia</h1>
         <p className="mt-2 text-muted-foreground">
           Discover prehistoric creatures from across the ages.
         </p>

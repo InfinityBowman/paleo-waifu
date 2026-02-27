@@ -1,13 +1,8 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
-import type {Rarity} from '@/lib/types';
+import { Search, Skull } from 'lucide-react'
+import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
-import {
-  RARITY_BG,
-  RARITY_BORDER,
-  RARITY_COLORS
-  
-} from '@/lib/types'
+import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { CreatureModal } from '@/components/collection/CreatureModal'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -34,7 +29,11 @@ interface CreatureData {
   imageUrl: string | null
 }
 
-export function EncyclopediaGrid({ creatures }: { creatures: Array<CreatureData> }) {
+export function EncyclopediaGrid({
+  creatures,
+}: {
+  creatures: Array<CreatureData>
+}) {
   const [search, setSearch] = useState('')
   const [eraFilter, setEraFilter] = useState<string>('all')
   const [dietFilter, setDietFilter] = useState<string>('all')
@@ -72,7 +71,7 @@ export function EncyclopediaGrid({ creatures }: { creatures: Array<CreatureData>
           <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">All Eras</SelectItem>
             {eras.map((e) => (
               <SelectItem key={e} value={e}>
@@ -85,7 +84,7 @@ export function EncyclopediaGrid({ creatures }: { creatures: Array<CreatureData>
           <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent position="popper">
             <SelectItem value="all">All Diets</SelectItem>
             {diets.map((d) => (
               <SelectItem key={d} value={d}>
@@ -108,34 +107,36 @@ export function EncyclopediaGrid({ creatures }: { creatures: Array<CreatureData>
               key={c.id}
               onClick={() => setSelected(c)}
               className={cn(
-                'group overflow-hidden rounded-lg border-2 text-left transition-all hover:scale-[1.02]',
+                'group relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1',
                 RARITY_BORDER[rarity],
                 RARITY_BG[rarity],
               )}
             >
-              <div className="aspect-[3/4] p-2">
+              <div className="aspect-[3/4] overflow-hidden p-2">
                 {c.imageUrl ? (
                   <img
                     src={c.imageUrl}
                     alt={c.name}
-                    className="h-full w-full rounded object-cover"
+                    className="h-full w-full rounded object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-4xl">
-                    🦖
+                  <div className="flex h-full w-full items-center justify-center">
+                    <Skull className="h-10 w-10 text-muted-foreground/30" />
                   </div>
                 )}
               </div>
               <div className="p-2 pt-0">
                 <span
                   className={cn(
-                    'text-[10px] font-semibold uppercase',
+                    'font-display text-[10px] font-semibold uppercase',
                     RARITY_COLORS[rarity],
                   )}
                 >
                   {rarity}
                 </span>
-                <div className="text-sm font-bold leading-tight">{c.name}</div>
+                <div className="font-display text-sm font-bold leading-tight">
+                  {c.name}
+                </div>
                 <div className="text-[11px] italic text-muted-foreground">
                   {c.scientificName}
                 </div>
