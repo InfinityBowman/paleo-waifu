@@ -93,6 +93,7 @@ export const creature = sqliteTable('creature', {
   description: text('description').notNull(),
   funFacts: text('fun_facts'), // JSON array of strings
   imageUrl: text('image_url'),
+  imageAspectRatio: real('image_aspect_ratio'),
   createdAt: integer('created_at', { mode: 'timestamp' }).default(
     sql`(unixepoch())`,
   ),

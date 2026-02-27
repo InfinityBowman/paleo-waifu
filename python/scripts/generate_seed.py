@@ -50,9 +50,11 @@ def main():
         # Use imageUrl if set (from R2 upload), otherwise NULL
         image_url = c.get("imageUrl")
 
+        image_aspect_ratio = c.get("imageAspectRatio")
+
         lines.append(
-            f"INSERT INTO creature (id, name, scientific_name, era, period, diet, "
-            f"size_meters, weight_kg, rarity, description, fun_facts, image_url) VALUES ("
+            f"INSERT OR REPLACE INTO creature (id, name, scientific_name, era, period, diet, "
+            f"size_meters, weight_kg, rarity, description, fun_facts, image_url, image_aspect_ratio) VALUES ("
             f"'{cid}', "
             f"{sql_str(c.get('name'))}, "
             f"{sql_str(c.get('scientificName'))}, "
@@ -64,7 +66,8 @@ def main():
             f"{sql_str(c.get('rarity', 'common'))}, "
             f"'{escape_sql(c.get('description') or '')}', "
             f"{sql_str(fun_facts)}, "
-            f"{sql_str(image_url)}"
+            f"{sql_str(image_url)}, "
+            f"{sql_num(image_aspect_ratio)}"
             f");"
         )
 
@@ -72,7 +75,7 @@ def main():
     banner_id = nanoid("default-banner")
     lines.append("")
     lines.append(
-        f"INSERT INTO banner (id, name, description, starts_at, is_active) VALUES ("
+        f"INSERT OR REPLACE INTO banner (id, name, description, starts_at, is_active) VALUES ("
         f"'{banner_id}', "
         f"'Mesozoic Mayhem', "
         f"'All prehistoric creatures available!', "
@@ -84,7 +87,7 @@ def main():
     for cid in creature_ids:
         pool_id = nanoid(f"pool-{banner_id}-{cid}")
         lines.append(
-            f"INSERT INTO banner_pool (id, banner_id, creature_id) VALUES ("
+            f"INSERT OR REPLACE INTO banner_pool (id, banner_id, creature_id) VALUES ("
             f"'{pool_id}', '{banner_id}', '{cid}');"
         )
 

@@ -27,6 +27,7 @@ interface CreatureData {
   description: string
   funFacts: string | null
   imageUrl: string | null
+  imageAspectRatio: number | null
 }
 
 export function EncyclopediaGrid({
@@ -99,7 +100,7 @@ export function EncyclopediaGrid({
         {filtered.length} creature{filtered.length !== 1 ? 's' : ''}
       </p>
 
-      <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+      <div className="columns-2 gap-4 sm:columns-3 md:columns-4 lg:columns-5">
         {filtered.map((c) => {
           const rarity = c.rarity as Rarity
           return (
@@ -107,26 +108,33 @@ export function EncyclopediaGrid({
               key={c.id}
               onClick={() => setSelected(c)}
               className={cn(
-                'group relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1',
+                'group mb-4 inline-block w-full overflow-hidden rounded-xl border-2 text-left break-inside-avoid transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
                 RARITY_BORDER[rarity],
                 RARITY_BG[rarity],
               )}
             >
-              <div className="aspect-[3/4] overflow-hidden">
+              <div
+                className="overflow-hidden"
+                style={
+                  c.imageAspectRatio
+                    ? { aspectRatio: c.imageAspectRatio }
+                    : undefined
+                }
+              >
                 {c.imageUrl ? (
                   <img
                     src={c.imageUrl}
                     alt={c.name}
                     loading="lazy"
-                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center bg-muted/20">
+                  <div className="flex aspect-square items-center justify-center bg-muted/20">
                     <Skull className="h-10 w-10 text-muted-foreground/30" />
                   </div>
                 )}
               </div>
-              <div className="p-2 pt-0">
+              <div className="p-2">
                 <span
                   className={cn(
                     'font-display text-[10px] font-semibold uppercase',
