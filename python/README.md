@@ -36,11 +36,13 @@ uv run python scripts/scrape_creatures.py
 ```
 
 Sources:
+
 - **NHM Dino Directory** (via Jurassic Park CSV) — ~309 dinosaurs with rich structured data (diet, period, size, weight, description, pronunciation, name meaning)
 - **Wikipedia** — ~84 non-dinosaur creatures (pterosaurs, marine reptiles, prehistoric mammals, Paleozoic creatures, birds)
 - **Wikimedia Commons** — Life reconstruction images for all creatures
 
 What it does:
+
 1. Downloads NHM dinosaur CSV from GitHub if not cached
 2. Scrapes each NHM creature page for detailed data
 3. Scrapes Wikipedia for non-dinosaur creatures
@@ -49,6 +51,7 @@ What it does:
 6. Writes `data/creatures_enriched.json`
 
 Options:
+
 - `uv run python scripts/scrape_creatures.py 5` — Limit to first N creatures (useful for testing)
 
 Rate limiting: 1s between Wikipedia API requests. Responses are cached in `data/cache/` to avoid re-fetching.
@@ -56,6 +59,7 @@ Rate limiting: 1s between Wikipedia API requests. Responses are cached in `data/
 Output: `data/creatures_enriched.json` (~393 creatures)
 
 Rarity distribution (bottom-heavy by design for gacha):
+
 - common: ~49%
 - uncommon: ~30%
 - rare: ~11%
@@ -71,12 +75,14 @@ uv run python scripts/download_images.py
 Downloads images from Wikimedia Commons URLs in `creatures_enriched.json`, processes them, and saves locally.
 
 Processing:
+
 - Resizes to 600x800 (3:4 aspect ratio to match frontend card display)
 - Center crops to exact dimensions
 - Converts to WebP (quality 85)
 - Handles RGBA/palette images by compositing onto white background
 
 Options:
+
 - `uv run python scripts/download_images.py 10` — Limit to first N creatures
 
 Output: `data/images/{slug}.webp`
@@ -92,11 +98,13 @@ uv run python scripts/upload_to_r2.py
 Uploads processed images to the `paleo-waifu-images` R2 bucket via `wrangler r2 object put` and updates `creatures_enriched.json` with Worker-served URLs.
 
 Images are served through the app's Worker (not a public R2 bucket):
+
 - R2 key: `creatures/{slug}.webp`
 - URL in DB: `/api/images/creatures/{slug}.webp`
 - Served by: `src/routes/api/images/$.ts` (reads from `env.IMAGES` R2 binding)
 
 Options:
+
 - `uv run python scripts/upload_to_r2.py --dry-run` — Preview without uploading
 - `uv run python scripts/upload_to_r2.py --bucket OTHER_BUCKET` — Use a different bucket
 
@@ -107,6 +115,7 @@ uv run python scripts/generate_seed.py
 ```
 
 Reads `creatures_enriched.json` (falls back to `creatures.json`) and generates `seed.sql` at the project root with INSERT statements for:
+
 - All creatures (with imageUrl from R2 upload)
 - A default "Mesozoic Mayhem" banner containing all creatures
 
@@ -140,6 +149,7 @@ python/
 ## Wrangler Config
 
 The R2 bucket binding in `wrangler.jsonc`:
+
 ```jsonc
 "r2_buckets": [
   {

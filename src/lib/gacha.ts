@@ -19,6 +19,12 @@ import {
 import type { Rarity } from './types'
 import type { Database } from './db/client'
 
+function secureRandom(): number {
+  const array = new Uint32Array(1)
+  crypto.getRandomValues(array)
+  return array[0] / (0xffffffff + 1)
+}
+
 /** Ensure new user gets their starter Fossils */
 export async function ensureUserCurrency(db: Database, userId: string) {
   await db
@@ -114,7 +120,7 @@ function calculateRarity(
   pullsSinceRare: number,
   pullsSinceLegendary: number,
 ): Rarity {
-  const rand = Math.random()
+  const rand = secureRandom()
 
   // Hard pity: guaranteed legendary at 90
   if (pullsSinceLegendary >= HARD_PITY_THRESHOLD) {
@@ -181,7 +187,7 @@ async function selectCreature(
       .all()
     if (fallback.length === 0)
       throw new Error(`No creatures of rarity: ${rarity}`)
-    return fallback[Math.floor(Math.random() * fallback.length)].id
+    return fallback[Math.floor(secureRandom() * fallback.length)].id
   }
 
   // Rate-up: featured creature gets 50% of its rarity's share
@@ -194,18 +200,18 @@ async function selectCreature(
       .get()
 
     if (isRateUpInPool && rateUpCreature?.rarity === rarity) {
-      if (Math.random() < RATE_UP_SHARE) {
+      if (secureRandom() < RATE_UP_SHARE) {
         return rateUpId
       }
       // Otherwise pick from the rest
       const others = pool.filter((p) => p.creatureId !== rateUpId)
       if (others.length > 0) {
-        return others[Math.floor(Math.random() * others.length)].creatureId
+        return others[Math.floor(secureRandom() * others.length)].creatureId
       }
     }
   }
 
-  return pool[Math.floor(Math.random() * pool.length)].creatureId
+  return pool[Math.floor(secureRandom() * pool.length)].creatureId
 }
 
 export interface PullResult {

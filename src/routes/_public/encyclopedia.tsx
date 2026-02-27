@@ -1,13 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
-import { env } from 'cloudflare:workers'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature } from '@/lib/db/schema'
 import { EncyclopediaGrid } from '@/components/encyclopedia/EncyclopediaGrid'
 
 const getCreatures = createServerFn({ method: 'GET' }).handler(async () => {
-  const db = createDb((env as unknown as Env).DB)
+  const db = await createDb(getCfEnv().DB)
   return db
     .select({
       id: creature.id,
@@ -26,7 +26,7 @@ const getCreatures = createServerFn({ method: 'GET' }).handler(async () => {
 export const getCreatureDetails = createServerFn({ method: 'GET' })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
-    const db = createDb((env as unknown as Env).DB)
+    const db = await createDb(getCfEnv().DB)
     const rows = await db
       .select({
         description: creature.description,

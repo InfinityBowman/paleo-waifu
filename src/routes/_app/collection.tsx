@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -9,7 +9,7 @@ import { CollectionGrid } from '@/components/collection/CollectionGrid'
 
 const getCollection = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
-  const db = createDb((env as unknown as Env).DB)
+  const db = await createDb(getCfEnv().DB)
 
   const owned = await db
     .select({

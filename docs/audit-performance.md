@@ -26,6 +26,7 @@ Each call to `executePull` makes 8-9 sequential D1 round-trips:
 For a 10-pull, `executePull` is called 10 times in a serial `for` loop (`src/routes/api/gacha.ts:107-109`). That is up to **90 sequential D1 round-trips in a single request** — estimated 300-500ms in query latency alone.
 
 **Recommended optimization:**
+
 - Hoist banner lookup and pity counter read/init out of `executePull` — do them once before the loop
 - Batch all 10 `INSERT INTO user_creature` rows into a single multi-row insert
 - Replace per-pull `isNew` COUNT with a single `SELECT creature_id, COUNT(*) GROUP BY creature_id WHERE creature_id IN (...)` after all pulls complete
@@ -55,6 +56,7 @@ Frequently queried columns with no index:
 - `trade_offer.receiver_id` — queried in `withdraw` and `accept` actions
 
 **Recommended optimization:**
+
 ```sql
 CREATE INDEX bp_banner_id_idx ON banner_pool (banner_id);
 CREATE INDEX creature_rarity_idx ON creature (rarity);
@@ -175,6 +177,7 @@ The proxy sets `Cache-Control: public, max-age=31536000, immutable` but does not
 More significantly, every image fetch flows through the Worker's 128MB memory limit and CPU time, competing with other requests.
 
 **Recommended optimization:**
+
 - Add `ETag` and `Last-Modified` response headers. Handle `If-None-Match` → `304 Not Modified`.
 - Consider enabling R2 public bucket / custom domain to serve images directly from R2's CDN without routing through the Worker at all.
 
@@ -219,6 +222,7 @@ Image URLs are not rendered in the DOM until each card's reveal timer fires. In 
 393 items rendered in a single pass using CSS `columns` masonry layout — roughly 2,000+ DOM nodes. The search filter runs on every render without memoization. Every `setSearch` state update recomputes `eras`, `diets`, and `filtered` arrays.
 
 **Recommended optimization:**
+
 - Add `useMemo` for `eras`, `diets`, and `filtered`
 - Add `useDeferredValue` for the `search` state
 - Consider `@tanstack/react-virtual` (may require switching from CSS columns to CSS grid for row-based virtualization)
@@ -268,6 +272,7 @@ Any store mutation re-renders PullButton even when only `pullResults` changed.
 None of the API endpoints set caching headers. SSR responses for `/encyclopedia` (effectively static data) have no `Cache-Control` header.
 
 **Recommended optimization:**
+
 - Mutation endpoints: `Cache-Control: no-store`
 - Encyclopedia SSR: `Cache-Control: public, s-maxage=300, stale-while-revalidate=86400`
 - Image proxy: use `caches.default` to cache within the edge PoP
@@ -336,32 +341,32 @@ The pity state is read before the pull loop for rollback purposes. Rollback is o
 
 ## Summary Table
 
-| # | Impact | Area | Issue |
-|---|--------|------|-------|
-| 1-A | Critical | DB Queries | Up to 90 sequential D1 round-trips for a 10-pull |
-| 7-A | Critical | Workers Limits | 90 sequential D1 calls risks Worker timeout and subrequest limit |
-| 5-A | Critical | Rendering | 393 items rendered without virtualization |
-| 1-B | High | DB Queries | Extra SELECT for rate-up rarity inside every `selectCreature` |
-| 1-C | High | DB Queries | Missing indexes on `banner_pool.banner_id`, `creature.rarity`, `session.userId`, `trade_offer.receiver_id` |
-| 1-D | High | DB Queries | Two-phase query for pending trade hydration |
-| 2-A | High | SSR | `defaultPreloadStaleTime: 0` re-runs all loaders on every navigation |
-| 2-B | High | SSR | `SELECT *` fetches 393 full creature rows for grid view |
-| 4-A | High | Images | No ETag/304 support; should bypass Worker with R2 public URL |
-| 4-B | High | Images | `<img>` tags without `width`/`height` causes CLS |
-| 5-B | High | Rendering | CollectionGrid filter arrays not memoized |
-| 6-A | High | Caching | No HTTP caching headers on any response |
-| 7-B | High | Workers | Image streaming through Workers wastes CPU/memory |
-| 1-E | Medium | DB Queries | Raw SQL OR on `trade_history` without indexes |
-| 1-F | Medium | DB Queries | Post-insert COUNT for `isNew` — extra round-trip |
-| 2-C | Medium | SSR | Double session fetch per auth'd page load |
-| 2-D | Medium | SSR | Redundant `getFossils` query after deduction |
-| 3-A | Medium | Bundle | Verify tree-shaking; `shadcn` in runtime deps |
-| 3-B | Medium | Bundle | Font display strategy not confirmed |
-| 4-C | Medium | Images | No `loading="lazy"` on collection images |
-| 4-D | Medium | Images | Gacha card images don't preload |
-| 5-C | Medium | Rendering | CreatureModal not lazy-loaded |
-| 6-B | Medium | Caching | `createAuth(env)` re-instantiated per request |
-| 7-C | Medium | Workers | `createDb` called per request — Drizzle not cached |
-| 5-D | Low | Rendering | PullButton subscribes to entire Zustand store |
-| 6-C | Low | Caching | Banner data not cached |
-| 7-D | Low | Workers | Pity snapshot adds extra D1 round-trip per multi-pull |
+| #   | Impact   | Area           | Issue                                                                                                      |
+| --- | -------- | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| 1-A | Critical | DB Queries     | Up to 90 sequential D1 round-trips for a 10-pull                                                           |
+| 7-A | Critical | Workers Limits | 90 sequential D1 calls risks Worker timeout and subrequest limit                                           |
+| 5-A | Critical | Rendering      | 393 items rendered without virtualization                                                                  |
+| 1-B | High     | DB Queries     | Extra SELECT for rate-up rarity inside every `selectCreature`                                              |
+| 1-C | High     | DB Queries     | Missing indexes on `banner_pool.banner_id`, `creature.rarity`, `session.userId`, `trade_offer.receiver_id` |
+| 1-D | High     | DB Queries     | Two-phase query for pending trade hydration                                                                |
+| 2-A | High     | SSR            | `defaultPreloadStaleTime: 0` re-runs all loaders on every navigation                                       |
+| 2-B | High     | SSR            | `SELECT *` fetches 393 full creature rows for grid view                                                    |
+| 4-A | High     | Images         | No ETag/304 support; should bypass Worker with R2 public URL                                               |
+| 4-B | High     | Images         | `<img>` tags without `width`/`height` causes CLS                                                           |
+| 5-B | High     | Rendering      | CollectionGrid filter arrays not memoized                                                                  |
+| 6-A | High     | Caching        | No HTTP caching headers on any response                                                                    |
+| 7-B | High     | Workers        | Image streaming through Workers wastes CPU/memory                                                          |
+| 1-E | Medium   | DB Queries     | Raw SQL OR on `trade_history` without indexes                                                              |
+| 1-F | Medium   | DB Queries     | Post-insert COUNT for `isNew` — extra round-trip                                                           |
+| 2-C | Medium   | SSR            | Double session fetch per auth'd page load                                                                  |
+| 2-D | Medium   | SSR            | Redundant `getFossils` query after deduction                                                               |
+| 3-A | Medium   | Bundle         | Verify tree-shaking; `shadcn` in runtime deps                                                              |
+| 3-B | Medium   | Bundle         | Font display strategy not confirmed                                                                        |
+| 4-C | Medium   | Images         | No `loading="lazy"` on collection images                                                                   |
+| 4-D | Medium   | Images         | Gacha card images don't preload                                                                            |
+| 5-C | Medium   | Rendering      | CreatureModal not lazy-loaded                                                                              |
+| 6-B | Medium   | Caching        | `createAuth(env)` re-instantiated per request                                                              |
+| 7-C | Medium   | Workers        | `createDb` called per request — Drizzle not cached                                                         |
+| 5-D | Low      | Rendering      | PullButton subscribes to entire Zustand store                                                              |
+| 6-C | Low      | Caching        | Banner data not cached                                                                                     |
+| 7-D | Low      | Workers        | Pity snapshot adds extra D1 round-trip per multi-pull                                                      |

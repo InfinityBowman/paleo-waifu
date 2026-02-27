@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { Bone, CalendarCheck, Gift } from 'lucide-react'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { banner, currency } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -18,7 +18,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 const getGachaData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
-  const db = createDb((env as unknown as Env).DB)
+  const db = await createDb(getCfEnv().DB)
 
   await ensureUserCurrency(db, session.user.id)
 
@@ -107,9 +107,7 @@ function GachaPage() {
               className="group border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20"
             >
               <Gift className="h-4 w-4 transition-transform group-hover:rotate-12" />
-              <span className="font-display">
-                Claim +{DAILY_FOSSILS}
-              </span>
+              <span className="font-display">Claim +{DAILY_FOSSILS}</span>
               <Bone className="h-3.5 w-3.5" />
             </Button>
           ) : (

@@ -101,7 +101,9 @@ Defensive setting preventing stale data — acceptable for a game. But encyclope
 
 ```typescript
 const storeFossils = useAppStore((s) => s.fossils)
-useEffect(() => { setFossils(initialFossils) }, [initialFossils, setFossils])
+useEffect(() => {
+  setFossils(initialFossils)
+}, [initialFossils, setFossils])
 const displayFossils = storeFossils ?? initialFossils
 ```
 
@@ -144,6 +146,7 @@ rarity: text('rarity').notNull(), // common | uncommon | rare | epic | legendary
 No `CHECK` constraint at the database level. Invalid rarity strings would pass silently and cause runtime errors in components that cast `rarity as Rarity`.
 
 **Recommendation:** Use Drizzle's enum support:
+
 ```typescript
 rarity: text('rarity', { enum: ['common', 'uncommon', 'rare', 'epic', 'legendary'] }).notNull(),
 ```
@@ -233,7 +236,10 @@ Request bodies are cast with TypeScript `as` assertions. Malformed JSON produces
 ```typescript
 const schema = z.object({ action: z.string(), bannerId: z.string().optional() })
 const body = schema.safeParse(await request.json())
-if (!body.success) return new Response(JSON.stringify({ error: 'Invalid request' }), { status: 400 })
+if (!body.success)
+  return new Response(JSON.stringify({ error: 'Invalid request' }), {
+    status: 400,
+  })
 ```
 
 ---
@@ -255,6 +261,7 @@ Constructs a full better-auth instance per request. Inherent to Workers isolatio
 No path traversal validation on the derived R2 key.
 
 **Recommendation:** Validate against a whitelist pattern:
+
 ```typescript
 if (!key || !/^[a-zA-Z0-9_\-./]+$/.test(key) || key.includes('..')) {
   return new Response('Not found', { status: 404 })
@@ -330,6 +337,7 @@ Rarity properties typed as `string` instead of the `Rarity` union, requiring uns
 Every server function casts through `unknown` to the local `Env` interface. If a binding is renamed in `wrangler.jsonc` but not in `src/env.d.ts`, TypeScript won't catch it.
 
 **Recommendation:** Centralize the cast in one helper:
+
 ```typescript
 import { env as cfWorkerEnv } from 'cloudflare:workers'
 export function getCfEnv(): Env {
@@ -350,9 +358,11 @@ rarity: creatureData.rarity as Rarity,
 No runtime check that the value is one of five valid values.
 
 **Recommendation:** Add a runtime assertion helper:
+
 ```typescript
 function assertRarity(value: string): Rarity {
-  if (!RARITIES.includes(value as Rarity)) throw new Error(`Invalid rarity: ${value}`)
+  if (!RARITIES.includes(value as Rarity))
+    throw new Error(`Invalid rarity: ${value}`)
   return value as Rarity
 }
 ```
@@ -363,7 +373,7 @@ function assertRarity(value: string): Rarity {
 
 **Location:** `src/routes/_app/profile.tsx:35-38`
 
-Uses `sql<number>\`count(distinct ...)\`` with a downstream type assertion. Drizzle's `countDistinct()` is properly typed.
+Uses `sql<number>\`count(distinct ...)\``with a downstream type assertion. Drizzle's`countDistinct()` is properly typed.
 
 **Recommendation:** Use `countDistinct(userCreature.creatureId)` from `drizzle-orm`.
 
@@ -388,6 +398,7 @@ JSON parsing with try/catch fallback happens in the UI layer.
 No Error Boundaries anywhere. If any component throws during rendering, the entire React tree unmounts — blank white screen with no recovery. TanStack Router supports `errorComponent` at the route level but none are defined.
 
 **Recommendation:**
+
 ```typescript
 // src/routes/__root.tsx
 export const Route = createRootRoute({
@@ -408,6 +419,7 @@ Add `pendingComponent` to routes with server function loaders for skeleton loadi
 ### 8.2 — High: Silent catch blocks swallow errors
 
 **Location:**
+
 - `src/routes/_app/gacha.tsx:82`: `} catch { // Silently fail }`
 - `src/components/trade/TradeList.tsx:101-103`: `} catch { // Network error }`
 
@@ -483,42 +495,42 @@ The link list is duplicated verbatim. Any route addition requires updating two p
 
 ## Summary Table
 
-| # | Priority | Area | Issue |
-|---|----------|------|-------|
-| 8.1 | Critical | Error Handling | No React Error Boundaries or TanStack route error components |
-| 5.2 | High | API Design | No runtime validation on request bodies |
-| 7.1 | High | Type Safety | Pervasive `env as unknown as Env` double-cast (12 occurrences) |
-| 4.1 | High | Schema | `creature.rarity` has no DB-level CHECK constraint |
-| 4.2 | High | Schema | `tradeOffer.status` has no CHECK constraint; `'expired'` type mismatch |
-| 5.1 | High | API Design | Action-dispatch pattern lacks per-operation HTTP semantics |
-| 3.1 | High | State | Fossil count dual-source of truth (Zustand + loader) |
-| 8.2 | High | Error Handling | Silent catch blocks swallow errors |
-| 2.1 | Medium | Data Flow | `startOfDay` logic duplicated |
-| 2.2 | Medium | Data Flow | Encyclopedia loads all columns for all creatures |
-| 2.3 | Medium | Data Flow | Inconsistent query strategy for pending vs open trades |
-| 4.3 | Medium | Schema | `isNew` flag unreliable in multi-pull batches |
-| 4.4 | Medium | Schema | `tradeHistory` ownership semantics undocumented |
-| 5.3 | Medium | API Design | `createAuth()` recreated per-request (inherent, undocumented) |
-| 5.4 | Medium | API Design | R2 image key not sanitized |
-| 3.2 | Medium | State | `pullResults` persist across navigations |
-| 6.2 | Medium | Components | CollectionGrid and EncyclopediaGrid duplicate ~60% code |
-| 6.3 | Medium | Components | PityCounter shows thresholds only, not user's actual pity count |
-| 7.2 | Medium | Type Safety | `rarity` cast without runtime validation |
-| 7.3 | Medium | Type Safety | `sql<number>` manual cast instead of `countDistinct()` |
-| 8.3 | Medium | Error Handling | Trade confirm cleanup not batched |
-| 8.4 | Medium | Error Handling | `isNew` check has TOCTOU race |
-| 6.1 | Medium | Components | DiscordIcon SVG duplicated |
-| 2.4 | Low | Data Flow | `defaultPreloadStaleTime: 0` re-fetches on every nav |
-| 4.5 | Low | Schema | `bannerPool` missing unique index on `(bannerId, creatureId)` |
-| 4.6 | Low | Schema | `currency` missing `createdAt` |
-| 4.7 | Low | Schema | `updatedAt` only set on INSERT for auth tables |
-| 5.5 | Low | API Design | HTTP 402 for insufficient fossils |
-| 6.4 | Low | Components | CollectionGrid interface manually maintained |
-| 6.5 | Low | Components | Trade interfaces use `string` instead of `Rarity` |
-| 7.4 | Low | Type Safety | `funFacts` raw JSON string instead of `mode: 'json'` |
-| 9.1 | Low | Conventions | No `prettier.config.js` |
-| 9.2 | Low | Conventions | `pnpm format` is a no-op |
-| 9.3 | Low | Conventions | Schema queries in route file instead of gacha module |
-| 9.4 | Low | Conventions | Nav links duplicated between desktop and mobile |
-| 1.2 | Low | Structure | `wrangler.jsonc` has `REPLACE_ME` database ID |
-| 1.3 | Low | Structure | `drizzle.config.ts` missing explanatory comment |
+| #   | Priority | Area           | Issue                                                                  |
+| --- | -------- | -------------- | ---------------------------------------------------------------------- |
+| 8.1 | Critical | Error Handling | No React Error Boundaries or TanStack route error components           |
+| 5.2 | High     | API Design     | No runtime validation on request bodies                                |
+| 7.1 | High     | Type Safety    | Pervasive `env as unknown as Env` double-cast (12 occurrences)         |
+| 4.1 | High     | Schema         | `creature.rarity` has no DB-level CHECK constraint                     |
+| 4.2 | High     | Schema         | `tradeOffer.status` has no CHECK constraint; `'expired'` type mismatch |
+| 5.1 | High     | API Design     | Action-dispatch pattern lacks per-operation HTTP semantics             |
+| 3.1 | High     | State          | Fossil count dual-source of truth (Zustand + loader)                   |
+| 8.2 | High     | Error Handling | Silent catch blocks swallow errors                                     |
+| 2.1 | Medium   | Data Flow      | `startOfDay` logic duplicated                                          |
+| 2.2 | Medium   | Data Flow      | Encyclopedia loads all columns for all creatures                       |
+| 2.3 | Medium   | Data Flow      | Inconsistent query strategy for pending vs open trades                 |
+| 4.3 | Medium   | Schema         | `isNew` flag unreliable in multi-pull batches                          |
+| 4.4 | Medium   | Schema         | `tradeHistory` ownership semantics undocumented                        |
+| 5.3 | Medium   | API Design     | `createAuth()` recreated per-request (inherent, undocumented)          |
+| 5.4 | Medium   | API Design     | R2 image key not sanitized                                             |
+| 3.2 | Medium   | State          | `pullResults` persist across navigations                               |
+| 6.2 | Medium   | Components     | CollectionGrid and EncyclopediaGrid duplicate ~60% code                |
+| 6.3 | Medium   | Components     | PityCounter shows thresholds only, not user's actual pity count        |
+| 7.2 | Medium   | Type Safety    | `rarity` cast without runtime validation                               |
+| 7.3 | Medium   | Type Safety    | `sql<number>` manual cast instead of `countDistinct()`                 |
+| 8.3 | Medium   | Error Handling | Trade confirm cleanup not batched                                      |
+| 8.4 | Medium   | Error Handling | `isNew` check has TOCTOU race                                          |
+| 6.1 | Medium   | Components     | DiscordIcon SVG duplicated                                             |
+| 2.4 | Low      | Data Flow      | `defaultPreloadStaleTime: 0` re-fetches on every nav                   |
+| 4.5 | Low      | Schema         | `bannerPool` missing unique index on `(bannerId, creatureId)`          |
+| 4.6 | Low      | Schema         | `currency` missing `createdAt`                                         |
+| 4.7 | Low      | Schema         | `updatedAt` only set on INSERT for auth tables                         |
+| 5.5 | Low      | API Design     | HTTP 402 for insufficient fossils                                      |
+| 6.4 | Low      | Components     | CollectionGrid interface manually maintained                           |
+| 6.5 | Low      | Components     | Trade interfaces use `string` instead of `Rarity`                      |
+| 7.4 | Low      | Type Safety    | `funFacts` raw JSON string instead of `mode: 'json'`                   |
+| 9.1 | Low      | Conventions    | No `prettier.config.js`                                                |
+| 9.2 | Low      | Conventions    | `pnpm format` is a no-op                                               |
+| 9.3 | Low      | Conventions    | Schema queries in route file instead of gacha module                   |
+| 9.4 | Low      | Conventions    | Nav links duplicated between desktop and mobile                        |
+| 1.2 | Low      | Structure      | `wrangler.jsonc` has `REPLACE_ME` database ID                          |
+| 1.3 | Low      | Structure      | `drizzle.config.ts` missing explanatory comment                        |

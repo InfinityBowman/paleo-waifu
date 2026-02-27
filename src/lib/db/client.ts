@@ -4,6 +4,7 @@ import type { DrizzleD1Database } from 'drizzle-orm/d1'
 
 export type Database = DrizzleD1Database<typeof schema>
 
-export function createDb(d1: D1Database): Database {
+export async function createDb(d1: D1Database): Promise<Database> {
+  await d1.exec('PRAGMA foreign_keys = ON')
   return drizzle(d1, { schema })
 }

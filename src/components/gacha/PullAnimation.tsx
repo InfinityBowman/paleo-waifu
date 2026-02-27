@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Pickaxe, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { CardReveal } from './CardReveal'
+import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 
 function DustParticle({ delay, left }: { delay: string; left: number }) {

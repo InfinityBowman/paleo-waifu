@@ -1,13 +1,13 @@
 import { redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { env } from 'cloudflare:workers'
 import { createAuth } from './auth'
+import { getCfEnv } from './env'
 
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async () => {
     const request = getRequest()
-    const auth = createAuth(env as unknown as Env)
+    const auth = createAuth(getCfEnv())
     const session = await auth.api.getSession({
       headers: request.headers,
     })

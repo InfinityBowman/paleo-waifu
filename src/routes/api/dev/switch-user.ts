@@ -19,10 +19,10 @@ export const Route = createFileRoute('/api/dev/switch-user')({
               return notFound()
             }
 
-            const { env } = await import('cloudflare:workers')
             const { eq } = await import('drizzle-orm')
             const { nanoid } = await import('nanoid')
             const { createDb } = await import('@/lib/db/client')
+            const { getCfEnv } = await import('@/lib/env')
             const { session, user } = await import('@/lib/db/schema')
             const { ensureUserCurrency } = await import('@/lib/gacha')
 
@@ -32,12 +32,15 @@ export const Route = createFileRoute('/api/dev/switch-user')({
             if (!userId?.startsWith('dev-user-')) {
               return new Response(
                 JSON.stringify({ error: 'Invalid dev user ID' }),
-                { status: 400, headers: { 'Content-Type': 'application/json' } },
+                {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' },
+                },
               )
             }
 
-            const cfEnv = env as unknown as Env
-            const db = createDb(cfEnv.DB)
+            const cfEnv = getCfEnv()
+            const db = await createDb(cfEnv.DB)
 
             const userRow = await db
               .select({ id: user.id })
@@ -48,9 +51,13 @@ export const Route = createFileRoute('/api/dev/switch-user')({
             if (!userRow) {
               return new Response(
                 JSON.stringify({
-                  error: 'Dev user not found. Run pnpm db:seed:dev-users first.',
+                  error:
+                    'Dev user not found. Run pnpm db:seed:dev-users first.',
                 }),
-                { status: 404, headers: { 'Content-Type': 'application/json' } },
+                {
+                  status: 404,
+                  headers: { 'Content-Type': 'application/json' },
+                },
               )
             }
 
@@ -69,7 +76,10 @@ export const Route = createFileRoute('/api/dev/switch-user')({
             })
 
             /** Sign a cookie value using HMAC-SHA256 (matches better-auth format) */
-            async function signCookieValue(value: string, secret: string): Promise<string> {
+            async function signCookieValue(
+              value: string,
+              secret: string,
+            ): Promise<string> {
               const key = await crypto.subtle.importKey(
                 'raw',
                 new TextEncoder().encode(secret),
@@ -82,7 +92,9 @@ export const Route = createFileRoute('/api/dev/switch-user')({
                 key,
                 new TextEncoder().encode(value),
               )
-              const base64Sig = btoa(String.fromCharCode(...new Uint8Array(sig)))
+              const base64Sig = btoa(
+                String.fromCharCode(...new Uint8Array(sig)),
+              )
               return encodeURIComponent(`${value}.${base64Sig}`)
             }
 

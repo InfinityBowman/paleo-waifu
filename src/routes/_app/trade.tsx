@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { env } from 'cloudflare:workers'
 import { and, eq, inArray, or } from 'drizzle-orm'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -9,7 +9,7 @@ import { TradeList } from '@/components/trade/TradeList'
 
 const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
-  const db = createDb((env as unknown as Env).DB)
+  const db = await createDb(getCfEnv().DB)
 
   const [openTrades, pendingTrades, myCreatures] = await Promise.all([
     db

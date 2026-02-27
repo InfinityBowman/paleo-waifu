@@ -60,7 +60,9 @@ const GachaBodySchema = z.discriminatedUnion('action', [
 
 ```typescript
 export function createDb(d1: D1Database): Database {
-  d1.prepare('PRAGMA foreign_keys = ON').run().catch(() => {})
+  d1.prepare('PRAGMA foreign_keys = ON')
+    .run()
+    .catch(() => {})
   return drizzle(d1, { schema })
 }
 ```
@@ -112,7 +114,12 @@ export function createDb(d1: D1Database): Database {
 
 ```typescript
 const key = decodeURIComponent(rawKey)
-if (!key || key.includes('..') || key.includes('\0') || !/^[\w\-./]+$/.test(key)) {
+if (
+  !key ||
+  key.includes('..') ||
+  key.includes('\0') ||
+  !/^[\w\-./]+$/.test(key)
+) {
   return new Response('Not found', { status: 404 })
 }
 ```
@@ -141,7 +148,7 @@ if (!key || key.includes('..') || key.includes('\0') || !/^[\w\-./]+$/.test(key)
 function secureRandom(): number {
   const array = new Uint32Array(1)
   crypto.getRandomValues(array)
-  return array[0] / (0xFFFFFFFF + 1)
+  return array[0] / (0xffffffff + 1)
 }
 ```
 
@@ -251,28 +258,28 @@ All database queries use Drizzle ORM with parameterized queries. No string-conca
 
 ## Summary Table
 
-| ID | Severity | Location | Issue |
-|---|---|---|---|
-| HIGH-01 | High | `api/gacha.ts`, `api/trade.ts`, `api/auth/$.ts` | No rate limiting on any endpoint |
-| HIGH-02 | High | `api/gacha.ts:34`, `api/trade.ts:28` | No runtime input validation |
-| HIGH-03 | High | `lib/db/client.ts` | D1 FK constraints disabled by default |
-| HIGH-04 | High | `api/gacha.ts`, `lib/gacha.ts` | Pity snapshot/restore not fully atomic |
-| HIGH-05 | High | `layout/Nav.tsx`, `profile.tsx` | Unvalidated user avatar URL |
-| MED-01 | Medium | `wrangler.jsonc` | No security response headers |
-| MED-02 | Medium | `api/images/$.ts:8-9` | Path traversal not sanitized |
-| MED-03 | Medium | `lib/db/schema.ts:197`, `api/trade.ts` | Trade expiry never enforced |
-| MED-04 | Medium | `lib/gacha.ts:117` | `Math.random()` not cryptographically secure |
-| MED-05 | Medium | `routes/_app/trade.tsx` | All trader names/avatars exposed |
-| MED-06 | Medium | `api/dev/switch-user.ts:90` | Session cookie missing `Secure` flag |
-| MED-07 | Medium | `api/gacha.ts`, `api/trade.ts` | No CSRF protection beyond `SameSite=Lax` |
-| LOW-01 | Low | `CreatureModal.tsx`, `EncyclopediaGrid.tsx` | Scraped content safe but image URLs unvalidated |
-| LOW-02 | Low | `lib/db/schema.ts:51-52` | Discord tokens stored in plaintext |
-| LOW-03 | Low | `wrangler.jsonc:14` | Placeholder `database_id` committed |
-| LOW-04 | Low | `routes/_app/trade.tsx:34` | No pagination on open trades query |
-| LOW-05 | Low | `lib/auth.ts:30-33` | 5-minute cookie cache delays session revocation |
-| INFO-01 | Info | `api/dev/switch-user.ts` | Dev switcher gating is well-implemented |
-| INFO-02 | Info | `routes/_app/profile.tsx:51` | Email correctly stripped from profile response |
-| INFO-03 | Info | All DB queries | Full SQL injection protection via Drizzle ORM |
+| ID      | Severity | Location                                        | Issue                                           |
+| ------- | -------- | ----------------------------------------------- | ----------------------------------------------- |
+| HIGH-01 | High     | `api/gacha.ts`, `api/trade.ts`, `api/auth/$.ts` | No rate limiting on any endpoint                |
+| HIGH-02 | High     | `api/gacha.ts:34`, `api/trade.ts:28`            | No runtime input validation                     |
+| HIGH-03 | High     | `lib/db/client.ts`                              | D1 FK constraints disabled by default           |
+| HIGH-04 | High     | `api/gacha.ts`, `lib/gacha.ts`                  | Pity snapshot/restore not fully atomic          |
+| HIGH-05 | High     | `layout/Nav.tsx`, `profile.tsx`                 | Unvalidated user avatar URL                     |
+| MED-01  | Medium   | `wrangler.jsonc`                                | No security response headers                    |
+| MED-02  | Medium   | `api/images/$.ts:8-9`                           | Path traversal not sanitized                    |
+| MED-03  | Medium   | `lib/db/schema.ts:197`, `api/trade.ts`          | Trade expiry never enforced                     |
+| MED-04  | Medium   | `lib/gacha.ts:117`                              | `Math.random()` not cryptographically secure    |
+| MED-05  | Medium   | `routes/_app/trade.tsx`                         | All trader names/avatars exposed                |
+| MED-06  | Medium   | `api/dev/switch-user.ts:90`                     | Session cookie missing `Secure` flag            |
+| MED-07  | Medium   | `api/gacha.ts`, `api/trade.ts`                  | No CSRF protection beyond `SameSite=Lax`        |
+| LOW-01  | Low      | `CreatureModal.tsx`, `EncyclopediaGrid.tsx`     | Scraped content safe but image URLs unvalidated |
+| LOW-02  | Low      | `lib/db/schema.ts:51-52`                        | Discord tokens stored in plaintext              |
+| LOW-03  | Low      | `wrangler.jsonc:14`                             | Placeholder `database_id` committed             |
+| LOW-04  | Low      | `routes/_app/trade.tsx:34`                      | No pagination on open trades query              |
+| LOW-05  | Low      | `lib/auth.ts:30-33`                             | 5-minute cookie cache delays session revocation |
+| INFO-01 | Info     | `api/dev/switch-user.ts`                        | Dev switcher gating is well-implemented         |
+| INFO-02 | Info     | `routes/_app/profile.tsx:51`                    | Email correctly stripped from profile response  |
+| INFO-03 | Info     | All DB queries                                  | Full SQL injection protection via Drizzle ORM   |
 
 ---
 

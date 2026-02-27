@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { env } from 'cloudflare:workers'
 import { count, eq, sql } from 'drizzle-orm'
 import { Bone, Dices, Handshake, Microscope } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 
 const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
-  const db = createDb((env as unknown as Env).DB)
+  const db = await createDb(getCfEnv().DB)
 
   const [
     currencyRow,

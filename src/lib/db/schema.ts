@@ -80,24 +80,28 @@ export const verification = sqliteTable('verification', {
 
 // ─── Game tables ─────────────────────────────────────────────────────
 
-export const creature = sqliteTable('creature', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  scientificName: text('scientific_name').notNull(),
-  era: text('era').notNull(),
-  period: text('period'),
-  diet: text('diet').notNull(),
-  sizeMeters: real('size_meters'),
-  weightKg: real('weight_kg'),
-  rarity: text('rarity').notNull(), // common | uncommon | rare | epic | legendary
-  description: text('description').notNull(),
-  funFacts: text('fun_facts'), // JSON array of strings
-  imageUrl: text('image_url'),
-  imageAspectRatio: real('image_aspect_ratio'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
-})
+export const creature = sqliteTable(
+  'creature',
+  {
+    id: text('id').primaryKey(),
+    name: text('name').notNull(),
+    scientificName: text('scientific_name').notNull(),
+    era: text('era').notNull(),
+    period: text('period'),
+    diet: text('diet').notNull(),
+    sizeMeters: real('size_meters'),
+    weightKg: real('weight_kg'),
+    rarity: text('rarity').notNull(), // common | uncommon | rare | epic | legendary
+    description: text('description').notNull(),
+    funFacts: text('fun_facts'), // JSON array of strings
+    imageUrl: text('image_url'),
+    imageAspectRatio: real('image_aspect_ratio'),
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+  },
+  (table) => [index('creature_rarity_idx').on(table.rarity)],
+)
 
 export const banner = sqliteTable('banner', {
   id: text('id').primaryKey(),
@@ -113,15 +117,19 @@ export const banner = sqliteTable('banner', {
   ),
 })
 
-export const bannerPool = sqliteTable('banner_pool', {
-  id: text('id').primaryKey(),
-  bannerId: text('banner_id')
-    .notNull()
-    .references(() => banner.id, { onDelete: 'cascade' }),
-  creatureId: text('creature_id')
-    .notNull()
-    .references(() => creature.id, { onDelete: 'cascade' }),
-})
+export const bannerPool = sqliteTable(
+  'banner_pool',
+  {
+    id: text('id').primaryKey(),
+    bannerId: text('banner_id')
+      .notNull()
+      .references(() => banner.id, { onDelete: 'cascade' }),
+    creatureId: text('creature_id')
+      .notNull()
+      .references(() => creature.id, { onDelete: 'cascade' }),
+  },
+  (table) => [index('bp_banner_id_idx').on(table.bannerId)],
+)
 
 export const userCreature = sqliteTable(
   'user_creature',
@@ -199,6 +207,7 @@ export const tradeOffer = sqliteTable(
   (table) => [
     index('trade_offer_status_idx').on(table.status),
     index('trade_offer_offerer_idx').on(table.offererId),
+    index('trade_offer_receiver_idx').on(table.receiverId),
   ],
 )
 

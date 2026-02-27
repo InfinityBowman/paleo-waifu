@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { env } from 'cloudflare:workers'
 import { and, eq, inArray } from 'drizzle-orm'
+import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
 import {
@@ -16,45 +16,49 @@ import {
   PULL_COST_MULTI,
   PULL_COST_SINGLE,
 } from '@/lib/types'
+import { withSecurityHeaders } from '@/lib/utils'
 
 export const Route = createFileRoute('/api/gacha')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const cfEnv = env as unknown as Env
+        const cfEnv = getCfEnv()
         const auth = createAuth(cfEnv)
         const session = await auth.api.getSession({ headers: request.headers })
         if (!session) {
-          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-            status: 401,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return withSecurityHeaders(
+            new Response(JSON.stringify({ error: 'Unauthorized' }), {
+              status: 401,
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          )
         }
 
         const body = (await request.json()) as {
           action: string
           bannerId?: string
         }
-        const db = createDb(cfEnv.DB)
+        const db = await createDb(cfEnv.DB)
 
         // Daily claim
         if (body.action === 'claim_daily') {
           const result = await claimDaily(db, session.user.id)
-          return new Response(JSON.stringify(result), {
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return withSecurityHeaders(
+            new Response(JSON.stringify(result), {
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          )
         }
 
         // Pull
         if (body.action === 'pull' || body.action === 'pull_multi') {
           const bannerId = body.bannerId
           if (!bannerId) {
-            return new Response(
-              JSON.stringify({ error: 'bannerId required' }),
-              {
+            return withSecurityHeaders(
+              new Response(JSON.stringify({ error: 'bannerId required' }), {
                 status: 400,
                 headers: { 'Content-Type': 'application/json' },
-              },
+              }),
             )
           }
 
@@ -66,12 +70,14 @@ export const Route = createFileRoute('/api/gacha')({
             .get()
 
           if (!bannerRow) {
-            return new Response(
-              JSON.stringify({ error: 'Banner not found or inactive' }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              },
+            return withSecurityHeaders(
+              new Response(
+                JSON.stringify({ error: 'Banner not found or inactive' }),
+                {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              ),
             )
           }
 
@@ -83,9 +89,14 @@ export const Route = createFileRoute('/api/gacha')({
           const success = await deductFossils(db, session.user.id, cost)
           if (!success) {
             const fossils = await getFossils(db, session.user.id)
-            return new Response(
-              JSON.stringify({ error: 'Insufficient fossils', fossils }),
-              { status: 402, headers: { 'Content-Type': 'application/json' } },
+            return withSecurityHeaders(
+              new Response(
+                JSON.stringify({ error: 'Insufficient fossils', fossils }),
+                {
+                  status: 402,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              ),
             )
           }
 
@@ -129,26 +140,35 @@ export const Route = createFileRoute('/api/gacha')({
             }
             await refundFossils(db, session.user.id, cost)
             const fossils = await getFossils(db, session.user.id)
-            return new Response(
-              JSON.stringify({
-                error: 'Pull failed, fossils refunded',
-                fossils,
-              }),
-              { status: 500, headers: { 'Content-Type': 'application/json' } },
+            return withSecurityHeaders(
+              new Response(
+                JSON.stringify({
+                  error: 'Pull failed, fossils refunded',
+                  fossils,
+                }),
+                {
+                  status: 500,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              ),
             )
           }
 
           const fossils = await getFossils(db, session.user.id)
 
-          return new Response(JSON.stringify({ results, fossils }), {
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return withSecurityHeaders(
+            new Response(JSON.stringify({ results, fossils }), {
+              headers: { 'Content-Type': 'application/json' },
+            }),
+          )
         }
 
-        return new Response(JSON.stringify({ error: 'Unknown action' }), {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        })
+        return withSecurityHeaders(
+          new Response(JSON.stringify({ error: 'Unknown action' }), {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        )
       },
     },
   },

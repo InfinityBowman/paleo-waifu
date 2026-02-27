@@ -60,27 +60,24 @@ export function EncyclopediaGrid({
     })
   }, [])
 
-  const handleClick = useCallback(
-    (id: string) => {
-      setSelectedId(id)
-      const cached = prefetchCache.current.get(id)
-      if (cached) {
-        setSelectedDetails(cached)
-      } else {
-        setSelectedDetails(null)
-        getCreatureDetails({ data: id }).then((result) => {
-          if (result) {
-            prefetchCache.current.set(id, result)
-            setSelectedDetails(result)
-          }
-        })
-      }
-    },
-    [],
-  )
+  const handleClick = useCallback((id: string) => {
+    setSelectedId(id)
+    const cached = prefetchCache.current.get(id)
+    if (cached) {
+      setSelectedDetails(cached)
+    } else {
+      setSelectedDetails(null)
+      getCreatureDetails({ data: id }).then((result) => {
+        if (result) {
+          prefetchCache.current.set(id, result)
+          setSelectedDetails(result)
+        }
+      })
+    }
+  }, [])
 
   const selectedGridItem = selectedId
-    ? creatures.find((c) => c.id === selectedId) ?? null
+    ? (creatures.find((c) => c.id === selectedId) ?? null)
     : null
 
   const modalCreature = selectedGridItem
