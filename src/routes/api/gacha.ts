@@ -16,22 +16,17 @@ import {
   PULL_COST_MULTI,
   PULL_COST_SINGLE,
 } from '@/lib/types'
-import { withSecurityHeaders } from '@/lib/utils'
+import { jsonResponse } from '@/lib/utils'
 
 export const Route = createFileRoute('/api/gacha')({
   server: {
     handlers: {
       POST: async ({ request }) => {
         const cfEnv = getCfEnv()
-        const auth = createAuth(cfEnv)
+        const auth = await createAuth(cfEnv)
         const session = await auth.api.getSession({ headers: request.headers })
         if (!session) {
-          return withSecurityHeaders(
-            new Response(JSON.stringify({ error: 'Unauthorized' }), {
-              status: 401,
-              headers: { 'Content-Type': 'application/json' },
-            }),
-          )
+          return jsonResponse({ error: 'Unauthorized' }, 401)
         }
 
         const body = (await request.json()) as {
@@ -43,23 +38,14 @@ export const Route = createFileRoute('/api/gacha')({
         // Daily claim
         if (body.action === 'claim_daily') {
           const result = await claimDaily(db, session.user.id)
-          return withSecurityHeaders(
-            new Response(JSON.stringify(result), {
-              headers: { 'Content-Type': 'application/json' },
-            }),
-          )
+          return jsonResponse(result)
         }
 
         // Pull
         if (body.action === 'pull' || body.action === 'pull_multi') {
           const bannerId = body.bannerId
           if (!bannerId) {
-            return withSecurityHeaders(
-              new Response(JSON.stringify({ error: 'bannerId required' }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              }),
-            )
+            return jsonResponse({ error: 'bannerId required' }, 400)
           }
 
           // Validate banner exists and is active before deducting fossils
@@ -70,14 +56,9 @@ export const Route = createFileRoute('/api/gacha')({
             .get()
 
           if (!bannerRow) {
-            return withSecurityHeaders(
-              new Response(
-                JSON.stringify({ error: 'Banner not found or inactive' }),
-                {
-                  status: 400,
-                  headers: { 'Content-Type': 'application/json' },
-                },
-              ),
+            return jsonResponse(
+              { error: 'Banner not found or inactive' },
+              400,
             )
           }
 
@@ -89,15 +70,7 @@ export const Route = createFileRoute('/api/gacha')({
           const success = await deductFossils(db, session.user.id, cost)
           if (!success) {
             const fossils = await getFossils(db, session.user.id)
-            return withSecurityHeaders(
-              new Response(
-                JSON.stringify({ error: 'Insufficient fossils', fossils }),
-                {
-                  status: 402,
-                  headers: { 'Content-Type': 'application/json' },
-                },
-              ),
-            )
+            return jsonResponse({ error: 'Insufficient fossils', fossils }, 402)
           }
 
           // Snapshot pity state before pulls so we can restore on failure
@@ -140,35 +113,18 @@ export const Route = createFileRoute('/api/gacha')({
             }
             await refundFossils(db, session.user.id, cost)
             const fossils = await getFossils(db, session.user.id)
-            return withSecurityHeaders(
-              new Response(
-                JSON.stringify({
-                  error: 'Pull failed, fossils refunded',
-                  fossils,
-                }),
-                {
-                  status: 500,
-                  headers: { 'Content-Type': 'application/json' },
-                },
-              ),
+            return jsonResponse(
+              { error: 'Pull failed, fossils refunded', fossils },
+              500,
             )
           }
 
           const fossils = await getFossils(db, session.user.id)
 
-          return withSecurityHeaders(
-            new Response(JSON.stringify({ results, fossils }), {
-              headers: { 'Content-Type': 'application/json' },
-            }),
-          )
+          return jsonResponse({ results, fossils })
         }
 
-        return withSecurityHeaders(
-          new Response(JSON.stringify({ error: 'Unknown action' }), {
-            status: 400,
-            headers: { 'Content-Type': 'application/json' },
-          }),
-        )
+        return jsonResponse({ error: 'Unknown action' }, 400)
       },
     },
   },

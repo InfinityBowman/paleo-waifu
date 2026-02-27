@@ -3,8 +3,8 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { createDb } from './db/client'
 import * as schema from './db/schema'
 
-export function createAuth(env: Env) {
-  const db = createDb(env.DB)
+export async function createAuth(env: Env) {
+  const db = await createDb(env.DB)
 
   return betterAuth({
     database: drizzleAdapter(db, {

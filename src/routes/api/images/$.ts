@@ -10,8 +10,10 @@ export const Route = createFileRoute('/api/images/$')({
         const key = decodeURIComponent(url.pathname.replace('/api/images/', ''))
         if (
           !key ||
+          key.startsWith('/') ||
           key.includes('..') ||
           key.includes('\0') ||
+          key.includes('//') ||
           !/^[\w\-./]+$/.test(key)
         ) {
           return new Response('Not found', { status: 404 })

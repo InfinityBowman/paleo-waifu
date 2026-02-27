@@ -7,7 +7,7 @@ import { getCfEnv } from './env'
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async () => {
     const request = getRequest()
-    const auth = createAuth(getCfEnv())
+    const auth = await createAuth(getCfEnv())
     const session = await auth.api.getSession({
       headers: request.headers,
     })
