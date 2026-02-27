@@ -1,5 +1,5 @@
-import { useAppStore } from '@/store/appStore'
 import { CardReveal } from './CardReveal'
+import { useAppStore } from '@/store/appStore'
 
 export function PullAnimation() {
   const { pullResults, isPulling } = useAppStore()

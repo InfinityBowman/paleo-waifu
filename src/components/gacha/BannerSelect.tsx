@@ -12,7 +12,7 @@ export function BannerSelect({
   selectedId,
   onSelect,
 }: {
-  banners: Banner[]
+  banners: Array<Banner>
   selectedId: string
   onSelect: (id: string) => void
 }) {

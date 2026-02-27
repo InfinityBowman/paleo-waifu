@@ -9,7 +9,11 @@
     "weightKg": 8400,
     "rarity": "legendary",
     "description": "The undisputed queen of the dinosaurs. Rexy-chan rules with an iron jaw and a surprisingly gentle heart — when she's not hungry, at least.",
-    "funFacts": ["Had the strongest bite force of any land animal ever", "Could eat 230 kg of meat in a single bite", "Arms were actually quite muscular despite their size"]
+    "funFacts": [
+      "Had the strongest bite force of any land animal ever",
+      "Could eat 230 kg of meat in a single bite",
+      "Arms were actually quite muscular despite their size"
+    ]
   },
   {
     "name": "Tri-tan",
@@ -21,7 +25,11 @@
     "weightKg": 6000,
     "rarity": "epic",
     "description": "Three horns, one enormous frill, and a heart of gold. Tri-tan charges headfirst into any problem — literally.",
-    "funFacts": ["The frill may have been used for temperature regulation", "Lived alongside T. rex", "Had a beak like a parrot"]
+    "funFacts": [
+      "The frill may have been used for temperature regulation",
+      "Lived alongside T. rex",
+      "Had a beak like a parrot"
+    ]
   },
   {
     "name": "Velo-chan",
@@ -33,7 +41,11 @@
     "weightKg": 15,
     "rarity": "rare",
     "description": "Small, feathered, and dangerously clever. Velo-chan may look cute, but she's already planned three escape routes and a ambush.",
-    "funFacts": ["Was actually the size of a turkey", "Covered in feathers", "Had a sickle-shaped killing claw on each foot"]
+    "funFacts": [
+      "Was actually the size of a turkey",
+      "Covered in feathers",
+      "Had a sickle-shaped killing claw on each foot"
+    ]
   },
   {
     "name": "Stego-tan",
@@ -45,7 +57,11 @@
     "weightKg": 3100,
     "rarity": "epic",
     "description": "Her plates blush when she's embarrassed, which is often. Stego-tan is shy but surprisingly fierce when cornered — that tail spike isn't just decorative!",
-    "funFacts": ["Brain was the size of a walnut", "Tail spikes are called a 'thagomizer'", "Plates may have changed color for communication"]
+    "funFacts": [
+      "Brain was the size of a walnut",
+      "Tail spikes are called a 'thagomizer'",
+      "Plates may have changed color for communication"
+    ]
   },
   {
     "name": "Bronto-hime",
@@ -57,7 +73,11 @@
     "weightKg": 15000,
     "rarity": "legendary",
     "description": "The gentle giant princess. Bronto-hime towers above everyone but speaks in the softest whisper. Her footsteps make the earth tremble with grace.",
-    "funFacts": ["Was declared invalid for over a century before being reinstated", "Could crack its tail like a whip at supersonic speeds", "Swallowed stones to help digest food"]
+    "funFacts": [
+      "Was declared invalid for over a century before being reinstated",
+      "Could crack its tail like a whip at supersonic speeds",
+      "Swallowed stones to help digest food"
+    ]
   },
   {
     "name": "Pterry",
@@ -69,7 +89,11 @@
     "weightKg": 25,
     "rarity": "rare",
     "description": "Not technically a dinosaur, and she'll correct you every time. Pterry soars above it all with her impressive 7-meter wingspan and sharp wit.",
-    "funFacts": ["Wingspan up to 7 meters", "Males had a large crest on their heads", "Caught fish by skimming the ocean surface"]
+    "funFacts": [
+      "Wingspan up to 7 meters",
+      "Males had a large crest on their heads",
+      "Caught fish by skimming the ocean surface"
+    ]
   },
   {
     "name": "Anky-chan",
@@ -81,7 +105,11 @@
     "weightKg": 6000,
     "rarity": "epic",
     "description": "The ultimate defensive specialist. Anky-chan is covered head to tail in armor and carries a club that could shatter a T. rex's ankle.",
-    "funFacts": ["Tail club could swing with enough force to break bones", "Even its eyelids were armored", "Walked low to the ground like a tank"]
+    "funFacts": [
+      "Tail club could swing with enough force to break bones",
+      "Even its eyelids were armored",
+      "Walked low to the ground like a tank"
+    ]
   },
   {
     "name": "Parasol",
@@ -93,7 +121,11 @@
     "weightKg": 2500,
     "rarity": "rare",
     "description": "Her hollow crest produces the most beautiful music in the Mesozoic. Parasol is the resident musician, humming ancient melodies that echo through the valleys.",
-    "funFacts": ["Crest was used to produce sounds like a trombone", "Could walk on two or four legs", "Had hundreds of teeth for grinding plants"]
+    "funFacts": [
+      "Crest was used to produce sounds like a trombone",
+      "Could walk on two or four legs",
+      "Had hundreds of teeth for grinding plants"
+    ]
   },
   {
     "name": "Spino-sama",
@@ -105,7 +137,11 @@
     "weightKg": 7400,
     "rarity": "legendary",
     "description": "Larger than T. rex but prefers fishing to fighting. Spino-sama is the mysterious loner who wades through rivers at dawn, her magnificent sail catching the light.",
-    "funFacts": ["Largest known carnivorous dinosaur", "Spent most of its time in water", "Had a sail on its back up to 1.7 meters tall"]
+    "funFacts": [
+      "Largest known carnivorous dinosaur",
+      "Spent most of its time in water",
+      "Had a sail on its back up to 1.7 meters tall"
+    ]
   },
   {
     "name": "Diplo-kun",
@@ -117,7 +153,11 @@
     "weightKg": 12000,
     "rarity": "epic",
     "description": "The longest noodle of the dinosaur world. Diplo-kun's neck seems to go on forever, and he uses it to reach the tallest, tastiest treetops.",
-    "funFacts": ["One of the longest dinosaurs ever", "Could crack its whip-like tail at supersonic speeds", "Had pencil-shaped teeth for stripping leaves"]
+    "funFacts": [
+      "One of the longest dinosaurs ever",
+      "Could crack its whip-like tail at supersonic speeds",
+      "Had pencil-shaped teeth for stripping leaves"
+    ]
   },
   {
     "name": "Allo-san",
@@ -129,7 +169,11 @@
     "weightKg": 2300,
     "rarity": "rare",
     "description": "The apex predator of the Jurassic, but with surprisingly refined manners. Allo-san hunts with calculated elegance, not brute force.",
-    "funFacts": ["Used its upper jaw like a hatchet", "Hunted in packs possibly", "Most common large predator of the Late Jurassic"]
+    "funFacts": [
+      "Used its upper jaw like a hatchet",
+      "Hunted in packs possibly",
+      "Most common large predator of the Late Jurassic"
+    ]
   },
   {
     "name": "Brachy-chan",
@@ -141,7 +185,11 @@
     "weightKg": 56000,
     "rarity": "legendary",
     "description": "Her head literally lives in the clouds. Brachy-chan is a dreamer whose gentle gaze from 13 meters up makes everything seem small and peaceful.",
-    "funFacts": ["Could raise its head to 13 meters high", "Front legs were longer than back legs", "Nostrils were on top of its head"]
+    "funFacts": [
+      "Could raise its head to 13 meters high",
+      "Front legs were longer than back legs",
+      "Nostrils were on top of its head"
+    ]
   },
   {
     "name": "Raptor-chan",
@@ -153,7 +201,11 @@
     "weightKg": 73,
     "rarity": "uncommon",
     "description": "The real-life inspiration for those movie raptors. Raptor-chan coordinates hunts with terrifying intelligence and questionable table manners.",
-    "funFacts": ["Name means 'terrible claw'", "Revolutionized our understanding of dinosaur intelligence", "Likely hunted in coordinated groups"]
+    "funFacts": [
+      "Name means 'terrible claw'",
+      "Revolutionized our understanding of dinosaur intelligence",
+      "Likely hunted in coordinated groups"
+    ]
   },
   {
     "name": "Iggy",
@@ -165,7 +217,11 @@
     "weightKg": 3000,
     "rarity": "uncommon",
     "description": "One of the first dinosaurs ever discovered, and she's very proud of it. Iggy gives a thumbs up with her signature spike — except that spike is actually on her thumb.",
-    "funFacts": ["Second dinosaur ever to be named", "Thumb spike was once placed on its nose", "Could walk on two or four legs"]
+    "funFacts": [
+      "Second dinosaur ever to be named",
+      "Thumb spike was once placed on its nose",
+      "Could walk on two or four legs"
+    ]
   },
   {
     "name": "Compy",
@@ -177,7 +233,11 @@
     "weightKg": 0.83,
     "rarity": "common",
     "description": "Tiny but absolutely fearless. Compy travels in a chaotic pack and will steal your lunch before you even notice she's there.",
-    "funFacts": ["One of the smallest known dinosaurs", "About the size of a chicken", "Was the first dinosaur found with evidence of its last meal"]
+    "funFacts": [
+      "One of the smallest known dinosaurs",
+      "About the size of a chicken",
+      "Was the first dinosaur found with evidence of its last meal"
+    ]
   },
   {
     "name": "Plessy",
@@ -189,7 +249,11 @@
     "weightKg": 450,
     "rarity": "rare",
     "description": "The original sea serpent legend. Plessy glides through ancient oceans with her impossibly long neck, always looking for the perfect fish.",
-    "funFacts": ["Not a dinosaur — a marine reptile", "Inspired the Loch Ness Monster legend", "Gave birth to live young"]
+    "funFacts": [
+      "Not a dinosaur — a marine reptile",
+      "Inspired the Loch Ness Monster legend",
+      "Gave birth to live young"
+    ]
   },
   {
     "name": "Mossy",
@@ -201,7 +265,11 @@
     "weightKg": 5000,
     "rarity": "legendary",
     "description": "Terror of the ancient seas. Mossy commands respect with a single glance from her massive jaws. Even sharks swim the other way.",
-    "funFacts": ["Could grow up to 17 meters long", "Related to modern monitor lizards", "Dominated the oceans after ichthyosaurs went extinct"]
+    "funFacts": [
+      "Could grow up to 17 meters long",
+      "Related to modern monitor lizards",
+      "Dominated the oceans after ichthyosaurs went extinct"
+    ]
   },
   {
     "name": "Ptera",
@@ -213,7 +281,11 @@
     "weightKg": 250,
     "rarity": "legendary",
     "description": "The largest flying creature ever. Ptera stands as tall as a giraffe and spreads wings wider than a small airplane. She is majesty incarnate.",
-    "funFacts": ["Wingspan of 10-11 meters", "As tall as a giraffe when standing", "Named after the Aztec feathered serpent god"]
+    "funFacts": [
+      "Wingspan of 10-11 meters",
+      "As tall as a giraffe when standing",
+      "Named after the Aztec feathered serpent god"
+    ]
   },
   {
     "name": "Ichthy-chan",
@@ -225,7 +297,11 @@
     "weightKg": 90,
     "rarity": "uncommon",
     "description": "Looks like a dolphin, acts like a dolphin, but is definitely not a dolphin. Ichthy-chan evolved this shape 200 million years before dolphins thought of it.",
-    "funFacts": ["Convergent evolution with dolphins", "Had the largest eyes relative to body size", "First discovered by Mary Anning"]
+    "funFacts": [
+      "Convergent evolution with dolphins",
+      "Had the largest eyes relative to body size",
+      "First discovered by Mary Anning"
+    ]
   },
   {
     "name": "Megalo-chan",
@@ -237,7 +313,11 @@
     "weightKg": 700,
     "rarity": "uncommon",
     "description": "The very first dinosaur ever named, and she wears that title like a crown. Megalo-chan walks with historic confidence.",
-    "funFacts": ["First dinosaur ever to be scientifically described", "Named in 1824", "Originally thought to walk on four legs"]
+    "funFacts": [
+      "First dinosaur ever to be scientifically described",
+      "Named in 1824",
+      "Originally thought to walk on four legs"
+    ]
   },
   {
     "name": "Archaeo",
@@ -249,7 +329,11 @@
     "weightKg": 0.8,
     "rarity": "epic",
     "description": "Half dinosaur, half bird, fully fabulous. Archaeo is the fashionista who proved dinosaurs could be beautiful AND fly. Sort of.",
-    "funFacts": ["Considered the first bird", "Had teeth, clawed wings, and a bony tail", "Only about the size of a raven"]
+    "funFacts": [
+      "Considered the first bird",
+      "Had teeth, clawed wings, and a bony tail",
+      "Only about the size of a raven"
+    ]
   },
   {
     "name": "Dimetro",
@@ -261,7 +345,11 @@
     "weightKg": 250,
     "rarity": "rare",
     "description": "Often mistaken for a dinosaur, but she's actually closer to YOU than to any dinosaur. Dimetro rocks her sail with proto-mammalian pride.",
-    "funFacts": ["Not a dinosaur — a synapsid more related to mammals", "Predates dinosaurs by 40 million years", "Sail was used for temperature regulation"]
+    "funFacts": [
+      "Not a dinosaur — a synapsid more related to mammals",
+      "Predates dinosaurs by 40 million years",
+      "Sail was used for temperature regulation"
+    ]
   },
   {
     "name": "Sabertooth",
@@ -273,7 +361,11 @@
     "weightKg": 280,
     "rarity": "epic",
     "description": "Those fangs aren't just for show — Sabertooth is the ice age's most elegant predator. She flashes her 28cm canines and the whole tundra goes quiet.",
-    "funFacts": ["Canine teeth up to 28 cm long", "Could open its jaw 120 degrees", "Went extinct about 10,000 years ago"]
+    "funFacts": [
+      "Canine teeth up to 28 cm long",
+      "Could open its jaw 120 degrees",
+      "Went extinct about 10,000 years ago"
+    ]
   },
   {
     "name": "Woolly-chan",
@@ -285,7 +377,11 @@
     "weightKg": 6000,
     "rarity": "epic",
     "description": "Cozy, fluffy, and surprisingly emotional. Woolly-chan remembers everything — every slight, every kindness, every tasty grass patch.",
-    "funFacts": ["Had 15 cm of fat under the skin", "Tusks could be up to 4.2 meters long", "Some specimens preserved so well we found intact blood"]
+    "funFacts": [
+      "Had 15 cm of fat under the skin",
+      "Tusks could be up to 4.2 meters long",
+      "Some specimens preserved so well we found intact blood"
+    ]
   },
   {
     "name": "Pachy-kun",
@@ -297,7 +393,11 @@
     "weightKg": 450,
     "rarity": "uncommon",
     "description": "Hard-headed in every sense. Pachy-kun solves disagreements the old-fashioned way — by headbutting. His skull is 25 cm of solid dome.",
-    "funFacts": ["Skull dome was 25 cm thick", "May have used head-butting for dominance", "Only the skull has been found — body is mostly guesswork"]
+    "funFacts": [
+      "Skull dome was 25 cm thick",
+      "May have used head-butting for dominance",
+      "Only the skull has been found — body is mostly guesswork"
+    ]
   },
   {
     "name": "Galli-chan",
@@ -309,7 +409,11 @@
     "weightKg": 440,
     "rarity": "uncommon",
     "description": "The fastest dinosaur in the west. Galli-chan dashes everywhere at 60 km/h and can't sit still for more than three seconds.",
-    "funFacts": ["Could run up to 60 km/h", "Name means 'chicken mimic'", "Had a beak instead of teeth"]
+    "funFacts": [
+      "Could run up to 60 km/h",
+      "Name means 'chicken mimic'",
+      "Had a beak instead of teeth"
+    ]
   },
   {
     "name": "Carno-chan",
@@ -321,7 +425,11 @@
     "weightKg": 1350,
     "rarity": "rare",
     "description": "Bull horns, tiny arms, and a bad attitude. Carno-chan is the punk rocker of the dinosaur world, charging first and asking questions never.",
-    "funFacts": ["Only large predator with horns above its eyes", "Arms were even tinier than T. rex proportionally", "One of the fastest large theropods"]
+    "funFacts": [
+      "Only large predator with horns above its eyes",
+      "Arms were even tinier than T. rex proportionally",
+      "One of the fastest large theropods"
+    ]
   },
   {
     "name": "Theriz",
@@ -333,7 +441,11 @@
     "weightKg": 5000,
     "rarity": "epic",
     "description": "Imagine Edward Scissorhands but a dinosaur. Theriz has meter-long claws and uses them to trim trees, not fight — mostly.",
-    "funFacts": ["Had the longest claws of any animal ever — up to 1 meter", "Was a herbivore despite looking terrifying", "Related to velociraptors"]
+    "funFacts": [
+      "Had the longest claws of any animal ever — up to 1 meter",
+      "Was a herbivore despite looking terrifying",
+      "Related to velociraptors"
+    ]
   },
   {
     "name": "Megane",
@@ -345,7 +457,11 @@
     "weightKg": 0.15,
     "rarity": "rare",
     "description": "A dragonfly with a 70 cm wingspan. Megane buzzes through Carboniferous forests hunting smaller insects, her iridescent wings catching ancient sunlight.",
-    "funFacts": ["Wingspan of about 70 cm", "Existed 300 million years ago", "Could grow so large because oxygen levels were 35%"]
+    "funFacts": [
+      "Wingspan of about 70 cm",
+      "Existed 300 million years ago",
+      "Could grow so large because oxygen levels were 35%"
+    ]
   },
   {
     "name": "Arthro",
@@ -357,7 +473,11 @@
     "weightKg": 50,
     "rarity": "rare",
     "description": "A millipede the size of a car. Arthro is actually very gentle, munching peacefully on rotting wood in steamy Carboniferous forests.",
-    "funFacts": ["Largest land invertebrate ever", "Up to 2.3 meters long", "Lived in the coal swamp forests 300 million years ago"]
+    "funFacts": [
+      "Largest land invertebrate ever",
+      "Up to 2.3 meters long",
+      "Lived in the coal swamp forests 300 million years ago"
+    ]
   },
   {
     "name": "Dunky",
@@ -369,7 +489,11 @@
     "weightKg": 1000,
     "rarity": "epic",
     "description": "An armored fish with jaws that could snap steel. Dunky ruled the Devonian seas 360 million years ago with bone-crushing authority.",
-    "funFacts": ["One of the first apex predators", "Had bony plates instead of teeth", "Bite force estimated at 6,000 newtons"]
+    "funFacts": [
+      "One of the first apex predators",
+      "Had bony plates instead of teeth",
+      "Bite force estimated at 6,000 newtons"
+    ]
   },
   {
     "name": "Trilobi-chan",
@@ -381,7 +505,11 @@
     "weightKg": 0.5,
     "rarity": "common",
     "description": "One of the earliest complex creatures, and she knows it. Trilobi-chan has been rolling up into a ball to avoid problems since before it was cool — 500 million years before.",
-    "funFacts": ["Trilobites existed for 300 million years", "Had some of the first complex eyes", "Could roll into a ball for defense like a pill bug"]
+    "funFacts": [
+      "Trilobites existed for 300 million years",
+      "Had some of the first complex eyes",
+      "Could roll into a ball for defense like a pill bug"
+    ]
   },
   {
     "name": "Ammonite-chan",
@@ -393,7 +521,11 @@
     "weightKg": 1.0,
     "rarity": "common",
     "description": "The spiral beauty of the ancient seas. Ammonite-chan's shell is a perfect golden ratio, and she's not above bragging about it.",
-    "funFacts": ["Existed for over 350 million years", "Related to modern nautilus", "Shell follows the golden ratio spiral"]
+    "funFacts": [
+      "Existed for over 350 million years",
+      "Related to modern nautilus",
+      "Shell follows the golden ratio spiral"
+    ]
   },
   {
     "name": "Anomalo-chan",
@@ -405,7 +537,11 @@
     "weightKg": 5.0,
     "rarity": "rare",
     "description": "The apex predator of the Cambrian explosion. When everything else was tiny, Anomalo-chan was the one-meter monster that ruled them all.",
-    "funFacts": ["Largest predator of the Cambrian period", "Had compound eyes with 16,000 lenses", "Used frontal appendages to catch prey"]
+    "funFacts": [
+      "Largest predator of the Cambrian period",
+      "Had compound eyes with 16,000 lenses",
+      "Used frontal appendages to catch prey"
+    ]
   },
   {
     "name": "Dilopho",
@@ -417,7 +553,11 @@
     "weightKg": 400,
     "rarity": "uncommon",
     "description": "Crowned with twin crests, Dilopho struts through Early Jurassic landscapes like a runway model. She does NOT spit venom — that was movie slander.",
-    "funFacts": ["Did NOT have a frill or spit venom", "Had two distinctive crests on its head", "One of the earliest large predatory dinosaurs"]
+    "funFacts": [
+      "Did NOT have a frill or spit venom",
+      "Had two distinctive crests on its head",
+      "One of the earliest large predatory dinosaurs"
+    ]
   },
   {
     "name": "Coel",
@@ -429,7 +569,11 @@
     "weightKg": 25,
     "rarity": "common",
     "description": "One of the earliest dinosaurs and still a crowd favorite. Coel is light, fast, and runs in packs — the original squad goals.",
-    "funFacts": ["One of the earliest known dinosaurs", "Hollow bones made it very lightweight", "Hundreds found together suggesting pack behavior"]
+    "funFacts": [
+      "One of the earliest known dinosaurs",
+      "Hollow bones made it very lightweight",
+      "Hundreds found together suggesting pack behavior"
+    ]
   },
   {
     "name": "Plateosaurus",
@@ -441,7 +585,11 @@
     "weightKg": 600,
     "rarity": "uncommon",
     "description": "The first really big dinosaur. Plateosaurus proved that going big was the winning strategy, setting the stage for the giants that followed.",
-    "funFacts": ["One of the first large dinosaurs", "Could stand on two legs to reach high plants", "Found all across Europe"]
+    "funFacts": [
+      "One of the first large dinosaurs",
+      "Could stand on two legs to reach high plants",
+      "Found all across Europe"
+    ]
   },
   {
     "name": "Herrera",
@@ -453,7 +601,11 @@
     "weightKg": 210,
     "rarity": "uncommon",
     "description": "From the very dawn of dinosaurs. Herrera is ancient even by dinosaur standards, and she carries that primordial energy with pride.",
-    "funFacts": ["One of the oldest known dinosaurs", "Lived about 231 million years ago", "Found in Argentina"]
+    "funFacts": [
+      "One of the oldest known dinosaurs",
+      "Lived about 231 million years ago",
+      "Found in Argentina"
+    ]
   },
   {
     "name": "Euoplo",
@@ -465,7 +617,11 @@
     "weightKg": 2500,
     "rarity": "uncommon",
     "description": "Like Anky-chan's shy cousin. Euoplo is armored from snout to tail club, but underneath all that plate mail is a gentle soul who just wants to munch ferns.",
-    "funFacts": ["Even its eyelids had bony armor", "Tail club weighed about 30 kg", "Named 'well-armored head'"]
+    "funFacts": [
+      "Even its eyelids had bony armor",
+      "Tail club weighed about 30 kg",
+      "Named 'well-armored head'"
+    ]
   },
   {
     "name": "Maiasaura",
@@ -477,7 +633,11 @@
     "weightKg": 4000,
     "rarity": "uncommon",
     "description": "The 'good mother lizard.' Maiasaura builds the coziest nests and cares for her babies with unmatched devotion. Community parenting goals.",
-    "funFacts": ["Name means 'good mother lizard'", "First dinosaur found with evidence of parental care", "Nested in large colonies"]
+    "funFacts": [
+      "Name means 'good mother lizard'",
+      "First dinosaur found with evidence of parental care",
+      "Nested in large colonies"
+    ]
   },
   {
     "name": "Oviraptor",
@@ -489,7 +649,11 @@
     "weightKg": 33,
     "rarity": "common",
     "description": "Falsely accused of egg theft for decades! Oviraptor was actually protecting her OWN eggs. She demands a formal apology from science.",
-    "funFacts": ["Name means 'egg thief' but was actually protecting its own eggs", "Had a distinctive crest on its head", "Closely related to birds"]
+    "funFacts": [
+      "Name means 'egg thief' but was actually protecting its own eggs",
+      "Had a distinctive crest on its head",
+      "Closely related to birds"
+    ]
   },
   {
     "name": "Corytho",
@@ -501,7 +665,11 @@
     "weightKg": 4000,
     "rarity": "uncommon",
     "description": "Wears her helmet-shaped crest with pride. Corytho's honking calls can be heard across the valley — she's the town crier of the Cretaceous.",
-    "funFacts": ["Crest shaped like a Corinthian helmet", "Crest was hollow and used for sound", "Found with preserved skin impressions"]
+    "funFacts": [
+      "Crest shaped like a Corinthian helmet",
+      "Crest was hollow and used for sound",
+      "Found with preserved skin impressions"
+    ]
   },
   {
     "name": "Lambeosaur",
@@ -513,7 +681,11 @@
     "weightKg": 5600,
     "rarity": "uncommon",
     "description": "The hatchet-crested hadrosaur. Lambeosaur's distinctive forward-pointing crest makes her look perpetually ready for battle, but she'd rather be foraging.",
-    "funFacts": ["Had a distinctive hatchet-shaped crest", "Could produce deep resonating sounds", "One of the largest hadrosaurs"]
+    "funFacts": [
+      "Had a distinctive hatchet-shaped crest",
+      "Could produce deep resonating sounds",
+      "One of the largest hadrosaurs"
+    ]
   },
   {
     "name": "Kentro",
@@ -525,7 +697,11 @@
     "weightKg": 700,
     "rarity": "common",
     "description": "Stego-tan's spikier African cousin. Kentro traded plates for spikes and isn't afraid to use them. Touch at your own risk.",
-    "funFacts": ["Had spikes instead of plates on its back half", "Shoulder spikes up to 60 cm long", "Found in Tanzania"]
+    "funFacts": [
+      "Had spikes instead of plates on its back half",
+      "Shoulder spikes up to 60 cm long",
+      "Found in Tanzania"
+    ]
   },
   {
     "name": "Giganoto",
@@ -537,7 +713,11 @@
     "weightKg": 6800,
     "rarity": "legendary",
     "description": "South America's answer to T. rex. Giganoto hunted sauropods in coordinated packs, combining brains and brawn in devastating fashion.",
-    "funFacts": ["Slightly longer than T. rex", "Had a thinner skull and weaker bite", "Likely hunted in groups to take down titanosaurs"]
+    "funFacts": [
+      "Slightly longer than T. rex",
+      "Had a thinner skull and weaker bite",
+      "Likely hunted in groups to take down titanosaurs"
+    ]
   },
   {
     "name": "Carcharo",
@@ -549,7 +729,11 @@
     "weightKg": 6200,
     "rarity": "epic",
     "description": "Named after the great white shark for her serrated teeth. Carcharo ruled North Africa with razor-sharp precision and an intimidating smile.",
-    "funFacts": ["Name means 'shark-toothed lizard'", "Teeth were up to 20 cm long", "Lived in the same region as Spinosaurus"]
+    "funFacts": [
+      "Name means 'shark-toothed lizard'",
+      "Teeth were up to 20 cm long",
+      "Lived in the same region as Spinosaurus"
+    ]
   },
   {
     "name": "Microraptor",
@@ -561,7 +745,11 @@
     "weightKg": 1.0,
     "rarity": "rare",
     "description": "Four wings! FOUR WINGS! Microraptor is the glittery biplane of the dinosaur world, swooping through forests with iridescent black feathers.",
-    "funFacts": ["Had flight feathers on all four limbs", "Feathers were iridescent black like a crow", "Glided between trees"]
+    "funFacts": [
+      "Had flight feathers on all four limbs",
+      "Feathers were iridescent black like a crow",
+      "Glided between trees"
+    ]
   },
   {
     "name": "Yutyrannus",
@@ -573,7 +761,11 @@
     "weightKg": 1400,
     "rarity": "rare",
     "description": "The beautiful feathered tyrant. Yutyrannus proves that even 9-meter predators can be fluffy. She's proud of every single feather.",
-    "funFacts": ["Largest known feathered dinosaur", "Name means 'beautiful feathered tyrant'", "Covered in filamentous feathers"]
+    "funFacts": [
+      "Largest known feathered dinosaur",
+      "Name means 'beautiful feathered tyrant'",
+      "Covered in filamentous feathers"
+    ]
   },
   {
     "name": "Titano",
@@ -585,7 +777,11 @@
     "weightKg": 13000,
     "rarity": "uncommon",
     "description": "One of the armored titans. Titano may not be the biggest sauropod, but her osteoderms make her the toughest. Size AND armor? Unfair.",
-    "funFacts": ["Had bony armor called osteoderms", "Part of a huge group of sauropods called titanosaurs", "Found on every continent"]
+    "funFacts": [
+      "Had bony armor called osteoderms",
+      "Part of a huge group of sauropods called titanosaurs",
+      "Found on every continent"
+    ]
   },
   {
     "name": "Argento",
@@ -597,7 +793,11 @@
     "weightKg": 70000,
     "rarity": "legendary",
     "description": "The heavyweight champion of ALL TIME. Argento is so massive that every step is an earthquake. She's gentle though — just watch where you stand.",
-    "funFacts": ["May have weighed up to 100 tonnes", "One of the largest land animals ever", "A single vertebra was 1.59 meters wide"]
+    "funFacts": [
+      "May have weighed up to 100 tonnes",
+      "One of the largest land animals ever",
+      "A single vertebra was 1.59 meters wide"
+    ]
   },
   {
     "name": "Terror Bird",
@@ -609,7 +809,11 @@
     "weightKg": 130,
     "rarity": "rare",
     "description": "After the dinosaurs fell, Terror Bird rose. She's a massive flightless predator who proves that birds are dinosaurs — the angry kind.",
-    "funFacts": ["Stood over 2.5 meters tall", "Could not fly but ran extremely fast", "Dominated South America for millions of years"]
+    "funFacts": [
+      "Stood over 2.5 meters tall",
+      "Could not fly but ran extremely fast",
+      "Dominated South America for millions of years"
+    ]
   },
   {
     "name": "Megatherium",
@@ -621,7 +825,11 @@
     "weightKg": 4000,
     "rarity": "epic",
     "description": "A sloth the size of an elephant. Megatherium proves that being slow doesn't mean being small. She reaches up to strip trees bare, one lazy bite at a time.",
-    "funFacts": ["Could stand on hind legs to reach 6 meters", "Had claws up to 30 cm long", "One of the largest land mammals ever"]
+    "funFacts": [
+      "Could stand on hind legs to reach 6 meters",
+      "Had claws up to 30 cm long",
+      "One of the largest land mammals ever"
+    ]
   },
   {
     "name": "Glyptodon",
@@ -633,7 +841,11 @@
     "weightKg": 2000,
     "rarity": "rare",
     "description": "Imagine an armadillo the size of a VW Beetle. Glyptodon trundles along inside her massive dome shell, impervious to basically everything.",
-    "funFacts": ["Shell was made of over 1,000 bony plates", "Related to modern armadillos", "Humans may have used their shells as shelters"]
+    "funFacts": [
+      "Shell was made of over 1,000 bony plates",
+      "Related to modern armadillos",
+      "Humans may have used their shells as shelters"
+    ]
   },
   {
     "name": "Basilosaurus",
@@ -645,7 +857,11 @@
     "weightKg": 5000,
     "rarity": "epic",
     "description": "The serpent of the ancient seas, except she's actually a whale. Basilosaurus's 18-meter body undulates through warm Eocene oceans like a living legend.",
-    "funFacts": ["Not a reptile — an early whale", "Name means 'king lizard' due to mistaken identity", "Still had tiny hind legs"]
+    "funFacts": [
+      "Not a reptile — an early whale",
+      "Name means 'king lizard' due to mistaken identity",
+      "Still had tiny hind legs"
+    ]
   },
   {
     "name": "Megalodon",
@@ -657,7 +873,11 @@
     "weightKg": 50000,
     "rarity": "legendary",
     "description": "THE ultimate ocean predator. Megalodon's jaws could swallow a great white shark whole. She's the reason the deep ocean still scares us.",
-    "funFacts": ["Teeth were up to 18 cm long", "Could bite with 108,000-182,000 newtons of force", "Went extinct about 3.6 million years ago"]
+    "funFacts": [
+      "Teeth were up to 18 cm long",
+      "Could bite with 108,000-182,000 newtons of force",
+      "Went extinct about 3.6 million years ago"
+    ]
   },
   {
     "name": "Thalasso",
@@ -669,7 +889,11 @@
     "weightKg": 2000,
     "rarity": "rare",
     "description": "A plesiosaur with a neck so long it defies physics. Thalasso means 'sea lord,' and she earned every letter of that name.",
-    "funFacts": ["Neck was 6 meters long", "Had 62 cervical vertebrae", "Swallowed stones for ballast"]
+    "funFacts": [
+      "Neck was 6 meters long",
+      "Had 62 cervical vertebrae",
+      "Swallowed stones for ballast"
+    ]
   },
   {
     "name": "Archie",
@@ -681,7 +905,11 @@
     "weightKg": 2200,
     "rarity": "rare",
     "description": "The biggest sea turtle ever. Archie cruised Cretaceous seas with the calm confidence of someone who knows they're carrying 2 tonnes of shell.",
-    "funFacts": ["Largest sea turtle ever known", "Leathery shell rather than hard", "Wingspan of flippers was 4 meters"]
+    "funFacts": [
+      "Largest sea turtle ever known",
+      "Leathery shell rather than hard",
+      "Wingspan of flippers was 4 meters"
+    ]
   },
   {
     "name": "Sarco",
@@ -693,7 +921,11 @@
     "weightKg": 4500,
     "rarity": "epic",
     "description": "Super Croc. Sarco is twice the length of any modern crocodile and ten times the attitude. She's patient, ancient, and absolutely terrifying.",
-    "funFacts": ["Twice the length of any living crocodile", "Could take down dinosaurs", "Had a bulbous growth on the tip of its snout"]
+    "funFacts": [
+      "Twice the length of any living crocodile",
+      "Could take down dinosaurs",
+      "Had a bulbous growth on the tip of its snout"
+    ]
   },
   {
     "name": "Elasmosaur",
@@ -705,7 +937,11 @@
     "weightKg": 2000,
     "rarity": "epic",
     "description": "72 neck vertebrae. SEVENTY-TWO. Elasmosaur has the longest neck of any animal ever, and she uses every centimeter to snatch fish from impossible angles.",
-    "funFacts": ["Had 72 cervical vertebrae", "Total length up to 14 meters", "Originally reconstructed with the head on the wrong end"]
+    "funFacts": [
+      "Had 72 cervical vertebrae",
+      "Total length up to 14 meters",
+      "Originally reconstructed with the head on the wrong end"
+    ]
   },
   {
     "name": "Lioplo",
@@ -717,7 +953,11 @@
     "weightKg": 1700,
     "rarity": "rare",
     "description": "A pliosaur with jaws built for crushing. Lioplo was the apex predator of Jurassic oceans — compact, powerful, and utterly lethal.",
-    "funFacts": ["Often exaggerated in media — was about 6 meters, not 25", "Had four powerful flippers for fast swimming", "Teeth were 30 cm long"]
+    "funFacts": [
+      "Often exaggerated in media — was about 6 meters, not 25",
+      "Had four powerful flippers for fast swimming",
+      "Teeth were 30 cm long"
+    ]
   },
   {
     "name": "Nothosaur",
@@ -729,7 +969,11 @@
     "weightKg": 200,
     "rarity": "common",
     "description": "An early marine reptile testing the waters — literally. Nothosaur splits her time between land and sea, not yet fully committed to ocean life.",
-    "funFacts": ["Could live on land and in water", "Ancestor of plesiosaurs", "Had webbed feet"]
+    "funFacts": [
+      "Could live on land and in water",
+      "Ancestor of plesiosaurs",
+      "Had webbed feet"
+    ]
   },
   {
     "name": "Scutosaur",
@@ -741,7 +985,11 @@
     "weightKg": 500,
     "rarity": "common",
     "description": "A tank before tanks existed. Scutosaur is a bulky Permian pareiasaur covered in bony studs, lumbering through ancient landscapes with zero worries.",
-    "funFacts": ["Covered in bony armor plates", "One of the largest Permian land animals", "Related to the ancestors of turtles"]
+    "funFacts": [
+      "Covered in bony armor plates",
+      "One of the largest Permian land animals",
+      "Related to the ancestors of turtles"
+    ]
   },
   {
     "name": "Edaphosaur",
@@ -753,7 +1001,11 @@
     "weightKg": 300,
     "rarity": "common",
     "description": "Dimetro's peaceful cousin. Edaphosaur has a similar sail but is a chill herbivore who'd rather sunbathe than hunt. Solar-powered since 300 million years ago.",
-    "funFacts": ["Sail had cross-bars unlike Dimetrodon", "One of the first large herbivores", "Sail was likely used for thermoregulation"]
+    "funFacts": [
+      "Sail had cross-bars unlike Dimetrodon",
+      "One of the first large herbivores",
+      "Sail was likely used for thermoregulation"
+    ]
   },
   {
     "name": "Hallucigenia",
@@ -765,7 +1017,11 @@
     "weightKg": 0.001,
     "rarity": "common",
     "description": "So weird scientists literally named her after a hallucination. Hallucigenia walks on spindly legs with spines on her back — or is it the other way around?",
-    "funFacts": ["Scientists originally reconstructed it upside down", "Only about 3 cm long", "Has been flipped and reinterpreted multiple times"]
+    "funFacts": [
+      "Scientists originally reconstructed it upside down",
+      "Only about 3 cm long",
+      "Has been flipped and reinterpreted multiple times"
+    ]
   },
   {
     "name": "Opabinia",
@@ -777,7 +1033,11 @@
     "weightKg": 0.01,
     "rarity": "uncommon",
     "description": "Five eyes and a backward-facing mouth on a trunk. When Opabinia was first presented at a conference, the audience literally laughed. She's had the last laugh for 505 million years.",
-    "funFacts": ["Had five eyes", "Proboscis pointed forward then curved down to its mouth", "Its presentation caused an audience of scientists to burst out laughing"]
+    "funFacts": [
+      "Had five eyes",
+      "Proboscis pointed forward then curved down to its mouth",
+      "Its presentation caused an audience of scientists to burst out laughing"
+    ]
   },
   {
     "name": "Wiwaxia",
@@ -789,7 +1049,11 @@
     "weightKg": 0.005,
     "rarity": "common",
     "description": "A spiky armored slug from the Cambrian. Wiwaxia crawls along the seafloor bristling with protective spines, looking like a tiny punk rock pincushion.",
-    "funFacts": ["Covered in overlapping scales and long spines", "Only about 5 cm long", "Relationship to other animals is still debated"]
+    "funFacts": [
+      "Covered in overlapping scales and long spines",
+      "Only about 5 cm long",
+      "Relationship to other animals is still debated"
+    ]
   },
   {
     "name": "Tiktaalik",
@@ -801,7 +1065,11 @@
     "weightKg": 30,
     "rarity": "epic",
     "description": "The fish that decided to go for a walk. Tiktaalik is THE transitional fossil between fish and land animals. She took the first steps so you could take yours.",
-    "funFacts": ["Had both fish and tetrapod features", "Could do push-ups with its fins", "Found exactly where scientists predicted it would be"]
+    "funFacts": [
+      "Had both fish and tetrapod features",
+      "Could do push-ups with its fins",
+      "Found exactly where scientists predicted it would be"
+    ]
   },
   {
     "name": "Gorgono",
@@ -813,7 +1081,11 @@
     "weightKg": 200,
     "rarity": "uncommon",
     "description": "Saber-toothed and synapsid, Gorgono predates cats by 250 million years but had the same idea about giant fangs. An ancient proto-mammal with serious bite.",
-    "funFacts": ["Not a dinosaur — a therapsid (proto-mammal)", "Had large saber-like canine teeth", "Apex predator of the Late Permian"]
+    "funFacts": [
+      "Not a dinosaur — a therapsid (proto-mammal)",
+      "Had large saber-like canine teeth",
+      "Apex predator of the Late Permian"
+    ]
   },
   {
     "name": "Diictodon",
@@ -825,7 +1097,11 @@
     "weightKg": 2.0,
     "rarity": "common",
     "description": "The tiny burrowing dicynodont with a beak and tusks. Diictodon is basically a prehistoric hamster that dug elaborate tunnel networks. Community housing pioneer.",
-    "funFacts": ["Lived in elaborate burrow systems", "Had a beak like a turtle", "One of the most common Permian vertebrates"]
+    "funFacts": [
+      "Lived in elaborate burrow systems",
+      "Had a beak like a turtle",
+      "One of the most common Permian vertebrates"
+    ]
   },
   {
     "name": "Kaprosuchus",
@@ -837,7 +1113,11 @@
     "weightKg": 800,
     "rarity": "rare",
     "description": "Nicknamed 'BoarCroc' for good reason. Kaprosuchus had massive tusks, long legs, and could gallop. Imagine a crocodile that chases you on land. Sleep tight.",
-    "funFacts": ["Could gallop on land", "Had large boar-like tusks", "Nicknamed 'BoarCroc'"]
+    "funFacts": [
+      "Could gallop on land",
+      "Had large boar-like tusks",
+      "Nicknamed 'BoarCroc'"
+    ]
   },
   {
     "name": "Quinkana",
@@ -849,7 +1129,11 @@
     "weightKg": 500,
     "rarity": "uncommon",
     "description": "Australia's land-running crocodile. Because of course Australia had those. Quinkana terrorized the outback on long legs until just 40,000 years ago.",
-    "funFacts": ["A fully terrestrial crocodile", "Had blade-like teeth for cutting", "Coexisted with early humans in Australia"]
+    "funFacts": [
+      "A fully terrestrial crocodile",
+      "Had blade-like teeth for cutting",
+      "Coexisted with early humans in Australia"
+    ]
   },
   {
     "name": "Thylacosmilus",
@@ -861,7 +1145,11 @@
     "weightKg": 100,
     "rarity": "rare",
     "description": "A marsupial saber-tooth! Thylacosmilus independently evolved giant fangs just like Smilodon, proving that evolution really likes putting big teeth on things.",
-    "funFacts": ["Not related to cats — a marsupial", "Fangs grew continuously throughout life", "Convergent evolution with saber-toothed cats"]
+    "funFacts": [
+      "Not related to cats — a marsupial",
+      "Fangs grew continuously throughout life",
+      "Convergent evolution with saber-toothed cats"
+    ]
   },
   {
     "name": "Andrewsarchus",
@@ -873,7 +1161,11 @@
     "weightKg": 1000,
     "rarity": "epic",
     "description": "The largest terrestrial mammalian predator ever. Andrewsarchus is known from a single massive skull and the nightmares it inspired. Related to sheep, somehow.",
-    "funFacts": ["Known only from a single 83 cm skull", "Possibly related to hippos and whales", "Largest known mammalian land predator"]
+    "funFacts": [
+      "Known only from a single 83 cm skull",
+      "Possibly related to hippos and whales",
+      "Largest known mammalian land predator"
+    ]
   },
   {
     "name": "Paraceratherium",
@@ -885,7 +1177,11 @@
     "weightKg": 15000,
     "rarity": "legendary",
     "description": "The largest land mammal EVER. Paraceratherium was a hornless rhino that stood taller than a giraffe. She grazes the treetops with prehistoric elegance.",
-    "funFacts": ["Largest land mammal ever known", "Stood about 5 meters at the shoulder", "Weighed as much as 4 elephants"]
+    "funFacts": [
+      "Largest land mammal ever known",
+      "Stood about 5 meters at the shoulder",
+      "Weighed as much as 4 elephants"
+    ]
   },
   {
     "name": "Doedicurus",
@@ -897,7 +1193,11 @@
     "weightKg": 1500,
     "rarity": "uncommon",
     "description": "Glyptodon's cousin with a spiked club tail. Doedicurus is what happens when an armadillo maxes out both defense AND offense. Nature's medieval knight.",
-    "funFacts": ["Had a spiked club on its tail", "Related to modern armadillos", "Shell could be 1.5 meters across"]
+    "funFacts": [
+      "Had a spiked club on its tail",
+      "Related to modern armadillos",
+      "Shell could be 1.5 meters across"
+    ]
   },
   {
     "name": "Elasmotherium",
@@ -909,7 +1209,11 @@
     "weightKg": 5000,
     "rarity": "epic",
     "description": "The Siberian Unicorn. A massive rhino with a single enormous horn, Elasmotherium thundered across the steppe until just 29,000 years ago. Unicorns were real — just fluffier.",
-    "funFacts": ["May have inspired unicorn legends", "Horn estimated at 1 meter long", "Survived until relatively recently — 29,000 years ago"]
+    "funFacts": [
+      "May have inspired unicorn legends",
+      "Horn estimated at 1 meter long",
+      "Survived until relatively recently — 29,000 years ago"
+    ]
   },
   {
     "name": "Diprotodon",
@@ -921,7 +1225,11 @@
     "weightKg": 2800,
     "rarity": "rare",
     "description": "The largest marsupial ever. Diprotodon was basically a hippo-sized wombat that roamed Australia. She's the OG big girl of the outback.",
-    "funFacts": ["Largest marsupial ever", "About the size of a hippopotamus", "Went extinct about 44,000 years ago"]
+    "funFacts": [
+      "Largest marsupial ever",
+      "About the size of a hippopotamus",
+      "Went extinct about 44,000 years ago"
+    ]
   },
   {
     "name": "Thylacoleo",
@@ -933,7 +1241,11 @@
     "weightKg": 130,
     "rarity": "rare",
     "description": "The marsupial lion of Australia. Despite being related to kangaroos and wombats, Thylacoleo had the strongest bite force relative to body size of any mammal. Ever.",
-    "funFacts": ["Strongest bite of any mammal relative to size", "Had retractable claws like a cat", "Was a marsupial despite being lion-like"]
+    "funFacts": [
+      "Strongest bite of any mammal relative to size",
+      "Had retractable claws like a cat",
+      "Was a marsupial despite being lion-like"
+    ]
   },
   {
     "name": "Dodo-chan",
@@ -945,7 +1257,11 @@
     "weightKg": 17.5,
     "rarity": "common",
     "description": "Yes, she's a meme. But Dodo-chan was perfectly adapted to her island paradise — it's not her fault humans showed up. She demands respect.",
-    "funFacts": ["Went extinct in 1662", "Had no natural predators on Mauritius", "Not actually stupid — just unafraid of humans"]
+    "funFacts": [
+      "Went extinct in 1662",
+      "Had no natural predators on Mauritius",
+      "Not actually stupid — just unafraid of humans"
+    ]
   },
   {
     "name": "Tanystropheus",
@@ -957,7 +1273,11 @@
     "weightKg": 150,
     "rarity": "uncommon",
     "description": "Half of her length is just neck. Tanystropheus looks like nature was experimenting with proportions and went a bit too far. She doesn't mind — more reach for fishing.",
-    "funFacts": ["Neck was longer than body and tail combined", "Neck had only 13 enormously elongated vertebrae", "Likely fished from the shoreline"]
+    "funFacts": [
+      "Neck was longer than body and tail combined",
+      "Neck had only 13 enormously elongated vertebrae",
+      "Likely fished from the shoreline"
+    ]
   },
   {
     "name": "Sharovipteryx",
@@ -969,7 +1289,11 @@
     "weightKg": 0.01,
     "rarity": "common",
     "description": "A tiny gliding reptile with wings on its LEGS. Sharovipteryx looks like evolution tried to make a biplane but put the wings in the wrong spot.",
-    "funFacts": ["Had membranes between its hind legs for gliding", "Only about 24 cm long", "One of the earliest known gliding reptiles"]
+    "funFacts": [
+      "Had membranes between its hind legs for gliding",
+      "Only about 24 cm long",
+      "One of the earliest known gliding reptiles"
+    ]
   },
   {
     "name": "Longisquama",
@@ -981,7 +1305,11 @@
     "weightKg": 0.01,
     "rarity": "common",
     "description": "Sports a row of bizarre elongated scales along her back that look like feathered hockey sticks. What were they for? Nobody knows. Fashion, probably.",
-    "funFacts": ["Had long bizarre scales along its back", "Their function is still debated", "Very small — about 15 cm long"]
+    "funFacts": [
+      "Had long bizarre scales along its back",
+      "Their function is still debated",
+      "Very small — about 15 cm long"
+    ]
   },
   {
     "name": "Postosuchus",
@@ -993,7 +1321,11 @@
     "weightKg": 250,
     "rarity": "uncommon",
     "description": "The apex predator before dinosaurs took over. Postosuchus was a massive croc-relative that walked upright and ruled the Late Triassic landscape.",
-    "funFacts": ["Related to crocodiles, not dinosaurs", "Could walk on two legs", "Apex predator before dinosaurs dominated"]
+    "funFacts": [
+      "Related to crocodiles, not dinosaurs",
+      "Could walk on two legs",
+      "Apex predator before dinosaurs dominated"
+    ]
   },
   {
     "name": "Desmatosuchus",
@@ -1005,7 +1337,11 @@
     "weightKg": 300,
     "rarity": "common",
     "description": "A heavily armored aetosaur that looks like a crocodile cosplaying as a stegosaurus. Desmatosuchus has shoulder spikes, back plates, and zero tolerance for predators.",
-    "funFacts": ["Had massive shoulder spikes", "An aetosaur — related to crocodilians", "Covered in bony armor plates called osteoderms"]
+    "funFacts": [
+      "Had massive shoulder spikes",
+      "An aetosaur — related to crocodilians",
+      "Covered in bony armor plates called osteoderms"
+    ]
   },
   {
     "name": "Nyasasaurus",
@@ -1017,7 +1353,11 @@
     "weightKg": 60,
     "rarity": "rare",
     "description": "Possibly the very first dinosaur, or the closest thing to it. Nyasasaurus walked the earth 243 million years ago, before dinosaurs were even a proper thing.",
-    "funFacts": ["May be the oldest known dinosaur or dinosaur relative", "Lived 243 million years ago", "Known from fragmentary remains"]
+    "funFacts": [
+      "May be the oldest known dinosaur or dinosaur relative",
+      "Lived 243 million years ago",
+      "Known from fragmentary remains"
+    ]
   },
   {
     "name": "Helicoprion",
@@ -1029,7 +1369,11 @@
     "weightKg": 200,
     "rarity": "rare",
     "description": "A shark with a tooth spiral that looks like a circular saw. Scientists debated where the whorl went for a century. Answer: in the lower jaw, like a nightmare buzzsaw.",
-    "funFacts": ["Had a spiral of teeth called a tooth whorl", "Scientists argued for 100+ years where the whorl went", "Not technically a shark — a related fish"]
+    "funFacts": [
+      "Had a spiral of teeth called a tooth whorl",
+      "Scientists argued for 100+ years where the whorl went",
+      "Not technically a shark — a related fish"
+    ]
   },
   {
     "name": "Cameroceras",
@@ -1041,7 +1385,11 @@
     "weightKg": 200,
     "rarity": "uncommon",
     "description": "A nautiloid so big it terrorized the entire Ordovician ocean. Cameroceras had a cone-shaped shell up to 6 meters long. The original sea monster.",
-    "funFacts": ["One of the largest Ordovician creatures", "A relative of modern nautilus", "Shell could be up to 6 meters long"]
+    "funFacts": [
+      "One of the largest Ordovician creatures",
+      "A relative of modern nautilus",
+      "Shell could be up to 6 meters long"
+    ]
   },
   {
     "name": "Eurypterus",
@@ -1053,7 +1401,11 @@
     "weightKg": 0.5,
     "rarity": "common",
     "description": "A sea scorpion — and yes, some grew to 2.5 meters. Eurypterus herself is smaller but still represents the terrifying age when arthropods ruled the seas.",
-    "funFacts": ["A sea scorpion", "Some relatives grew up to 2.5 meters", "State fossil of New York"]
+    "funFacts": [
+      "A sea scorpion",
+      "Some relatives grew up to 2.5 meters",
+      "State fossil of New York"
+    ]
   },
   {
     "name": "Acanthostega",
@@ -1065,7 +1417,11 @@
     "weightKg": 2.0,
     "rarity": "uncommon",
     "description": "One of the first vertebrates with proper limbs — but she still had gills and a fish tail. Acanthostega is evolution caught mid-thought.",
-    "funFacts": ["Had eight fingers on each hand", "Still had gills despite having legs", "Key transitional fossil between fish and tetrapods"]
+    "funFacts": [
+      "Had eight fingers on each hand",
+      "Still had gills despite having legs",
+      "Key transitional fossil between fish and tetrapods"
+    ]
   },
   {
     "name": "Dunkleosteus Jr.",
@@ -1077,7 +1433,11 @@
     "weightKg": 600,
     "rarity": "uncommon",
     "description": "Unlike her cousin Dunky, Titanichthys was a gentle giant filter feeder — the whale shark of the Devonian. All that armor and she just wanted plankton.",
-    "funFacts": ["An armored fish like Dunkleosteus but a filter feeder", "Up to 5 meters long", "Had no sharp bony blades — fed on small organisms"]
+    "funFacts": [
+      "An armored fish like Dunkleosteus but a filter feeder",
+      "Up to 5 meters long",
+      "Had no sharp bony blades — fed on small organisms"
+    ]
   },
   {
     "name": "Cooksonia",
@@ -1089,7 +1449,11 @@
     "weightKg": 0.001,
     "rarity": "common",
     "description": "Not an animal — one of the first land plants! Cooksonia is a tiny fork-shaped pioneer who made dry land livable for everyone else. The ultimate support character.",
-    "funFacts": ["One of the earliest known land plants", "Only about 6 cm tall", "Made colonization of land possible for animals"]
+    "funFacts": [
+      "One of the earliest known land plants",
+      "Only about 6 cm tall",
+      "Made colonization of land possible for animals"
+    ]
   },
   {
     "name": "Aegirocassis",
@@ -1101,7 +1465,11 @@
     "weightKg": 20,
     "rarity": "rare",
     "description": "A giant filter-feeding anomalocarid. Aegirocassis swam through Ordovician seas like a prehistoric whale shark, peacefully filtering plankton with modified appendages.",
-    "funFacts": ["A gentle giant filter feeder", "Related to the predatory Anomalocaris", "Had paired flaps for swimming"]
+    "funFacts": [
+      "A gentle giant filter feeder",
+      "Related to the predatory Anomalocaris",
+      "Had paired flaps for swimming"
+    ]
   },
   {
     "name": "Lystrosaurus",
@@ -1113,7 +1481,11 @@
     "weightKg": 100,
     "rarity": "common",
     "description": "The ultimate survivor. After the Great Dying wiped out 96% of all species, Lystrosaurus was one of the few left standing. She once made up 95% of all land vertebrates.",
-    "funFacts": ["Survived the worst mass extinction in history", "At one point 95% of all land vertebrates were Lystrosaurus", "Found on every continent including Antarctica"]
+    "funFacts": [
+      "Survived the worst mass extinction in history",
+      "At one point 95% of all land vertebrates were Lystrosaurus",
+      "Found on every continent including Antarctica"
+    ]
   },
   {
     "name": "Ambulocetus",
@@ -1125,7 +1497,11 @@
     "weightKg": 300,
     "rarity": "uncommon",
     "description": "The 'walking whale.' Ambulocetus is the missing link between land mammals and whales — she walked AND swam, ambushing prey like a crocodile.",
-    "funFacts": ["Name means 'walking whale'", "Could walk on land and swim", "Key transitional fossil in whale evolution"]
+    "funFacts": [
+      "Name means 'walking whale'",
+      "Could walk on land and swim",
+      "Key transitional fossil in whale evolution"
+    ]
   },
   {
     "name": "Pakicetus",
@@ -1137,7 +1513,11 @@
     "weightKg": 25,
     "rarity": "common",
     "description": "A tiny wolf-like creature that would one day become... a whale? Pakicetus is proof that evolution's plans are wilder than any fiction.",
-    "funFacts": ["Earliest known whale ancestor", "Looked like a small dog or wolf", "Lived on land near the shore"]
+    "funFacts": [
+      "Earliest known whale ancestor",
+      "Looked like a small dog or wolf",
+      "Lived on land near the shore"
+    ]
   },
   {
     "name": "Sivatherium",
@@ -1149,7 +1529,11 @@
     "weightKg": 1200,
     "rarity": "uncommon",
     "description": "The moose of giraffes. Sivatherium had massive antler-like ossicones and a stocky build. She looked like a giraffe designed by a committee that included moose.",
-    "funFacts": ["Related to giraffes but much stockier", "Had large antler-like ossicones", "Survived until about 8,000 years ago"]
+    "funFacts": [
+      "Related to giraffes but much stockier",
+      "Had large antler-like ossicones",
+      "Survived until about 8,000 years ago"
+    ]
   },
   {
     "name": "Deinotherium",
@@ -1161,7 +1545,11 @@
     "weightKg": 14000,
     "rarity": "epic",
     "description": "An elephant with its tusks pointing DOWN from the lower jaw. Deinotherium is what happens when evolution says 'what if we put those the other way round?'",
-    "funFacts": ["Tusks curved downward from the lower jaw", "One of the largest land mammals ever", "Name means 'terrible beast'"]
+    "funFacts": [
+      "Tusks curved downward from the lower jaw",
+      "One of the largest land mammals ever",
+      "Name means 'terrible beast'"
+    ]
   },
   {
     "name": "Josephoartigasia",
@@ -1173,7 +1561,11 @@
     "weightKg": 1000,
     "rarity": "rare",
     "description": "The largest rodent ever. Josephoartigasia was a capybara the size of a buffalo. If you think modern capybaras are chill, imagine this absolute unit.",
-    "funFacts": ["Largest rodent ever known", "About the size of a buffalo", "Related to modern guinea pigs and capybaras"]
+    "funFacts": [
+      "Largest rodent ever known",
+      "About the size of a buffalo",
+      "Related to modern guinea pigs and capybaras"
+    ]
   },
   {
     "name": "Arctodus",
@@ -1185,7 +1577,11 @@
     "weightKg": 800,
     "rarity": "rare",
     "description": "The short-faced bear — taller than a grizzly and built for speed. Arctodus could outrun a horse and stood 3.4 meters on hind legs. Peak bear performance.",
-    "funFacts": ["Could stand 3.4 meters tall on hind legs", "Built for speed unlike modern bears", "One of the largest land carnivores in ice age North America"]
+    "funFacts": [
+      "Could stand 3.4 meters tall on hind legs",
+      "Built for speed unlike modern bears",
+      "One of the largest land carnivores in ice age North America"
+    ]
   },
   {
     "name": "Procoptodon",
@@ -1197,7 +1593,11 @@
     "weightKg": 230,
     "rarity": "uncommon",
     "description": "A kangaroo the size of a gorilla with a flat face. Procoptodon couldn't hop like modern roos — she walked upright like a short, furry, confused person.",
-    "funFacts": ["Largest kangaroo ever", "Could not hop — walked instead", "Had a shortened flat face unlike modern kangaroos"]
+    "funFacts": [
+      "Largest kangaroo ever",
+      "Could not hop — walked instead",
+      "Had a shortened flat face unlike modern kangaroos"
+    ]
   },
   {
     "name": "Megalania",
@@ -1209,6 +1609,10 @@
     "weightKg": 600,
     "rarity": "epic",
     "description": "A 5-meter venomous monitor lizard. Megalania was basically a Komodo dragon supersized. She ruled prehistoric Australia with terrifying efficiency.",
-    "funFacts": ["Largest venomous animal ever", "Related to Komodo dragons", "Coexisted with early Aboriginal Australians"]
+    "funFacts": [
+      "Largest venomous animal ever",
+      "Related to Komodo dragons",
+      "Coexisted with early Aboriginal Australians"
+    ]
   }
 ]

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
-import { eq, and, or } from 'drizzle-orm'
+import { and, eq, or } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
-import { tradeOffer, userCreature, creature, user } from '@/lib/db/schema'
+import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
 import { TradeList } from '@/components/trade/TradeList'
 
@@ -26,7 +26,10 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       })
       .from(tradeOffer)
       .innerJoin(user, eq(user.id, tradeOffer.offererId))
-      .innerJoin(userCreature, eq(userCreature.id, tradeOffer.offeredCreatureId))
+      .innerJoin(
+        userCreature,
+        eq(userCreature.id, tradeOffer.offeredCreatureId),
+      )
       .innerJoin(creature, eq(creature.id, userCreature.creatureId))
       .where(eq(tradeOffer.status, 'open'))
       .all(),
@@ -72,11 +75,12 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
   ])
 
   // Hydrate pending trades with creature/user names
-  const pendingTradeIds = pendingTrades.flatMap((t) =>
-    [t.offeredCreatureId, t.receiverCreatureId].filter(Boolean) as string[],
+  const pendingTradeIds = pendingTrades.flatMap(
+    (t) =>
+      [t.offeredCreatureId, t.receiverCreatureId].filter(Boolean) as Array<string>,
   )
-  const pendingUserIds = pendingTrades.flatMap((t) =>
-    [t.offererId, t.receiverId].filter(Boolean) as string[],
+  const pendingUserIds = pendingTrades.flatMap(
+    (t) => [t.offererId, t.receiverId].filter(Boolean) as Array<string>,
   )
 
   const [creatureDetails, userDetails] = await Promise.all([
@@ -117,8 +121,12 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
     ...t,
     offererName: userDetails[t.offererId]?.name ?? 'Unknown',
     offererImage: userDetails[t.offererId]?.image ?? null,
-    receiverName: t.receiverId ? (userDetails[t.receiverId]?.name ?? 'Unknown') : null,
-    receiverImage: t.receiverId ? (userDetails[t.receiverId]?.image ?? null) : null,
+    receiverName: t.receiverId
+      ? (userDetails[t.receiverId]?.name ?? 'Unknown')
+      : null,
+    receiverImage: t.receiverId
+      ? (userDetails[t.receiverId]?.image ?? null)
+      : null,
     offeredCreatureName: t.offeredCreatureId
       ? (creatureDetails[t.offeredCreatureId]?.name ?? 'Unknown')
       : 'Unknown',
@@ -133,7 +141,12 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       : null,
   }))
 
-  return { openTrades, pendingTrades: hydratedPending, myCreatures, userId: session.user.id }
+  return {
+    openTrades,
+    pendingTrades: hydratedPending,
+    myCreatures,
+    userId: session.user.id,
+  }
 })
 
 export const Route = createFileRoute('/_app/trade')({
@@ -142,7 +155,8 @@ export const Route = createFileRoute('/_app/trade')({
 })
 
 function TradePage() {
-  const { openTrades, pendingTrades, myCreatures, userId } = Route.useLoaderData()
+  const { openTrades, pendingTrades, myCreatures, userId } =
+    Route.useLoaderData()
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">

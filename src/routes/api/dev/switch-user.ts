@@ -3,14 +3,11 @@ import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from '@/lib/db/client'
-import { user, session } from '@/lib/db/schema'
+import { session, user } from '@/lib/db/schema'
 import { ensureUserCurrency } from '@/lib/gacha'
 
 /** Sign a cookie value using HMAC-SHA256 (matches better-auth/better-call format) */
-async function signCookieValue(
-  value: string,
-  secret: string,
-): Promise<string> {
+async function signCookieValue(value: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),

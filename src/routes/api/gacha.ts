@@ -3,9 +3,19 @@ import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
-import { executePull, deductFossils, claimDaily, getFossils, refundFossils } from '@/lib/gacha'
+import {
+  claimDaily,
+  deductFossils,
+  executePull,
+  getFossils,
+  refundFossils,
+} from '@/lib/gacha'
 import { banner } from '@/lib/db/schema'
-import { PULL_COST_SINGLE, PULL_COST_MULTI, MULTI_PULL_COUNT } from '@/lib/types'
+import {
+  MULTI_PULL_COUNT,
+  PULL_COST_MULTI,
+  PULL_COST_SINGLE,
+} from '@/lib/types'
 
 export const Route = createFileRoute('/api/gacha')({
   server: {
@@ -21,7 +31,10 @@ export const Route = createFileRoute('/api/gacha')({
           })
         }
 
-        const body = await request.json() as { action: string; bannerId?: string }
+        const body = (await request.json()) as {
+          action: string
+          bannerId?: string
+        }
         const db = createDb(cfEnv.DB)
 
         // Daily claim
@@ -36,10 +49,13 @@ export const Route = createFileRoute('/api/gacha')({
         if (body.action === 'pull' || body.action === 'pull_multi') {
           const bannerId = body.bannerId
           if (!bannerId) {
-            return new Response(JSON.stringify({ error: 'bannerId required' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'bannerId required' }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Validate banner exists and is active before deducting fossils
@@ -50,10 +66,13 @@ export const Route = createFileRoute('/api/gacha')({
             .get()
 
           if (!bannerRow) {
-            return new Response(JSON.stringify({ error: 'Banner not found or inactive' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Banner not found or inactive' }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           const isMulti = body.action === 'pull_multi'
@@ -82,17 +101,19 @@ export const Route = createFileRoute('/api/gacha')({
             await refundFossils(db, session.user.id, cost)
             const fossils = await getFossils(db, session.user.id)
             return new Response(
-              JSON.stringify({ error: 'Pull failed, fossils refunded', fossils }),
+              JSON.stringify({
+                error: 'Pull failed, fossils refunded',
+                fossils,
+              }),
               { status: 500, headers: { 'Content-Type': 'application/json' } },
             )
           }
 
           const fossils = await getFossils(db, session.user.id)
 
-          return new Response(
-            JSON.stringify({ results, fossils }),
-            { headers: { 'Content-Type': 'application/json' } },
-          )
+          return new Response(JSON.stringify({ results, fossils }), {
+            headers: { 'Content-Type': 'application/json' },
+          })
         }
 
         return new Response(JSON.stringify({ error: 'Unknown action' }), {

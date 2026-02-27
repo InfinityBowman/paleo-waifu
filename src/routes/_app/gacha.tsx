@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
+import { eq } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import { banner } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
 import { ensureSession } from '@/lib/auth-server'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 import { useAppStore } from '@/store/appStore'
@@ -12,6 +12,7 @@ import { BannerSelect } from '@/components/gacha/BannerSelect'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'
+import { Card, CardContent } from '@/components/ui/card'
 
 const getGachaData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
@@ -55,19 +56,21 @@ function GachaPage() {
             Excavate fossils to discover prehistoric waifus!
           </p>
         </div>
-        <div className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2">
+        <Card size="sm" className="flex-row items-center px-4 py-2">
           <span className="text-lg">🦴</span>
           <span className="text-xl font-bold">{displayFossils}</span>
           <span className="text-sm text-muted-foreground">Fossils</span>
-        </div>
+        </Card>
       </div>
 
       {banners.length === 0 ? (
-        <div className="rounded-lg border bg-card p-12 text-center">
-          <p className="text-lg text-muted-foreground">
-            No active banners right now. Check back soon!
-          </p>
-        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-lg text-muted-foreground">
+              No active banners right now. Check back soon!
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="space-y-6">
           <BannerSelect

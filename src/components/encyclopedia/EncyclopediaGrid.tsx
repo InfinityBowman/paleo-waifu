@@ -1,8 +1,23 @@
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { RARITY_COLORS, RARITY_BORDER, RARITY_BG, type Rarity } from '@/lib/types'
-import { CreatureModal } from '@/components/collection/CreatureModal'
 import { Search } from 'lucide-react'
+import type {Rarity} from '@/lib/types';
+import { cn } from '@/lib/utils'
+import {
+  RARITY_BG,
+  RARITY_BORDER,
+  RARITY_COLORS
+  
+} from '@/lib/types'
+import { CreatureModal } from '@/components/collection/CreatureModal'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface CreatureData {
   id: string
@@ -19,7 +34,7 @@ interface CreatureData {
   imageUrl: string | null
 }
 
-export function EncyclopediaGrid({ creatures }: { creatures: CreatureData[] }) {
+export function EncyclopediaGrid({ creatures }: { creatures: Array<CreatureData> }) {
   const [search, setSearch] = useState('')
   const [eraFilter, setEraFilter] = useState<string>('all')
   const [dietFilter, setDietFilter] = useState<string>('all')
@@ -45,38 +60,40 @@ export function EncyclopediaGrid({ creatures }: { creatures: CreatureData[] }) {
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             placeholder="Search by name or scientific name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-md border bg-transparent pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
+            className="pl-9"
           />
         </div>
-        <select
-          value={eraFilter}
-          onChange={(e) => setEraFilter(e.target.value)}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="all">All Eras</option>
-          {eras.map((e) => (
-            <option key={e} value={e}>
-              {e}
-            </option>
-          ))}
-        </select>
-        <select
-          value={dietFilter}
-          onChange={(e) => setDietFilter(e.target.value)}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="all">All Diets</option>
-          {diets.map((d) => (
-            <option key={d} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
+        <Select value={eraFilter} onValueChange={setEraFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Eras</SelectItem>
+            {eras.map((e) => (
+              <SelectItem key={e} value={e}>
+                {e}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={dietFilter} onValueChange={setDietFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Diets</SelectItem>
+            {diets.map((d) => (
+              <SelectItem key={d} value={d}>
+                {d}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <p className="mb-4 text-sm text-muted-foreground">
@@ -131,9 +148,13 @@ export function EncyclopediaGrid({ creatures }: { creatures: CreatureData[] }) {
         })}
       </div>
 
-      {selected && (
-        <CreatureModal creature={selected} onClose={() => setSelected(null)} />
-      )}
+      <CreatureModal
+        creature={selected}
+        open={!!selected}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null)
+        }}
+      />
     </>
   )
 }

@@ -3,11 +3,11 @@ import type { PullResult } from '@/lib/gacha'
 
 interface AppState {
   fossils: number
-  pullResults: PullResult[]
+  pullResults: Array<PullResult>
   isPulling: boolean
 
   setFossils: (fossils: number) => void
-  setPullResults: (results: PullResult[]) => void
+  setPullResults: (results: Array<PullResult>) => void
   addPullResult: (result: PullResult) => void
   setIsPulling: (pulling: boolean) => void
   clearPullResults: () => void

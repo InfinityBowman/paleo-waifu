@@ -2,7 +2,4 @@
 
 import { tanstackConfig } from '@tanstack/eslint-config'
 
-export default [
-  { ignores: ['.output/**', '.wrangler/**'] },
-  ...tanstackConfig,
-]
+export default [{ ignores: ['.output/**', '.wrangler/**'] }, ...tanstackConfig]

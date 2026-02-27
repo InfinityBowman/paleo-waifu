@@ -1,6 +1,13 @@
+import type {Rarity} from '@/lib/types';
 import { cn } from '@/lib/utils'
-import { RARITY_COLORS, RARITY_BORDER, type Rarity } from '@/lib/types'
-import { X } from 'lucide-react'
+import { RARITY_BORDER, RARITY_COLORS  } from '@/lib/types'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Badge } from '@/components/ui/badge'
 
 interface Creature {
   name: string
@@ -14,32 +21,26 @@ interface Creature {
 
 export function CreatureModal({
   creature,
-  onClose,
+  open,
+  onOpenChange,
 }: {
-  creature: Creature
-  onClose: () => void
+  creature: Creature | null
+  open: boolean
+  onOpenChange: (open: boolean) => void
 }) {
+  if (!creature) return null
+
   const rarity = creature.rarity as Rarity
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <div
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
         className={cn(
-          'relative mx-4 w-full max-w-md overflow-hidden rounded-xl border-2 bg-card shadow-2xl',
+          'gap-0 overflow-hidden p-0 sm:max-w-md',
+          'border-2',
           RARITY_BORDER[rarity],
         )}
-        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-full bg-background/80 p-1.5 hover:bg-background"
-        >
-          <X className="h-4 w-4" />
-        </button>
-
         <div className="aspect-square bg-gradient-to-b from-muted/30 to-background p-8">
           {creature.imageUrl ? (
             <img
@@ -55,18 +56,22 @@ export function CreatureModal({
         </div>
 
         <div className="p-6">
-          <span
+          <Badge
+            variant="secondary"
             className={cn(
-              'text-xs font-semibold uppercase',
+              'uppercase',
               RARITY_COLORS[rarity],
+              'bg-transparent px-0',
             )}
           >
             {rarity}
-          </span>
-          <h2 className="mt-1 text-2xl font-bold">{creature.name}</h2>
-          <p className="text-sm italic text-muted-foreground">
+          </Badge>
+          <DialogTitle className="mt-1 text-2xl font-bold">
+            {creature.name}
+          </DialogTitle>
+          <DialogDescription className="italic">
             {creature.scientificName}
-          </p>
+          </DialogDescription>
 
           <div className="mt-4 flex gap-4 text-sm">
             <div>
@@ -83,7 +88,7 @@ export function CreatureModal({
             {creature.description}
           </p>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

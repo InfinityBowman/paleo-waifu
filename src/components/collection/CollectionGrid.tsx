@@ -1,8 +1,23 @@
 import { useState } from 'react'
-import { cn } from '@/lib/utils'
-import { RARITY_COLORS, RARITY_BORDER, RARITY_BG, type Rarity } from '@/lib/types'
-import { CreatureModal } from './CreatureModal'
 import { Search } from 'lucide-react'
+import { CreatureModal } from './CreatureModal'
+import type {Rarity} from '@/lib/types';
+import { cn } from '@/lib/utils'
+import {
+  RARITY_BG,
+  RARITY_BORDER,
+  RARITY_COLORS
+  
+} from '@/lib/types'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface CollectionItem {
   id: string
@@ -18,7 +33,11 @@ interface CollectionItem {
   isLocked: boolean | null
 }
 
-export function CollectionGrid({ collection }: { collection: CollectionItem[] }) {
+export function CollectionGrid({
+  collection,
+}: {
+  collection: Array<CollectionItem>
+}) {
   const [search, setSearch] = useState('')
   const [rarityFilter, setRarityFilter] = useState<string>('all')
   const [eraFilter, setEraFilter] = useState<string>('all')
@@ -28,7 +47,8 @@ export function CollectionGrid({ collection }: { collection: CollectionItem[] })
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
   const filtered = collection.filter((c) => {
-    if (search && !c.name.toLowerCase().includes(search.toLowerCase())) return false
+    if (search && !c.name.toLowerCase().includes(search.toLowerCase()))
+      return false
     if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
     if (eraFilter !== 'all' && c.era !== eraFilter) return false
     return true
@@ -39,44 +59,48 @@ export function CollectionGrid({ collection }: { collection: CollectionItem[] })
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Input
             type="text"
             placeholder="Search creatures..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-9 w-full rounded-md border bg-transparent pl-9 pr-3 text-sm outline-none focus:ring-1 focus:ring-ring"
+            className="pl-9"
           />
         </div>
-        <select
-          value={rarityFilter}
-          onChange={(e) => setRarityFilter(e.target.value)}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="all">All Rarities</option>
-          {rarities.map((r) => (
-            <option key={r} value={r}>
-              {r[0].toUpperCase() + r.slice(1)}
-            </option>
-          ))}
-        </select>
-        <select
-          value={eraFilter}
-          onChange={(e) => setEraFilter(e.target.value)}
-          className="h-9 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="all">All Eras</option>
-          {eras.map((e) => (
-            <option key={e} value={e}>
-              {e}
-            </option>
-          ))}
-        </select>
+        <Select value={rarityFilter} onValueChange={setRarityFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Rarities</SelectItem>
+            {rarities.map((r) => (
+              <SelectItem key={r} value={r}>
+                {r[0].toUpperCase() + r.slice(1)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={eraFilter} onValueChange={setEraFilter}>
+          <SelectTrigger className="w-[140px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Eras</SelectItem>
+            {eras.map((e) => (
+              <SelectItem key={e} value={e}>
+                {e}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-lg border bg-card p-12 text-center text-muted-foreground">
-          No creatures match your filters.
-        </div>
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            No creatures match your filters.
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {filtered.map((item) => {
@@ -113,8 +137,12 @@ export function CollectionGrid({ collection }: { collection: CollectionItem[] })
                   >
                     {rarity}
                   </span>
-                  <div className="text-sm font-bold leading-tight">{item.name}</div>
-                  <div className="text-[11px] text-muted-foreground">{item.era}</div>
+                  <div className="text-sm font-bold leading-tight">
+                    {item.name}
+                  </div>
+                  <div className="text-[11px] text-muted-foreground">
+                    {item.era}
+                  </div>
                 </div>
                 {item.isFavorite && (
                   <div className="absolute right-1 top-1 text-amber-400">★</div>
@@ -125,9 +153,13 @@ export function CollectionGrid({ collection }: { collection: CollectionItem[] })
         </div>
       )}
 
-      {selected && (
-        <CreatureModal creature={selected} onClose={() => setSelected(null)} />
-      )}
+      <CreatureModal
+        creature={selected}
+        open={!!selected}
+        onOpenChange={(open) => {
+          if (!open) setSelected(null)
+        }}
+      />
     </>
   )
 }

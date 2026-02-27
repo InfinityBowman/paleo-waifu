@@ -38,6 +38,7 @@ File-based routing via TanStack Router. Route tree auto-generated in `src/routeT
 - `_app` — Auth-guarded layout (gacha, collection, trade, profile)
 
 Routes:
+
 - `/` — Landing page
 - `/encyclopedia` — Browse all creatures (public)
 - `/gacha` — Pull screen (auth required)

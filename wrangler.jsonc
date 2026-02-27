@@ -12,7 +12,7 @@
       "binding": "DB",
       "database_name": "paleo-waifu-db",
       "database_id": "REPLACE_ME",
-      "migrations_dir": "drizzle"
-    }
-  ]
+      "migrations_dir": "drizzle",
+    },
+  ],
 }

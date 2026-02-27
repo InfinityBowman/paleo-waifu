@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { env } from 'cloudflare:workers'
-import { eq, and, ne } from 'drizzle-orm'
+import { and, eq, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
-import { tradeOffer, tradeHistory, userCreature } from '@/lib/db/schema'
+import { tradeHistory, tradeOffer, userCreature } from '@/lib/db/schema'
 
 export const Route = createFileRoute('/api/trade')({
   server: {
@@ -20,7 +20,7 @@ export const Route = createFileRoute('/api/trade')({
           })
         }
 
-        const body = await request.json() as {
+        const body = (await request.json()) as {
           action: string
           offeredCreatureId?: string
           wantedCreatureId?: string
@@ -33,10 +33,13 @@ export const Route = createFileRoute('/api/trade')({
         // Create trade offer
         if (body.action === 'create') {
           if (!body.offeredCreatureId) {
-            return new Response(JSON.stringify({ error: 'offeredCreatureId required' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'offeredCreatureId required' }),
+              {
+                status: 400,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Atomically verify ownership + lock in one step to prevent race conditions
@@ -92,11 +95,17 @@ export const Route = createFileRoute('/api/trade')({
             )
             .get()
 
-          if (!trade || (trade.status !== 'open' && trade.status !== 'pending')) {
-            return new Response(JSON.stringify({ error: 'Trade not found or not cancellable' }), {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            })
+          if (
+            !trade ||
+            (trade.status !== 'open' && trade.status !== 'pending')
+          ) {
+            return new Response(
+              JSON.stringify({ error: 'Trade not found or not cancellable' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Unlock the offerer's creature
@@ -151,7 +160,10 @@ export const Route = createFileRoute('/api/trade')({
 
           if (claimed.length === 0) {
             return new Response(
-              JSON.stringify({ error: 'Trade not found, not open, or you cannot accept your own trade' }),
+              JSON.stringify({
+                error:
+                  'Trade not found, not open, or you cannot accept your own trade',
+              }),
               { status: 409, headers: { 'Content-Type': 'application/json' } },
             )
           }
@@ -173,7 +185,11 @@ export const Route = createFileRoute('/api/trade')({
             // Revert trade back to open
             await db
               .update(tradeOffer)
-              .set({ status: 'open', receiverId: null, receiverCreatureId: null })
+              .set({
+                status: 'open',
+                receiverId: null,
+                receiverCreatureId: null,
+              })
               .where(eq(tradeOffer.id, body.tradeId))
             return new Response(
               JSON.stringify({ error: 'Your creature not found or locked' }),
@@ -181,9 +197,12 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          return new Response(JSON.stringify({ success: true, status: 'pending' }), {
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return new Response(
+            JSON.stringify({ success: true, status: 'pending' }),
+            {
+              headers: { 'Content-Type': 'application/json' },
+            },
+          )
         }
 
         // Offerer confirms a pending trade — executes the swap
@@ -209,10 +228,13 @@ export const Route = createFileRoute('/api/trade')({
             .get()
 
           if (!trade || !trade.receiverId || !trade.receiverCreatureId) {
-            return new Response(JSON.stringify({ error: 'Trade not found or not pending' }), {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Trade not found or not pending' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Atomically set to accepted to prevent double-confirm
@@ -228,10 +250,13 @@ export const Route = createFileRoute('/api/trade')({
             .returning()
 
           if (confirmed.length === 0) {
-            return new Response(JSON.stringify({ error: 'Trade already completed' }), {
-              status: 409,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Trade already completed' }),
+              {
+                status: 409,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Swap ownership and record history atomically
@@ -281,10 +306,13 @@ export const Route = createFileRoute('/api/trade')({
             .get()
 
           if (!trade) {
-            return new Response(JSON.stringify({ error: 'Trade not found or not pending' }), {
-              status: 404,
-              headers: { 'Content-Type': 'application/json' },
-            })
+            return new Response(
+              JSON.stringify({ error: 'Trade not found or not pending' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
           }
 
           // Unlock the receiver's creature

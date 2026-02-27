@@ -19,9 +19,7 @@ export const Route = createRootRoute({
         content: 'Collect waifu-fied prehistoric creatures in this gacha game!',
       },
     ],
-    links: [
-      { rel: 'stylesheet', href: appCss },
-    ],
+    links: [{ rel: 'stylesheet', href: appCss }],
     scripts: [
       {
         children: `document.documentElement.classList.add('dark')`,
@@ -38,7 +36,9 @@ function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-32 text-center">
       <h1 className="text-4xl font-bold">404</h1>
-      <p className="text-muted-foreground">This fossil couldn&apos;t be found.</p>
+      <p className="text-muted-foreground">
+        This fossil couldn&apos;t be found.
+      </p>
       <Link
         to="/"
         className="text-sm text-primary underline underline-offset-4 hover:text-primary/80"

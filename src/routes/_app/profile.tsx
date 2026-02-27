@@ -1,10 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
-import { eq, sql, count } from 'drizzle-orm'
+import { count, eq, sql } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
-import { userCreature, creature, currency, tradeHistory } from '@/lib/db/schema'
+import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Card, CardContent } from '@/components/ui/card'
 
 const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await ensureSession()
@@ -17,14 +19,20 @@ const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
     totalSpeciesCount,
     tradeCount,
   ] = await Promise.all([
-    db.select().from(currency).where(eq(currency.userId, session.user.id)).get(),
+    db
+      .select()
+      .from(currency)
+      .where(eq(currency.userId, session.user.id))
+      .get(),
     db
       .select({ count: count() })
       .from(userCreature)
       .where(eq(userCreature.userId, session.user.id))
       .get(),
     db
-      .select({ count: sql<number>`count(distinct ${userCreature.creatureId})` })
+      .select({
+        count: sql<number>`count(distinct ${userCreature.creatureId})`,
+      })
       .from(userCreature)
       .where(eq(userCreature.userId, session.user.id))
       .get(),
@@ -57,18 +65,20 @@ function ProfilePage() {
   const { user, fossils, totalPulls, uniqueSpecies, totalSpecies, tradeCount } =
     Route.useLoaderData()
 
-  const completionPct = totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0
+  const completionPct =
+    totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
       <div className="mb-8 flex items-center gap-4">
-        {user.image ? (
-          <img src={user.image} alt="" className="h-16 w-16 rounded-full" />
-        ) : (
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted text-2xl font-bold">
-            {user.name?.[0]?.toUpperCase()}
-          </div>
-        )}
+        <Avatar className="size-16">
+          {user.image ? (
+            <AvatarImage src={user.image} alt={user.name} />
+          ) : null}
+          <AvatarFallback className="text-2xl font-bold">
+            {user.name[0].toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
         <div>
           <h1 className="text-2xl font-bold">{user.name}</h1>
           <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -102,15 +112,17 @@ function StatCard({
   subtitle?: string
 }) {
   return (
-    <div className="rounded-lg border bg-card p-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <span>{icon}</span>
-        {label}
-      </div>
-      <div className="mt-1 text-2xl font-bold">{value}</div>
-      {subtitle && (
-        <div className="mt-0.5 text-xs text-muted-foreground">{subtitle}</div>
-      )}
-    </div>
+    <Card size="sm">
+      <CardContent>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{icon}</span>
+          {label}
+        </div>
+        <div className="mt-1 text-2xl font-bold">{value}</div>
+        {subtitle && (
+          <div className="mt-0.5 text-xs text-muted-foreground">{subtitle}</div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

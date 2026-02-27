@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { useAppStore } from '@/store/appStore'
-import { PULL_COST_SINGLE, PULL_COST_MULTI } from '@/lib/types'
 import { Pickaxe } from 'lucide-react'
+import { useAppStore } from '@/store/appStore'
+import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@/lib/types'
+import { Button } from '@/components/ui/button'
 
 export function PullButton({ bannerId }: { bannerId: string }) {
   const [pulling, setPulling] = useState(false)
@@ -41,24 +42,27 @@ export function PullButton({ bannerId }: { bannerId: string }) {
 
   return (
     <div className="flex gap-3">
-      <button
+      <Button
         onClick={() => doPull('pull')}
         disabled={pulling || !canSingle}
-        className="inline-flex h-11 items-center gap-2 rounded-lg bg-primary px-5 font-medium text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+        size="lg"
+        className="h-11 px-5"
       >
         <Pickaxe className="h-5 w-5" />
         Pull x1
         <span className="text-xs opacity-70">({PULL_COST_SINGLE} 🦴)</span>
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={() => doPull('pull_multi')}
         disabled={pulling || !canMulti}
-        className="inline-flex h-11 items-center gap-2 rounded-lg border border-primary bg-primary/10 px-5 font-medium text-primary transition-all hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        variant="outline"
+        size="lg"
+        className="h-11 border-primary bg-primary/10 px-5 text-primary hover:bg-primary/20"
       >
         <Pickaxe className="h-5 w-5" />
         Pull x10
         <span className="text-xs opacity-70">({PULL_COST_MULTI} 🦴)</span>
-      </button>
+      </Button>
     </div>
   )
 }

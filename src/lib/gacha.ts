@@ -1,16 +1,24 @@
 import { and, eq, gte, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import type { Database } from './db/client'
-import { creature, banner, bannerPool, userCreature, currency, pityCounter } from './db/schema'
+import {
+  banner,
+  bannerPool,
+  creature,
+  currency,
+  pityCounter,
+  userCreature,
+} from './db/schema'
 import {
   BASE_RATES,
-  SOFT_PITY_THRESHOLD,
-  HARD_PITY_THRESHOLD,
-  RATE_UP_SHARE,
-  NEW_USER_BONUS,
   DAILY_FOSSILS,
-  type Rarity,
+  HARD_PITY_THRESHOLD,
+  NEW_USER_BONUS,
+  RATE_UP_SHARE,
+  
+  SOFT_PITY_THRESHOLD
 } from './types'
+import type {Rarity} from './types';
+import type { Database } from './db/client'
 
 /** Ensure new user gets their starter Fossils */
 export async function ensureUserCurrency(db: Database, userId: string) {
@@ -25,7 +33,10 @@ export async function ensureUserCurrency(db: Database, userId: string) {
 }
 
 /** Get user's current fossil count */
-export async function getFossils(db: Database, userId: string): Promise<number> {
+export async function getFossils(
+  db: Database,
+  userId: string,
+): Promise<number> {
   const row = await db
     .select({ fossils: currency.fossils })
     .from(currency)
@@ -100,7 +111,10 @@ export async function claimDaily(
 }
 
 /** Calculate adjusted rarity rates based on pity */
-function calculateRarity(pullsSinceRare: number, pullsSinceLegendary: number): Rarity {
+function calculateRarity(
+  pullsSinceRare: number,
+  pullsSinceLegendary: number,
+): Rarity {
   const rand = Math.random()
 
   // Hard pity: guaranteed legendary at 90
@@ -126,7 +140,12 @@ function calculateRarity(pullsSinceRare: number, pullsSinceLegendary: number): R
   }
 
   // Normalize and roll
-  const total = BASE_RATES.common + BASE_RATES.uncommon + rareRate + epicRate + legendaryRate
+  const total =
+    BASE_RATES.common +
+    BASE_RATES.uncommon +
+    rareRate +
+    epicRate +
+    legendaryRate
   const commonNorm = BASE_RATES.common / total
   const uncommonNorm = BASE_RATES.uncommon / total
   const rareNorm = rareRate / total
@@ -161,7 +180,8 @@ async function selectCreature(
       .from(creature)
       .where(eq(creature.rarity, rarity))
       .all()
-    if (fallback.length === 0) throw new Error(`No creatures of rarity: ${rarity}`)
+    if (fallback.length === 0)
+      throw new Error(`No creatures of rarity: ${rarity}`)
     return fallback[Math.floor(Math.random() * fallback.length)].id
   }
 
@@ -232,7 +252,9 @@ export async function executePull(
   const pity = await db
     .select()
     .from(pityCounter)
-    .where(and(eq(pityCounter.userId, userId), eq(pityCounter.bannerId, bannerId)))
+    .where(
+      and(eq(pityCounter.userId, userId), eq(pityCounter.bannerId, bannerId)),
+    )
     .get()
 
   if (!pity) throw new Error('Failed to create pity counter')
@@ -241,7 +263,12 @@ export async function executePull(
   const rarity = calculateRarity(pity.pullsSinceRare, pity.pullsSinceLegendary)
 
   // Select creature
-  const creatureId = await selectCreature(db, bannerId, rarity, bannerRow.rateUpId)
+  const creatureId = await selectCreature(
+    db,
+    bannerId,
+    rarity,
+    bannerRow.rateUpId,
+  )
 
   // Create user creature instance
   const userCreatureId = nanoid()
@@ -256,7 +283,12 @@ export async function executePull(
   const existingCount = await db
     .select({ count: sql<number>`count(*)` })
     .from(userCreature)
-    .where(and(eq(userCreature.userId, userId), eq(userCreature.creatureId, creatureId)))
+    .where(
+      and(
+        eq(userCreature.userId, userId),
+        eq(userCreature.creatureId, creatureId),
+      ),
+    )
     .get()
   const isNew = (existingCount?.count ?? 0) <= 1
 
@@ -268,7 +300,9 @@ export async function executePull(
     .update(pityCounter)
     .set({
       pullsSinceRare: isRarePlus ? 0 : sql`${pityCounter.pullsSinceRare} + 1`,
-      pullsSinceLegendary: isLegendary ? 0 : sql`${pityCounter.pullsSinceLegendary} + 1`,
+      pullsSinceLegendary: isLegendary
+        ? 0
+        : sql`${pityCounter.pullsSinceLegendary} + 1`,
       totalPulls: sql`${pityCounter.totalPulls} + 1`,
     })
     .where(eq(pityCounter.id, pity.id))

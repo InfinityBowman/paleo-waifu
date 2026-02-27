@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { Outlet, createFileRoute } from '@tanstack/react-router'
 import { Nav } from '@/components/layout/Nav'
 
 export const Route = createFileRoute('/_public')({
@@ -7,14 +7,14 @@ export const Route = createFileRoute('/_public')({
 
 function PublicLayout() {
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Nav />
-      <main className="flex-1">
+      <main className="flex-1 overflow-y-auto">
         <Outlet />
+        <footer className="border-t py-6 text-center text-sm text-muted-foreground">
+          PaleoWaifu — Prehistoric creatures, reimagined.
+        </footer>
       </main>
-      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
-        PaleoWaifu — Prehistoric creatures, reimagined.
-      </footer>
     </div>
   )
 }

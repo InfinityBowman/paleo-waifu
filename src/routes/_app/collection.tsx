@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
-import { userCreature, creature } from '@/lib/db/schema'
+import { creature, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
 import { CollectionGrid } from '@/components/collection/CollectionGrid'
 
@@ -47,7 +47,8 @@ function CollectionPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">My Collection</h1>
         <p className="mt-2 text-muted-foreground">
-          {collection.length} creature{collection.length !== 1 ? 's' : ''} discovered
+          {collection.length} creature{collection.length !== 1 ? 's' : ''}{' '}
+          discovered
         </p>
       </div>
       <CollectionGrid collection={collection} />

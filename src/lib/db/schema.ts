@@ -1,4 +1,10 @@
-import { sqliteTable, text, integer, real, uniqueIndex } from 'drizzle-orm/sqlite-core'
+import {
+  integer,
+  real,
+  sqliteTable,
+  text,
+  uniqueIndex,
+} from 'drizzle-orm/sqlite-core'
 import { sql } from 'drizzle-orm'
 
 // ─── Better-Auth tables ──────────────────────────────────────────────
@@ -9,16 +15,24 @@ export const user = sqliteTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: integer('emailVerified', { mode: 'boolean' }).default(false),
   image: text('image'),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
 export const session = sqliteTable('session', {
   id: text('id').primaryKey(),
   expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
   token: text('token').notNull().unique(),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
   ipAddress: text('ipAddress'),
   userAgent: text('userAgent'),
   userId: text('userId')
@@ -37,11 +51,17 @@ export const account = sqliteTable('account', {
   refreshToken: text('refreshToken'),
   idToken: text('idToken'),
   accessTokenExpiresAt: integer('accessTokenExpiresAt', { mode: 'timestamp' }),
-  refreshTokenExpiresAt: integer('refreshTokenExpiresAt', { mode: 'timestamp' }),
+  refreshTokenExpiresAt: integer('refreshTokenExpiresAt', {
+    mode: 'timestamp',
+  }),
   scope: text('scope'),
   password: text('password'),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
 export const verification = sqliteTable('verification', {
@@ -49,8 +69,12 @@ export const verification = sqliteTable('verification', {
   identifier: text('identifier').notNull(),
   value: text('value').notNull(),
   expiresAt: integer('expiresAt', { mode: 'timestamp' }).notNull(),
-  createdAt: integer('createdAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
-  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('createdAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
+  updatedAt: integer('updatedAt', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
 // ─── Game tables ─────────────────────────────────────────────────────
@@ -68,7 +92,9 @@ export const creature = sqliteTable('creature', {
   description: text('description').notNull(),
   funFacts: text('fun_facts'), // JSON array of strings
   imageUrl: text('image_url'),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
 export const banner = sqliteTable('banner', {
@@ -80,70 +106,126 @@ export const banner = sqliteTable('banner', {
   endsAt: integer('ends_at', { mode: 'timestamp' }),
   isActive: integer('is_active', { mode: 'boolean' }).default(true),
   rateUpId: text('rate_up_id').references(() => creature.id),
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
 export const bannerPool = sqliteTable('banner_pool', {
   id: text('id').primaryKey(),
-  bannerId: text('banner_id').notNull().references(() => banner.id, { onDelete: 'cascade' }),
-  creatureId: text('creature_id').notNull().references(() => creature.id, { onDelete: 'cascade' }),
+  bannerId: text('banner_id')
+    .notNull()
+    .references(() => banner.id, { onDelete: 'cascade' }),
+  creatureId: text('creature_id')
+    .notNull()
+    .references(() => creature.id, { onDelete: 'cascade' }),
 })
 
 export const userCreature = sqliteTable('user_creature', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  creatureId: text('creature_id').notNull().references(() => creature.id),
+  userId: text('user_id')
+    .notNull()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  creatureId: text('creature_id')
+    .notNull()
+    .references(() => creature.id),
   bannerId: text('banner_id').references(() => banner.id),
-  pulledAt: integer('pulled_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  pulledAt: integer('pulled_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
   isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
   isLocked: integer('is_locked', { mode: 'boolean' }).default(false),
 })
 
 export const currency = sqliteTable('currency', {
   id: text('id').primaryKey(),
-  userId: text('user_id').notNull().unique().references(() => user.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
   fossils: integer('fossils').default(0).notNull(),
   lastDailyClaim: integer('last_daily_claim', { mode: 'timestamp' }),
-  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
-export const pityCounter = sqliteTable('pity_counter', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  bannerId: text('banner_id').notNull().references(() => banner.id),
-  pullsSinceRare: integer('pulls_since_rare').default(0).notNull(),
-  pullsSinceLegendary: integer('pulls_since_legendary').default(0).notNull(),
-  totalPulls: integer('total_pulls').default(0).notNull(),
-}, (table) => [
-  uniqueIndex('pity_user_banner_idx').on(table.userId, table.bannerId),
-])
+export const pityCounter = sqliteTable(
+  'pity_counter',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    bannerId: text('banner_id')
+      .notNull()
+      .references(() => banner.id),
+    pullsSinceRare: integer('pulls_since_rare').default(0).notNull(),
+    pullsSinceLegendary: integer('pulls_since_legendary').default(0).notNull(),
+    totalPulls: integer('total_pulls').default(0).notNull(),
+  },
+  (table) => [
+    uniqueIndex('pity_user_banner_idx').on(table.userId, table.bannerId),
+  ],
+)
 
 export const tradeOffer = sqliteTable('trade_offer', {
   id: text('id').primaryKey(),
-  offererId: text('offerer_id').notNull().references(() => user.id),
+  offererId: text('offerer_id')
+    .notNull()
+    .references(() => user.id),
   receiverId: text('receiver_id').references(() => user.id),
-  offeredCreatureId: text('offered_creature_id').notNull().references(() => userCreature.id),
-  receiverCreatureId: text('receiver_creature_id').references(() => userCreature.id),
+  offeredCreatureId: text('offered_creature_id')
+    .notNull()
+    .references(() => userCreature.id),
+  receiverCreatureId: text('receiver_creature_id').references(
+    () => userCreature.id,
+  ),
   wantedCreatureId: text('wanted_creature_id').references(() => creature.id),
   status: text('status').notNull().default('open'), // open | pending | accepted | cancelled
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  createdAt: integer('created_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
   expiresAt: integer('expires_at', { mode: 'timestamp' }),
 })
 
 export const tradeHistory = sqliteTable('trade_history', {
   id: text('id').primaryKey(),
-  tradeOfferId: text('trade_offer_id').notNull().references(() => tradeOffer.id),
-  giverId: text('giver_id').notNull().references(() => user.id),
-  receiverId: text('receiver_id').notNull().references(() => user.id),
-  givenCreatureId: text('given_creature_id').notNull().references(() => userCreature.id),
-  receivedCreatureId: text('received_creature_id').notNull().references(() => userCreature.id),
-  completedAt: integer('completed_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
+  tradeOfferId: text('trade_offer_id')
+    .notNull()
+    .references(() => tradeOffer.id),
+  giverId: text('giver_id')
+    .notNull()
+    .references(() => user.id),
+  receiverId: text('receiver_id')
+    .notNull()
+    .references(() => user.id),
+  givenCreatureId: text('given_creature_id')
+    .notNull()
+    .references(() => userCreature.id),
+  receivedCreatureId: text('received_creature_id')
+    .notNull()
+    .references(() => userCreature.id),
+  completedAt: integer('completed_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
 })
 
-export const wishlist = sqliteTable('wishlist', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
-  creatureId: text('creature_id').notNull().references(() => creature.id),
-}, (table) => [
-  uniqueIndex('wishlist_user_creature_idx').on(table.userId, table.creatureId),
-])
+export const wishlist = sqliteTable(
+  'wishlist',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    creatureId: text('creature_id')
+      .notNull()
+      .references(() => creature.id),
+  },
+  (table) => [
+    uniqueIndex('wishlist_user_creature_idx').on(
+      table.userId,
+      table.creatureId,
+    ),
+  ],
+)
