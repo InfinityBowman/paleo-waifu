@@ -46,51 +46,51 @@ VALUES ('dev-currency-4', 'dev-user-4', 75, unixepoch());
 -- ─── Collections for dev-user-2 (FossilQueen — mid-game) ───────────
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-2a', 'dev-user-2', 'e3b12550114f2ac47e5a8', NULL, unixepoch(), 0, 0);
--- Compy (common)
+VALUES ('dev-uc-2a', 'dev-user-2', '562c2967d043c0cf11aef', NULL, unixepoch(), 0, 0);
+-- Achillobator (common)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
 VALUES ('dev-uc-2b', 'dev-user-2', '73c2101cb11150082a6ac', NULL, unixepoch(), 0, 0);
--- Raptor-chan (uncommon)
+-- Deinonychus (epic)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-2c', 'dev-user-2', '93dceb99ae11326c2b94f', NULL, unixepoch(), 1, 0);
--- Velo-chan (rare)
+VALUES ('dev-uc-2c', 'dev-user-2', '7e9d3072faa34a482239a', NULL, unixepoch(), 1, 0);
+-- Alamosaurus (rare)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-2d', 'dev-user-2', '948cb61dbae7e6b5bea3a', NULL, unixepoch(), 1, 1);
--- Tri-tan (epic)
+VALUES ('dev-uc-2d', 'dev-user-2', '001ba030720b0583fdadb', NULL, unixepoch(), 1, 1);
+-- Allosaurus (epic)
 
 -- ─── Collections for dev-user-3 (MesozoicMax — whale) ──────────────
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3a', 'dev-user-3', '5c526097fcdc46eb4c220', NULL, unixepoch(), 0, 0);
--- Trilobi-chan (common)
+VALUES ('dev-uc-3a', 'dev-user-3', '2ed0a2a127b9daaeae62d', NULL, unixepoch(), 0, 0);
+-- Agilisaurus (common)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3b', 'dev-user-3', 'ff5c151ba5f7d38c1bac0', NULL, unixepoch(), 0, 0);
--- Iggy (uncommon)
+VALUES ('dev-uc-3b', 'dev-user-3', 'a3f9623817f9deddd9e00', NULL, unixepoch(), 0, 0);
+-- Aardonyx (uncommon)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3c', 'dev-user-3', '9f1da2a89c1bf3afafabb', NULL, unixepoch(), 0, 0);
--- Parasol (rare)
+VALUES ('dev-uc-3c', 'dev-user-3', 'e296fc855c7c5eb18d525', NULL, unixepoch(), 0, 0);
+-- Apatosaurus (rare)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
 VALUES ('dev-uc-3d', 'dev-user-3', 'cd08a4eaabb034d94ecc3', NULL, unixepoch(), 0, 0);
--- Carno-chan (rare)
+-- Carnotaurus (epic)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3e', 'dev-user-3', '162290ab40ff583160473', NULL, unixepoch(), 1, 0);
--- Stego-tan (epic)
+VALUES ('dev-uc-3e', 'dev-user-3', 'b93aab5eb3f01fdd74c6f', NULL, unixepoch(), 1, 0);
+-- Ankylosaurus (epic)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3f', 'dev-user-3', 'b93aab5eb3f01fdd74c6f', NULL, unixepoch(), 1, 1);
--- Anky-chan (epic)
+VALUES ('dev-uc-3f', 'dev-user-3', '2eaa4cbac5a71f5adb46c', NULL, unixepoch(), 1, 1);
+-- Diplodocus (epic)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
-VALUES ('dev-uc-3g', 'dev-user-3', '06b921acce773fc9d5879', NULL, unixepoch(), 1, 1);
--- Rexy-chan (legendary)
+VALUES ('dev-uc-3g', 'dev-user-3', '8d2d6a354f29a724a74f4', NULL, unixepoch(), 1, 1);
+-- Spinosaurus (legendary)
 
 INSERT OR IGNORE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at, is_favorite, is_locked)
 VALUES ('dev-uc-3h', 'dev-user-3', '2d424bb39b8dbf6c85776', NULL, unixepoch(), 1, 1);
--- Brachy-chan (legendary)
+-- Brachiosaurus (legendary)

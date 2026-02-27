@@ -51,7 +51,7 @@ function DiscordIcon({ className }: { className?: string }) {
 }
 
 export function Nav() {
-  const { data: session, isPending } = useSession()
+  const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
@@ -72,7 +72,7 @@ export function Nav() {
                 <BookOpen className="h-4 w-4" />
                 Encyclopedia
               </Link>
-              {(session || isPending) && (
+              {session && (
                 <>
                   <Link to="/gacha" className={NAV_LINK_CLASS}>
                     <Gem className="h-4 w-4" />
@@ -95,9 +95,7 @@ export function Nav() {
           <div className="flex items-center gap-2">
             {/* Desktop auth area — fixed width to prevent layout shift */}
             <div className="hidden min-w-[120px] items-center justify-end gap-2 md:flex">
-              {isPending ? (
-                <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-              ) : session ? (
+              {session ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="gap-2 px-2">
@@ -254,9 +252,7 @@ export function Nav() {
 
             {/* Mobile: show avatar or login inline */}
             <div className="flex items-center md:hidden">
-              {isPending ? (
-                <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />
-              ) : session ? (
+              {session ? (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link to="/profile">

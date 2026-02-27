@@ -6,21 +6,42 @@
 		"nodejs_compat"
 	],
 	"main": "@tanstack/react-start/server-entry",
-	// D1 Database — create with: wrangler d1 create paleo-waifu-db
-	// Then replace database_id below with the actual ID
+
+	// ─── Development (default) ──────────────────────────────────────────
 	"d1_databases": [
 		{
 			"binding": "DB",
 			"database_name": "paleo-waifu-db",
-			"database_id": "REPLACE_ME",
-			"migrations_dir": "drizzle",
-		},
+			"database_id": "6ac6d424-2a7c-4087-9f42-0cd1a2ab367a",
+			"migrations_dir": "drizzle"
+		}
 	],
-	// R2 Bucket — create with: wrangler r2 bucket create paleo-waifu-images
 	"r2_buckets": [
 		{
 			"binding": "IMAGES",
 			"bucket_name": "paleo-waifu-images"
-		},
+		}
 	],
+
+	// ─── Production ─────────────────────────────────────────────────────
+	// Secrets managed via: wrangler secret put AUTH_SECRET --env production
+	"env": {
+		"production": {
+			"name": "paleo-waifu-prod",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "paleo-waifu-db-prod",
+					"database_id": "61839285-28e1-4de9-9954-1a77b296c092",
+					"migrations_dir": "drizzle"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "IMAGES",
+					"bucket_name": "paleo-waifu-images-prod"
+				}
+			]
+		}
+	}
 }

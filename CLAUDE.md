@@ -7,11 +7,12 @@ This file provides guidance to Claude Code when working with this repository.
 ```bash
 pnpm dev              # Dev server on http://localhost:3000
 pnpm build            # Production build
-pnpm deploy           # Build + deploy to Cloudflare Workers
+pnpm deploy           # Build + deploy to Cloudflare Workers (production env)
 pnpm db:generate      # Generate Drizzle migration files
 pnpm db:migrate:local # Apply migrations to local D1
-pnpm db:migrate:remote # Apply migrations to remote D1
+pnpm db:migrate:prod  # Apply migrations to production D1
 pnpm db:seed:local    # Seed local D1 with creature data
+pnpm db:seed:prod     # Seed production D1 with creature data
 pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
