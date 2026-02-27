@@ -1,0 +1,14 @@
+node_modules
+dist
+.output
+.wrangler
+.env
+.env.local
+routeTree.gen.ts
+.vinxi
+.tanstack
+drizzle/meta
+*.db
+*.db-journal
+python/.venv/
+python/__pycache__/

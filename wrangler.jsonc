@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "paleo-waifu",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+
+  // D1 Database — create with: wrangler d1 create paleo-waifu-db
+  // Then replace database_id below with the actual ID
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "paleo-waifu-db",
+      "database_id": "REPLACE_ME",
+      "migrations_dir": "drizzle"
+    }
+  ]
+}
