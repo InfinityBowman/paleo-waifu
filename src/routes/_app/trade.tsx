@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { env } from 'cloudflare:workers'
-import { and, eq, or } from 'drizzle-orm'
+import { and, eq, inArray, or } from 'drizzle-orm'
 import { createDb } from '@/lib/db/client'
 import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
 import { ensureSession } from '@/lib/auth-server'
@@ -95,12 +95,11 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
           })
           .from(userCreature)
           .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+          .where(inArray(userCreature.id, pendingTradeIds))
           .all()
           .then((rows) =>
             Object.fromEntries(
-              rows
-                .filter((r) => pendingTradeIds.includes(r.ucId))
-                .map((r) => [r.ucId, { name: r.name, rarity: r.rarity }]),
+              rows.map((r) => [r.ucId, { name: r.name, rarity: r.rarity }]),
             ),
           )
       : {},
@@ -108,12 +107,11 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       ? db
           .select({ id: user.id, name: user.name, image: user.image })
           .from(user)
+          .where(inArray(user.id, pendingUserIds))
           .all()
           .then((rows) =>
             Object.fromEntries(
-              rows
-                .filter((r) => pendingUserIds.includes(r.id))
-                .map((r) => [r.id, { name: r.name, image: r.image }]),
+              rows.map((r) => [r.id, { name: r.name, image: r.image }]),
             ),
           )
       : {},

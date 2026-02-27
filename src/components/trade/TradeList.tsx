@@ -81,102 +81,66 @@ export function TradeList({
     myCreatureId: string
   } | null>(null)
 
-  const handleCreate = async () => {
-    if (!selectedOffer || loading) return
-    setLoading('create')
-
+  const tradeAction = async (
+    body: Record<string, string>,
+    loadingKey: string,
+    onSuccess?: () => void,
+  ) => {
+    if (loading) return
+    setLoading(loadingKey)
     try {
       const res = await fetch('/api/trade', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          offeredCreatureId: selectedOffer,
-        }),
+        body: JSON.stringify(body),
       })
-
       if (res.ok) {
-        setCreating(false)
-        setSelectedOffer('')
+        onSuccess?.()
         router.invalidate()
       }
+    } catch {
+      // Network error — user can retry
     } finally {
       setLoading(null)
     }
   }
 
-  const handleCancel = async (tradeId: string) => {
-    if (loading) return
-    setLoading(tradeId)
-
-    try {
-      const res = await fetch('/api/trade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel', tradeId }),
-      })
-
-      if (res.ok) router.invalidate()
-    } finally {
-      setLoading(null)
-    }
+  const handleCreate = async () => {
+    if (!selectedOffer) return
+    await tradeAction(
+      { action: 'create', offeredCreatureId: selectedOffer },
+      'create',
+      () => {
+        setCreating(false)
+        setSelectedOffer('')
+      },
+    )
   }
+
+  const handleCancel = (tradeId: string) =>
+    tradeAction({ action: 'cancel', tradeId }, tradeId)
 
   const handleAccept = async () => {
-    if (!pendingAccept || loading) return
-    setLoading(pendingAccept.tradeId)
-
-    try {
-      const res = await fetch('/api/trade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'accept',
-          tradeId: pendingAccept.tradeId,
-          myCreatureId: pendingAccept.myCreatureId,
-        }),
-      })
-
-      if (res.ok) router.invalidate()
-    } finally {
-      setLoading(null)
-      setPendingAccept(null)
-    }
+    if (!pendingAccept) return
+    await tradeAction(
+      {
+        action: 'accept',
+        tradeId: pendingAccept.tradeId,
+        myCreatureId: pendingAccept.myCreatureId,
+      },
+      pendingAccept.tradeId,
+    )
+    setPendingAccept(null)
   }
 
-  const handleConfirm = async (tradeId: string) => {
-    if (loading) return
-    setLoading(tradeId)
+  const handleConfirm = (tradeId: string) =>
+    tradeAction({ action: 'confirm', tradeId }, tradeId)
 
-    try {
-      const res = await fetch('/api/trade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'confirm', tradeId }),
-      })
+  const handleReject = (tradeId: string) =>
+    tradeAction({ action: 'reject', tradeId }, tradeId)
 
-      if (res.ok) router.invalidate()
-    } finally {
-      setLoading(null)
-    }
-  }
-
-  const handleReject = async (tradeId: string) => {
-    if (loading) return
-    setLoading(tradeId)
-
-    try {
-      const res = await fetch('/api/trade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reject', tradeId }),
-      })
-
-      if (res.ok) router.invalidate()
-    } finally {
-      setLoading(null)
-    }
-  }
+  const handleWithdraw = (tradeId: string) =>
+    tradeAction({ action: 'withdraw', tradeId }, tradeId)
 
   return (
     <div className="space-y-6">
@@ -378,8 +342,24 @@ export function TradeList({
                         </Button>
                       </div>
                     ) : (
-                      <div className="text-center text-xs text-muted-foreground">
-                        Waiting for {trade.offererName} to approve...
+                      <div className="space-y-2">
+                        <div className="text-center text-xs text-muted-foreground">
+                          Waiting for {trade.offererName} to approve...
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={() => handleWithdraw(trade.id)}
+                          disabled={loading === trade.id}
+                          className="w-full"
+                          size="sm"
+                        >
+                          {loading === trade.id ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <X className="h-3.5 w-3.5" />
+                          )}
+                          Withdraw
+                        </Button>
                       </div>
                     )}
                   </CardContent>

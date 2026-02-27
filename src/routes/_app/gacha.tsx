@@ -64,7 +64,7 @@ function GachaPage() {
     setFossils(initialFossils)
   }, [initialFossils, setFossils])
 
-  const displayFossils = storeFossils || initialFossils
+  const displayFossils = storeFossils ?? initialFossils
 
   const handleClaimDaily = async () => {
     setClaiming(true)
@@ -79,6 +79,8 @@ function GachaPage() {
         setFossils(data.fossils)
         setCanClaim(false)
       }
+    } catch {
+      // Silently fail — user can retry
     } finally {
       setClaiming(false)
     }

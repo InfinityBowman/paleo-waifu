@@ -235,7 +235,7 @@ export async function executePull(
 
   if (!bannerRow) throw new Error('Banner not found or inactive')
 
-  // Get or create pity counter (INSERT ON CONFLICT DO NOTHING to avoid race condition)
+  // Ensure pity counter exists (INSERT ON CONFLICT DO NOTHING)
   await db
     .insert(pityCounter)
     .values({
@@ -248,18 +248,48 @@ export async function executePull(
     })
     .onConflictDoNothing()
 
-  const pity = await db
-    .select()
-    .from(pityCounter)
+  // Atomically increment pity counter and read the pre-increment values
+  // This prevents concurrent pulls from reading the same stale state
+  const pityRows = await db
+    .update(pityCounter)
+    .set({
+      pullsSinceRare: sql`${pityCounter.pullsSinceRare} + 1`,
+      pullsSinceLegendary: sql`${pityCounter.pullsSinceLegendary} + 1`,
+      totalPulls: sql`${pityCounter.totalPulls} + 1`,
+    })
     .where(
       and(eq(pityCounter.userId, userId), eq(pityCounter.bannerId, bannerId)),
     )
-    .get()
+    .returning({
+      id: pityCounter.id,
+      // These are post-increment values, subtract 1 for the pre-increment state
+      pullsSinceRare: pityCounter.pullsSinceRare,
+      pullsSinceLegendary: pityCounter.pullsSinceLegendary,
+      totalPulls: pityCounter.totalPulls,
+    })
 
-  if (!pity) throw new Error('Failed to create pity counter')
+  if (pityRows.length === 0) throw new Error('Failed to update pity counter')
+  const pity = pityRows[0]
+
+  // Use pre-increment values for rarity calculation
+  const pullsSinceRare = pity.pullsSinceRare - 1
+  const pullsSinceLegendary = pity.pullsSinceLegendary - 1
 
   // Roll rarity
-  const rarity = calculateRarity(pity.pullsSinceRare, pity.pullsSinceLegendary)
+  const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary)
+
+  // If we got rare+ or legendary, reset the relevant counter
+  const isRarePlus = ['rare', 'epic', 'legendary'].includes(rarity)
+  const isLegendary = rarity === 'legendary'
+  if (isRarePlus || isLegendary) {
+    await db
+      .update(pityCounter)
+      .set({
+        ...(isRarePlus ? { pullsSinceRare: 0 } : {}),
+        ...(isLegendary ? { pullsSinceLegendary: 0 } : {}),
+      })
+      .where(eq(pityCounter.id, pity.id))
+  }
 
   // Select creature
   const creatureId = await selectCreature(
@@ -290,21 +320,6 @@ export async function executePull(
     )
     .get()
   const isNew = (existingCount?.count ?? 0) <= 1
-
-  // Update pity counter
-  const isRarePlus = ['rare', 'epic', 'legendary'].includes(rarity)
-  const isLegendary = rarity === 'legendary'
-
-  await db
-    .update(pityCounter)
-    .set({
-      pullsSinceRare: isRarePlus ? 0 : sql`${pityCounter.pullsSinceRare} + 1`,
-      pullsSinceLegendary: isLegendary
-        ? 0
-        : sql`${pityCounter.pullsSinceLegendary} + 1`,
-      totalPulls: sql`${pityCounter.totalPulls} + 1`,
-    })
-    .where(eq(pityCounter.id, pity.id))
 
   // Get full creature data
   const creatureData = await db

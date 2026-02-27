@@ -112,15 +112,16 @@ export function EncyclopediaGrid({
                 RARITY_BG[rarity],
               )}
             >
-              <div className="aspect-[3/4] overflow-hidden p-2">
+              <div className="aspect-[3/4] overflow-hidden">
                 {c.imageUrl ? (
                   <img
                     src={c.imageUrl}
                     alt={c.name}
-                    className="h-full w-full rounded object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center">
+                  <div className="flex h-full w-full items-center justify-center bg-muted/20">
                     <Skull className="h-10 w-10 text-muted-foreground/30" />
                   </div>
                 )}

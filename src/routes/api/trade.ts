@@ -4,7 +4,12 @@ import { and, eq, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
-import { tradeHistory, tradeOffer, userCreature } from '@/lib/db/schema'
+import {
+  creature,
+  tradeHistory,
+  tradeOffer,
+  userCreature,
+} from '@/lib/db/schema'
 
 export const Route = createFileRoute('/api/trade')({
   server: {
@@ -108,24 +113,26 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Unlock the offerer's creature
-          await db
-            .update(userCreature)
-            .set({ isLocked: false })
-            .where(eq(userCreature.id, trade.offeredCreatureId))
-
-          // If pending, also unlock the receiver's creature
-          if (trade.status === 'pending' && trade.receiverCreatureId) {
-            await db
+          // Atomically unlock creatures and cancel trade in one batch
+          await db.batch([
+            db
               .update(userCreature)
               .set({ isLocked: false })
-              .where(eq(userCreature.id, trade.receiverCreatureId))
-          }
-
-          await db
-            .update(tradeOffer)
-            .set({ status: 'cancelled' })
-            .where(eq(tradeOffer.id, body.tradeId))
+              .where(eq(userCreature.id, trade.offeredCreatureId)),
+            // If pending, also unlock the receiver's creature
+            ...(trade.status === 'pending' && trade.receiverCreatureId
+              ? [
+                  db
+                    .update(userCreature)
+                    .set({ isLocked: false })
+                    .where(eq(userCreature.id, trade.receiverCreatureId)),
+                ]
+              : []),
+            db
+              .update(tradeOffer)
+              .set({ status: 'cancelled' })
+              .where(eq(tradeOffer.id, body.tradeId)),
+          ])
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { 'Content-Type': 'application/json' },
@@ -159,6 +166,41 @@ export const Route = createFileRoute('/api/trade')({
               JSON.stringify({ error: 'Your creature not found or locked' }),
               { status: 400, headers: { 'Content-Type': 'application/json' } },
             )
+          }
+
+          // Validate wantedCreatureId constraint if the trade specifies one
+          const trade = await db
+            .select({
+              wantedCreatureId: tradeOffer.wantedCreatureId,
+              status: tradeOffer.status,
+            })
+            .from(tradeOffer)
+            .where(eq(tradeOffer.id, body.tradeId))
+            .get()
+
+          if (trade?.wantedCreatureId) {
+            const mySpecies = await db
+              .select({ creatureId: userCreature.creatureId })
+              .from(userCreature)
+              .where(eq(userCreature.id, body.myCreatureId))
+              .get()
+
+            if (mySpecies?.creatureId !== trade.wantedCreatureId) {
+              // Unlock the creature we just locked
+              await db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, body.myCreatureId))
+              return new Response(
+                JSON.stringify({
+                  error: 'This trade requires a specific creature species',
+                }),
+                {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' },
+                },
+              )
+            }
           }
 
           // Now atomically claim the trade as pending — prevents double-propose and self-trade
@@ -281,30 +323,18 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Atomically set to accepted to prevent double-confirm
-          const confirmed = await db
-            .update(tradeOffer)
-            .set({ status: 'accepted' })
-            .where(
-              and(
-                eq(tradeOffer.id, body.tradeId),
-                eq(tradeOffer.status, 'pending'),
-              ),
-            )
-            .returning()
-
-          if (confirmed.length === 0) {
-            return new Response(
-              JSON.stringify({ error: 'Trade already completed' }),
-              {
-                status: 409,
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-          }
-
-          // Swap ownership and record history atomically
+          // Execute the entire confirm + swap atomically in one batch
+          // This prevents partial failure from leaving creatures locked
           await db.batch([
+            db
+              .update(tradeOffer)
+              .set({ status: 'accepted' })
+              .where(
+                and(
+                  eq(tradeOffer.id, body.tradeId),
+                  eq(tradeOffer.status, 'pending'),
+                ),
+              ),
             db
               .update(userCreature)
               .set({ userId: trade.receiverId, isLocked: false })
@@ -359,19 +389,81 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Unlock the receiver's creature
-          if (trade.receiverCreatureId) {
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, trade.receiverCreatureId))
+          // Atomically unlock receiver's creature and reset trade to open
+          await db.batch([
+            ...(trade.receiverCreatureId
+              ? [
+                  db
+                    .update(userCreature)
+                    .set({ isLocked: false })
+                    .where(eq(userCreature.id, trade.receiverCreatureId)),
+                ]
+              : []),
+            db
+              .update(tradeOffer)
+              .set({
+                status: 'open',
+                receiverId: null,
+                receiverCreatureId: null,
+              })
+              .where(eq(tradeOffer.id, body.tradeId)),
+          ])
+
+          return new Response(JSON.stringify({ success: true }), {
+            headers: { 'Content-Type': 'application/json' },
+          })
+        }
+
+        // Receiver withdraws their pending proposal — trade returns to open
+        if (body.action === 'withdraw') {
+          if (!body.tradeId) {
+            return new Response(JSON.stringify({ error: 'tradeId required' }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            })
           }
 
-          // Reset trade back to open
-          await db
-            .update(tradeOffer)
-            .set({ status: 'open', receiverId: null, receiverCreatureId: null })
-            .where(eq(tradeOffer.id, body.tradeId))
+          const trade = await db
+            .select()
+            .from(tradeOffer)
+            .where(
+              and(
+                eq(tradeOffer.id, body.tradeId),
+                eq(tradeOffer.receiverId, userId),
+                eq(tradeOffer.status, 'pending'),
+              ),
+            )
+            .get()
+
+          if (!trade) {
+            return new Response(
+              JSON.stringify({ error: 'Trade not found or not pending' }),
+              {
+                status: 404,
+                headers: { 'Content-Type': 'application/json' },
+              },
+            )
+          }
+
+          // Atomically unlock receiver's creature and reset trade to open
+          await db.batch([
+            ...(trade.receiverCreatureId
+              ? [
+                  db
+                    .update(userCreature)
+                    .set({ isLocked: false })
+                    .where(eq(userCreature.id, trade.receiverCreatureId)),
+                ]
+              : []),
+            db
+              .update(tradeOffer)
+              .set({
+                status: 'open',
+                receiverId: null,
+                receiverCreatureId: null,
+              })
+              .where(eq(tradeOffer.id, body.tradeId)),
+          ])
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { 'Content-Type': 'application/json' },

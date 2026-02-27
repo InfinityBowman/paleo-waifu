@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button'
 
 export function PullButton({ bannerId }: { bannerId: string }) {
   const [pulling, setPulling] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const store = useAppStore()
 
   const doPull = async (action: 'pull' | 'pull_multi') => {
     if (!bannerId) return
 
     setPulling(true)
+    setError(null)
     store.setIsPulling(true)
     store.clearPullResults()
 
@@ -24,24 +26,30 @@ export function PullButton({ bannerId }: { bannerId: string }) {
 
       const data = await res.json()
       if (!res.ok) {
-        console.error(data.error)
+        setError(data.error ?? 'Pull failed')
         if (data.fossils != null) store.setFossils(data.fossils)
         return
       }
 
       store.setPullResults(data.results)
       store.setFossils(data.fossils)
+    } catch {
+      setError('Network error — please try again')
     } finally {
       setPulling(false)
       store.setIsPulling(false)
     }
   }
 
-  const canSingle = store.fossils >= PULL_COST_SINGLE
-  const canMulti = store.fossils >= PULL_COST_MULTI
+  const canSingle = (store.fossils ?? 0) >= PULL_COST_SINGLE
+  const canMulti = (store.fossils ?? 0) >= PULL_COST_MULTI
 
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-col items-end gap-2">
+      {error && (
+        <p className="text-sm text-red-400">{error}</p>
+      )}
+      <div className="flex gap-3">
       <Button
         onClick={() => doPull('pull')}
         disabled={pulling || !canSingle}
@@ -69,6 +77,7 @@ export function PullButton({ bannerId }: { bannerId: string }) {
         {/* Shimmer on hover */}
         <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 rarity-shimmer-legendary" />
       </Button>
+      </div>
     </div>
   )
 }

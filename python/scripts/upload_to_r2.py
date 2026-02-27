@@ -1,6 +1,6 @@
 """
 Upload creature images to Cloudflare R2 and update creatures_enriched.json
-with the final public image URLs.
+with Worker-served image URLs (/api/images/creatures/{slug}.webp).
 
 Prerequisites:
     - wrangler must be authenticated (wrangler login)
@@ -8,13 +8,14 @@ Prerequisites:
     - Images must be downloaded to data/images/
 
 Usage:
-    uv run python scripts/upload_to_r2.py [--dry-run] [--bucket BUCKET] [--domain DOMAIN]
+    uv run python scripts/upload_to_r2.py [--dry-run] [--local] [--bucket BUCKET]
 """
 
 import json
 import re
 import subprocess
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from tqdm import tqdm
@@ -24,13 +25,14 @@ IMAGES_DIR = DATA_DIR / "images"
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 DEFAULT_BUCKET = "paleo-waifu-images"
+WORKERS = 10
 
 
 def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
-def upload_to_r2(local_path: Path, key: str, bucket: str) -> bool:
+def upload_to_r2(local_path: Path, key: str, bucket: str, local: bool = False) -> bool:
     """Upload a file to R2 using wrangler CLI."""
     cmd = [
         "npx", "wrangler", "r2", "object", "put",
@@ -38,6 +40,8 @@ def upload_to_r2(local_path: Path, key: str, bucket: str) -> bool:
         f"--file={local_path}",
         "--content-type=image/webp",
     ]
+    if local:
+        cmd.append("--local")
     result = subprocess.run(
         cmd,
         cwd=PROJECT_ROOT,
@@ -49,66 +53,68 @@ def upload_to_r2(local_path: Path, key: str, bucket: str) -> bool:
 
 def main():
     dry_run = "--dry-run" in sys.argv
+    local = "--local" in sys.argv
     bucket = DEFAULT_BUCKET
-    domain = None
 
     # Parse args
     for i, arg in enumerate(sys.argv):
         if arg == "--bucket" and i + 1 < len(sys.argv):
             bucket = sys.argv[i + 1]
-        if arg == "--domain" and i + 1 < len(sys.argv):
-            domain = sys.argv[i + 1]
-
-    if not domain:
-        print("Usage: upload_to_r2.py --domain <your-r2-public-domain>")
-        print("  e.g. --domain images.paleo-waifu.example.com")
-        print("  or   --domain pub-xxxx.r2.dev")
-        print()
-        print("Set up public access for R2 bucket first:")
-        print(f"  wrangler r2 bucket create {bucket}")
-        print("  Then enable public access in Cloudflare dashboard")
-        if not dry_run:
-            sys.exit(1)
-        domain = "EXAMPLE.r2.dev"
 
     creatures = json.loads((DATA_DIR / "creatures_enriched.json").read_text())
 
-    stats = {"uploaded": 0, "missing": 0, "failed": 0}
-    updated = 0
-
-    for creature in tqdm(creatures, desc="Uploading to R2"):
+    # Build upload tasks
+    tasks = []
+    for creature in creatures:
         slug = slugify(creature["scientificName"])
         local_path = IMAGES_DIR / f"{slug}.webp"
-
         if not local_path.exists():
-            stats["missing"] += 1
+            creature["_status"] = "missing"
             continue
-
         key = f"creatures/{slug}.webp"
-        public_url = f"https://{domain}/{key}"
+        creature["imageUrl"] = f"/api/images/{key}"
+        creature["_status"] = "pending"
+        tasks.append((creature, local_path, key))
 
-        if dry_run:
-            tqdm.write(f"  [DRY RUN] {local_path.name} -> {key}")
-            creature["imageUrl"] = public_url
-            updated += 1
-            continue
+    if dry_run:
+        for creature, local_path, key in tasks:
+            creature["_status"] = "uploaded"
+        missing = sum(1 for c in creatures if c.get("_status") == "missing")
+        print(f"[DRY RUN] Would upload {len(tasks)} images ({missing} missing)")
+    else:
+        # Parallel uploads
+        def do_upload(item):
+            creature, local_path, key = item
+            ok = upload_to_r2(local_path, key, bucket, local=local)
+            return item, ok
 
-        if upload_to_r2(local_path, key, bucket):
-            creature["imageUrl"] = public_url
+        with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+            futures = {pool.submit(do_upload, t): t for t in tasks}
+            with tqdm(total=len(futures), desc="Uploading to R2") as pbar:
+                for future in as_completed(futures):
+                    (creature, local_path, key), ok = future.result()
+                    creature["_status"] = "uploaded" if ok else "failed"
+                    if not ok:
+                        tqdm.write(f"  FAIL: {creature['name']}")
+                    pbar.update(1)
+
+    # Clean up temp status and write back
+    stats = {"uploaded": 0, "missing": 0, "failed": 0}
+    for c in creatures:
+        status = c.pop("_status", None)
+        if status == "uploaded":
             stats["uploaded"] += 1
-            updated += 1
-        else:
+        elif status == "missing":
+            stats["missing"] += 1
+        elif status == "failed":
             stats["failed"] += 1
-            tqdm.write(f"  FAIL: {creature['name']}")
 
-    # Write back
     (DATA_DIR / "creatures_enriched.json").write_text(json.dumps(creatures, indent=2))
 
     print(f"\nDone! {'(DRY RUN)' if dry_run else ''}")
     print(f"  Uploaded: {stats['uploaded']}")
     print(f"  Missing images: {stats['missing']}")
     print(f"  Failed: {stats['failed']}")
-    print(f"  URLs updated: {updated}")
 
 
 if __name__ == "__main__":

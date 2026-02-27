@@ -11,8 +11,11 @@ export const Route = createFileRoute('/api/dev/switch-user')({
     handlers: {
       POST: import.meta.env.DEV
         ? async ({ request }) => {
-            // Runtime double-check — never allow in production
-            if (typeof process !== 'undefined' && process.env.NODE_ENV === 'production') {
+            // Runtime double-check — only allow if positively confirmed as dev
+            const isDev =
+              typeof process !== 'undefined' &&
+              process.env.NODE_ENV === 'development'
+            if (!isDev) {
               return notFound()
             }
 

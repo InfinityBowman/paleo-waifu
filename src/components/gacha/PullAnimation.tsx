@@ -1,16 +1,17 @@
+import { useMemo } from 'react'
 import { Pickaxe, Skull, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CardReveal } from './CardReveal'
 import { useAppStore } from '@/store/appStore'
 
-function DustParticle({ delay }: { delay: string }) {
+function DustParticle({ delay, left }: { delay: string; left: number }) {
   return (
     <div
       className="absolute bottom-8 text-xs text-muted-foreground/50"
       style={{
         animation: 'particle-rise 1.5s ease-out infinite',
         animationDelay: delay,
-        left: `${30 + Math.random() * 40}%`,
+        left: `${left}%`,
       }}
     >
       .
@@ -20,6 +21,12 @@ function DustParticle({ delay }: { delay: string }) {
 
 export function PullAnimation() {
   const { pullResults, isPulling, clearPullResults } = useAppStore()
+
+  // Stable random positions for dust particles — computed once per mount
+  const dustPositions = useMemo(
+    () => [30, 40, 50, 60].map((base) => base + ((base * 7) % 10)),
+    [],
+  )
 
   if (isPulling) {
     return (
@@ -53,10 +60,10 @@ export function PullAnimation() {
             </span>
           </p>
           {/* Dust particles */}
-          <DustParticle delay="0s" />
-          <DustParticle delay="0.3s" />
-          <DustParticle delay="0.6s" />
-          <DustParticle delay="0.9s" />
+          <DustParticle delay="0s" left={dustPositions[0]} />
+          <DustParticle delay="0.3s" left={dustPositions[1]} />
+          <DustParticle delay="0.6s" left={dustPositions[2]} />
+          <DustParticle delay="0.9s" left={dustPositions[3]} />
         </div>
       </div>
     )

@@ -35,13 +35,26 @@ def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
+def download_with_retry(url: str, max_retries: int = 3) -> bytes:
+    """Download with exponential backoff on 429s."""
+    for attempt in range(max_retries):
+        resp = SESSION.get(url, timeout=30)
+        if resp.status_code == 429:
+            wait = 30 * (2 ** attempt)  # 30s, 60s, 120s
+            tqdm.write(f"  Rate limited, waiting {wait}s...")
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp.content
+    raise requests.HTTPError(f"Still rate-limited after {max_retries} retries")
+
+
 def download_and_process(url: str, output_path: Path) -> bool:
     """Download an image, resize to target dimensions, save as WebP."""
     try:
-        resp = SESSION.get(url, timeout=30)
-        resp.raise_for_status()
+        content = download_with_retry(url)
 
-        img = Image.open(BytesIO(resp.content))
+        img = Image.open(BytesIO(content))
 
         # Convert to RGB if necessary (handles RGBA, palette, etc.)
         if img.mode in ("RGBA", "LA"):
@@ -52,26 +65,8 @@ def download_and_process(url: str, output_path: Path) -> bool:
         elif img.mode != "RGB":
             img = img.convert("RGB")
 
-        # Resize to fit within target dimensions while maintaining aspect ratio
-        # Then crop to exact target size (center crop)
-        img_ratio = img.width / img.height
-        target_ratio = TARGET_WIDTH / TARGET_HEIGHT
-
-        if img_ratio > target_ratio:
-            # Image is wider than target - fit by height, crop width
-            new_height = TARGET_HEIGHT
-            new_width = int(TARGET_HEIGHT * img_ratio)
-        else:
-            # Image is taller than target - fit by width, crop height
-            new_width = TARGET_WIDTH
-            new_height = int(TARGET_WIDTH / img_ratio)
-
-        img = img.resize((new_width, new_height), Image.LANCZOS)
-
-        # Center crop to exact target dimensions
-        left = (new_width - TARGET_WIDTH) // 2
-        top = (new_height - TARGET_HEIGHT) // 2
-        img = img.crop((left, top, left + TARGET_WIDTH, top + TARGET_HEIGHT))
+        # Resize to fit within max dimensions, preserving aspect ratio (no crop)
+        img.thumbnail((TARGET_WIDTH, TARGET_HEIGHT), Image.LANCZOS)
 
         # Save as WebP
         img.save(output_path, "WebP", quality=85)
@@ -112,7 +107,7 @@ def main():
             stats["failed"] += 1
             tqdm.write(f"  Failed: {creature['name']} ({url[:60]}...)")
 
-        time.sleep(0.5)  # Rate limit
+        time.sleep(3)  # Rate limit — Wikimedia enforces strict throttling
 
     print(f"\nDone!")
     print(f"  Downloaded: {stats['downloaded']}")

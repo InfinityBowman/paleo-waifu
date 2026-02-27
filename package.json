@@ -10,6 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply paleo-waifu-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply paleo-waifu-db --remote",
+    "db:clear:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
     "db:seed:local": "wrangler d1 execute paleo-waifu-db --local --file=./seed.sql",
     "db:seed:dev-users": "wrangler d1 execute paleo-waifu-db --local --file=./seed-dev-users.sql",
     "lint": "eslint",

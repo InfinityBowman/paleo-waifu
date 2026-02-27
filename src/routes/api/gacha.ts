@@ -10,7 +10,7 @@ import {
   getFossils,
   refundFossils,
 } from '@/lib/gacha'
-import { banner, userCreature } from '@/lib/db/schema'
+import { banner, pityCounter, userCreature } from '@/lib/db/schema'
 import {
   MULTI_PULL_COUNT,
   PULL_COST_MULTI,
@@ -89,7 +89,19 @@ export const Route = createFileRoute('/api/gacha')({
             )
           }
 
-          // Execute pulls — clean up inserted creatures and refund on failure
+          // Snapshot pity state before pulls so we can restore on failure
+          const pityBefore = await db
+            .select()
+            .from(pityCounter)
+            .where(
+              and(
+                eq(pityCounter.userId, session.user.id),
+                eq(pityCounter.bannerId, bannerId),
+              ),
+            )
+            .get()
+
+          // Execute pulls — clean up inserted creatures, refund, and restore pity on failure
           const results = []
           try {
             for (let i = 0; i < pullCount; i++) {
@@ -103,6 +115,17 @@ export const Route = createFileRoute('/api/gacha')({
               await db
                 .delete(userCreature)
                 .where(inArray(userCreature.id, insertedIds))
+            }
+            // Restore pity counter to pre-pull state
+            if (pityBefore) {
+              await db
+                .update(pityCounter)
+                .set({
+                  pullsSinceRare: pityBefore.pullsSinceRare,
+                  pullsSinceLegendary: pityBefore.pullsSinceLegendary,
+                  totalPulls: pityBefore.totalPulls,
+                })
+                .where(eq(pityCounter.id, pityBefore.id))
             }
             await refundFossils(db, session.user.id, cost)
             const fossils = await getFossils(db, session.user.id)

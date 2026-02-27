@@ -1,4 +1,5 @@
 import {
+  index,
   integer,
   real,
   sqliteTable,
@@ -121,21 +122,25 @@ export const bannerPool = sqliteTable('banner_pool', {
     .references(() => creature.id, { onDelete: 'cascade' }),
 })
 
-export const userCreature = sqliteTable('user_creature', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => user.id, { onDelete: 'cascade' }),
-  creatureId: text('creature_id')
-    .notNull()
-    .references(() => creature.id),
-  bannerId: text('banner_id').references(() => banner.id),
-  pulledAt: integer('pulled_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
-  isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
-  isLocked: integer('is_locked', { mode: 'boolean' }).default(false),
-})
+export const userCreature = sqliteTable(
+  'user_creature',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    creatureId: text('creature_id')
+      .notNull()
+      .references(() => creature.id),
+    bannerId: text('banner_id').references(() => banner.id),
+    pulledAt: integer('pulled_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+    isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
+    isLocked: integer('is_locked', { mode: 'boolean' }).default(false),
+  },
+  (table) => [index('uc_user_id_idx').on(table.userId)],
+)
 
 export const currency = sqliteTable('currency', {
   id: text('id').primaryKey(),
@@ -169,25 +174,32 @@ export const pityCounter = sqliteTable(
   ],
 )
 
-export const tradeOffer = sqliteTable('trade_offer', {
-  id: text('id').primaryKey(),
-  offererId: text('offerer_id')
-    .notNull()
-    .references(() => user.id),
-  receiverId: text('receiver_id').references(() => user.id),
-  offeredCreatureId: text('offered_creature_id')
-    .notNull()
-    .references(() => userCreature.id),
-  receiverCreatureId: text('receiver_creature_id').references(
-    () => userCreature.id,
-  ),
-  wantedCreatureId: text('wanted_creature_id').references(() => creature.id),
-  status: text('status').notNull().default('open'), // open | pending | accepted | cancelled
-  createdAt: integer('created_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
-  expiresAt: integer('expires_at', { mode: 'timestamp' }),
-})
+export const tradeOffer = sqliteTable(
+  'trade_offer',
+  {
+    id: text('id').primaryKey(),
+    offererId: text('offerer_id')
+      .notNull()
+      .references(() => user.id),
+    receiverId: text('receiver_id').references(() => user.id),
+    offeredCreatureId: text('offered_creature_id')
+      .notNull()
+      .references(() => userCreature.id),
+    receiverCreatureId: text('receiver_creature_id').references(
+      () => userCreature.id,
+    ),
+    wantedCreatureId: text('wanted_creature_id').references(() => creature.id),
+    status: text('status').notNull().default('open'), // open | pending | accepted | cancelled
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+    expiresAt: integer('expires_at', { mode: 'timestamp' }),
+  },
+  (table) => [
+    index('trade_offer_status_idx').on(table.status),
+    index('trade_offer_offerer_idx').on(table.offererId),
+  ],
+)
 
 export const tradeHistory = sqliteTable('trade_history', {
   id: text('id').primaryKey(),

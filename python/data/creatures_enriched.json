@@ -15,7 +15,8 @@
     "type": "sauropod",
     "foundIn": "South Africa",
     "nameMeaning": "' Earth claw '",
-    "pronunciation": "ar-don-ix"
+    "pronunciation": "ar-don-ix",
+    "imageUrl": "/api/images/creatures/aardonyx-celestae.webp"
   },
   {
     "name": "Abelisaurus",
@@ -33,7 +34,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Abel's lizard '",
-    "pronunciation": "ah-BEEL-ee-sore-us"
+    "pronunciation": "ah-BEEL-ee-sore-us",
+    "imageUrl": "/api/images/creatures/abelisaurus-comahuensis.webp"
   },
   {
     "name": "Achelousaurus",
@@ -51,7 +53,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' Achelous' lizard '",
-    "pronunciation": "ah-KEL-oo-SORE-us"
+    "pronunciation": "ah-KEL-oo-SORE-us",
+    "imageUrl": "/api/images/creatures/achelousaurus-horneri.webp"
   },
   {
     "name": "Achillobator",
@@ -69,7 +72,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Achilles hero '",
-    "pronunciation": "a-kil-oh-bah-tor"
+    "pronunciation": "a-kil-oh-bah-tor",
+    "imageUrl": "/api/images/creatures/achillobator-giganteus.webp"
   },
   {
     "name": "Acrocanthosaurus",
@@ -87,7 +91,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' high-spined lizard '",
-    "pronunciation": "ah-kroh-kan-tho-SORE-us"
+    "pronunciation": "ah-kroh-kan-tho-SORE-us",
+    "imageUrl": "/api/images/creatures/acrocanthosaurus-atokensis.webp"
   },
   {
     "name": "Aegyptosaurus",
@@ -105,7 +110,8 @@
     "type": "sauropod",
     "foundIn": "Egypt",
     "nameMeaning": "' Egyptian lizard '",
-    "pronunciation": "ee-JIP-toe-SORE-us"
+    "pronunciation": "ee-JIP-toe-SORE-us",
+    "imageUrl": "/api/images/creatures/aegyptosaurus-baharijensis.webp"
   },
   {
     "name": "Afrovenator",
@@ -123,7 +129,8 @@
     "type": "large theropod",
     "foundIn": "Niger",
     "nameMeaning": "' African hunter '",
-    "pronunciation": "aff-ROW-ven-ah-tor"
+    "pronunciation": "aff-ROW-ven-ah-tor",
+    "imageUrl": "/api/images/creatures/afrovenator-abakensis.webp"
   },
   {
     "name": "Agilisaurus",
@@ -141,7 +148,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' agile lizard '",
-    "pronunciation": "aj-i-li-sore-us"
+    "pronunciation": "aj-i-li-sore-us",
+    "imageUrl": "/api/images/creatures/agilisaurus-louderbacki.webp"
   },
   {
     "name": "Alamosaurus",
@@ -159,7 +167,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' Alamo lizard '",
-    "pronunciation": "ah-la-mow-SORE-us"
+    "pronunciation": "ah-la-mow-SORE-us",
+    "imageUrl": "/api/images/creatures/alamosaurus-sanjuanensis.webp"
   },
   {
     "name": "Albertaceratops",
@@ -177,7 +186,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' Alberta horned face '",
-    "pronunciation": "al-bert-a-serra-tops"
+    "pronunciation": "al-bert-a-serra-tops",
+    "imageUrl": "/api/images/creatures/albertaceratops-nesmoi.webp"
   },
   {
     "name": "Albertosaurus",
@@ -195,7 +205,8 @@
     "type": "large theropod",
     "foundIn": "Canada",
     "nameMeaning": "' Alberta lizard '",
-    "pronunciation": "al-BERT-oh-saw-russ"
+    "pronunciation": "al-BERT-oh-saw-russ",
+    "imageUrl": "/api/images/creatures/albertosaurus-libratus.webp"
   },
   {
     "name": "Alectrosaurus",
@@ -213,7 +224,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' eagle lizard '",
-    "pronunciation": "ah-LEK-tro-sore-us"
+    "pronunciation": "ah-LEK-tro-sore-us",
+    "imageUrl": "/api/images/creatures/alectrosaurus-olseni.webp"
   },
   {
     "name": "Alioramus",
@@ -231,7 +243,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' other [evolutionary] branch '",
-    "pronunciation": "al-ee-oh-ray-mus"
+    "pronunciation": "al-ee-oh-ray-mus",
+    "imageUrl": "/api/images/creatures/alioramus-remotus.webp"
   },
   {
     "name": "Allosaurus",
@@ -249,7 +262,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' different lizard '",
-    "pronunciation": "AL-oh-saw-russ"
+    "pronunciation": "AL-oh-saw-russ",
+    "imageUrl": "/api/images/creatures/allosaurus-fragilis.webp"
   },
   {
     "name": "Alvarezsaurus",
@@ -267,7 +281,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Alvarez's lizard '",
-    "pronunciation": "al-var-rez-SORE-us"
+    "pronunciation": "al-var-rez-SORE-us",
+    "imageUrl": "/api/images/creatures/alvarezsaurus-calvoi.webp"
   },
   {
     "name": "Amargasaurus",
@@ -285,7 +300,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Amarga lizard '",
-    "pronunciation": "A-MARG-oh-sore-us"
+    "pronunciation": "A-MARG-oh-sore-us",
+    "imageUrl": "/api/images/creatures/amargasaurus-cazaui.webp"
   },
   {
     "name": "Ammosaurus",
@@ -303,7 +319,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' sand lizard '",
-    "pronunciation": "ah-moh-SORE-us"
+    "pronunciation": "ah-moh-SORE-us",
+    "imageUrl": "/api/images/creatures/ammosaurus-major.webp"
   },
   {
     "name": "Ampelosaurus",
@@ -321,7 +338,8 @@
     "type": "sauropod",
     "foundIn": "France",
     "nameMeaning": "' vineyard lizard '",
-    "pronunciation": "am-pel-oh-sore-us"
+    "pronunciation": "am-pel-oh-sore-us",
+    "imageUrl": "/api/images/creatures/ampelosaurus-atacis.webp"
   },
   {
     "name": "Amygdalodon",
@@ -339,7 +357,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' almond tooth '",
-    "pronunciation": "am-ig-dal-oh-don"
+    "pronunciation": "am-ig-dal-oh-don",
+    "imageUrl": "/api/images/creatures/amygdalodon-patagonicus.webp"
   },
   {
     "name": "Anchiceratops",
@@ -357,7 +376,8 @@
     "type": "ceratopsian",
     "foundIn": "Canada",
     "nameMeaning": "' near horned lizard '",
-    "pronunciation": "an-key-SERRA-tops"
+    "pronunciation": "an-key-SERRA-tops",
+    "imageUrl": "/api/images/creatures/anchiceratops-ornatus.webp"
   },
   {
     "name": "Anchisaurus",
@@ -375,7 +395,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' near lizard '",
-    "pronunciation": "ANK-ee-sore-us"
+    "pronunciation": "ANK-ee-sore-us",
+    "imageUrl": "/api/images/creatures/anchisaurus-polyzelous.webp"
   },
   {
     "name": "Ankylosaurus",
@@ -393,7 +414,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' fused lizard '",
-    "pronunciation": "An-KYE-low-sore-us"
+    "pronunciation": "An-KYE-low-sore-us",
+    "imageUrl": "/api/images/creatures/ankylosaurus-magniventris.webp"
   },
   {
     "name": "Anserimimus",
@@ -411,7 +433,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' goose mimic '",
-    "pronunciation": "ANN-ser-ih-mee-muss"
+    "pronunciation": "ANN-ser-ih-mee-muss",
+    "imageUrl": "/api/images/creatures/anserimimus-planinychus.webp"
   },
   {
     "name": "Antarctosaurus",
@@ -429,7 +452,8 @@
     "type": "sauropod",
     "foundIn": "Uruguay",
     "nameMeaning": "' non-northern lizard '",
-    "pronunciation": "Ant-ARK-toe-sore-us"
+    "pronunciation": "Ant-ARK-toe-sore-us",
+    "imageUrl": "/api/images/creatures/antarctosaurus-wichmannianus.webp"
   },
   {
     "name": "Apatosaurus",
@@ -447,7 +471,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' deceptive lizard '",
-    "pronunciation": "ah-PAT-oh-sore-us"
+    "pronunciation": "ah-PAT-oh-sore-us",
+    "imageUrl": "/api/images/creatures/apatosaurus-ajax.webp"
   },
   {
     "name": "Aragosaurus",
@@ -465,7 +490,8 @@
     "type": "sauropod",
     "foundIn": "Spain",
     "nameMeaning": "' Arag\u00f3n lizard '",
-    "pronunciation": "ahr-ah-go-sore-us"
+    "pronunciation": "ahr-ah-go-sore-us",
+    "imageUrl": "/api/images/creatures/aragosaurus-ischiadicus.webp"
   },
   {
     "name": "Aralosaurus",
@@ -483,7 +509,8 @@
     "type": "euornithopod",
     "foundIn": "Kazakhstan",
     "nameMeaning": "' Aral lizard '",
-    "pronunciation": "ar-al-oh-sore-us"
+    "pronunciation": "ar-al-oh-sore-us",
+    "imageUrl": "/api/images/creatures/aralosaurus-tuberiferus.webp"
   },
   {
     "name": "Archaeoceratops",
@@ -501,7 +528,8 @@
     "type": "ceratopsian",
     "foundIn": "China",
     "nameMeaning": "' ancient horned face '",
-    "pronunciation": "ahr-kee-oh-serra-tops"
+    "pronunciation": "ahr-kee-oh-serra-tops",
+    "imageUrl": "/api/images/creatures/archaeoceratops-oshimai.webp"
   },
   {
     "name": "Archaeopteryx",
@@ -519,7 +547,8 @@
     "type": "small theropod",
     "foundIn": "Germany",
     "nameMeaning": "' ancient wing '",
-    "pronunciation": "ark-ee-OPT-er-ix"
+    "pronunciation": "ark-ee-OPT-er-ix",
+    "imageUrl": "/api/images/creatures/archaeopteryx-lithographica.webp"
   },
   {
     "name": "Archaeornithomimus",
@@ -537,7 +566,8 @@
     "type": "small theropod",
     "foundIn": "Uzbekistan",
     "nameMeaning": "' ancient bird mimic '",
-    "pronunciation": "Ark-ee-orn-ith-oh-meem-us"
+    "pronunciation": "Ark-ee-orn-ith-oh-meem-us",
+    "imageUrl": "/api/images/creatures/archaeornithomimus-asiaticus.webp"
   },
   {
     "name": "Argentinosaurus",
@@ -555,7 +585,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Argentina lizard '",
-    "pronunciation": "AR-gent-eeno-sore-us"
+    "pronunciation": "AR-gent-eeno-sore-us",
+    "imageUrl": "/api/images/creatures/argentinosaurus-huinculensis.webp"
   },
   {
     "name": "Arrhinoceratops",
@@ -573,7 +604,8 @@
     "type": "ceratopsian",
     "foundIn": "Canada",
     "nameMeaning": "' without-nose-horn face '",
-    "pronunciation": "ay-rine-oh-ker-ah-tops"
+    "pronunciation": "ay-rine-oh-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/arrhinoceratops-brachyops.webp"
   },
   {
     "name": "Atlascopcosaurus",
@@ -591,7 +623,8 @@
     "type": "euornithopod",
     "foundIn": "Australia",
     "nameMeaning": "' Atlas Copco lizard '",
-    "pronunciation": "Atlass-KOP-KO-sore-us"
+    "pronunciation": "Atlass-KOP-KO-sore-us",
+    "imageUrl": "/api/images/creatures/atlascopcosaurus-loadsi.webp"
   },
   {
     "name": "Aucasaurus",
@@ -609,7 +642,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Auca lizard '",
-    "pronunciation": "aw-ka-sore-us"
+    "pronunciation": "aw-ka-sore-us",
+    "imageUrl": "/api/images/creatures/aucasaurus-garridoi.webp"
   },
   {
     "name": "Austrosaurus",
@@ -627,7 +661,8 @@
     "type": "sauropod",
     "foundIn": "Australia",
     "nameMeaning": "' south lizard '",
-    "pronunciation": "aws-troh-sore-us"
+    "pronunciation": "aws-troh-sore-us",
+    "imageUrl": "/api/images/creatures/austrosaurus-mckillopi.webp"
   },
   {
     "name": "Avaceratops",
@@ -645,7 +680,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' Ava's horned face '",
-    "pronunciation": "ay-va-ker-ah-tops"
+    "pronunciation": "ay-va-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/avaceratops-lammersi.webp"
   },
   {
     "name": "Avimimus",
@@ -663,7 +699,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' bird mimic '",
-    "pronunciation": "ah-vee-MEEM-us"
+    "pronunciation": "ah-vee-MEEM-us",
+    "imageUrl": "/api/images/creatures/avimimus-portentosus.webp"
   },
   {
     "name": "Bactrosaurus",
@@ -681,7 +718,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' club [spined] lizard '",
-    "pronunciation": "bak-troh-sore-us"
+    "pronunciation": "bak-troh-sore-us",
+    "imageUrl": "/api/images/creatures/bactrosaurus-johnsoni.webp"
   },
   {
     "name": "Bagaceratops",
@@ -699,7 +737,8 @@
     "type": "ceratopsian",
     "foundIn": "Mongolia",
     "nameMeaning": "' small-horned face '",
-    "pronunciation": "Bag-a-ser-a-tops"
+    "pronunciation": "Bag-a-ser-a-tops",
+    "imageUrl": "/api/images/creatures/bagaceratops-rozhdestvenskyi.webp"
   },
   {
     "name": "Bambiraptor",
@@ -717,7 +756,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' Bambi plunderer '",
-    "pronunciation": "bam-bee-rap-tor"
+    "pronunciation": "bam-bee-rap-tor",
+    "imageUrl": "/api/images/creatures/bambiraptor-feinbergorum.webp"
   },
   {
     "name": "Barapasaurus",
@@ -735,7 +775,8 @@
     "type": "sauropod",
     "foundIn": "India",
     "nameMeaning": "' big leg lizard '",
-    "pronunciation": "Bar-rap-oh-SORE-us"
+    "pronunciation": "Bar-rap-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/barapasaurus-tagorei.webp"
   },
   {
     "name": "Barosaurus",
@@ -753,7 +794,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' heavy lizard '",
-    "pronunciation": "BAR-oh-sore-us"
+    "pronunciation": "BAR-oh-sore-us",
+    "imageUrl": "/api/images/creatures/barosaurus-lentus.webp"
   },
   {
     "name": "Baryonyx",
@@ -771,7 +813,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' heavy claw '",
-    "pronunciation": "bah-ree-ON-icks"
+    "pronunciation": "bah-ree-ON-icks",
+    "imageUrl": "/api/images/creatures/baryonyx-walkeri.webp"
   },
   {
     "name": "Becklespinax",
@@ -789,7 +832,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' Beckles' spinax '",
-    "pronunciation": "beck-el-spien-aks"
+    "pronunciation": "beck-el-spien-aks",
+    "imageUrl": "/api/images/creatures/becklespinax-altispinax.webp"
   },
   {
     "name": "Beipiaosaurus",
@@ -807,7 +851,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' Beipiao lizard '",
-    "pronunciation": "bay-pyow-sore-us"
+    "pronunciation": "bay-pyow-sore-us",
+    "imageUrl": "/api/images/creatures/beipiaosaurus-inexpectus.webp"
   },
   {
     "name": "Bellusaurus",
@@ -825,7 +870,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' fine lizard '",
-    "pronunciation": "bel-uh-sore-us"
+    "pronunciation": "bel-uh-sore-us",
+    "imageUrl": "/api/images/creatures/bellusaurus-sui.webp"
   },
   {
     "name": "Borogovia",
@@ -843,7 +889,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' borogove '",
-    "pronunciation": "bor-o-goh-vee-a"
+    "pronunciation": "bor-o-goh-vee-a",
+    "imageUrl": "/api/images/creatures/borogovia-gracilicrus.webp"
   },
   {
     "name": "Brachiosaurus",
@@ -861,7 +908,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' arm lizard '",
-    "pronunciation": "BRAK-ee-oh-sore-us"
+    "pronunciation": "BRAK-ee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/brachiosaurus-altithorax.webp"
   },
   {
     "name": "Brachylophosaurus",
@@ -879,7 +927,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' short-crested lizard '",
-    "pronunciation": "brak-i-lof-oh-sore-us"
+    "pronunciation": "brak-i-lof-oh-sore-us",
+    "imageUrl": "/api/images/creatures/brachylophosaurus-canadensis.webp"
   },
   {
     "name": "Brachytrachelopan",
@@ -897,7 +946,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' short-necked Pan [shepherd god] '",
-    "pronunciation": "brak-i-trak-eh-loh-pan"
+    "pronunciation": "brak-i-trak-eh-loh-pan",
+    "imageUrl": "/api/images/creatures/brachytrachelopan-mesai.webp"
   },
   {
     "name": "Buitreraptor",
@@ -915,7 +965,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Buitrera ('vulture roost') plunderer '",
-    "pronunciation": "bwee-tree-rap-tor"
+    "pronunciation": "bwee-tree-rap-tor",
+    "imageUrl": "/api/images/creatures/buitreraptor-gonzalezorum.webp"
   },
   {
     "name": "Camarasaurus",
@@ -933,7 +984,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' chambered lizard '",
-    "pronunciation": "KAM-ar-a-sore-us"
+    "pronunciation": "KAM-ar-a-sore-us",
+    "imageUrl": "/api/images/creatures/camarasaurus-supremus.webp"
   },
   {
     "name": "Camptosaurus",
@@ -951,7 +1003,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' bent lizard '",
-    "pronunciation": "KAMP-toe-sore-us"
+    "pronunciation": "KAMP-toe-sore-us",
+    "imageUrl": "/api/images/creatures/camptosaurus-dispar.webp"
   },
   {
     "name": "Carcharodontosaurus",
@@ -969,7 +1022,8 @@
     "type": "large theropod",
     "foundIn": "North Africa",
     "nameMeaning": "' Carcharodon lizard '",
-    "pronunciation": "kar-KAR-o-don-toe-sore-us"
+    "pronunciation": "kar-KAR-o-don-toe-sore-us",
+    "imageUrl": "/api/images/creatures/carcharodontosaurus-saharicus.webp"
   },
   {
     "name": "Carnotaurus",
@@ -987,7 +1041,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' carnivorous bull '",
-    "pronunciation": "Kar-noh-TORE-us"
+    "pronunciation": "Kar-noh-TORE-us",
+    "imageUrl": "/api/images/creatures/carnotaurus-sastrei.webp"
   },
   {
     "name": "Caudipteryx",
@@ -1005,7 +1060,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' tail feather '",
-    "pronunciation": "caw-dip-ter-iks"
+    "pronunciation": "caw-dip-ter-iks",
+    "imageUrl": "/api/images/creatures/caudipteryx-zoui.webp"
   },
   {
     "name": "Cedarpelta",
@@ -1023,7 +1079,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' Cedar [Mountain Formation] shield '",
-    "pronunciation": "see-dar-pel-tuh"
+    "pronunciation": "see-dar-pel-tuh",
+    "imageUrl": "/api/images/creatures/cedarpelta-bilbeyhallorum.webp"
   },
   {
     "name": "Centrosaurus",
@@ -1041,7 +1098,8 @@
     "type": "ceratopsian",
     "foundIn": "Canada",
     "nameMeaning": "' sharp pointed lizard '",
-    "pronunciation": "Cen-TROH-sore-us"
+    "pronunciation": "Cen-TROH-sore-us",
+    "imageUrl": "/api/images/creatures/centrosaurus.webp"
   },
   {
     "name": "Ceratosaurus",
@@ -1059,7 +1117,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' horned lizard '",
-    "pronunciation": "Ser-AT-oh-sore-us"
+    "pronunciation": "Ser-AT-oh-sore-us",
+    "imageUrl": "/api/images/creatures/ceratosaurus-nasicornis.webp"
   },
   {
     "name": "Cetiosauriscus",
@@ -1077,7 +1136,8 @@
     "type": "sauropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' like whale lizard '",
-    "pronunciation": "see-tee-oh-SORE-is-kuss"
+    "pronunciation": "see-tee-oh-SORE-is-kuss",
+    "imageUrl": "/api/images/creatures/cetiosauriscus-stewarti.webp"
   },
   {
     "name": "Cetiosaurus",
@@ -1095,7 +1155,8 @@
     "type": "sauropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' whale lizard '",
-    "pronunciation": "See-TEE-oh-sore-us"
+    "pronunciation": "See-TEE-oh-sore-us",
+    "imageUrl": "/api/images/creatures/cetiosaurus-oxoniensis.webp"
   },
   {
     "name": "Chaoyangsaurus",
@@ -1113,7 +1174,8 @@
     "type": "ceratopsian",
     "foundIn": "China",
     "nameMeaning": "' Chaoyang lizard '",
-    "pronunciation": "chow-yahng-sore-us"
+    "pronunciation": "chow-yahng-sore-us",
+    "imageUrl": "/api/images/creatures/chaoyangsaurus-youngi.webp"
   },
   {
     "name": "Chasmosaurus",
@@ -1131,7 +1193,8 @@
     "type": "ceratopsian",
     "foundIn": "Canada",
     "nameMeaning": "' chasm lizard '",
-    "pronunciation": "KAZ-mo-sore-us"
+    "pronunciation": "KAZ-mo-sore-us",
+    "imageUrl": "/api/images/creatures/chasmosaurus.webp"
   },
   {
     "name": "Chindesaurus",
@@ -1149,7 +1212,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' Chinde lizard '",
-    "pronunciation": "chin-dee-sore-us"
+    "pronunciation": "chin-dee-sore-us",
+    "imageUrl": "/api/images/creatures/chindesaurus-bryansmalli.webp"
   },
   {
     "name": "Chinshakiangosaurus",
@@ -1185,7 +1249,8 @@
     "type": "small theropod",
     "foundIn": "Canada",
     "nameMeaning": "' narrow-handed '",
-    "pronunciation": "kie-ro-sten-oh-teez"
+    "pronunciation": "kie-ro-sten-oh-teez",
+    "imageUrl": "/api/images/creatures/chirostenotes-pergracilis.webp"
   },
   {
     "name": "Chubutisaurus",
@@ -1203,7 +1268,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Chubut [Province] lizard '",
-    "pronunciation": "choo-boot-i-sore-us"
+    "pronunciation": "choo-boot-i-sore-us",
+    "imageUrl": "/api/images/creatures/chubutisaurus-insignis.webp"
   },
   {
     "name": "Chungkingosaurus",
@@ -1221,7 +1287,8 @@
     "type": "armoured dinosaur",
     "foundIn": "China",
     "nameMeaning": "' Chongqing lizard '",
-    "pronunciation": "chung-ching-oh-sore-us"
+    "pronunciation": "chung-ching-oh-sore-us",
+    "imageUrl": "/api/images/creatures/chungkingosaurus-jiangbeiensis.webp"
   },
   {
     "name": "Citipati",
@@ -1239,7 +1306,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' lord of the funeral pyre '",
-    "pronunciation": "chit-i-puh-tih"
+    "pronunciation": "chit-i-puh-tih",
+    "imageUrl": "/api/images/creatures/citipati-osmolskae.webp"
   },
   {
     "name": "Coelophysis",
@@ -1257,7 +1325,8 @@
     "type": "small theropod",
     "foundIn": "Zimbabwe",
     "nameMeaning": "' hollow form '",
-    "pronunciation": "seel-OH-fie-sis"
+    "pronunciation": "seel-OH-fie-sis",
+    "imageUrl": "/api/images/creatures/coelophysis.webp"
   },
   {
     "name": "Coelurus",
@@ -1275,7 +1344,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' hollow tail '",
-    "pronunciation": "seel-YEW-rus"
+    "pronunciation": "seel-YEW-rus",
+    "imageUrl": "/api/images/creatures/coelurus-fragilis.webp"
   },
   {
     "name": "Coloradisaurus",
@@ -1293,7 +1363,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' [Los] Colorados lizard '",
-    "pronunciation": "ko-lo-rahd-i-sore-us"
+    "pronunciation": "ko-lo-rahd-i-sore-us",
+    "imageUrl": "/api/images/creatures/coloradisaurus-brevis.webp"
   },
   {
     "name": "Compsognathus",
@@ -1311,7 +1382,8 @@
     "type": "small theropod",
     "foundIn": "Germany",
     "nameMeaning": "' pretty jaw '",
-    "pronunciation": "Komp-sog-NATH-us"
+    "pronunciation": "Komp-sog-NATH-us",
+    "imageUrl": "/api/images/creatures/compsognathus-longipes.webp"
   },
   {
     "name": "Conchoraptor",
@@ -1329,7 +1401,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' conch thief '",
-    "pronunciation": "kon-koh-rap-tor"
+    "pronunciation": "kon-koh-rap-tor",
+    "imageUrl": "/api/images/creatures/conchoraptor-gracilis.webp"
   },
   {
     "name": "Confuciusornis",
@@ -1347,7 +1420,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' Confucius bird '",
-    "pronunciation": "kon-few-shus-or-niss"
+    "pronunciation": "kon-few-shus-or-niss",
+    "imageUrl": "/api/images/creatures/confuciusornis-sanctus.webp"
   },
   {
     "name": "Corythosaurus",
@@ -1365,7 +1439,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' Corinthian helmet lizard '",
-    "pronunciation": "koh-rith-OH-sore-us"
+    "pronunciation": "koh-rith-OH-sore-us",
+    "imageUrl": "/api/images/creatures/corythosaurus-casuarius.webp"
   },
   {
     "name": "Cryolophosaurus",
@@ -1383,7 +1458,8 @@
     "type": "large theropod",
     "foundIn": "Antarctica",
     "nameMeaning": "' frozen crested lizard '",
-    "pronunciation": "cry-o-loaf-oh-sore-us"
+    "pronunciation": "cry-o-loaf-oh-sore-us",
+    "imageUrl": "/api/images/creatures/cryolophosaurus-elliotti.webp"
   },
   {
     "name": "Dacentrurus",
@@ -1401,7 +1477,8 @@
     "type": "armoured dinosaur",
     "foundIn": "United Kingdom",
     "nameMeaning": "' pointed tail '",
-    "pronunciation": "dah-sen-troo-russ"
+    "pronunciation": "dah-sen-troo-russ",
+    "imageUrl": "/api/images/creatures/dacentrurus-armatus.webp"
   },
   {
     "name": "Daspletosaurus",
@@ -1419,7 +1496,8 @@
     "type": "large theropod",
     "foundIn": "Canada",
     "nameMeaning": "' frightful lizard '",
-    "pronunciation": "dass-PLEE-toe-SORE-us"
+    "pronunciation": "dass-PLEE-toe-SORE-us",
+    "imageUrl": "/api/images/creatures/daspletosaurus-torosus.webp"
   },
   {
     "name": "Datousaurus",
@@ -1437,7 +1515,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Datou lizard '",
-    "pronunciation": "dah-too-SORE-us"
+    "pronunciation": "dah-too-SORE-us",
+    "imageUrl": "/api/images/creatures/datousaurus-bashanensis.webp"
   },
   {
     "name": "Deinocheirus",
@@ -1455,7 +1534,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' terrible hand '",
-    "pronunciation": "DINE-oh-KIRE-us"
+    "pronunciation": "DINE-oh-KIRE-us",
+    "imageUrl": "/api/images/creatures/deinocheirus-mirificus.webp"
   },
   {
     "name": "Deinonychus",
@@ -1473,7 +1553,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' terrible claw '",
-    "pronunciation": "dye-NON-ick-us"
+    "pronunciation": "dye-NON-ick-us",
+    "imageUrl": "/api/images/creatures/deinonychus-antirrhopus.webp"
   },
   {
     "name": "Deltadromeus",
@@ -1491,7 +1572,8 @@
     "type": "large theropod",
     "foundIn": "Morocco",
     "nameMeaning": "' delta runner '",
-    "pronunciation": "del-tah-drohm-ee-us"
+    "pronunciation": "del-tah-drohm-ee-us",
+    "imageUrl": "/api/images/creatures/deltadromeus-agilis.webp"
   },
   {
     "name": "Dicraeosaurus",
@@ -1509,7 +1591,8 @@
     "type": "sauropod",
     "foundIn": "Tanzania",
     "nameMeaning": "' forked lizard '",
-    "pronunciation": "die-KRAY-oh-SORE-us"
+    "pronunciation": "die-KRAY-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/dicraeosaurus-hansemanni.webp"
   },
   {
     "name": "Dilophosaurus",
@@ -1527,7 +1610,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' two-crested lizard '",
-    "pronunciation": "die-LOAF-oh-sore-us"
+    "pronunciation": "die-LOAF-oh-sore-us",
+    "imageUrl": "/api/images/creatures/dilophosaurus.webp"
   },
   {
     "name": "Diplodocus",
@@ -1545,7 +1629,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' double beam '",
-    "pronunciation": "DIP-low-DOCK-us"
+    "pronunciation": "DIP-low-DOCK-us",
+    "imageUrl": "/api/images/creatures/diplodocus-longus.webp"
   },
   {
     "name": "Dromaeosaurus",
@@ -1563,7 +1648,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' running lizard '",
-    "pronunciation": "DROM-ee-oh-saw-russ"
+    "pronunciation": "DROM-ee-oh-saw-russ",
+    "imageUrl": "/api/images/creatures/dromaeosaurus-albertensis.webp"
   },
   {
     "name": "Dromiceiomimus",
@@ -1581,7 +1667,8 @@
     "type": "large theropod",
     "foundIn": "Canada",
     "nameMeaning": "' emu mimic '",
-    "pronunciation": "dro-MI-see-oh-me-muss"
+    "pronunciation": "dro-MI-see-oh-me-muss",
+    "imageUrl": "/api/images/creatures/dromiceiomimus-brevitertius.webp"
   },
   {
     "name": "Dryosaurus",
@@ -1599,7 +1686,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' oak lizard '",
-    "pronunciation": "dry-oh-SORE-us"
+    "pronunciation": "dry-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/dryosaurus-altus.webp"
   },
   {
     "name": "Dryptosaurus",
@@ -1617,7 +1705,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' tearing lizard '",
-    "pronunciation": "drip-toe-SORE-us"
+    "pronunciation": "drip-toe-SORE-us",
+    "imageUrl": "/api/images/creatures/dryptosaurus-aquilunguis.webp"
   },
   {
     "name": "Dubreuillosaurus",
@@ -1635,7 +1724,8 @@
     "type": "large theropod",
     "foundIn": "France",
     "nameMeaning": "' (unknown) '",
-    "pronunciation": "dub-rhe-oo-oh-sore-us"
+    "pronunciation": "dub-rhe-oo-oh-sore-us",
+    "imageUrl": "/api/images/creatures/dubreuillosaurus-valesdunensis.webp"
   },
   {
     "name": "Edmontonia",
@@ -1653,7 +1743,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Canada",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/edmontonia-longiceps.webp"
   },
   {
     "name": "Edmontosaurus",
@@ -1671,7 +1762,8 @@
     "type": "euornithopod",
     "foundIn": "Canada",
     "nameMeaning": "' Edmonton lizard '",
-    "pronunciation": "ed-MON-toe-sore-us"
+    "pronunciation": "ed-MON-toe-sore-us",
+    "imageUrl": "/api/images/creatures/edmontosaurus-regalis.webp"
   },
   {
     "name": "Einiosaurus",
@@ -1689,7 +1781,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' bison lizard '",
-    "pronunciation": "ie-nee-oh-sore-us"
+    "pronunciation": "ie-nee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/einiosaurus-procurvicornis.webp"
   },
   {
     "name": "Elaphrosaurus",
@@ -1707,7 +1800,8 @@
     "type": "large theropod",
     "foundIn": "Tanzania",
     "nameMeaning": "' fleet lizard '",
-    "pronunciation": "el-a-fro-sore-us"
+    "pronunciation": "el-a-fro-sore-us",
+    "imageUrl": "/api/images/creatures/elaphrosaurus-bambergi.webp"
   },
   {
     "name": "Emausaurus",
@@ -1725,7 +1819,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Germany",
     "nameMeaning": "' EMAU (Ernst-Moritz-Arndt-Universit\u00e4t) lizard '",
-    "pronunciation": "em-ow-sore-us"
+    "pronunciation": "em-ow-sore-us",
+    "imageUrl": "/api/images/creatures/emausaurus-ernsti.webp"
   },
   {
     "name": "Eolambia",
@@ -1743,7 +1838,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' dawn lambeosaurine '",
-    "pronunciation": "ee-oh-lam-bee-ah"
+    "pronunciation": "ee-oh-lam-bee-ah",
+    "imageUrl": "/api/images/creatures/eolambia-caroljonesa.webp"
   },
   {
     "name": "Eoraptor",
@@ -1761,7 +1857,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' early plunderer '",
-    "pronunciation": "EE-oh-RAP-tor"
+    "pronunciation": "EE-oh-RAP-tor",
+    "imageUrl": "/api/images/creatures/eoraptor-lunensis.webp"
   },
   {
     "name": "Eotyrannus",
@@ -1779,7 +1876,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' dawn tyrant '",
-    "pronunciation": "ee-oh-ti-ran-us"
+    "pronunciation": "ee-oh-ti-ran-us",
+    "imageUrl": "/api/images/creatures/eotyrannus-lengi.webp"
   },
   {
     "name": "Equijubus",
@@ -1797,7 +1895,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' (unknown) '",
-    "pronunciation": "ee-kwee-joo-bus"
+    "pronunciation": "ee-kwee-joo-bus",
+    "imageUrl": "/api/images/creatures/equijubus-normani.webp"
   },
   {
     "name": "Erketu",
@@ -1815,7 +1914,8 @@
     "type": "sauropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Erketu = Tengri (a Mongolian creator-god) '",
-    "pronunciation": "er-kee-tu"
+    "pronunciation": "er-kee-tu",
+    "imageUrl": "/api/images/creatures/erketu-ellisoni.webp"
   },
   {
     "name": "Erlikosaurus",
@@ -1833,7 +1933,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Erlik's lizard '",
-    "pronunciation": "er-lik-oh-sore-us"
+    "pronunciation": "er-lik-oh-sore-us",
+    "imageUrl": "/api/images/creatures/erlikosaurus-andrewsi.webp"
   },
   {
     "name": "Euhelopus",
@@ -1851,7 +1952,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' 1 marsh foot '",
-    "pronunciation": "yoo-hel-oh-pus"
+    "pronunciation": "yoo-hel-oh-pus",
+    "imageUrl": "/api/images/creatures/euhelopus-zdanskyi.webp"
   },
   {
     "name": "Euoplocephalus",
@@ -1869,7 +1971,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' well-armoured head '",
-    "pronunciation": "you-OH-plo-kef-ah-luss"
+    "pronunciation": "you-OH-plo-kef-ah-luss",
+    "imageUrl": "/api/images/creatures/euoplocephalus.webp"
   },
   {
     "name": "Europasaurus",
@@ -1887,7 +1990,8 @@
     "type": "sauropod",
     "foundIn": "Germany",
     "nameMeaning": "' Europe lizard '",
-    "pronunciation": "yoo-roh-pah-sore-us"
+    "pronunciation": "yoo-roh-pah-sore-us",
+    "imageUrl": "/api/images/creatures/europasaurus-holgeri.webp"
   },
   {
     "name": "Eustreptospondylus",
@@ -1905,7 +2009,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' well-curved vertebra '",
-    "pronunciation": "ewe-strep-toe-SPON-die-luss"
+    "pronunciation": "ewe-strep-toe-SPON-die-luss",
+    "imageUrl": "/api/images/creatures/eustreptospondylus-oxoniensis.webp"
   },
   {
     "name": "Fukuiraptor",
@@ -1923,7 +2028,8 @@
     "type": "large theropod",
     "foundIn": "Japan",
     "nameMeaning": "' Fukui plunderer '",
-    "pronunciation": "foo-koo-ee-rap-tor"
+    "pronunciation": "foo-koo-ee-rap-tor",
+    "imageUrl": "/api/images/creatures/fukuiraptor-kitadaniensis.webp"
   },
   {
     "name": "Fukuisaurus",
@@ -1941,7 +2047,8 @@
     "type": "euornithopod",
     "foundIn": "Japan",
     "nameMeaning": "' Fukui lizard '",
-    "pronunciation": "foo-koo-I-sore-us"
+    "pronunciation": "foo-koo-I-sore-us",
+    "imageUrl": "/api/images/creatures/fukuisaurus-tetoriensius.webp"
   },
   {
     "name": "Gallimimus",
@@ -1959,7 +2066,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' chicken mimic '",
-    "pronunciation": "galley-MIME-us"
+    "pronunciation": "galley-MIME-us",
+    "imageUrl": "/api/images/creatures/gallimimus-bullatus.webp"
   },
   {
     "name": "Gargoyleosaurus",
@@ -1977,7 +2085,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' gargoyle lizard '",
-    "pronunciation": "gahr-goy-lee-oh-sore-us"
+    "pronunciation": "gahr-goy-lee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/gargoyleosaurus-parkpinorum.webp"
   },
   {
     "name": "Garudimimus",
@@ -1995,7 +2104,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Garuda mimic '",
-    "pronunciation": "ga-roo-dee-meem-us"
+    "pronunciation": "ga-roo-dee-meem-us",
+    "imageUrl": "/api/images/creatures/garudimimus-brevipes.webp"
   },
   {
     "name": "Gasosaurus",
@@ -2013,7 +2123,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' gas lizard '",
-    "pronunciation": "gas-oh-SORE-us"
+    "pronunciation": "gas-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/gasosaurus-constructus.webp"
   },
   {
     "name": "Gasparinisaura",
@@ -2031,7 +2142,8 @@
     "type": "euornithopod",
     "foundIn": "Argentina",
     "nameMeaning": "' Gasparini's lizard '",
-    "pronunciation": "gas-pah-reen-ee-sore-us"
+    "pronunciation": "gas-pah-reen-ee-sore-us",
+    "imageUrl": "/api/images/creatures/gasparinisaura-cincosaltensis.webp"
   },
   {
     "name": "Gastonia",
@@ -2049,7 +2161,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' [Robert] Gaston '",
-    "pronunciation": "gas-toh-nee-ah"
+    "pronunciation": "gas-toh-nee-ah",
+    "imageUrl": "/api/images/creatures/gastonia-burgei.webp"
   },
   {
     "name": "Giganotosaurus",
@@ -2067,7 +2180,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' giant southern lizard '",
-    "pronunciation": "gig-an-OH-toe-SORE-us"
+    "pronunciation": "gig-an-OH-toe-SORE-us",
+    "imageUrl": "/api/images/creatures/giganotosaurus-carolinii.webp"
   },
   {
     "name": "Gilmoreosaurus",
@@ -2085,7 +2199,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' Gilmore's lizard '",
-    "pronunciation": "GIL-more-oh-SORE-us"
+    "pronunciation": "GIL-more-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/gilmoreosaurus-mongoliensis.webp"
   },
   {
     "name": "Giraffatitan",
@@ -2103,7 +2218,8 @@
     "type": "sauropod",
     "foundIn": "Tanzania",
     "nameMeaning": "' giraffe titan '",
-    "pronunciation": "ji-raf-a-tie-tan"
+    "pronunciation": "ji-raf-a-tie-tan",
+    "imageUrl": "/api/images/creatures/giraffatitan-brancai.webp"
   },
   {
     "name": "Gobisaurus",
@@ -2121,7 +2237,8 @@
     "type": "armoured dinosaur",
     "foundIn": "China",
     "nameMeaning": "' Gobi lizard '",
-    "pronunciation": "goh-bee-sore-us"
+    "pronunciation": "goh-bee-sore-us",
+    "imageUrl": "/api/images/creatures/gobisaurus-domoculus.webp"
   },
   {
     "name": "Gorgosaurus",
@@ -2139,7 +2256,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' fierce lizard '",
-    "pronunciation": "gor-goh-sore-us"
+    "pronunciation": "gor-goh-sore-us",
+    "imageUrl": "/api/images/creatures/gorgosaurus-libratus.webp"
   },
   {
     "name": "Goyocephale",
@@ -2157,7 +2275,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' decorated head '",
-    "pronunciation": "goy-oh-keff-ah-lee"
+    "pronunciation": "goy-oh-keff-ah-lee",
+    "imageUrl": "/api/images/creatures/goyocephale-lattimorei.webp"
   },
   {
     "name": "Graciliceratops",
@@ -2175,7 +2294,8 @@
     "type": "ceratopsian",
     "foundIn": "Mongolia",
     "nameMeaning": "' gracile horned face '",
-    "pronunciation": "gras-i-li-serra-tops"
+    "pronunciation": "gras-i-li-serra-tops",
+    "imageUrl": "/api/images/creatures/graciliceratops-mongoliensis.webp"
   },
   {
     "name": "Gryposaurus",
@@ -2193,7 +2313,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' hook-nosed lizard '",
-    "pronunciation": "grip-oh-sore-us"
+    "pronunciation": "grip-oh-sore-us",
+    "imageUrl": "/api/images/creatures/gryposaurus-notabilis.webp"
   },
   {
     "name": "Guaibasaurus",
@@ -2211,7 +2332,8 @@
     "type": "small theropod",
     "foundIn": "Brazil",
     "nameMeaning": "' [Rio] Guaiba lizard '",
-    "pronunciation": "gwie-bah-sore-us"
+    "pronunciation": "gwie-bah-sore-us",
+    "imageUrl": "/api/images/creatures/guaibasaurus-candelariensis.webp"
   },
   {
     "name": "Guanlong",
@@ -2229,7 +2351,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' crowned dragon '",
-    "pronunciation": "gwan-long"
+    "pronunciation": "gwan-long",
+    "imageUrl": "/api/images/creatures/guanlong-wucaii.webp"
   },
   {
     "name": "Hadrosaurus",
@@ -2247,7 +2370,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' big lizard '",
-    "pronunciation": "HAD-row-SORE-us"
+    "pronunciation": "HAD-row-SORE-us",
+    "imageUrl": "/api/images/creatures/hadrosaurus-foulkii.webp"
   },
   {
     "name": "Hagryphus",
@@ -2265,7 +2389,8 @@
     "type": "small theropod",
     "foundIn": "",
     "nameMeaning": "' Ha (Egyptian god of the western desert) griffin '",
-    "pronunciation": "ha-grif-us"
+    "pronunciation": "ha-grif-us",
+    "imageUrl": "/api/images/creatures/hagryphus-giganteus.webp"
   },
   {
     "name": "Haplocanthosaurus",
@@ -2283,7 +2408,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' simple-spined lizard '",
-    "pronunciation": "hap-lo-kan-tho-sore-us"
+    "pronunciation": "hap-lo-kan-tho-sore-us",
+    "imageUrl": "/api/images/creatures/haplocanthosaurus-priscus.webp"
   },
   {
     "name": "Harpymimus",
@@ -2301,7 +2427,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' harpy mimic '",
-    "pronunciation": "har-pi-miem-us"
+    "pronunciation": "har-pi-miem-us",
+    "imageUrl": "/api/images/creatures/harpymimus-okladnikovi.webp"
   },
   {
     "name": "Herrerasaurus",
@@ -2319,7 +2446,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Herrera's lizard '",
-    "pronunciation": "herr-ray-rah-SORE-us"
+    "pronunciation": "herr-ray-rah-SORE-us",
+    "imageUrl": "/api/images/creatures/herrerasaurus-ischigualastensis.webp"
   },
   {
     "name": "Hesperosaurus",
@@ -2337,7 +2465,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' western lizard '",
-    "pronunciation": "hes-per-oh-sore-us"
+    "pronunciation": "hes-per-oh-sore-us",
+    "imageUrl": "/api/images/creatures/hesperosaurus-mjosi.webp"
   },
   {
     "name": "Heterodontosaurus",
@@ -2355,7 +2484,8 @@
     "type": "euornithopod",
     "foundIn": "South Africa",
     "nameMeaning": "' different-teeth lizard '",
-    "pronunciation": "HET-er-oh-DON\u2019T-oh-sore-us"
+    "pronunciation": "HET-er-oh-DON\u2019T-oh-sore-us",
+    "imageUrl": "/api/images/creatures/heterodontosaurus-tucki.webp"
   },
   {
     "name": "Heyuannia",
@@ -2373,7 +2503,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' from [the city of] Heyuan '",
-    "pronunciation": "Hey-YOU-ARN-ee-ah"
+    "pronunciation": "Hey-YOU-ARN-ee-ah",
+    "imageUrl": "/api/images/creatures/heyuannia-yanshini.webp"
   },
   {
     "name": "Homalocephale",
@@ -2391,7 +2522,8 @@
     "type": "euornithopod",
     "foundIn": "Mongolia",
     "nameMeaning": "' level head '",
-    "pronunciation": "Home-ah-loh-keff-ah-lee"
+    "pronunciation": "Home-ah-loh-keff-ah-lee",
+    "imageUrl": "/api/images/creatures/homalocephale-calathocercos.webp"
   },
   {
     "name": "Huayangosaurus",
@@ -2409,7 +2541,8 @@
     "type": "armoured dinosaur",
     "foundIn": "China",
     "nameMeaning": "' Huayang lizard '",
-    "pronunciation": "hoy-YANG-oh-SORE-us"
+    "pronunciation": "hoy-YANG-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/huayangosaurus-taibaii.webp"
   },
   {
     "name": "Hylaeosaurus",
@@ -2427,7 +2560,8 @@
     "type": "armoured dinosaur",
     "foundIn": "United Kingdom",
     "nameMeaning": "' woodland lizard '",
-    "pronunciation": "HIGH-lee-oh-sore-us"
+    "pronunciation": "HIGH-lee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/hylaeosaurus-armatus.webp"
   },
   {
     "name": "Hypacrosaurus",
@@ -2445,7 +2579,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' near-topmost lizard '",
-    "pronunciation": "hi-pak-roh-sore-us"
+    "pronunciation": "hi-pak-roh-sore-us",
+    "imageUrl": "/api/images/creatures/hypacrosaurus-altispinus.webp"
   },
   {
     "name": "Hypsilophodon",
@@ -2463,7 +2598,8 @@
     "type": "euornithopod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' high-crested tooth '",
-    "pronunciation": "hip-sih-LOH-foh-don"
+    "pronunciation": "hip-sih-LOH-foh-don",
+    "imageUrl": "/api/images/creatures/hypsilophodon-foxii.webp"
   },
   {
     "name": "Iguanodon",
@@ -2481,7 +2617,8 @@
     "type": "euornithopod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' iguana tooth '",
-    "pronunciation": "ig-WHA-noh-don"
+    "pronunciation": "ig-WHA-noh-don",
+    "imageUrl": "/api/images/creatures/iguanodon-bernissartensis.webp"
   },
   {
     "name": "Indosuchus",
@@ -2499,7 +2636,8 @@
     "type": "large theropod",
     "foundIn": "India",
     "nameMeaning": "' Indian crocodile '",
-    "pronunciation": "in-doh-sook-us"
+    "pronunciation": "in-doh-sook-us",
+    "imageUrl": "/api/images/creatures/indosuchus-raptorius.webp"
   },
   {
     "name": "Irritator",
@@ -2517,7 +2655,8 @@
     "type": "large theropod",
     "foundIn": "Brazil",
     "nameMeaning": "' irritator '",
-    "pronunciation": "irr-it-ate-or"
+    "pronunciation": "irr-it-ate-or",
+    "imageUrl": "/api/images/creatures/irritator-challengeri.webp"
   },
   {
     "name": "Isisaurus",
@@ -2535,7 +2674,8 @@
     "type": "sauropod",
     "foundIn": "India",
     "nameMeaning": "' ISI (Indian Statistical Institute) lizard '",
-    "pronunciation": "iss-ee-sore-us"
+    "pronunciation": "iss-ee-sore-us",
+    "imageUrl": "/api/images/creatures/isisaurus-colberti.webp"
   },
   {
     "name": "Janenschia",
@@ -2553,7 +2693,8 @@
     "type": "sauropod",
     "foundIn": "Tanzania",
     "nameMeaning": "' named after Janansch '",
-    "pronunciation": "yan-ensh-ee-ah"
+    "pronunciation": "yan-ensh-ee-ah",
+    "imageUrl": "/api/images/creatures/janenschia-robusta.webp"
   },
   {
     "name": "Jaxartosaurus",
@@ -2571,7 +2712,8 @@
     "type": "euornithopod",
     "foundIn": "Kazakhstan",
     "nameMeaning": "' Jaxartes [River] lizard '",
-    "pronunciation": "jak-sahr-toh-sore-us"
+    "pronunciation": "jak-sahr-toh-sore-us",
+    "imageUrl": "/api/images/creatures/jaxartosaurus-aralensis.webp"
   },
   {
     "name": "Jingshanosaurus",
@@ -2589,7 +2731,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Jingshan lizard '",
-    "pronunciation": "jing-shahn-oh-sore-us"
+    "pronunciation": "jing-shahn-oh-sore-us",
+    "imageUrl": "/api/images/creatures/jingshanosaurus-xinwaensis.webp"
   },
   {
     "name": "Jinzhousaurus",
@@ -2607,7 +2750,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' Jinzhou lizard '",
-    "pronunciation": "jeen-joh-sore-us"
+    "pronunciation": "jeen-joh-sore-us",
+    "imageUrl": "/api/images/creatures/jinzhousaurus-yangi.webp"
   },
   {
     "name": "Jobaria",
@@ -2625,7 +2769,8 @@
     "type": "sauropod",
     "foundIn": "Niger",
     "nameMeaning": "' Jobar (mythical animal) '",
-    "pronunciation": "joh-bahr-ee-uh"
+    "pronunciation": "joh-bahr-ee-uh",
+    "imageUrl": "/api/images/creatures/jobaria-tiguidensis.webp"
   },
   {
     "name": "Juravenator",
@@ -2643,7 +2788,8 @@
     "type": "small theropod",
     "foundIn": "Germany",
     "nameMeaning": "' Jura (Bavarian mountains) hunter '",
-    "pronunciation": "ju-rah-ve-nay-tor"
+    "pronunciation": "ju-rah-ve-nay-tor",
+    "imageUrl": "/api/images/creatures/juravenator-starki.webp"
   },
   {
     "name": "Kentrosaurus",
@@ -2661,7 +2807,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Tanzania",
     "nameMeaning": "' spiky lizard '",
-    "pronunciation": "ken-TROH-sore-us"
+    "pronunciation": "ken-TROH-sore-us",
+    "imageUrl": "/api/images/creatures/kentrosaurus-aethiopicus.webp"
   },
   {
     "name": "Khaan",
@@ -2679,7 +2826,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' ruler '",
-    "pronunciation": "kahn"
+    "pronunciation": "kahn",
+    "imageUrl": "/api/images/creatures/khaan-mckennai.webp"
   },
   {
     "name": "Kotasaurus",
@@ -2697,7 +2845,8 @@
     "type": "sauropod",
     "foundIn": "India",
     "nameMeaning": "' Kota lizard '",
-    "pronunciation": "koht-a-sore-us"
+    "pronunciation": "koht-a-sore-us",
+    "imageUrl": "/api/images/creatures/kotasaurus-yamanpalliensis.webp"
   },
   {
     "name": "Kritosaurus",
@@ -2715,7 +2864,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' noble lizard '",
-    "pronunciation": "KRIT-oh-SORE-us"
+    "pronunciation": "KRIT-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/kritosaurus-navajovius.webp"
   },
   {
     "name": "Lambeosaurus",
@@ -2733,7 +2883,8 @@
     "type": "euornithopod",
     "foundIn": "Canada",
     "nameMeaning": "' Lambe's lizard '",
-    "pronunciation": "lam-BEE-oh-SORE-us"
+    "pronunciation": "lam-BEE-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/lambeosaurus-lambei.webp"
   },
   {
     "name": "Lapparentosaurus",
@@ -2751,7 +2902,8 @@
     "type": "sauropod",
     "foundIn": "Madagascar",
     "nameMeaning": "' Lapparent's lizard '",
-    "pronunciation": "la-pah-rent-oh-sore-us"
+    "pronunciation": "la-pah-rent-oh-sore-us",
+    "imageUrl": "/api/images/creatures/lapparentosaurus-madagascariensis.webp"
   },
   {
     "name": "Leaellynasaura",
@@ -2769,7 +2921,8 @@
     "type": "euornithopod",
     "foundIn": "Australia",
     "nameMeaning": "' Leaellyn's lizard '",
-    "pronunciation": "LEE-ELL-IN-a-SORE-a"
+    "pronunciation": "LEE-ELL-IN-a-SORE-a",
+    "imageUrl": "/api/images/creatures/leaellynasaura-amicagraphica.webp"
   },
   {
     "name": "Leptoceratops",
@@ -2787,7 +2940,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' slim horned face '",
-    "pronunciation": "lep-toh-ker-ah-tops"
+    "pronunciation": "lep-toh-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/leptoceratops-gracilis.webp"
   },
   {
     "name": "Lesothosaurus",
@@ -2805,7 +2959,8 @@
     "type": "1.0m",
     "foundIn": "Lesotho",
     "nameMeaning": "' Lesotho lizard '",
-    "pronunciation": "Le-SO-toe-sore-us"
+    "pronunciation": "Le-SO-toe-sore-us",
+    "imageUrl": "/api/images/creatures/lesothosaurus-diagnosticus.webp"
   },
   {
     "name": "Liaoceratops",
@@ -2823,7 +2978,8 @@
     "type": "ceratopsian",
     "foundIn": "China",
     "nameMeaning": "' Liaoning horned face '",
-    "pronunciation": "lyow-serra-tops"
+    "pronunciation": "lyow-serra-tops",
+    "imageUrl": "/api/images/creatures/liaoceratops-yanzigouensis.webp"
   },
   {
     "name": "Ligabuesaurus",
@@ -2841,7 +2997,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' [Dr Giancarlo] Ligabue lizard '",
-    "pronunciation": "lee-gah-boo-sore-us"
+    "pronunciation": "lee-gah-boo-sore-us",
+    "imageUrl": "/api/images/creatures/ligabuesaurus-leanzai.webp"
   },
   {
     "name": "Liliensternus",
@@ -2859,7 +3016,8 @@
     "type": "small theropod",
     "foundIn": "Germany",
     "nameMeaning": "' [for] Lilienstern '",
-    "pronunciation": "lil-ee-en-shtern-us"
+    "pronunciation": "lil-ee-en-shtern-us",
+    "imageUrl": "/api/images/creatures/liliensternus-liliensterni.webp"
   },
   {
     "name": "Lophorhothon",
@@ -2877,7 +3035,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' crested nose '",
-    "pronunciation": "lof-oh-roh-thon"
+    "pronunciation": "lof-oh-roh-thon",
+    "imageUrl": "/api/images/creatures/lophorhothon-atopus.webp"
   },
   {
     "name": "Lophostropheus",
@@ -2913,7 +3072,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Lufeng lizard '",
-    "pronunciation": "Loo-FUNG-oh-SORE-us"
+    "pronunciation": "Loo-FUNG-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/lufengosaurus-huenei.webp"
   },
   {
     "name": "Lurdusaurus",
@@ -2931,7 +3091,8 @@
     "type": "euornithopod",
     "foundIn": "Niger",
     "nameMeaning": "' heavy lizard '",
-    "pronunciation": "loor-duh-sore-us"
+    "pronunciation": "loor-duh-sore-us",
+    "imageUrl": "/api/images/creatures/lurdusaurus-arenatus.webp"
   },
   {
     "name": "Lycorhinus",
@@ -2949,7 +3110,8 @@
     "type": "euornithopod",
     "foundIn": "South Africa",
     "nameMeaning": "' wolf snout '",
-    "pronunciation": "liek-oh-rien-us"
+    "pronunciation": "liek-oh-rien-us",
+    "imageUrl": "/api/images/creatures/lycorhinus-angustidens.webp"
   },
   {
     "name": "Magyarosaurus",
@@ -2967,7 +3129,8 @@
     "type": "sauropod",
     "foundIn": "Romania",
     "nameMeaning": "' Magyar lizard '",
-    "pronunciation": "mod-yar-oh-sore-us"
+    "pronunciation": "mod-yar-oh-sore-us",
+    "imageUrl": "/api/images/creatures/magyarosaurus-dacus.webp"
   },
   {
     "name": "Maiasaura",
@@ -2985,7 +3148,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' good mother lizard '",
-    "pronunciation": "my-ah-SORE-ah"
+    "pronunciation": "my-ah-SORE-ah",
+    "imageUrl": "/api/images/creatures/maiasaura-peeblesorum.webp"
   },
   {
     "name": "Majungasaurus",
@@ -3003,7 +3167,8 @@
     "type": "large theropod",
     "foundIn": "Madagascar",
     "nameMeaning": "' Majunga lizard '",
-    "pronunciation": "mah-joon-gah-sore-us"
+    "pronunciation": "mah-joon-gah-sore-us",
+    "imageUrl": "/api/images/creatures/majungasaurus-atopus.webp"
   },
   {
     "name": "Malawisaurus",
@@ -3021,7 +3186,8 @@
     "type": "sauropod",
     "foundIn": "Malawi",
     "nameMeaning": "' Malawi lizard '",
-    "pronunciation": "mah-lah-wee-sore-us"
+    "pronunciation": "mah-lah-wee-sore-us",
+    "imageUrl": "/api/images/creatures/malawisaurus-dixeyi.webp"
   },
   {
     "name": "Mamenchisaurus",
@@ -3039,7 +3205,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Mamenchi lizard '",
-    "pronunciation": "mah-men-chi-sore-us"
+    "pronunciation": "mah-men-chi-sore-us",
+    "imageUrl": "/api/images/creatures/mamenchisaurus-constructus.webp"
   },
   {
     "name": "Mapusaurus",
@@ -3057,7 +3224,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Earth (Mapuche language, Patagonia) lizard '",
-    "pronunciation": "mah-puh-sore-us"
+    "pronunciation": "mah-puh-sore-us",
+    "imageUrl": "/api/images/creatures/mapusaurus-roseae.webp"
   },
   {
     "name": "Marshosaurus",
@@ -3075,7 +3243,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' [Othniel Charles] Marsh lizard '",
-    "pronunciation": "marsh-oh-sore-us"
+    "pronunciation": "marsh-oh-sore-us",
+    "imageUrl": "/api/images/creatures/marshosaurus-bicentesimus.webp"
   },
   {
     "name": "Masiakasaurus",
@@ -3093,7 +3262,8 @@
     "type": "small theropod",
     "foundIn": "Madagascar",
     "nameMeaning": "' vicious lizard '",
-    "pronunciation": "mah-shee-ah-kah-sore-us"
+    "pronunciation": "mah-shee-ah-kah-sore-us",
+    "imageUrl": "/api/images/creatures/masiakasaurus-knopfleri.webp"
   },
   {
     "name": "Massospondylus",
@@ -3111,7 +3281,8 @@
     "type": "sauropod",
     "foundIn": "Zimbabwe",
     "nameMeaning": "' massive vertebrae '",
-    "pronunciation": "mass-oh-SPON-di-luss"
+    "pronunciation": "mass-oh-SPON-di-luss",
+    "imageUrl": "/api/images/creatures/massospondylus-carinatus.webp"
   },
   {
     "name": "Maxakalisaurus",
@@ -3129,7 +3300,8 @@
     "type": "sauropod",
     "foundIn": "Brazil",
     "nameMeaning": "' Maxakali (tribe of Brazil) lizard '",
-    "pronunciation": "max-aka-li-sore-us"
+    "pronunciation": "max-aka-li-sore-us",
+    "imageUrl": "/api/images/creatures/maxakalisaurus-topai.webp"
   },
   {
     "name": "Megalosaurus",
@@ -3147,7 +3319,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' big lizard '",
-    "pronunciation": "MEG-ah-low-sore-us"
+    "pronunciation": "MEG-ah-low-sore-us",
+    "imageUrl": "/api/images/creatures/megalosaurus-bucklandii.webp"
   },
   {
     "name": "Melanorosaurus",
@@ -3165,7 +3338,8 @@
     "type": "sauropod",
     "foundIn": "South Africa",
     "nameMeaning": "' Black [Mountain] lizard '",
-    "pronunciation": "me-lan-or-oh-sore-us"
+    "pronunciation": "me-lan-or-oh-sore-us",
+    "imageUrl": "/api/images/creatures/melanorosaurus-readi.webp"
   },
   {
     "name": "Metriacanthosaurus",
@@ -3183,7 +3357,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' moderately-spined lizard '",
-    "pronunciation": "met-ree-a-kan-tho-sore-us"
+    "pronunciation": "met-ree-a-kan-tho-sore-us",
+    "imageUrl": "/api/images/creatures/metriacanthosaurus-parkeri.webp"
   },
   {
     "name": "Microceratus",
@@ -3201,7 +3376,8 @@
     "type": "ceratopsian",
     "foundIn": "Mongolia",
     "nameMeaning": "' tiny horned '",
-    "pronunciation": "mike-row-ker-ah-tuss"
+    "pronunciation": "mike-row-ker-ah-tuss",
+    "imageUrl": "/api/images/creatures/microceratus-gobiensis.webp"
   },
   {
     "name": "Micropachycephalosaurus",
@@ -3219,7 +3395,8 @@
     "type": "ceratopsian",
     "foundIn": "China",
     "nameMeaning": "' tiny thick-headed lizard '",
-    "pronunciation": "mike-row-pak-ee-keff-ah-loh-sore-us"
+    "pronunciation": "mike-row-pak-ee-keff-ah-loh-sore-us",
+    "imageUrl": "/api/images/creatures/micropachycephalosaurus-hongtuyanensis.webp"
   },
   {
     "name": "Microraptor",
@@ -3237,7 +3414,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' tiny plunderer '",
-    "pronunciation": "MIKE-roe-rap-tor"
+    "pronunciation": "MIKE-roe-rap-tor",
+    "imageUrl": "/api/images/creatures/microraptor-zhaoianus.webp"
   },
   {
     "name": "Minmi",
@@ -3255,7 +3433,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Australia",
     "nameMeaning": "' named after Minmi Crossing, Queensland '",
-    "pronunciation": "min-mie"
+    "pronunciation": "min-mie",
+    "imageUrl": "/api/images/creatures/minmi-paravertebra.webp"
   },
   {
     "name": "Monolophosaurus",
@@ -3273,7 +3452,8 @@
     "type": "large theropod",
     "foundIn": "China",
     "nameMeaning": "' single-crested lizard '",
-    "pronunciation": "mono-Loh-foh-sore-us"
+    "pronunciation": "mono-Loh-foh-sore-us",
+    "imageUrl": "/api/images/creatures/monolophosaurus-jiangi.webp"
   },
   {
     "name": "Mononykus",
@@ -3291,7 +3471,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' single claw '",
-    "pronunciation": "mono-Nike-us"
+    "pronunciation": "mono-Nike-us",
+    "imageUrl": "/api/images/creatures/mononykus-olecranus.webp"
   },
   {
     "name": "Mussaurus",
@@ -3309,7 +3490,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' mouse lizard '",
-    "pronunciation": "moos-SORE-us"
+    "pronunciation": "moos-SORE-us",
+    "imageUrl": "/api/images/creatures/mussaurus-patagonicus.webp"
   },
   {
     "name": "Muttaburrasaurus",
@@ -3327,7 +3509,8 @@
     "type": "euornithopod",
     "foundIn": "Australia",
     "nameMeaning": "' Muttaburra lizard '",
-    "pronunciation": "MUT-a-BURR-a-SORE-us"
+    "pronunciation": "MUT-a-BURR-a-SORE-us",
+    "imageUrl": "/api/images/creatures/muttaburrasaurus-langdoni.webp"
   },
   {
     "name": "Nanshiungosaurus",
@@ -3345,7 +3528,8 @@
     "type": "large theropod",
     "foundIn": "China",
     "nameMeaning": "' Nanxiong lizard '",
-    "pronunciation": "nahn-shyung-oh-sore-us"
+    "pronunciation": "nahn-shyung-oh-sore-us",
+    "imageUrl": "/api/images/creatures/nanshiungosaurus-brevispinus.webp"
   },
   {
     "name": "Nedoceratops",
@@ -3363,7 +3547,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' insufficient horned face '",
-    "pronunciation": "ned-o-ker-ah-tops"
+    "pronunciation": "ned-o-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/nedoceratops-hatcheri.webp"
   },
   {
     "name": "Nemegtosaurus",
@@ -3381,7 +3566,8 @@
     "type": "sauropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Nemegt lizard '",
-    "pronunciation": "Nem-egg-tow-sore-us"
+    "pronunciation": "Nem-egg-tow-sore-us",
+    "imageUrl": "/api/images/creatures/nemegtosaurus-mongoliensis.webp"
   },
   {
     "name": "Neovenator",
@@ -3399,7 +3585,8 @@
     "type": "large theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' new hunter '",
-    "pronunciation": "nee-oh-ve-nay-tor"
+    "pronunciation": "nee-oh-ve-nay-tor",
+    "imageUrl": "/api/images/creatures/neovenator-salerii.webp"
   },
   {
     "name": "Neuquenosaurus",
@@ -3435,7 +3622,8 @@
     "type": "sauropod",
     "foundIn": "Tunisia",
     "nameMeaning": "' Niger lizard '",
-    "pronunciation": "nee-zhayr-sore-us"
+    "pronunciation": "nee-zhayr-sore-us",
+    "imageUrl": "/api/images/creatures/nigersaurus-taqueti.webp"
   },
   {
     "name": "Nipponosaurus",
@@ -3453,7 +3641,8 @@
     "type": "euornithopod",
     "foundIn": "Russia",
     "nameMeaning": "' Japanese lizard '",
-    "pronunciation": "nip-on-oh-sore-us"
+    "pronunciation": "nip-on-oh-sore-us",
+    "imageUrl": "/api/images/creatures/nipponosaurus-sachalinensis.webp"
   },
   {
     "name": "Noasaurus",
@@ -3471,7 +3660,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' northwestern Argentina lizard '",
-    "pronunciation": "noh-ah-sore-us"
+    "pronunciation": "noh-ah-sore-us",
+    "imageUrl": "/api/images/creatures/noasaurus-leali.webp"
   },
   {
     "name": "Nodosaurus",
@@ -3489,7 +3679,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' node lizard '",
-    "pronunciation": "no-doh-SORE-us"
+    "pronunciation": "no-doh-SORE-us",
+    "imageUrl": "/api/images/creatures/nodosaurus-textilis.webp"
   },
   {
     "name": "Nomingia",
@@ -3507,7 +3698,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' Nomingiin '",
-    "pronunciation": "noh-ming-ee-uh"
+    "pronunciation": "noh-ming-ee-uh",
+    "imageUrl": "/api/images/creatures/nomingia-gobiensis.webp"
   },
   {
     "name": "Nothronychus",
@@ -3525,7 +3717,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' sloth-like claw '",
-    "pronunciation": "noh-thron-i-kus"
+    "pronunciation": "noh-thron-i-kus",
+    "imageUrl": "/api/images/creatures/nothronychus-mckinleyi.webp"
   },
   {
     "name": "Nqwebasaurus",
@@ -3543,7 +3736,8 @@
     "type": "small theropod",
     "foundIn": "South Africa",
     "nameMeaning": "' Nqweba lizard '",
-    "pronunciation": "n-qu-web-ah-sore-us"
+    "pronunciation": "n-qu-web-ah-sore-us",
+    "imageUrl": "/api/images/creatures/nqwebasaurus-thwazi.webp"
   },
   {
     "name": "Omeisaurus",
@@ -3561,7 +3755,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Omei lizard '",
-    "pronunciation": "oh-mee-sore-us"
+    "pronunciation": "oh-mee-sore-us",
+    "imageUrl": "/api/images/creatures/omeisaurus-junghsiensis.webp"
   },
   {
     "name": "Opisthocoelicaudia",
@@ -3579,7 +3774,8 @@
     "type": "sauropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' hollow-backed tail [vertebrae] '",
-    "pronunciation": "o-pis-tho-seel-i-cawd-ee-a"
+    "pronunciation": "o-pis-tho-seel-i-cawd-ee-a",
+    "imageUrl": "/api/images/creatures/opisthocoelicaudia-skarzynskii.webp"
   },
   {
     "name": "Ornitholestes",
@@ -3597,7 +3793,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' bird robber '",
-    "pronunciation": "Or-nith-oh-LES-teez"
+    "pronunciation": "Or-nith-oh-LES-teez",
+    "imageUrl": "/api/images/creatures/ornitholestes-hermanni.webp"
   },
   {
     "name": "Ornithomimus",
@@ -3615,7 +3812,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' bird mimic '",
-    "pronunciation": "orn-ITH-oh-MEE-mus"
+    "pronunciation": "orn-ITH-oh-MEE-mus",
+    "imageUrl": "/api/images/creatures/ornithomimus-velox.webp"
   },
   {
     "name": "Orodromeus",
@@ -3633,7 +3831,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' mountain runner '",
-    "pronunciation": "or-oh-DROM-ee-us"
+    "pronunciation": "or-oh-DROM-ee-us",
+    "imageUrl": "/api/images/creatures/orodromeus-makelai.webp"
   },
   {
     "name": "Oryctodromeus",
@@ -3651,7 +3850,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' digging runner '",
-    "pronunciation": "or-ik-tow-drohm-ee-us"
+    "pronunciation": "or-ik-tow-drohm-ee-us",
+    "imageUrl": "/api/images/creatures/oryctodromeus-cubicularis.webp"
   },
   {
     "name": "Othnielia",
@@ -3669,7 +3869,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' [for] Othniel [Marsh] '",
-    "pronunciation": "oth-ni-ee-lee-a"
+    "pronunciation": "oth-ni-ee-lee-a",
+    "imageUrl": "/api/images/creatures/othnielia-rex.webp"
   },
   {
     "name": "Ouranosaurus",
@@ -3687,7 +3888,8 @@
     "type": "euornithopod",
     "foundIn": "Niger",
     "nameMeaning": "' brave monitor lizard '",
-    "pronunciation": "oo-RAH-noh-sore-us"
+    "pronunciation": "oo-RAH-noh-sore-us",
+    "imageUrl": "/api/images/creatures/ouranosaurus-nigeriensis.webp"
   },
   {
     "name": "Oviraptor",
@@ -3705,7 +3907,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' egg thief '",
-    "pronunciation": "OH-vee-RAP-tor"
+    "pronunciation": "OH-vee-RAP-tor",
+    "imageUrl": "/api/images/creatures/oviraptor-philoceratops.webp"
   },
   {
     "name": "Pachycephalosaurus",
@@ -3723,7 +3926,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' thick-headed lizard '",
-    "pronunciation": "pack-ee-KEF-ah-lo-sore-us"
+    "pronunciation": "pack-ee-KEF-ah-lo-sore-us",
+    "imageUrl": "/api/images/creatures/pachycephalosaurus-wyomingensis.webp"
   },
   {
     "name": "Pachyrhinosaurus",
@@ -3741,7 +3945,8 @@
     "type": "ceratopsian",
     "foundIn": "Canada",
     "nameMeaning": "' thick-nosed lizard '",
-    "pronunciation": "pack-ee-RINE-oh-sore-us"
+    "pronunciation": "pack-ee-RINE-oh-sore-us",
+    "imageUrl": "/api/images/creatures/pachyrhinosaurus-canadensis.webp"
   },
   {
     "name": "Panoplosaurus",
@@ -3759,7 +3964,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' fully-armoured lizard '",
-    "pronunciation": "pan-op-loh-sore-us"
+    "pronunciation": "pan-op-loh-sore-us",
+    "imageUrl": "/api/images/creatures/panoplosaurus-mirus.webp"
   },
   {
     "name": "Pantydraco",
@@ -3777,7 +3983,8 @@
     "type": "euornithopod",
     "foundIn": "Wales",
     "nameMeaning": "' Pant-y-ffynnon dragon '",
-    "pronunciation": "pant-ee-drak-oh"
+    "pronunciation": "pant-ee-drak-oh",
+    "imageUrl": "/api/images/creatures/pantydraco-caducus.webp"
   },
   {
     "name": "Paralititan",
@@ -3795,7 +4002,8 @@
     "type": "sauropod",
     "foundIn": "Egypt",
     "nameMeaning": "' tidal giant '",
-    "pronunciation": "pa-ral-ee-tie-tan"
+    "pronunciation": "pa-ral-ee-tie-tan",
+    "imageUrl": "/api/images/creatures/paralititan-stromeri.webp"
   },
   {
     "name": "Parasaurolophus",
@@ -3813,7 +4021,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' like 'Saurolophus' '",
-    "pronunciation": "pa-ra-saw-ROL-off-us"
+    "pronunciation": "pa-ra-saw-ROL-off-us",
+    "imageUrl": "/api/images/creatures/parasaurolophus-walkeri.webp"
   },
   {
     "name": "Parksosaurus",
@@ -3831,7 +4040,8 @@
     "type": "euornithopod",
     "foundIn": "Canada",
     "nameMeaning": "' Park's lizard '",
-    "pronunciation": "PARKS-oh-SORE-us"
+    "pronunciation": "PARKS-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/parksosaurus-warrenae.webp"
   },
   {
     "name": "Patagosaurus",
@@ -3849,7 +4059,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Patagonian lizard '",
-    "pronunciation": "pat-ag-oh-sore-us"
+    "pronunciation": "pat-ag-oh-sore-us",
+    "imageUrl": "/api/images/creatures/patagosaurus-fariasi.webp"
   },
   {
     "name": "Pelicanimimus",
@@ -3867,7 +4078,8 @@
     "type": "small theropod",
     "foundIn": "Spain",
     "nameMeaning": "' pelican mimic '",
-    "pronunciation": "pel-e-kan-i-mim-us"
+    "pronunciation": "pel-e-kan-i-mim-us",
+    "imageUrl": "/api/images/creatures/pelicanimimus-polyodon.webp"
   },
   {
     "name": "Pelorosaurus",
@@ -3885,7 +4097,8 @@
     "type": "sauropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' monstrous lizard '",
-    "pronunciation": "pel-oh-ROW-sore-us"
+    "pronunciation": "pel-oh-ROW-sore-us",
+    "imageUrl": "/api/images/creatures/pelorosaurus-conybearei.webp"
   },
   {
     "name": "Pentaceratops",
@@ -3903,7 +4116,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' five-horned face '",
-    "pronunciation": "pent-ah-ker-ah-tops"
+    "pronunciation": "pent-ah-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/pentaceratops-sternbergi.webp"
   },
   {
     "name": "Piatnitzkysaurus",
@@ -3921,7 +4135,8 @@
     "type": "large theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' Piatnitzky's lizard '",
-    "pronunciation": "pye-at-nits-key-sore-us"
+    "pronunciation": "pye-at-nits-key-sore-us",
+    "imageUrl": "/api/images/creatures/piatnitzkysaurus-floresi.webp"
   },
   {
     "name": "Pinacosaurus",
@@ -3939,7 +4154,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": "' plank lizard '",
-    "pronunciation": "pin-ak-oh-sore-us"
+    "pronunciation": "pin-ak-oh-sore-us",
+    "imageUrl": "/api/images/creatures/pinacosaurus-grangeri.webp"
   },
   {
     "name": "Plateosaurus",
@@ -3957,7 +4173,8 @@
     "type": "sauropod",
     "foundIn": "Switzerland",
     "nameMeaning": "' flat lizard '",
-    "pronunciation": "plat-ee-oh-sore-us"
+    "pronunciation": "plat-ee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/plateosaurus-engelhardti.webp"
   },
   {
     "name": "Podokesaurus",
@@ -3975,7 +4192,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' swift-footed lizard '",
-    "pronunciation": "po-doh-kee-sore-us"
+    "pronunciation": "po-doh-kee-sore-us",
+    "imageUrl": "/api/images/creatures/podokesaurus-holyokensis.webp"
   },
   {
     "name": "Poekilopleuron",
@@ -3993,7 +4211,8 @@
     "type": "large theropod",
     "foundIn": "France",
     "nameMeaning": "' varied ribs '",
-    "pronunciation": "peek-i-loh-ploor-on"
+    "pronunciation": "peek-i-loh-ploor-on",
+    "imageUrl": "/api/images/creatures/poekilopleuron-bucklandii.webp"
   },
   {
     "name": "Polacanthus",
@@ -4011,7 +4230,8 @@
     "type": "armoured dinosaur",
     "foundIn": "United Kingdom",
     "nameMeaning": "' many spines '",
-    "pronunciation": "pol-a-KAN-thus"
+    "pronunciation": "pol-a-KAN-thus",
+    "imageUrl": "/api/images/creatures/polacanthus-foxii.webp"
   },
   {
     "name": "Prenocephale",
@@ -4029,7 +4249,8 @@
     "type": "euornithopod",
     "foundIn": "Mongolia",
     "nameMeaning": "' sloping head '",
-    "pronunciation": "preen-oh-keff-ah-lee"
+    "pronunciation": "preen-oh-keff-ah-lee",
+    "imageUrl": "/api/images/creatures/prenocephale-prenes.webp"
   },
   {
     "name": "Probactrosaurus",
@@ -4047,7 +4268,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' before Bactrosaurus '",
-    "pronunciation": "proh-bak-troh-sore-us"
+    "pronunciation": "proh-bak-troh-sore-us",
+    "imageUrl": "/api/images/creatures/probactrosaurus-gobiensis.webp"
   },
   {
     "name": "Proceratosaurus",
@@ -4065,7 +4287,8 @@
     "type": "small theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' before Ceratosaurus '",
-    "pronunciation": "proh-ker-at-oh-sore-us"
+    "pronunciation": "proh-ker-at-oh-sore-us",
+    "imageUrl": "/api/images/creatures/proceratosaurus-bradleyi.webp"
   },
   {
     "name": "Procompsognathus",
@@ -4083,7 +4306,8 @@
     "type": "small theropod",
     "foundIn": "Germany",
     "nameMeaning": "' before Compsognathus '",
-    "pronunciation": "pro-comp-sog-nay-thus"
+    "pronunciation": "pro-comp-sog-nay-thus",
+    "imageUrl": "/api/images/creatures/procompsognathus-triassicus.webp"
   },
   {
     "name": "Prosaurolophus",
@@ -4101,7 +4325,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' before lizard crest [Saurolophus] '",
-    "pronunciation": "proh-sore-oh-lof-us"
+    "pronunciation": "proh-sore-oh-lof-us",
+    "imageUrl": "/api/images/creatures/prosaurolophus-maximus.webp"
   },
   {
     "name": "Protarchaeopteryx",
@@ -4119,7 +4344,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' before Archaeopteryx '",
-    "pronunciation": "pro-tark-ee-op-ter-iks"
+    "pronunciation": "pro-tark-ee-op-ter-iks",
+    "imageUrl": "/api/images/creatures/protarchaeopteryx-robusta.webp"
   },
   {
     "name": "Protoceratops",
@@ -4137,7 +4363,8 @@
     "type": "ceratopsian",
     "foundIn": "Mongolia",
     "nameMeaning": "' first horned face '",
-    "pronunciation": "pro-toe-ker-ah-tops"
+    "pronunciation": "pro-toe-ker-ah-tops",
+    "imageUrl": "/api/images/creatures/protoceratops-andrewsi.webp"
   },
   {
     "name": "Protohadros",
@@ -4155,7 +4382,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' first hadrosaur '",
-    "pronunciation": "proh-toh-had-ros"
+    "pronunciation": "proh-toh-had-ros",
+    "imageUrl": "/api/images/creatures/protohadros-byrdi.webp"
   },
   {
     "name": "Psittacosaurus",
@@ -4173,7 +4401,8 @@
     "type": "ceratopsian",
     "foundIn": "Russia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/psittacosaurus-mongoliensis.webp"
   },
   {
     "name": "Quaesitosaurus",
@@ -4191,7 +4420,8 @@
     "type": "sauropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' extraordinary lizard '",
-    "pronunciation": "kwee-siet-oh-sore-us"
+    "pronunciation": "kwee-siet-oh-sore-us",
+    "imageUrl": "/api/images/creatures/quaesitosaurus-orientalis.webp"
   },
   {
     "name": "Rebbachisaurus",
@@ -4209,7 +4439,8 @@
     "type": "sauropod",
     "foundIn": "Morocco",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/rebbachisaurus-garasbae.webp"
   },
   {
     "name": "Rhabdodon",
@@ -4227,7 +4458,8 @@
     "type": "euornithopod",
     "foundIn": "Spain",
     "nameMeaning": "' rod tooth '",
-    "pronunciation": "RAB-doh-don"
+    "pronunciation": "RAB-doh-don",
+    "imageUrl": "/api/images/creatures/rhabdodon-priscus.webp"
   },
   {
     "name": "Rhoetosaurus",
@@ -4245,7 +4477,8 @@
     "type": "sauropod",
     "foundIn": "Australia",
     "nameMeaning": "' Rhoetan lizard '",
-    "pronunciation": "reet-oh-sore-us"
+    "pronunciation": "reet-oh-sore-us",
+    "imageUrl": "/api/images/creatures/rhoetosaurus-brownei.webp"
   },
   {
     "name": "Rinchenia",
@@ -4263,7 +4496,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/rinchenia-mongoliensis.webp"
   },
   {
     "name": "Riojasaurus",
@@ -4281,7 +4515,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": "' [La] Rioja lizard '",
-    "pronunciation": "ree-oh-hah-sore-us"
+    "pronunciation": "ree-oh-hah-sore-us",
+    "imageUrl": "/api/images/creatures/riojasaurus-incertus.webp"
   },
   {
     "name": "Rugops",
@@ -4299,7 +4534,8 @@
     "type": "large theropod",
     "foundIn": "Niger",
     "nameMeaning": "' wrinkle face '",
-    "pronunciation": "roo-gops"
+    "pronunciation": "roo-gops",
+    "imageUrl": "/api/images/creatures/rugops-primus.webp"
   },
   {
     "name": "Saichania",
@@ -4317,7 +4553,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": "' beautiful '",
-    "pronunciation": "sigh-CHAN-ee-a"
+    "pronunciation": "sigh-CHAN-ee-a",
+    "imageUrl": "/api/images/creatures/saichania-chulsanensis.webp"
   },
   {
     "name": "Saltasaurus",
@@ -4335,7 +4572,8 @@
     "type": "sauropod",
     "foundIn": "Argentina",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/saltasaurus-loricatus.webp"
   },
   {
     "name": "Saltopus",
@@ -4353,7 +4591,8 @@
     "type": "small theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/saltopus-elginensis.webp"
   },
   {
     "name": "Sarcosaurus",
@@ -4371,7 +4610,8 @@
     "type": "small theropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' flesh lizard '",
-    "pronunciation": "sahr-koh-sore-us"
+    "pronunciation": "sahr-koh-sore-us",
+    "imageUrl": "/api/images/creatures/sarcosaurus-woodi.webp"
   },
   {
     "name": "Saurolophus",
@@ -4389,7 +4629,8 @@
     "type": "euornithopod",
     "foundIn": "Mongolia",
     "nameMeaning": "' ridged lizard '",
-    "pronunciation": "SORE-oh-LOAF-us"
+    "pronunciation": "SORE-oh-LOAF-us",
+    "imageUrl": "/api/images/creatures/saurolophus-osborni.webp"
   },
   {
     "name": "Sauropelta",
@@ -4407,7 +4648,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' lizard shield '",
-    "pronunciation": "sore-oh-pelt-ah"
+    "pronunciation": "sore-oh-pelt-ah",
+    "imageUrl": "/api/images/creatures/sauropelta-edwardsorum.webp"
   },
   {
     "name": "Saurophaganax",
@@ -4425,7 +4667,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' king of the lizard eaters '",
-    "pronunciation": "sore-oh-fag-ah-naks"
+    "pronunciation": "sore-oh-fag-ah-naks",
+    "imageUrl": "/api/images/creatures/saurophaganax-maximus.webp"
   },
   {
     "name": "Saurornithoides",
@@ -4443,7 +4686,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' bird-like lizard '",
-    "pronunciation": "sore-OR-nith-OID-eez"
+    "pronunciation": "sore-OR-nith-OID-eez",
+    "imageUrl": "/api/images/creatures/saurornithoides-mongoliensis.webp"
   },
   {
     "name": "Scelidosaurus",
@@ -4461,7 +4705,8 @@
     "type": "armoured dinosaur",
     "foundIn": "United Kingdom",
     "nameMeaning": "' limb lizard '",
-    "pronunciation": "skel-EYE-doh-sore-us"
+    "pronunciation": "skel-EYE-doh-sore-us",
+    "imageUrl": "/api/images/creatures/scelidosaurus-harrisonii.webp"
   },
   {
     "name": "Scutellosaurus",
@@ -4479,7 +4724,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' small shield lizard '",
-    "pronunciation": "skoo-tell-oh-sore-us"
+    "pronunciation": "skoo-tell-oh-sore-us",
+    "imageUrl": "/api/images/creatures/scutellosaurus-lawleri.webp"
   },
   {
     "name": "Secernosaurus",
@@ -4497,7 +4743,8 @@
     "type": "euornithopod",
     "foundIn": "Argentina",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/secernosaurus-koerneri.webp"
   },
   {
     "name": "Segisaurus",
@@ -4515,7 +4762,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/segisaurus-halli.webp"
   },
   {
     "name": "Segnosaurus",
@@ -4533,7 +4781,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' slow lizard '",
-    "pronunciation": "SEG-no-SORE-us"
+    "pronunciation": "SEG-no-SORE-us",
+    "imageUrl": "/api/images/creatures/segnosaurus-galbinensis.webp"
   },
   {
     "name": "Shamosaurus",
@@ -4551,7 +4800,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/shamosaurus-scutatus.webp"
   },
   {
     "name": "Shanag",
@@ -4569,7 +4819,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' named after the dancers in the Buddhist Tsam festival '",
-    "pronunciation": "sha-nag"
+    "pronunciation": "sha-nag",
+    "imageUrl": "/api/images/creatures/shanag-ashile.webp"
   },
   {
     "name": "Shantungosaurus",
@@ -4587,7 +4838,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' Shantung (=Shandong) lizard '",
-    "pronunciation": "shan-TUN-go-sore-us"
+    "pronunciation": "shan-TUN-go-sore-us",
+    "imageUrl": "/api/images/creatures/shantungosaurus-giganteus.webp"
   },
   {
     "name": "Shunosaurus",
@@ -4605,7 +4857,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/shunosaurus-lii.webp"
   },
   {
     "name": "Shuvuuia",
@@ -4623,7 +4876,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' bird '",
-    "pronunciation": "shu-voo-ee-ah"
+    "pronunciation": "shu-voo-ee-ah",
+    "imageUrl": "/api/images/creatures/shuvuuia-deserti.webp"
   },
   {
     "name": "Silvisaurus",
@@ -4641,7 +4895,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/silvisaurus-condrayi.webp"
   },
   {
     "name": "Sinocalliopteryx",
@@ -4659,7 +4914,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/sinocalliopteryx-gigas.webp"
   },
   {
     "name": "Sinornithosaurus",
@@ -4677,7 +4933,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' Chinese bird lizard '",
-    "pronunciation": "sine-or-nith-oh-sore-us"
+    "pronunciation": "sine-or-nith-oh-sore-us",
+    "imageUrl": "/api/images/creatures/sinornithosaurus-millenii.webp"
   },
   {
     "name": "Sinosauropteryx",
@@ -4695,7 +4952,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' Chinese lizard wing '",
-    "pronunciation": "sine-oh-sore-op-ter-iks"
+    "pronunciation": "sine-oh-sore-op-ter-iks",
+    "imageUrl": "/api/images/creatures/sinosauropteryx-prima.webp"
   },
   {
     "name": "Sinovenator",
@@ -4713,7 +4971,8 @@
     "type": "small theropod",
     "foundIn": "China",
     "nameMeaning": "' Chinese hunter '",
-    "pronunciation": "sien-oh-vee-nay-tor"
+    "pronunciation": "sien-oh-vee-nay-tor",
+    "imageUrl": "/api/images/creatures/sinovenator-changii.webp"
   },
   {
     "name": "Sinraptor",
@@ -4731,7 +4990,8 @@
     "type": "large theropod",
     "foundIn": "China",
     "nameMeaning": "' Chinese plunderer '",
-    "pronunciation": "sien-rap-tor"
+    "pronunciation": "sien-rap-tor",
+    "imageUrl": "/api/images/creatures/sinraptor-hepingensis.webp"
   },
   {
     "name": "Sonidosaurus",
@@ -4749,7 +5009,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": "' Sonid (area in which the type locality is) lizard '",
-    "pronunciation": "soh-nid-oh-sore-us"
+    "pronunciation": "soh-nid-oh-sore-us",
+    "imageUrl": "/api/images/creatures/sonidosaurus-saihangaobiensis.webp"
   },
   {
     "name": "Spinosaurus",
@@ -4767,7 +5028,8 @@
     "type": "large theropod",
     "foundIn": "Morocco",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/spinosaurus-aegyptiacus.webp"
   },
   {
     "name": "Staurikosaurus",
@@ -4785,7 +5047,8 @@
     "type": "large theropod",
     "foundIn": "Brazil",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/staurikosaurus-pricei.webp"
   },
   {
     "name": "Stegoceras",
@@ -4803,7 +5066,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/stegoceras-validum.webp"
   },
   {
     "name": "Stegosaurus",
@@ -4821,7 +5085,8 @@
     "type": "armoured dinosaur",
     "foundIn": "USA",
     "nameMeaning": "' roof lizard '",
-    "pronunciation": "STEG-oh-SORE-us"
+    "pronunciation": "STEG-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/stegosaurus-armatus.webp"
   },
   {
     "name": "Stenopelix",
@@ -4839,7 +5104,8 @@
     "type": "ceratopsian",
     "foundIn": "Germany",
     "nameMeaning": "' narrow pelvis '",
-    "pronunciation": "ste-nop-e-liks"
+    "pronunciation": "ste-nop-e-liks",
+    "imageUrl": "/api/images/creatures/stenopelix-valdensis.webp"
   },
   {
     "name": "Struthiomimus",
@@ -4857,7 +5123,8 @@
     "type": "small theropod",
     "foundIn": "Canada",
     "nameMeaning": "' ostrich mimic '",
-    "pronunciation": "STRUTH-ee-oh-MEEM-us"
+    "pronunciation": "STRUTH-ee-oh-MEEM-us",
+    "imageUrl": "/api/images/creatures/struthiomimus-altus.webp"
   },
   {
     "name": "Struthiosaurus",
@@ -4875,7 +5142,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Spain",
     "nameMeaning": "' ostrich lizard '",
-    "pronunciation": "strew-thee-oh-sore-us"
+    "pronunciation": "strew-thee-oh-sore-us",
+    "imageUrl": "/api/images/creatures/struthiosaurus-austriacus.webp"
   },
   {
     "name": "Styracosaurus",
@@ -4893,7 +5161,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/styracosaurus-albertensis.webp"
   },
   {
     "name": "Suchomimus",
@@ -4911,7 +5180,8 @@
     "type": "large theropod",
     "foundIn": "Niger",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/suchomimus-tenerensis.webp"
   },
   {
     "name": "Supersaurus",
@@ -4929,7 +5199,8 @@
     "type": "sauropod",
     "foundIn": "USA",
     "nameMeaning": "' super lizard '",
-    "pronunciation": "sue-per-sore-us"
+    "pronunciation": "sue-per-sore-us",
+    "imageUrl": "/api/images/creatures/supersaurus-vivianae.webp"
   },
   {
     "name": "Talarurus",
@@ -4947,7 +5218,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": "' wicker tail '",
-    "pronunciation": "tal-a-roor-us"
+    "pronunciation": "tal-a-roor-us",
+    "imageUrl": "/api/images/creatures/talarurus-plicatospineus.webp"
   },
   {
     "name": "Tanius",
@@ -4965,7 +5237,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' [H. C.] Tan '",
-    "pronunciation": "tahn-ee-us"
+    "pronunciation": "tahn-ee-us",
+    "imageUrl": "/api/images/creatures/tanius-sinensis.webp"
   },
   {
     "name": "Tarbosaurus",
@@ -4983,7 +5256,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tarbosaurus-bataar.webp"
   },
   {
     "name": "Tarchia",
@@ -5001,7 +5275,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tarchia-gigantea.webp"
   },
   {
     "name": "Telmatosaurus",
@@ -5019,7 +5294,8 @@
     "type": "euornithopod",
     "foundIn": "Spain",
     "nameMeaning": "' swamp lizard '",
-    "pronunciation": "tel-ma-toh-sore-us"
+    "pronunciation": "tel-ma-toh-sore-us",
+    "imageUrl": "/api/images/creatures/telmatosaurus-transsylvanicus.webp"
   },
   {
     "name": "Tenontosaurus",
@@ -5037,7 +5313,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tenontosaurus-tillettorum.webp"
   },
   {
     "name": "Thecodontosaurus",
@@ -5055,7 +5332,8 @@
     "type": "sauropod",
     "foundIn": "United Kingdom",
     "nameMeaning": "' socket-toothed lizard '",
-    "pronunciation": "theek-o-don-toh-sore-us"
+    "pronunciation": "theek-o-don-toh-sore-us",
+    "imageUrl": "/api/images/creatures/thecodontosaurus-antiquus.webp"
   },
   {
     "name": "Therizinosaurus",
@@ -5073,7 +5351,8 @@
     "type": "large theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' scythe lizard '",
-    "pronunciation": "theh-riz-in-oh-SORE-us"
+    "pronunciation": "theh-riz-in-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/therizinosaurus-cheloniformis.webp"
   },
   {
     "name": "Thescelosaurus",
@@ -5091,7 +5370,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": "' wonderful lizard '",
-    "pronunciation": "thes-kel-oh-SORE-us"
+    "pronunciation": "thes-kel-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/thescelosaurus-neglectus.webp"
   },
   {
     "name": "Torosaurus",
@@ -5109,7 +5389,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/torosaurus-latus.webp"
   },
   {
     "name": "Torvosaurus",
@@ -5127,7 +5408,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' savage lizard '",
-    "pronunciation": "TOR-voh-SORE-us"
+    "pronunciation": "TOR-voh-SORE-us",
+    "imageUrl": "/api/images/creatures/torvosaurus-tanneri.webp"
   },
   {
     "name": "Triceratops",
@@ -5145,7 +5427,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": "' three-horned face '",
-    "pronunciation": "tri-SERRA-tops"
+    "pronunciation": "tri-SERRA-tops",
+    "imageUrl": "/api/images/creatures/triceratops-horridus.webp"
   },
   {
     "name": "Troodon",
@@ -5163,7 +5446,8 @@
     "type": "small theropod",
     "foundIn": "USA",
     "nameMeaning": "' wounding tooth '",
-    "pronunciation": "TROH-oh-don"
+    "pronunciation": "TROH-oh-don",
+    "imageUrl": "/api/images/creatures/troodon-formosus.webp"
   },
   {
     "name": "Tsagantegia",
@@ -5181,7 +5465,8 @@
     "type": "armoured dinosaur",
     "foundIn": "Mongolia",
     "nameMeaning": "' Tsagan Teg '",
-    "pronunciation": "tsah-gahn-tay-gee-a"
+    "pronunciation": "tsah-gahn-tay-gee-a",
+    "imageUrl": "/api/images/creatures/tsagantegia-longicranialis.webp"
   },
   {
     "name": "Tsintaosaurus",
@@ -5199,7 +5484,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": "' Qingdao lizard '",
-    "pronunciation": "ching-dow-sore-us"
+    "pronunciation": "ching-dow-sore-us",
+    "imageUrl": "/api/images/creatures/tsintaosaurus-spinorhinus.webp"
   },
   {
     "name": "Tuojiangosaurus",
@@ -5217,7 +5503,8 @@
     "type": "armoured dinosaur",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tuojiangosaurus-multispinus.webp"
   },
   {
     "name": "Tylocephale",
@@ -5235,7 +5522,8 @@
     "type": "euornithopod",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tylocephale-gilmorei.webp"
   },
   {
     "name": "Tyrannosaurus",
@@ -5253,7 +5541,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": "' tyrant lizard '",
-    "pronunciation": "tie-RAN-oh-sore-us"
+    "pronunciation": "tie-RAN-oh-sore-us",
+    "imageUrl": "/api/images/creatures/tyrannosaurus-rex.webp"
   },
   {
     "name": "Udanoceratops",
@@ -5271,7 +5560,8 @@
     "type": "ceratopsian",
     "foundIn": "Mongolia",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/udanoceratops-tschizhovi.webp"
   },
   {
     "name": "Unenlagia",
@@ -5289,7 +5579,8 @@
     "type": "small theropod",
     "foundIn": "Argentina",
     "nameMeaning": "' half bird '",
-    "pronunciation": "oon-en-lahg-ee-ah"
+    "pronunciation": "oon-en-lahg-ee-ah",
+    "imageUrl": "/api/images/creatures/unenlagia-comahuensis.webp"
   },
   {
     "name": "Urbacodon",
@@ -5307,7 +5598,8 @@
     "type": "small theropod",
     "foundIn": "Uzbekistan",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/urbacodon-itemirensis.webp"
   },
   {
     "name": "Utahraptor",
@@ -5325,7 +5617,8 @@
     "type": "large theropod",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/utahraptor-ostrommaysorum.webp"
   },
   {
     "name": "Valdosaurus",
@@ -5343,7 +5636,8 @@
     "type": "euornithopod",
     "foundIn": "United Kingdom",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/valdosaurus-canaliculatus.webp"
   },
   {
     "name": "Velociraptor",
@@ -5361,7 +5655,8 @@
     "type": "small theropod",
     "foundIn": "Mongolia",
     "nameMeaning": "' quick plunderer '",
-    "pronunciation": "vel-OSS-ee-rap-tor"
+    "pronunciation": "vel-OSS-ee-rap-tor",
+    "imageUrl": "/api/images/creatures/velociraptor-mongoliensis.webp"
   },
   {
     "name": "Vulcanodon",
@@ -5379,7 +5674,8 @@
     "type": "sauropod",
     "foundIn": "Zimbabwe",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/vulcanodon-karibaensis.webp"
   },
   {
     "name": "Yandusaurus",
@@ -5397,7 +5693,8 @@
     "type": "euornithopod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yandusaurus-hongheensis.webp"
   },
   {
     "name": "Yangchuanosaurus",
@@ -5415,7 +5712,8 @@
     "type": "large theropod",
     "foundIn": "China",
     "nameMeaning": "' Yangchuan lizard '",
-    "pronunciation": "yang-choo-AHN-oh-SORE-us"
+    "pronunciation": "yang-choo-AHN-oh-SORE-us",
+    "imageUrl": "/api/images/creatures/yangchuanosaurus-shangyouensis.webp"
   },
   {
     "name": "Yimenosaurus",
@@ -5433,7 +5731,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yimenosaurus-youngi.webp"
   },
   {
     "name": "Yingshanosaurus",
@@ -5451,7 +5750,8 @@
     "type": "armoured dinosaur",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yingshanosaurus-jichuanensis.webp"
   },
   {
     "name": "Yinlong",
@@ -5469,7 +5769,8 @@
     "type": "ceratopsian",
     "foundIn": "China",
     "nameMeaning": "' hidden dragon '",
-    "pronunciation": "yin-long"
+    "pronunciation": "yin-long",
+    "imageUrl": "/api/images/creatures/yinlong-downsi.webp"
   },
   {
     "name": "Yuanmousaurus",
@@ -5487,7 +5788,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yuanmousaurus-jiangyiensis.webp"
   },
   {
     "name": "Yunnanosaurus",
@@ -5505,7 +5807,8 @@
     "type": "sauropod",
     "foundIn": "China",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yunnanosaurus-huangi.webp"
   },
   {
     "name": "Zalmoxes",
@@ -5523,7 +5826,8 @@
     "type": "euornithopod",
     "foundIn": "Romania",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/zalmoxes-robustus.webp"
   },
   {
     "name": "Zephyrosaurus",
@@ -5541,7 +5845,8 @@
     "type": "euornithopod",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/zephyrosaurus-schaffi.webp"
   },
   {
     "name": "Zuniceratops",
@@ -5559,7 +5864,8 @@
     "type": "ceratopsian",
     "foundIn": "USA",
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/zuniceratops-christopheri.webp"
   },
   {
     "name": "Pteranodon",
@@ -5577,7 +5883,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/pteranodon-longiceps.webp"
   },
   {
     "name": "Quetzalcoatlus",
@@ -5595,7 +5902,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/quetzalcoatlus-northropi.webp"
   },
   {
     "name": "Dimorphodon",
@@ -5613,7 +5921,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/dimorphodon-macronyx.webp"
   },
   {
     "name": "Rhamphorhynchus",
@@ -5631,7 +5940,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/rhamphorhynchus-muensteri.webp"
   },
   {
     "name": "Pterodactylus",
@@ -5649,7 +5959,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/pterodactylus-antiquus.webp"
   },
   {
     "name": "Tropeognathus",
@@ -5667,7 +5978,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tropeognathus-mesembrinus.webp"
   },
   {
     "name": "Tapejara",
@@ -5685,7 +5997,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tapejara-wellnhoferi.webp"
   },
   {
     "name": "Anhanguera",
@@ -5703,7 +6016,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/anhanguera-blittersdorffi.webp"
   },
   {
     "name": "Dsungaripterus",
@@ -5721,7 +6035,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/dsungaripterus-weii.webp"
   },
   {
     "name": "Nyctosaurus",
@@ -5739,7 +6054,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/nyctosaurus-gracilis.webp"
   },
   {
     "name": "Plesiosaur",
@@ -5757,7 +6073,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/plesiosaurus-dolichodeirus.webp"
   },
   {
     "name": "Mosasaurus",
@@ -5775,7 +6092,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/mosasaurus-hoffmannii.webp"
   },
   {
     "name": "Ichthyosaurus",
@@ -5793,7 +6111,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/ichthyosaurus-communis.webp"
   },
   {
     "name": "Elasmosaurus",
@@ -5811,7 +6130,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/elasmosaurus-platyurus.webp"
   },
   {
     "name": "Liopleurodon",
@@ -5829,7 +6149,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/liopleurodon-ferox.webp"
   },
   {
     "name": "Kronosaurus",
@@ -5847,7 +6168,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/kronosaurus-queenslandicus.webp"
   },
   {
     "name": "Nothosaurus",
@@ -5883,7 +6205,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tylosaurus-proriger.webp"
   },
   {
     "name": "Thalassomedon",
@@ -5901,7 +6224,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/thalassomedon-haningtoni.webp"
   },
   {
     "name": "Shonisaurus",
@@ -5919,7 +6243,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/shonisaurus-popularis.webp"
   },
   {
     "name": "Ophthalmosaurus",
@@ -5937,7 +6262,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/ophthalmosaurus-icenicus.webp"
   },
   {
     "name": "Temnodontosaurus",
@@ -5955,7 +6281,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/temnodontosaurus-platyodon.webp"
   },
   {
     "name": "Tanystropheus",
@@ -5973,7 +6300,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tanystropheus-longobardicus.webp"
   },
   {
     "name": "Smilodon",
@@ -5991,7 +6319,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/smilodon-fatalis.webp"
   },
   {
     "name": "Woolly Mammoth",
@@ -6009,7 +6338,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/mammuthus-primigenius.webp"
   },
   {
     "name": "Woolly Rhinoceros",
@@ -6027,7 +6357,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/coelodonta-antiquitatis.webp"
   },
   {
     "name": "Megatherium",
@@ -6045,7 +6376,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/megatherium-americanum.webp"
   },
   {
     "name": "Glyptodon",
@@ -6063,7 +6395,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/glyptodon-clavipes.webp"
   },
   {
     "name": "Andrewsarchus",
@@ -6081,7 +6414,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/andrewsarchus-mongoliensis.webp"
   },
   {
     "name": "Paraceratherium",
@@ -6099,7 +6433,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/paraceratherium-transouralicum.webp"
   },
   {
     "name": "Basilosaurus",
@@ -6117,7 +6452,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/basilosaurus-cetoides.webp"
   },
   {
     "name": "Ambulocetus",
@@ -6135,7 +6471,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/ambulocetus-natans.webp"
   },
   {
     "name": "Pakicetus",
@@ -6153,7 +6490,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/pakicetus-inachus.webp"
   },
   {
     "name": "Deinotherium",
@@ -6171,7 +6509,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/deinotherium-giganteum.webp"
   },
   {
     "name": "Sivatherium",
@@ -6189,7 +6528,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/sivatherium-giganteum.webp"
   },
   {
     "name": "Elasmotherium",
@@ -6207,7 +6547,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/elasmotherium-sibiricum.webp"
   },
   {
     "name": "Megalodon",
@@ -6225,7 +6566,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/otodus-megalodon.webp"
   },
   {
     "name": "Thylacosmilus",
@@ -6243,7 +6585,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/thylacosmilus-atrox.webp"
   },
   {
     "name": "Thylacoleo",
@@ -6261,7 +6604,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/thylacoleo-carnifex.webp"
   },
   {
     "name": "Diprotodon",
@@ -6279,7 +6623,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/diprotodon-optatum.webp"
   },
   {
     "name": "Procoptodon",
@@ -6297,7 +6642,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/procoptodon-goliah.webp"
   },
   {
     "name": "Megalania",
@@ -6315,7 +6661,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/varanus-priscus.webp"
   },
   {
     "name": "Arctodus",
@@ -6333,7 +6680,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/arctodus-simus.webp"
   },
   {
     "name": "Doedicurus",
@@ -6351,7 +6699,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/doedicurus-clavicaudatus.webp"
   },
   {
     "name": "Josephoartigasia",
@@ -6369,7 +6718,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/josephoartigasia-monesi.webp"
   },
   {
     "name": "Terror Bird",
@@ -6387,7 +6737,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/phorusrhacos-longissimus.webp"
   },
   {
     "name": "Gastornis",
@@ -6405,7 +6756,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/gastornis-gigantea.webp"
   },
   {
     "name": "Titanoboa",
@@ -6423,7 +6775,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/titanoboa-cerrejonensis.webp"
   },
   {
     "name": "Sarcosuchus",
@@ -6441,7 +6794,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/sarcosuchus-imperator.webp"
   },
   {
     "name": "Deinosuchus",
@@ -6459,7 +6813,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/deinosuchus-hatcheri.webp"
   },
   {
     "name": "Kaprosuchus",
@@ -6477,7 +6832,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/kaprosuchus-saharicus.webp"
   },
   {
     "name": "Quinkana",
@@ -6495,7 +6851,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/quinkana-fortirostrum.webp"
   },
   {
     "name": "Dimetrodon",
@@ -6513,7 +6870,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/dimetrodon-grandis.webp"
   },
   {
     "name": "Edaphosaurus",
@@ -6531,7 +6889,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/edaphosaurus-pogonias.webp"
   },
   {
     "name": "Gorgonops",
@@ -6549,7 +6908,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/gorgonops-torvus.webp"
   },
   {
     "name": "Inostrancevia",
@@ -6567,7 +6927,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/inostrancevia-alexandri.webp"
   },
   {
     "name": "Scutosaurus",
@@ -6585,7 +6946,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/scutosaurus-karpinskii.webp"
   },
   {
     "name": "Moschops",
@@ -6603,7 +6965,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/moschops-capensis.webp"
   },
   {
     "name": "Lystrosaurus",
@@ -6621,7 +6984,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/lystrosaurus-murrayi.webp"
   },
   {
     "name": "Diictodon",
@@ -6639,7 +7003,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/diictodon-feliceps.webp"
   },
   {
     "name": "Postosuchus",
@@ -6657,7 +7022,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/postosuchus-kirkpatricki.webp"
   },
   {
     "name": "Desmatosuchus",
@@ -6675,7 +7041,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/desmatosuchus-spurensis.webp"
   },
   {
     "name": "Anomalocaris",
@@ -6693,7 +7060,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/anomalocaris-canadensis.webp"
   },
   {
     "name": "Hallucigenia",
@@ -6711,7 +7079,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/hallucigenia-sparsa.webp"
   },
   {
     "name": "Opabinia",
@@ -6729,7 +7098,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/opabinia-regalis.webp"
   },
   {
     "name": "Wiwaxia",
@@ -6747,7 +7117,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/wiwaxia-corrugata.webp"
   },
   {
     "name": "Trilobite",
@@ -6765,7 +7136,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/paradoxides-davidis.webp"
   },
   {
     "name": "Eurypterus",
@@ -6783,7 +7155,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/eurypterus-remipes.webp"
   },
   {
     "name": "Cameroceras",
@@ -6801,7 +7174,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/cameroceras-trentonense.webp"
   },
   {
     "name": "Dunkleosteus",
@@ -6819,7 +7193,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/dunkleosteus-terrelli.webp"
   },
   {
     "name": "Tiktaalik",
@@ -6837,7 +7212,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/tiktaalik-roseae.webp"
   },
   {
     "name": "Acanthostega",
@@ -6855,7 +7231,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/acanthostega-gunnari.webp"
   },
   {
     "name": "Helicoprion",
@@ -6873,7 +7250,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/helicoprion-davisii.webp"
   },
   {
     "name": "Cooksonia",
@@ -6891,7 +7269,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/cooksonia-pertoni.webp"
   },
   {
     "name": "Aegirocassis",
@@ -6909,7 +7288,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/aegirocassis-benmoulai.webp"
   },
   {
     "name": "Arthropleura",
@@ -6927,7 +7307,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/arthropleura-armata.webp"
   },
   {
     "name": "Meganeura",
@@ -6945,7 +7326,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/meganeura-monyi.webp"
   },
   {
     "name": "Dodo",
@@ -6963,7 +7345,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/raphus-cucullatus.webp"
   },
   {
     "name": "Moa",
@@ -6981,7 +7364,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/dinornis-robustus.webp"
   },
   {
     "name": "Haast's Eagle",
@@ -6999,7 +7383,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/hieraaetus-moorei.webp"
   },
   {
     "name": "Elephant Bird",
@@ -7035,7 +7420,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/argentavis-magnificens.webp"
   },
   {
     "name": "Pelagornis",
@@ -7053,7 +7439,8 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/pelagornis-sandersi.webp"
   },
   {
     "name": "Yutyrannus",
@@ -7071,6 +7458,7 @@
     "type": null,
     "foundIn": null,
     "nameMeaning": null,
-    "pronunciation": null
+    "pronunciation": null,
+    "imageUrl": "/api/images/creatures/yutyrannus-huali.webp"
   }
 ]

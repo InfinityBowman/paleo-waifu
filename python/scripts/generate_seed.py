@@ -41,7 +41,7 @@ def main():
     lines: list[str] = []
     creature_ids: list[str] = []
 
-    # Insert creatures
+    # Insert creatures (OR REPLACE to handle re-seeding)
     for c in creatures:
         cid = nanoid(c["scientificName"])
         creature_ids.append(cid)
@@ -62,7 +62,7 @@ def main():
             f"{sql_num(c.get('sizeMeters'))}, "
             f"{sql_num(c.get('weightKg'))}, "
             f"{sql_str(c.get('rarity', 'common'))}, "
-            f"{sql_str(c.get('description', ''))}, "
+            f"'{escape_sql(c.get('description') or '')}', "
             f"{sql_str(fun_facts)}, "
             f"{sql_str(image_url)}"
             f");"

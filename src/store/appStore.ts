@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { PullResult } from '@/lib/gacha'
 
 interface AppState {
-  fossils: number
+  fossils: number | null
   pullResults: Array<PullResult>
   isPulling: boolean
 
@@ -14,7 +14,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  fossils: 0,
+  fossils: null,
   pullResults: [],
   isPulling: false,
 
