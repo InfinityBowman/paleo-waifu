@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { Bone, CalendarCheck, Gift } from 'lucide-react'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { banner, currency } from '@/lib/db/schema'
-import { ensureSession } from '@/lib/auth-server'
+import { getSession } from '@/lib/auth-server'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 import { DAILY_FOSSILS } from '@/lib/types'
 import { useAppStore } from '@/store/appStore'
@@ -17,18 +17,20 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
 const getGachaData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await ensureSession()
+  const session = await getSession()
+  if (!session) throw redirect({ to: '/' })
+  const userId = session.user.id
   const db = await createDb(getCfEnv().DB)
 
-  await ensureUserCurrency(db, session.user.id)
+  await ensureUserCurrency(db, userId)
 
   const [banners, fossils, currencyRow] = await Promise.all([
     db.select().from(banner).where(eq(banner.isActive, true)).all(),
-    getFossils(db, session.user.id),
+    getFossils(db, userId),
     db
       .select({ lastDailyClaim: currency.lastDailyClaim })
       .from(currency)
-      .where(eq(currency.userId, session.user.id))
+      .where(eq(currency.userId, userId))
       .get(),
   ])
 

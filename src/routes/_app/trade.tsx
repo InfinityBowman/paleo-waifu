@@ -1,14 +1,16 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, inArray, or } from 'drizzle-orm'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
-import { ensureSession } from '@/lib/auth-server'
+import { getSession } from '@/lib/auth-server'
 import { TradeList } from '@/components/trade/TradeList'
 
 const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await ensureSession()
+  const session = await getSession()
+  if (!session) throw redirect({ to: '/' })
+  const userId = session.user.id
   const db = await createDb(getCfEnv().DB)
 
   const [openTrades, pendingTrades, myCreatures] = await Promise.all([
@@ -48,8 +50,8 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
         and(
           eq(tradeOffer.status, 'pending'),
           or(
-            eq(tradeOffer.offererId, session.user.id),
-            eq(tradeOffer.receiverId, session.user.id),
+            eq(tradeOffer.offererId, userId),
+            eq(tradeOffer.receiverId, userId),
           ),
         ),
       )
@@ -67,7 +69,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
       .innerJoin(creature, eq(creature.id, userCreature.creatureId))
       .where(
         and(
-          eq(userCreature.userId, session.user.id),
+          eq(userCreature.userId, userId),
           eq(userCreature.isLocked, false),
         ),
       )
@@ -145,7 +147,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
     openTrades,
     pendingTrades: hydratedPending,
     myCreatures,
-    userId: session.user.id,
+    userId,
   }
 })
 

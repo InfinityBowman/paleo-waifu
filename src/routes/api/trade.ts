@@ -69,7 +69,7 @@ export const Route = createFileRoute('/api/trade')({
               resetOp,
             ])
           } else {
-            await db.batch([resetOp])
+            await resetOp
           }
 
           return null

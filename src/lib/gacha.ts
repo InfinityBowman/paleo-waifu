@@ -1,7 +1,6 @@
-import { and, eq, gte, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import {
-  banner,
   bannerPool,
   creature,
   currency,
@@ -163,47 +162,30 @@ function calculateRarity(
   return 'legendary'
 }
 
-/** Select a creature from the banner pool at the given rarity, respecting rate-up */
-async function selectCreature(
-  db: Database,
-  bannerId: string,
+interface PoolCreature {
+  creatureId: string
+  rarity: string
+  name: string
+  scientificName: string
+  imageUrl: string | null
+  description: string
+  era: string
+}
+
+/** Select a creature from pre-fetched pool data (no DB queries) */
+function selectCreatureFromPool(
+  poolByRarity: Map<string, Array<PoolCreature>>,
   rarity: Rarity,
   rateUpId: string | null,
-): Promise<string> {
-  // Get all creatures of this rarity in the banner pool
-  const pool = await db
-    .select({ creatureId: bannerPool.creatureId })
-    .from(bannerPool)
-    .innerJoin(creature, eq(creature.id, bannerPool.creatureId))
-    .where(and(eq(bannerPool.bannerId, bannerId), eq(creature.rarity, rarity)))
-    .all()
+): string | null {
+  const pool = poolByRarity.get(rarity)
+  if (!pool || pool.length === 0) return null
 
-  if (pool.length === 0) {
-    // Fallback: any creature of this rarity
-    const fallback = await db
-      .select({ id: creature.id })
-      .from(creature)
-      .where(eq(creature.rarity, rarity))
-      .all()
-    if (fallback.length === 0)
-      throw new Error(`No creatures of rarity: ${rarity}`)
-    return fallback[Math.floor(secureRandom() * fallback.length)].id
-  }
-
-  // Rate-up: featured creature gets 50% of its rarity's share
   if (rateUpId) {
+    // Rate-up rarity is derived from pool data — no extra DB query needed
     const isRateUpInPool = pool.some((p) => p.creatureId === rateUpId)
-    const rateUpCreature = await db
-      .select({ rarity: creature.rarity })
-      .from(creature)
-      .where(eq(creature.id, rateUpId))
-      .get()
-
-    if (isRateUpInPool && rateUpCreature?.rarity === rarity) {
-      if (secureRandom() < RATE_UP_SHARE) {
-        return rateUpId
-      }
-      // Otherwise pick from the rest
+    if (isRateUpInPool) {
+      if (secureRandom() < RATE_UP_SHARE) return rateUpId
       const others = pool.filter((p) => p.creatureId !== rateUpId)
       if (others.length > 0) {
         return others[Math.floor(secureRandom() * others.length)].creatureId
@@ -226,22 +208,15 @@ export interface PullResult {
   isNew: boolean
 }
 
-/** Execute a single gacha pull */
-export async function executePull(
+/** Execute a batch of gacha pulls with minimal D1 round-trips (~7 vs ~90 for 10-pull) */
+export async function executePullBatch(
   db: Database,
   userId: string,
   bannerId: string,
-): Promise<PullResult> {
-  // Get banner details
-  const bannerRow = await db
-    .select()
-    .from(banner)
-    .where(and(eq(banner.id, bannerId), eq(banner.isActive, true)))
-    .get()
-
-  if (!bannerRow) throw new Error('Banner not found or inactive')
-
-  // Ensure pity counter exists (INSERT ON CONFLICT DO NOTHING)
+  rateUpId: string | null,
+  count: number,
+): Promise<PullResult[]> {
+  // 1. Ensure pity counter exists
   await db
     .insert(pityCounter)
     .values({
@@ -254,97 +229,176 @@ export async function executePull(
     })
     .onConflictDoNothing()
 
-  // Atomically increment pity counter and read the pre-increment values
-  // This prevents concurrent pulls from reading the same stale state
-  const pityRows = await db
-    .update(pityCounter)
-    .set({
-      pullsSinceRare: sql`${pityCounter.pullsSinceRare} + 1`,
-      pullsSinceLegendary: sql`${pityCounter.pullsSinceLegendary} + 1`,
-      totalPulls: sql`${pityCounter.totalPulls} + 1`,
-    })
-    .where(
-      and(eq(pityCounter.userId, userId), eq(pityCounter.bannerId, bannerId)),
-    )
-    .returning({
-      id: pityCounter.id,
-      // These are post-increment values, subtract 1 for the pre-increment state
-      pullsSinceRare: pityCounter.pullsSinceRare,
-      pullsSinceLegendary: pityCounter.pullsSinceLegendary,
-      totalPulls: pityCounter.totalPulls,
-    })
-
-  if (pityRows.length === 0) throw new Error('Failed to update pity counter')
-  const pity = pityRows[0]
-
-  // Use pre-increment values for rarity calculation
-  const pullsSinceRare = pity.pullsSinceRare - 1
-  const pullsSinceLegendary = pity.pullsSinceLegendary - 1
-
-  // Roll rarity
-  const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary)
-
-  // If we got rare+ or legendary, reset the relevant counter
-  const isRarePlus = ['rare', 'epic', 'legendary'].includes(rarity)
-  const isLegendary = rarity === 'legendary'
-  if (isRarePlus || isLegendary) {
-    await db
+  // 2. Atomically claim pity slots for this batch (prevents race conditions)
+  //    and fetch pool with creature data in parallel
+  const [pityRows, poolRows] = await Promise.all([
+    db
       .update(pityCounter)
       .set({
-        ...(isRarePlus ? { pullsSinceRare: 0 } : {}),
-        ...(isLegendary ? { pullsSinceLegendary: 0 } : {}),
+        pullsSinceRare: sql`${pityCounter.pullsSinceRare} + ${count}`,
+        pullsSinceLegendary: sql`${pityCounter.pullsSinceLegendary} + ${count}`,
+        totalPulls: sql`${pityCounter.totalPulls} + ${count}`,
       })
-      .where(eq(pityCounter.id, pity.id))
+      .where(
+        and(
+          eq(pityCounter.userId, userId),
+          eq(pityCounter.bannerId, bannerId),
+        ),
+      )
+      .returning({
+        id: pityCounter.id,
+        pullsSinceRare: pityCounter.pullsSinceRare,
+        pullsSinceLegendary: pityCounter.pullsSinceLegendary,
+        totalPulls: pityCounter.totalPulls,
+      }),
+    db
+      .select({
+        creatureId: bannerPool.creatureId,
+        rarity: creature.rarity,
+        name: creature.name,
+        scientificName: creature.scientificName,
+        imageUrl: creature.imageUrl,
+        description: creature.description,
+        era: creature.era,
+      })
+      .from(bannerPool)
+      .innerJoin(creature, eq(creature.id, bannerPool.creatureId))
+      .where(eq(bannerPool.bannerId, bannerId))
+      .all(),
+  ])
+
+  if (pityRows.length === 0) throw new Error('Failed to update pity counter')
+  const pityAfterBatch = pityRows[0]
+
+  // Derive pre-batch pity values from the post-increment returned values
+  const preBatchRare = pityAfterBatch.pullsSinceRare - count
+  const preBatchLegendary = pityAfterBatch.pullsSinceLegendary - count
+
+  // Group pool by rarity for O(1) lookup
+  const poolByRarity = new Map<string, Array<PoolCreature>>()
+  for (const row of poolRows) {
+    if (!poolByRarity.has(row.rarity)) poolByRarity.set(row.rarity, [])
+    poolByRarity.get(row.rarity)!.push(row)
   }
 
-  // Select creature
-  const creatureId = await selectCreature(
-    db,
-    bannerId,
-    rarity,
-    bannerRow.rateUpId,
+  // Creature data cache from pool
+  const creatureCache = new Map<string, PoolCreature>(
+    poolRows.map((p) => [p.creatureId, p]),
   )
 
-  // Create user creature instance
-  const userCreatureId = nanoid()
-  await db.insert(userCreature).values({
-    id: userCreatureId,
-    userId,
-    creatureId,
-    bannerId,
-  })
+  // 3. In-memory pull loop — no DB queries
+  let pullsSinceRare = preBatchRare
+  let pullsSinceLegendary = preBatchLegendary
 
-  // Check if this is a new species for the user
-  const existingCount = await db
-    .select({ count: sql<number>`count(*)` })
+  const pullData: Array<{
+    userCreatureId: string
+    creatureId: string
+    rarity: Rarity
+  }> = []
+
+  for (let i = 0; i < count; i++) {
+    const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary)
+
+    let creatureId = selectCreatureFromPool(poolByRarity, rarity, rateUpId)
+
+    // Fallback: pool missing this rarity (rare edge case)
+    if (!creatureId) {
+      const fallback = await db
+        .select({
+          id: creature.id,
+          name: creature.name,
+          scientificName: creature.scientificName,
+          imageUrl: creature.imageUrl,
+          description: creature.description,
+          era: creature.era,
+          rarity: creature.rarity,
+        })
+        .from(creature)
+        .where(eq(creature.rarity, rarity))
+        .all()
+      if (fallback.length === 0)
+        throw new Error(`No creatures of rarity: ${rarity}`)
+      const picked = fallback[Math.floor(secureRandom() * fallback.length)]
+      creatureId = picked.id
+      creatureCache.set(creatureId, {
+        creatureId,
+        rarity: picked.rarity,
+        name: picked.name,
+        scientificName: picked.scientificName,
+        imageUrl: picked.imageUrl,
+        description: picked.description,
+        era: picked.era,
+      })
+    }
+
+    pullsSinceRare++
+    pullsSinceLegendary++
+
+    if (['rare', 'epic', 'legendary'].includes(rarity)) pullsSinceRare = 0
+    if (rarity === 'legendary') pullsSinceLegendary = 0
+
+    pullData.push({ userCreatureId: nanoid(), creatureId, rarity })
+  }
+
+  // 4. Check isNew for all unique creatures BEFORE inserting (1 query)
+  const uniqueCreatureIds = [...new Set(pullData.map((p) => p.creatureId))]
+  const existingCounts = await db
+    .select({
+      creatureId: userCreature.creatureId,
+      count: sql<number>`count(*)`,
+    })
     .from(userCreature)
     .where(
       and(
         eq(userCreature.userId, userId),
-        eq(userCreature.creatureId, creatureId),
+        inArray(userCreature.creatureId, uniqueCreatureIds),
       ),
     )
-    .get()
-  const isNew = (existingCount?.count ?? 0) <= 1
+    .groupBy(userCreature.creatureId)
+    .all()
+  const existingMap = new Map(
+    existingCounts.map((e) => [e.creatureId, e.count]),
+  )
 
-  // Get full creature data
-  const creatureData = await db
-    .select()
-    .from(creature)
-    .where(eq(creature.id, creatureId))
-    .get()
+  // 5. Write final pity state (with resets) + insert all creatures atomically
+  //    The initial atomic increment claimed our slots; now we correct for any resets
+  await db.batch([
+    db
+      .update(pityCounter)
+      .set({ pullsSinceRare, pullsSinceLegendary })
+      .where(eq(pityCounter.id, pityAfterBatch.id)),
+    db.insert(userCreature).values(
+      pullData.map((p) => ({
+        id: p.userCreatureId,
+        userId,
+        creatureId: p.creatureId,
+        bannerId,
+      })),
+    ),
+  ])
 
-  if (!creatureData) throw new Error('Creature not found')
+  // 6. Build results from cache
+  const seenInBatch = new Map<string, number>()
 
-  return {
-    userCreatureId,
-    creatureId,
-    name: creatureData.name,
-    scientificName: creatureData.scientificName,
-    rarity: creatureData.rarity as Rarity,
-    imageUrl: creatureData.imageUrl,
-    description: creatureData.description,
-    era: creatureData.era,
-    isNew,
-  }
+  return pullData.map((p) => {
+    const batchCount = seenInBatch.get(p.creatureId) ?? 0
+    seenInBatch.set(p.creatureId, batchCount + 1)
+
+    const isNew = (existingMap.get(p.creatureId) ?? 0) === 0 && batchCount === 0
+
+    const data = creatureCache.get(p.creatureId)
+    if (!data) throw new Error(`Creature ${p.creatureId} not found in cache`)
+
+    return {
+      userCreatureId: p.userCreatureId,
+      creatureId: p.creatureId,
+      name: data.name,
+      scientificName: data.scientificName,
+      rarity: p.rarity,
+      imageUrl: data.imageUrl,
+      description: data.description,
+      era: data.era,
+      isNew,
+    }
+  })
 }

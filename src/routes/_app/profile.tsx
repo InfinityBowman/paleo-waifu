@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { count, eq, sql } from 'drizzle-orm'
 import { Bone, Dices, Handshake, Microscope } from 'lucide-react'
@@ -6,12 +6,15 @@ import type { LucideIcon } from 'lucide-react'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
-import { ensureSession } from '@/lib/auth-server'
+import { getSession } from '@/lib/auth-server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 
 const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await ensureSession()
+  const session = await getSession()
+  if (!session) throw redirect({ to: '/' })
+  const userId = session.user.id
+
   const db = await createDb(getCfEnv().DB)
 
   const [
@@ -24,26 +27,26 @@ const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
     db
       .select()
       .from(currency)
-      .where(eq(currency.userId, session.user.id))
+      .where(eq(currency.userId, userId))
       .get(),
     db
       .select({ count: count() })
       .from(userCreature)
-      .where(eq(userCreature.userId, session.user.id))
+      .where(eq(userCreature.userId, userId))
       .get(),
     db
       .select({
         count: sql<number>`count(distinct ${userCreature.creatureId})`,
       })
       .from(userCreature)
-      .where(eq(userCreature.userId, session.user.id))
+      .where(eq(userCreature.userId, userId))
       .get(),
     db.select({ count: count() }).from(creature).get(),
     db
       .select({ count: count() })
       .from(tradeHistory)
       .where(
-        sql`${tradeHistory.giverId} = ${session.user.id} OR ${tradeHistory.receiverId} = ${session.user.id}`,
+        sql`${tradeHistory.giverId} = ${userId} OR ${tradeHistory.receiverId} = ${userId}`,
       )
       .get(),
   ])
