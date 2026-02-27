@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Skull, Sparkles } from 'lucide-react'
 import type { PullResult } from '@/lib/gacha'
-import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import {
   RARITY_BG,

@@ -102,7 +102,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
               rows.map((r) => [r.ucId, { name: r.name, rarity: r.rarity }]),
             ),
           )
-      : {},
+      : ({} as Record<string, { name: string; rarity: string }>),
     pendingUserIds.length > 0
       ? db
           .select({ id: user.id, name: user.name, image: user.image })
@@ -114,7 +114,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
               rows.map((r) => [r.id, { name: r.name, image: r.image }]),
             ),
           )
-      : {},
+      : ({} as Record<string, { name: string; image: string | null }>),
   ])
 
   const hydratedPending = pendingTrades.map((t) => ({

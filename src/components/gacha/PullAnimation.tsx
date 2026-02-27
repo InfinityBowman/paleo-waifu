@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Pickaxe, Skull, X } from 'lucide-react'
+import { Pickaxe, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { CardReveal } from './CardReveal'
 import { useAppStore } from '@/store/appStore'

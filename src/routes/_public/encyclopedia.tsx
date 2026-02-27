@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
+import { eq } from 'drizzle-orm'
 import { env } from 'cloudflare:workers'
 import { createDb } from '@/lib/db/client'
 import { creature } from '@/lib/db/schema'
@@ -7,8 +8,37 @@ import { EncyclopediaGrid } from '@/components/encyclopedia/EncyclopediaGrid'
 
 const getCreatures = createServerFn({ method: 'GET' }).handler(async () => {
   const db = createDb((env as unknown as Env).DB)
-  return db.select().from(creature).all()
+  return db
+    .select({
+      id: creature.id,
+      name: creature.name,
+      scientificName: creature.scientificName,
+      era: creature.era,
+      diet: creature.diet,
+      rarity: creature.rarity,
+      imageUrl: creature.imageUrl,
+      imageAspectRatio: creature.imageAspectRatio,
+    })
+    .from(creature)
+    .all()
 })
+
+export const getCreatureDetails = createServerFn({ method: 'GET' })
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: id }) => {
+    const db = createDb((env as unknown as Env).DB)
+    const rows = await db
+      .select({
+        description: creature.description,
+        period: creature.period,
+        sizeMeters: creature.sizeMeters,
+        weightKg: creature.weightKg,
+        funFacts: creature.funFacts,
+      })
+      .from(creature)
+      .where(eq(creature.id, id))
+    return rows[0] ?? null
+  })
 
 export const Route = createFileRoute('/_public/encyclopedia')({
   loader: () => getCreatures(),

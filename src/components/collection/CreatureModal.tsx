@@ -17,7 +17,7 @@ interface Creature {
   era: string
   diet: string
   imageUrl: string | null
-  description: string
+  description?: string | null
   period?: string | null
   sizeMeters?: number | null
   weightKg?: number | null
@@ -141,24 +141,34 @@ export function CreatureModal({
             )}
           </div>
 
-          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-            {creature.description}
-          </p>
+          {creature.description ? (
+            <>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                {creature.description}
+              </p>
 
-          {funFacts.length > 0 && (
-            <div className="mt-4">
-              <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-                <Sparkles className="h-3.5 w-3.5 text-primary" />
-                Fun Facts
-              </div>
-              <ul className="space-y-1.5 text-sm text-muted-foreground">
-                {funFacts.map((fact, i) => (
-                  <li key={i} className="flex gap-2">
-                    <span className="mt-0.5 text-primary/60">•</span>
-                    <span>{fact}</span>
-                  </li>
-                ))}
-              </ul>
+              {funFacts.length > 0 && (
+                <div className="mt-4">
+                  <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    Fun Facts
+                  </div>
+                  <ul className="space-y-1.5 text-sm text-muted-foreground">
+                    {funFacts.map((fact, i) => (
+                      <li key={i} className="flex gap-2">
+                        <span className="mt-0.5 text-primary/60">•</span>
+                        <span>{fact}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="mt-4 space-y-2">
+              <div className="h-4 w-full animate-pulse rounded bg-muted/50" />
+              <div className="h-4 w-5/6 animate-pulse rounded bg-muted/50" />
+              <div className="h-4 w-4/6 animate-pulse rounded bg-muted/50" />
             </div>
           )}
         </div>

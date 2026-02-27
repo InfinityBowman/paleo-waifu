@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Bone, Pickaxe } from 'lucide-react'
 import { useAppStore } from '@/store/appStore'
+import type { PullResult } from '@/lib/gacha'
 import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
@@ -24,15 +25,19 @@ export function PullButton({ bannerId }: { bannerId: string }) {
         body: JSON.stringify({ action, bannerId }),
       })
 
-      const data = await res.json()
+      const data = (await res.json()) as {
+        error?: string
+        fossils?: number
+        results?: Array<PullResult>
+      }
       if (!res.ok) {
         setError(data.error ?? 'Pull failed')
         if (data.fossils != null) store.setFossils(data.fossils)
         return
       }
 
-      store.setPullResults(data.results)
-      store.setFossils(data.fossils)
+      if (data.results) store.setPullResults(data.results)
+      if (data.fossils != null) store.setFossils(data.fossils)
     } catch {
       setError('Network error — please try again')
     } finally {

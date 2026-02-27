@@ -74,9 +74,12 @@ function GachaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'claim_daily' }),
       })
-      const data = await res.json()
+      const data = (await res.json()) as {
+        claimed?: boolean
+        fossils?: number
+      }
       if (data.claimed) {
-        setFossils(data.fossils)
+        if (data.fossils != null) setFossils(data.fossils)
         setCanClaim(false)
       }
     } catch {

@@ -16,6 +16,7 @@ pnpm db:seed:prod     # Seed production D1 with creature data
 pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
+pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
 ```
 
 ## Environment

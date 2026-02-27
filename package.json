@@ -16,7 +16,8 @@
     "db:seed:dev-users": "wrangler d1 execute paleo-waifu-db --local --file=./seed-dev-users.sql",
     "lint": "eslint",
     "format": "prettier",
-    "check": "prettier --write . && eslint --fix"
+    "check": "prettier --write . && eslint --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/fredoka": "^5.2.10",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.25.2",
+    "@cloudflare/workers-types": "^4.20260226.1",
     "@tanstack/eslint-config": "^0.3.0",
     "@tanstack/router-plugin": "^1.132.0",
     "@types/node": "^22.10.2",

@@ -5,7 +5,6 @@ import { nanoid } from 'nanoid'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
 import {
-  creature,
   tradeHistory,
   tradeOffer,
   userCreature,
@@ -390,15 +389,7 @@ export const Route = createFileRoute('/api/trade')({
           }
 
           // Atomically unlock receiver's creature and reset trade to open
-          await db.batch([
-            ...(trade.receiverCreatureId
-              ? [
-                  db
-                    .update(userCreature)
-                    .set({ isLocked: false })
-                    .where(eq(userCreature.id, trade.receiverCreatureId)),
-                ]
-              : []),
+          const rejectOps = [
             db
               .update(tradeOffer)
               .set({
@@ -407,7 +398,18 @@ export const Route = createFileRoute('/api/trade')({
                 receiverCreatureId: null,
               })
               .where(eq(tradeOffer.id, body.tradeId)),
-          ])
+          ] as const
+          if (trade.receiverCreatureId) {
+            await db.batch([
+              db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, trade.receiverCreatureId)),
+              ...rejectOps,
+            ])
+          } else {
+            await db.batch(rejectOps)
+          }
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { 'Content-Type': 'application/json' },
@@ -446,15 +448,7 @@ export const Route = createFileRoute('/api/trade')({
           }
 
           // Atomically unlock receiver's creature and reset trade to open
-          await db.batch([
-            ...(trade.receiverCreatureId
-              ? [
-                  db
-                    .update(userCreature)
-                    .set({ isLocked: false })
-                    .where(eq(userCreature.id, trade.receiverCreatureId)),
-                ]
-              : []),
+          const withdrawOps = [
             db
               .update(tradeOffer)
               .set({
@@ -463,7 +457,18 @@ export const Route = createFileRoute('/api/trade')({
                 receiverCreatureId: null,
               })
               .where(eq(tradeOffer.id, body.tradeId)),
-          ])
+          ] as const
+          if (trade.receiverCreatureId) {
+            await db.batch([
+              db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, trade.receiverCreatureId)),
+              ...withdrawOps,
+            ])
+          } else {
+            await db.batch(withdrawOps)
+          }
 
           return new Response(JSON.stringify({ success: true }), {
             headers: { 'Content-Type': 'application/json' },

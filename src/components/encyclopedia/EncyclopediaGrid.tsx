@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Search, Skull } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { CreatureModal } from '@/components/collection/CreatureModal'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
 import {
   Select,
   SelectContent,
@@ -13,32 +12,80 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { getCreatureDetails } from '@/routes/_public/encyclopedia'
 
-interface CreatureData {
+interface CreatureGridItem {
   id: string
   name: string
   scientificName: string
   era: string
-  period: string | null
   diet: string
-  sizeMeters: number | null
-  weightKg: number | null
   rarity: string
-  description: string
-  funFacts: string | null
   imageUrl: string | null
   imageAspectRatio: number | null
+}
+
+interface CreatureDetails {
+  description: string
+  period: string | null
+  sizeMeters: number | null
+  weightKg: number | null
+  funFacts: string | null
 }
 
 export function EncyclopediaGrid({
   creatures,
 }: {
-  creatures: Array<CreatureData>
+  creatures: Array<CreatureGridItem>
 }) {
   const [search, setSearch] = useState('')
   const [eraFilter, setEraFilter] = useState<string>('all')
   const [dietFilter, setDietFilter] = useState<string>('all')
-  const [selected, setSelected] = useState<CreatureData | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedDetails, setSelectedDetails] =
+    useState<CreatureDetails | null>(null)
+
+  const prefetchCache = useRef<Map<string, CreatureDetails>>(new Map())
+  const prefetchInFlight = useRef<Set<string>>(new Set())
+
+  const prefetch = useCallback((id: string) => {
+    if (prefetchCache.current.has(id) || prefetchInFlight.current.has(id))
+      return
+    prefetchInFlight.current.add(id)
+    getCreatureDetails({ data: id }).then((result) => {
+      prefetchInFlight.current.delete(id)
+      if (result) {
+        prefetchCache.current.set(id, result)
+      }
+    })
+  }, [])
+
+  const handleClick = useCallback(
+    (id: string) => {
+      setSelectedId(id)
+      const cached = prefetchCache.current.get(id)
+      if (cached) {
+        setSelectedDetails(cached)
+      } else {
+        setSelectedDetails(null)
+        getCreatureDetails({ data: id }).then((result) => {
+          if (result) {
+            prefetchCache.current.set(id, result)
+            setSelectedDetails(result)
+          }
+        })
+      }
+    },
+    [],
+  )
+
+  const selectedGridItem = selectedId
+    ? creatures.find((c) => c.id === selectedId) ?? null
+    : null
+
+  const modalCreature = selectedGridItem
+    ? { ...selectedGridItem, ...selectedDetails }
+    : null
 
   const eras = [...new Set(creatures.map((c) => c.era))]
   const diets = [...new Set(creatures.map((c) => c.diet))]
@@ -106,7 +153,8 @@ export function EncyclopediaGrid({
           return (
             <button
               key={c.id}
-              onClick={() => setSelected(c)}
+              onMouseEnter={() => prefetch(c.id)}
+              onClick={() => handleClick(c.id)}
               className={cn(
                 'group mb-4 inline-block w-full overflow-hidden rounded-xl border-2 text-left break-inside-avoid transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
                 RARITY_BORDER[rarity],
@@ -159,10 +207,13 @@ export function EncyclopediaGrid({
       </div>
 
       <CreatureModal
-        creature={selected}
-        open={!!selected}
+        creature={modalCreature}
+        open={!!selectedId}
         onOpenChange={(open) => {
-          if (!open) setSelected(null)
+          if (!open) {
+            setSelectedId(null)
+            setSelectedDetails(null)
+          }
         }}
       />
     </>
