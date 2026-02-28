@@ -13,6 +13,8 @@
     "db:clear:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
     "db:seed:local": "wrangler d1 execute paleo-waifu-db --local --file=./seed.sql",
     "db:seed:prod": "wrangler d1 execute paleo-waifu-db-prod --remote --env production --file=./seed.sql",
+    "data:pipeline": "cd python && uv run python scripts/clean_descriptions.py && uv run python scripts/enrich_descriptions.py && cd .. && python3 python/scripts/generate_seed.py",
+    "data:pipeline:all": "cd python && uv run python scripts/clean_descriptions.py && uv run python scripts/enrich_descriptions.py --all && cd .. && python3 python/scripts/generate_seed.py",
     "db:seed:dev-users": "wrangler d1 execute paleo-waifu-db --local --file=./seed-dev-users.sql",
     "lint": "eslint",
     "format": "prettier",

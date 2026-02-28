@@ -61,14 +61,14 @@ export function CreatureModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className={cn(
-          'gap-0 overflow-hidden p-0 sm:max-w-md',
+          'flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-md',
           'border-2',
           RARITY_BORDER[rarity],
         )}
       >
         <div
           className={cn(
-            'relative aspect-square bg-gradient-to-b p-8',
+            'relative flex max-h-72 shrink-0 items-center justify-center bg-gradient-to-b p-6',
             RARITY_IMAGE_GRADIENT[rarity] ?? 'from-muted/30 to-background',
           )}
         >
@@ -85,16 +85,16 @@ export function CreatureModal({
             <img
               src={creature.imageUrl}
               alt={creature.name}
-              className="h-full w-full rounded-lg object-contain"
+              className="max-h-60 w-auto rounded-lg object-contain"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center">
+            <div className="flex h-40 w-full items-center justify-center">
               <Skull className="h-20 w-20 text-muted-foreground/20" />
             </div>
           )}
         </div>
 
-        <div className="p-6">
+        <div className="min-h-0 flex-1 overflow-y-auto p-6">
           <Badge
             variant="secondary"
             className={cn(
