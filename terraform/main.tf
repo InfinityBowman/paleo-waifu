@@ -21,9 +21,9 @@ resource "cloudflare_ruleset" "rate_limiting" {
 
   rules = [
     {
-      description = "Global rate limit: 20 req/10s per IP per colo"
+      description = "Rate limit API endpoints"
       action      = "block"
-      expression  = "true"
+      expression  = "starts_with(http.request.uri.path, \"/api/\")"
       enabled     = true
       ratelimit = {
         characteristics     = ["cf.colo.id", "ip.src"]

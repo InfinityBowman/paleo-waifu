@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, Search, Skull } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
@@ -170,6 +170,39 @@ export function EncyclopediaGrid({
 
   const allCreatures = [...creatures, ...extraItems]
 
+  // ── Masonry column distribution ──────────────────────────────────────────
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [columnCount, setColumnCount] = useState(5)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry!.contentRect.width
+      setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const columns = useMemo(() => {
+    const cols: Array<Array<CreatureGridItem>> = Array.from(
+      { length: columnCount },
+      () => [],
+    )
+    const heights = new Array<number>(columnCount).fill(0)
+    for (const item of allCreatures) {
+      let minIdx = 0
+      for (let i = 1; i < columnCount; i++) {
+        if (heights[i]! < heights[minIdx]!) minIdx = i
+      }
+      cols[minIdx]!.push(item)
+      const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
+      heights[minIdx] += imgH + 0.3
+    }
+    return cols
+  }, [allCreatures, columnCount])
+
   const selectedGridItem = selectedId
     ? (allCreatures.find((c) => c.id === selectedId) ?? null)
     : null
@@ -212,7 +245,7 @@ export function EncyclopediaGrid({
   }, [filters])
 
   useEffect(() => {
-    if (!hasMore) {
+    if (!hasMore || loadingMore) {
       observerRef.current?.disconnect()
       return
     }
@@ -229,7 +262,7 @@ export function EncyclopediaGrid({
     )
     observerRef.current.observe(sentinel)
     return () => observerRef.current?.disconnect()
-  }, [hasMore, handleLoadMore])
+  }, [hasMore, loadingMore, handleLoadMore])
 
   return (
     <>
@@ -289,65 +322,69 @@ export function EncyclopediaGrid({
         </Select>
       </div>
 
-      {/* Grid */}
-      <div className="columns-2 gap-4 sm:columns-3 md:columns-4 lg:columns-5">
-        {allCreatures.map((c) => {
-          const rarity = c.rarity as Rarity
-          return (
-            <button
-              key={c.id}
-              onMouseEnter={() => prefetch(c.id)}
-              onMouseLeave={cancelPrefetch}
-              onClick={() => handleClick(c.id)}
-              className={cn(
-                'group mb-4 inline-block w-full overflow-hidden rounded-xl border-2 text-left break-inside-avoid transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
-                RARITY_BORDER[rarity],
-                RARITY_BG[rarity],
-              )}
-            >
-              <div
-                className="overflow-hidden"
-                style={
-                  c.imageAspectRatio
-                    ? { aspectRatio: c.imageAspectRatio }
-                    : undefined
-                }
-              >
-                {c.imageUrl ? (
-                  <img
-                    src={c.imageUrl}
-                    alt={c.name}
-                    loading="lazy"
-                    className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex aspect-square items-center justify-center bg-muted/20">
-                    <Skull className="h-10 w-10 text-muted-foreground/30" />
-                  </div>
-                )}
-              </div>
-              <div className="p-2">
-                <span
+      {/* Masonry grid */}
+      <div ref={containerRef} className="flex gap-4">
+        {columns.map((col, colIdx) => (
+          <div key={colIdx} className="flex flex-1 flex-col gap-4">
+            {col.map((c) => {
+              const rarity = c.rarity as Rarity
+              return (
+                <button
+                  key={c.id}
+                  onMouseEnter={() => prefetch(c.id)}
+                  onMouseLeave={cancelPrefetch}
+                  onClick={() => handleClick(c.id)}
                   className={cn(
-                    'font-display text-[10px] font-semibold uppercase',
-                    RARITY_COLORS[rarity],
+                    'group overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
+                    RARITY_BORDER[rarity],
+                    RARITY_BG[rarity],
                   )}
                 >
-                  {rarity}
-                </span>
-                <div className="font-display text-sm font-bold leading-tight">
-                  {c.name}
-                </div>
-                <div className="text-[11px] italic text-muted-foreground">
-                  {c.scientificName}
-                </div>
-                <div className="mt-1 text-[11px] text-muted-foreground">
-                  {c.era} · {c.diet}
-                </div>
-              </div>
-            </button>
-          )
-        })}
+                  <div
+                    className="overflow-hidden"
+                    style={
+                      c.imageAspectRatio
+                        ? { aspectRatio: c.imageAspectRatio }
+                        : undefined
+                    }
+                  >
+                    {c.imageUrl ? (
+                      <img
+                        src={c.imageUrl}
+                        alt={c.name}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex aspect-square items-center justify-center bg-muted/20">
+                        <Skull className="h-10 w-10 text-muted-foreground/30" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-2">
+                    <span
+                      className={cn(
+                        'font-display text-[10px] font-semibold uppercase',
+                        RARITY_COLORS[rarity],
+                      )}
+                    >
+                      {rarity}
+                    </span>
+                    <div className="font-display text-sm font-bold leading-tight">
+                      {c.name}
+                    </div>
+                    <div className="text-[11px] italic text-muted-foreground">
+                      {c.scientificName}
+                    </div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">
+                      {c.era} · {c.diet}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        ))}
       </div>
 
       {/* Infinite scroll sentinel */}
