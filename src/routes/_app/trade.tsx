@@ -1,17 +1,15 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, inArray, or } from 'drizzle-orm'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
-import { getSession } from '@/lib/auth-server'
 import { TradeList } from '@/components/trade/TradeList'
 
-const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await getSession()
-  if (!session) throw redirect({ to: '/' })
-  const userId = session.user.id
-  const db = await createDb(getCfEnv().DB)
+const getTradeData = createServerFn({ method: 'GET' })
+  .inputValidator((d: string) => d)
+  .handler(async ({ data: userId }) => {
+    const db = await createDb(getCfEnv().DB)
 
   const [openTrades, pendingTrades, myCreatures] = await Promise.all([
     db
@@ -152,7 +150,7 @@ const getTradeData = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 export const Route = createFileRoute('/_app/trade')({
-  loader: () => getTradeData(),
+  loader: ({ context }) => getTradeData({ data: context.session.user.id }),
   component: TradePage,
 })
 

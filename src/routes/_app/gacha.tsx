@@ -1,26 +1,23 @@
-import { useEffect, useState } from 'react'
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { useState } from 'react'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { Bone, CalendarCheck, Gift } from 'lucide-react'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { banner, currency } from '@/lib/db/schema'
-import { getSession } from '@/lib/auth-server'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 import { DAILY_FOSSILS } from '@/lib/types'
-import { useAppStore } from '@/store/appStore'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
-const getGachaData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await getSession()
-  if (!session) throw redirect({ to: '/' })
-  const userId = session.user.id
-  const db = await createDb(getCfEnv().DB)
+const getGachaData = createServerFn({ method: 'GET' })
+  .inputValidator((d: string) => d)
+  .handler(async ({ data: userId }) => {
+    const db = await createDb(getCfEnv().DB)
 
   await ensureUserCurrency(db, userId)
 
@@ -47,7 +44,7 @@ const getGachaData = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 export const Route = createFileRoute('/_app/gacha')({
-  loader: () => getGachaData(),
+  loader: ({ context }) => getGachaData({ data: context.session.user.id }),
   component: GachaPage,
 })
 
@@ -57,16 +54,10 @@ function GachaPage() {
     fossils: initialFossils,
     canClaimDaily: initialCanClaim,
   } = Route.useLoaderData()
-  const storeFossils = useAppStore((s) => s.fossils)
-  const setFossils = useAppStore((s) => s.setFossils)
+  const router = useRouter()
+  const [fossils, setFossils] = useState(initialFossils)
   const [canClaim, setCanClaim] = useState(initialCanClaim)
   const [claiming, setClaiming] = useState(false)
-
-  useEffect(() => {
-    setFossils(initialFossils)
-  }, [initialFossils, setFossils])
-
-  const displayFossils = storeFossils ?? initialFossils
 
   const handleClaimDaily = async () => {
     setClaiming(true)
@@ -83,6 +74,7 @@ function GachaPage() {
       if (data.claimed) {
         if (data.fossils != null) setFossils(data.fossils)
         setCanClaim(false)
+        router.invalidate()
       }
     } catch (err) {
       console.error('Daily claim failed:', err)
@@ -124,7 +116,7 @@ function GachaPage() {
           >
             <Bone className="h-6 w-6 text-primary/70" />
             <span className="font-display text-2xl font-bold text-primary">
-              {displayFossils}
+              {fossils}
             </span>
             <span className="text-sm text-muted-foreground">Fossils</span>
           </Card>
@@ -144,7 +136,14 @@ function GachaPage() {
           <PullAnimation />
           <div className="flex items-center justify-between gap-4">
             <PityCounter />
-            <PullButton bannerId={activeBannerId} />
+            <PullButton
+              bannerId={activeBannerId}
+              fossils={fossils}
+              onFossilsChange={(f) => {
+                setFossils(f)
+                router.invalidate()
+              }}
+            />
           </div>
         </div>
       )}

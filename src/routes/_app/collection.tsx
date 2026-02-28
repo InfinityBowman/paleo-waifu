@@ -1,42 +1,41 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, userCreature } from '@/lib/db/schema'
-import { getSession } from '@/lib/auth-server'
 import { CollectionGrid } from '@/components/collection/CollectionGrid'
 
-const getCollection = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await getSession()
-  if (!session) throw redirect({ to: '/' })
-  const db = await createDb(getCfEnv().DB)
+const getCollection = createServerFn({ method: 'GET' })
+  .inputValidator((d: string) => d)
+  .handler(async ({ data: userId }) => {
+    const db = await createDb(getCfEnv().DB)
 
-  const owned = await db
-    .select({
-      id: userCreature.id,
-      creatureId: userCreature.creatureId,
-      pulledAt: userCreature.pulledAt,
-      isFavorite: userCreature.isFavorite,
-      isLocked: userCreature.isLocked,
-      name: creature.name,
-      scientificName: creature.scientificName,
-      rarity: creature.rarity,
-      era: creature.era,
-      diet: creature.diet,
-      imageUrl: creature.imageUrl,
-      description: creature.description,
-    })
-    .from(userCreature)
-    .innerJoin(creature, eq(creature.id, userCreature.creatureId))
-    .where(eq(userCreature.userId, session.user.id))
-    .all()
+    const owned = await db
+      .select({
+        id: userCreature.id,
+        creatureId: userCreature.creatureId,
+        pulledAt: userCreature.pulledAt,
+        isFavorite: userCreature.isFavorite,
+        isLocked: userCreature.isLocked,
+        name: creature.name,
+        scientificName: creature.scientificName,
+        rarity: creature.rarity,
+        era: creature.era,
+        diet: creature.diet,
+        imageUrl: creature.imageUrl,
+        description: creature.description,
+      })
+      .from(userCreature)
+      .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+      .where(eq(userCreature.userId, userId))
+      .all()
 
   return owned
 })
 
 export const Route = createFileRoute('/_app/collection')({
-  loader: () => getCollection(),
+  loader: ({ context }) => getCollection({ data: context.session.user.id }),
   component: CollectionPage,
 })
 

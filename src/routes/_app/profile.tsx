@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { count, eq, sql } from 'drizzle-orm'
 import { Bone, Dices, Handshake, Microscope } from 'lucide-react'
@@ -6,16 +6,13 @@ import type { LucideIcon } from 'lucide-react'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
-import { getSession } from '@/lib/auth-server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 
-const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
-  const session = await getSession()
-  if (!session) throw redirect({ to: '/' })
-  const userId = session.user.id
-
-  const db = await createDb(getCfEnv().DB)
+const getProfileData = createServerFn({ method: 'GET' })
+  .inputValidator((d: string) => d)
+  .handler(async ({ data: userId }) => {
+    const db = await createDb(getCfEnv().DB)
 
   const [
     currencyRow,
@@ -51,9 +48,7 @@ const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
       .get(),
   ])
 
-  const { email: _email, ...safeUser } = session.user
   return {
-    user: safeUser,
     fossils: currencyRow?.fossils ?? 0,
     totalPulls: totalCreatures?.count ?? 0,
     uniqueSpecies: (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
@@ -63,13 +58,15 @@ const getProfileData = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 export const Route = createFileRoute('/_app/profile')({
-  loader: () => getProfileData(),
+  loader: ({ context }) => getProfileData({ data: context.session.user.id }),
   component: ProfilePage,
 })
 
 function ProfilePage() {
-  const { user, fossils, totalPulls, uniqueSpecies, totalSpecies, tradeCount } =
+  const { fossils, totalPulls, uniqueSpecies, totalSpecies, tradeCount } =
     Route.useLoaderData()
+  const { session } = Route.useRouteContext()
+  const user = session.user
 
   const completionPct =
     totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0

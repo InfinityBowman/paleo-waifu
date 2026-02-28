@@ -4,7 +4,15 @@ import { useAppStore } from '@/store/appStore'
 import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
-export function PullButton({ bannerId }: { bannerId: string }) {
+export function PullButton({
+  bannerId,
+  fossils,
+  onFossilsChange,
+}: {
+  bannerId: string
+  fossils: number
+  onFossilsChange: (fossils: number) => void
+}) {
   const [pulling, setPulling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const store = useAppStore()
@@ -31,12 +39,12 @@ export function PullButton({ bannerId }: { bannerId: string }) {
       }
       if (!res.ok) {
         setError(data.error ?? 'Pull failed')
-        if (data.fossils != null) store.setFossils(data.fossils)
+        if (data.fossils != null) onFossilsChange(data.fossils)
         return
       }
 
       if (data.results) store.setPullResults(data.results)
-      if (data.fossils != null) store.setFossils(data.fossils)
+      if (data.fossils != null) onFossilsChange(data.fossils)
     } catch {
       setError('Network error — please try again')
     } finally {
@@ -45,8 +53,8 @@ export function PullButton({ bannerId }: { bannerId: string }) {
     }
   }
 
-  const canSingle = (store.fossils ?? 0) >= PULL_COST_SINGLE
-  const canMulti = (store.fossils ?? 0) >= PULL_COST_MULTI
+  const canSingle = fossils >= PULL_COST_SINGLE
+  const canMulti = fossils >= PULL_COST_MULTI
 
   return (
     <div className="flex flex-col items-end gap-2">
