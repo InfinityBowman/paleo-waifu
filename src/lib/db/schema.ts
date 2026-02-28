@@ -100,7 +100,11 @@ export const creature = sqliteTable(
       sql`(unixepoch())`,
     ),
   },
-  (table) => [index('creature_rarity_idx').on(table.rarity)],
+  (table) => [
+    index('creature_rarity_idx').on(table.rarity),
+    index('creature_name_idx').on(table.name),
+    index('creature_era_idx').on(table.era),
+  ],
 )
 
 export const banner = sqliteTable('banner', {

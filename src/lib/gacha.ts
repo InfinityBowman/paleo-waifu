@@ -17,6 +17,7 @@ import {
 } from './types'
 import type { Rarity } from './types'
 import type { Database } from './db/client'
+import { toCdnUrl } from './utils'
 
 function secureRandom(): number {
   const array = new Uint32Array(1)
@@ -392,7 +393,7 @@ export async function executePullBatch(
       name: data.name,
       scientificName: data.scientificName,
       rarity: p.rarity,
-      imageUrl: data.imageUrl,
+      imageUrl: toCdnUrl(data.imageUrl),
       description: data.description,
       era: data.era,
       isNew,

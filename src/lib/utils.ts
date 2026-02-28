@@ -6,6 +6,17 @@ export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
 
+const CDN_BASE = 'https://cdn.jacobmaynard.dev'
+
+/** Rewrite `/api/images/…` paths to direct CDN URLs to avoid Worker round-trips. */
+export function toCdnUrl(imageUrl: string | null): string | null {
+  if (!imageUrl) return null
+  if (imageUrl.startsWith('/api/images/')) {
+    return `${CDN_BASE}/${imageUrl.slice('/api/images/'.length)}`
+  }
+  return imageUrl
+}
+
 export const SECURITY_HEADERS: Record<string, string> = {
   'X-Frame-Options': 'DENY',
   'X-Content-Type-Options': 'nosniff',

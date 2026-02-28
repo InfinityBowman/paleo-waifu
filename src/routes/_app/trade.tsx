@@ -5,6 +5,7 @@ import { alias } from 'drizzle-orm/sqlite-core'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
+import { toCdnUrl } from '@/lib/utils'
 import { TradeList } from '@/components/trade/TradeList'
 
 const PAGE_SIZE = 20
@@ -165,10 +166,21 @@ const getTradeData = createServerFn({ method: 'GET' })
       ? openTradesRaw.slice(0, PAGE_SIZE)
       : openTradesRaw
 
+    const mapCdn = <T extends { offeredCreatureImage?: string | null }>(
+      items: Array<T>,
+    ) =>
+      items.map((t) => ({
+        ...t,
+        offeredCreatureImage: toCdnUrl(t.offeredCreatureImage ?? null),
+      }))
+
     return {
-      openTrades,
+      openTrades: mapCdn(openTrades),
       pendingTrades,
-      myCreatures,
+      myCreatures: myCreatures.map((c) => ({
+        ...c,
+        imageUrl: toCdnUrl(c.imageUrl),
+      })),
       userId,
       hasMore,
     }
@@ -209,8 +221,12 @@ export const loadMoreOpenTrades = createServerFn({ method: 'GET' })
       .all()
 
     const hasMore = rows.length > PAGE_SIZE
+    const trades = hasMore ? rows.slice(0, PAGE_SIZE) : rows
     return {
-      trades: hasMore ? rows.slice(0, PAGE_SIZE) : rows,
+      trades: trades.map((t) => ({
+        ...t,
+        offeredCreatureImage: toCdnUrl(t.offeredCreatureImage),
+      })),
       hasMore,
     }
   })

@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, userCreature } from '@/lib/db/schema'
+import { toCdnUrl } from '@/lib/utils'
 import { CollectionGrid } from '@/components/collection/CollectionGrid'
 
 const getCollection = createServerFn({ method: 'GET' })
@@ -31,7 +32,7 @@ const getCollection = createServerFn({ method: 'GET' })
       .where(eq(userCreature.userId, userId))
       .all()
 
-    return owned
+    return owned.map((r) => ({ ...r, imageUrl: toCdnUrl(r.imageUrl) }))
   })
 
 export const Route = createFileRoute('/_app/collection')({
