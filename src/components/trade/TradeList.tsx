@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
+import { toast } from 'sonner'
 import { ArrowLeftRight, Check, Clock, Loader2, Plus, X } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -24,6 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { loadMoreOpenTrades } from '@/routes/_app/trade'
 
 interface TradeItem {
   id: string
@@ -41,7 +43,7 @@ interface PendingTradeItem {
   id: string
   offererId: string
   receiverId: string | null
-  offererName: string
+  offererName: string | null
   offererImage: string | null
   receiverName: string | null
   receiverImage: string | null
@@ -66,11 +68,13 @@ export function TradeList({
   pendingTrades,
   myCreatures,
   userId,
+  hasMore: initialHasMore,
 }: {
   trades: Array<TradeItem>
   pendingTrades: Array<PendingTradeItem>
   myCreatures: Array<MyCreature>
   userId: string
+  hasMore: boolean
 }) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
@@ -80,6 +84,23 @@ export function TradeList({
     tradeId: string
     myCreatureId: string
   } | null>(null)
+
+  // Pagination state
+  const [extraTrades, setExtraTrades] = useState<Array<TradeItem>>([])
+  const [hasMore, setHasMore] = useState(initialHasMore)
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  // Reset pagination state when loader data refreshes
+  const tradesRef = useRef(trades)
+  useEffect(() => {
+    if (tradesRef.current !== trades) {
+      tradesRef.current = trades
+      setExtraTrades([])
+      setHasMore(initialHasMore)
+    }
+  }, [trades, initialHasMore])
+
+  const allTrades = [...trades, ...extraTrades]
 
   const tradeAction = async (
     body: Record<string, string>,
@@ -96,10 +117,19 @@ export function TradeList({
       })
       if (res.ok) {
         onSuccess?.()
-        router.invalidate()
+        await router.invalidate()
+      } else {
+        let message = 'Something went wrong. Please try again.'
+        try {
+          const data: { error?: string } = await res.json()
+          if (data.error) message = data.error
+        } catch {
+          // body not JSON, use default message
+        }
+        toast.error(message)
       }
-    } catch (err) {
-      console.error('Trade action failed:', err)
+    } catch {
+      toast.error('Network error. Please check your connection.')
     } finally {
       setLoading(null)
     }
@@ -141,6 +171,24 @@ export function TradeList({
 
   const handleWithdraw = (tradeId: string) =>
     tradeAction({ action: 'withdraw', tradeId }, tradeId)
+
+  const handleLoadMore = useCallback(async () => {
+    if (allTrades.length === 0 || loadingMore) return
+    const lastTrade = allTrades[allTrades.length - 1]
+    if (!lastTrade.createdAt) return
+    setLoadingMore(true)
+    try {
+      const result = await loadMoreOpenTrades({
+        data: { cursor: new Date(lastTrade.createdAt).getTime() },
+      })
+      setExtraTrades((prev) => [...prev, ...result.trades])
+      setHasMore(result.hasMore)
+    } catch {
+      toast.error('Failed to load more trades.')
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [allTrades, loadingMore])
 
   return (
     <div className="space-y-6">
@@ -370,97 +418,111 @@ export function TradeList({
         </div>
       )}
 
-      {trades.length === 0 ? (
+      {allTrades.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center text-muted-foreground">
             No open trades. Be the first to create one!
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {trades.map((trade) => {
-            const rarity = trade.offeredCreatureRarity as Rarity
-            const isMine = trade.offererId === userId
-            return (
-              <Card
-                key={trade.id}
-                className={cn('border-2', RARITY_BORDER[rarity])}
-              >
-                <CardContent>
-                  <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-                    {trade.offererImage ? (
-                      <img
-                        src={trade.offererImage}
-                        alt=""
-                        className="h-5 w-5 rounded-full"
-                      />
-                    ) : null}
-                    {trade.offererName}
-                  </div>
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {allTrades.map((trade) => {
+              const rarity = trade.offeredCreatureRarity as Rarity
+              const isMine = trade.offererId === userId
+              return (
+                <Card
+                  key={trade.id}
+                  className={cn('border-2', RARITY_BORDER[rarity])}
+                >
+                  <CardContent>
+                    <div className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
+                      {trade.offererImage ? (
+                        <img
+                          src={trade.offererImage}
+                          alt=""
+                          className="h-5 w-5 rounded-full"
+                        />
+                      ) : null}
+                      {trade.offererName}
+                    </div>
 
-                  <div className="mb-3 flex items-center gap-3">
-                    <div className="flex-1">
-                      <span
-                        className={cn(
-                          'font-display text-[10px] font-semibold uppercase',
-                          RARITY_COLORS[rarity],
-                        )}
-                      >
-                        {rarity}
-                      </span>
-                      <div className="font-display font-bold">
-                        {trade.offeredCreatureName}
+                    <div className="mb-3 flex items-center gap-3">
+                      <div className="flex-1">
+                        <span
+                          className={cn(
+                            'font-display text-[10px] font-semibold uppercase',
+                            RARITY_COLORS[rarity],
+                          )}
+                        >
+                          {rarity}
+                        </span>
+                        <div className="font-display font-bold">
+                          {trade.offeredCreatureName}
+                        </div>
+                      </div>
+                      <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                      <div className="flex-1 text-right text-sm text-muted-foreground">
+                        Open to offers
                       </div>
                     </div>
-                    <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 text-right text-sm text-muted-foreground">
-                      Open to offers
-                    </div>
-                  </div>
 
-                  {isMine ? (
-                    <Button
-                      variant="destructive"
-                      onClick={() => handleCancel(trade.id)}
-                      disabled={loading === trade.id}
-                      className="w-full"
-                      size="sm"
-                    >
-                      {loading === trade.id ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <X className="h-3.5 w-3.5" />
-                      )}
-                      Cancel
-                    </Button>
-                  ) : (
-                    <Select
-                      onValueChange={(value) => {
-                        if (value) {
-                          setPendingAccept({
-                            tradeId: trade.id,
-                            myCreatureId: value,
-                          })
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-full" disabled={!!loading}>
-                        <SelectValue placeholder="Offer a creature..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {myCreatures.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>
-                            {c.name} ({c.rarity})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          })}
-        </div>
+                    {isMine ? (
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleCancel(trade.id)}
+                        disabled={loading === trade.id}
+                        className="w-full"
+                        size="sm"
+                      >
+                        {loading === trade.id ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <X className="h-3.5 w-3.5" />
+                        )}
+                        Cancel
+                      </Button>
+                    ) : (
+                      <Select
+                        onValueChange={(value) => {
+                          if (value) {
+                            setPendingAccept({
+                              tradeId: trade.id,
+                              myCreatureId: value,
+                            })
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full" disabled={!!loading}>
+                          <SelectValue placeholder="Offer a creature..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {myCreatures.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name} ({c.rarity})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+          {hasMore && (
+            <div className="flex justify-center">
+              <Button
+                variant="outline"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+              >
+                {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
+                Load more trades
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

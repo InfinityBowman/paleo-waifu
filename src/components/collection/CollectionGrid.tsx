@@ -40,7 +40,10 @@ export function CollectionGrid({
 
   const deferredSearch = useDeferredValue(search)
 
-  const eras = useMemo(() => [...new Set(collection.map((c) => c.era))], [collection])
+  const eras = useMemo(
+    () => [...new Set(collection.map((c) => c.era))],
+    [collection],
+  )
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
   const filtered = useMemo(

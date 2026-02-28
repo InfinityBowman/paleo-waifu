@@ -35,7 +35,7 @@ export function DevAccountSwitcher() {
       if (res.ok) {
         window.location.reload()
       } else {
-        const data = (await res.json()) as { error?: string }
+        const data = (await res.json())
         console.error('Dev switch failed:', data.error)
       }
     } finally {

@@ -32,11 +32,7 @@ export function PullButton({
         body: JSON.stringify({ action, bannerId }),
       })
 
-      const data = (await res.json()) as {
-        error?: string
-        fossils?: number
-        results?: Array<import('@/lib/gacha').PullResult>
-      }
+      const data = (await res.json())
       if (!res.ok) {
         setError(data.error ?? 'Pull failed')
         if (data.fossils != null) onFossilsChange(data.fossils)

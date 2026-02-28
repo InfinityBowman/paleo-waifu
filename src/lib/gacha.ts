@@ -215,7 +215,7 @@ export async function executePullBatch(
   bannerId: string,
   rateUpId: string | null,
   count: number,
-): Promise<PullResult[]> {
+): Promise<Array<PullResult>> {
   // 1. Ensure pity counter exists
   await db
     .insert(pityCounter)
@@ -240,10 +240,7 @@ export async function executePullBatch(
         totalPulls: sql`${pityCounter.totalPulls} + ${count}`,
       })
       .where(
-        and(
-          eq(pityCounter.userId, userId),
-          eq(pityCounter.bannerId, bannerId),
-        ),
+        and(eq(pityCounter.userId, userId), eq(pityCounter.bannerId, bannerId)),
       )
       .returning({
         id: pityCounter.id,

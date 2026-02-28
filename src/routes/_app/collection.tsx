@@ -31,8 +31,8 @@ const getCollection = createServerFn({ method: 'GET' })
       .where(eq(userCreature.userId, userId))
       .all()
 
-  return owned
-})
+    return owned
+  })
 
 export const Route = createFileRoute('/_app/collection')({
   loader: ({ context }) => getCollection({ data: context.session.user.id }),

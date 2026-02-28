@@ -76,10 +76,7 @@ export const Route = createFileRoute('/api/gacha')({
             .get()
 
           if (!bannerRow) {
-            return jsonResponse(
-              { error: 'Banner not found or inactive' },
-              400,
-            )
+            return jsonResponse({ error: 'Banner not found or inactive' }, 400)
           }
 
           const isMulti = body.action === 'pull_multi'

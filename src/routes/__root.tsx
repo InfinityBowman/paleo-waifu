@@ -1,4 +1,3 @@
-import type { ErrorComponentProps } from '@tanstack/react-router'
 import {
   HeadContent,
   Link,
@@ -7,7 +6,9 @@ import {
   createRootRoute,
 } from '@tanstack/react-router'
 import appCss from '../styles.css?url'
+import type { ErrorComponentProps } from '@tanstack/react-router'
 import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
+import { Toaster } from '@/components/ui/sonner'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -60,6 +61,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-noise min-h-screen bg-background text-foreground antialiased">
         {children}
         {import.meta.env.DEV && <DevAccountSwitcher />}
+        <Toaster />
         <Scripts />
       </body>
     </html>

@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { and, eq, ne } from 'drizzle-orm'
+import { and, count, eq, inArray, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
@@ -104,7 +104,7 @@ export const Route = createFileRoute('/api/trade')({
 
         // Create trade offer
         if (body.action === 'create') {
-          // Atomically verify ownership + lock in one step to prevent race conditions
+          // Lock first — this is the natural serialization point for concurrent requests
           const locked = await db
             .update(userCreature)
             .set({ isLocked: true })
@@ -118,11 +118,39 @@ export const Route = createFileRoute('/api/trade')({
             .returning({ id: userCreature.id })
 
           if (locked.length === 0) {
+            return jsonResponse({ error: 'Creature not found or locked' }, 400)
+          }
+
+          // Enforce 5-trade cap AFTER lock to avoid TOCTOU race
+          const [capRow] = await db
+            .select({ total: count() })
+            .from(tradeOffer)
+            .where(
+              and(
+                eq(tradeOffer.offererId, userId),
+                inArray(tradeOffer.status, ['open', 'pending']),
+              ),
+            )
+
+          if (capRow.total >= 5) {
+            // Undo the lock since we're rejecting the trade
+            await db
+              .update(userCreature)
+              .set({ isLocked: false })
+              .where(eq(userCreature.id, body.offeredCreatureId))
             return jsonResponse(
-              { error: 'Creature not found or locked' },
+              {
+                error:
+                  'You already have 5 active trades. Cancel one to create another.',
+              },
               400,
             )
           }
+
+          const SEVEN_DAYS_SECONDS = 7 * 24 * 60 * 60
+          const expiresAt = new Date(
+            (Math.floor(Date.now() / 1000) + SEVEN_DAYS_SECONDS) * 1000,
+          )
 
           const id = nanoid()
           await db.insert(tradeOffer).values({
@@ -130,6 +158,7 @@ export const Route = createFileRoute('/api/trade')({
             offererId: userId,
             offeredCreatureId: body.offeredCreatureId,
             wantedCreatureId: body.wantedCreatureId ?? null,
+            expiresAt,
           })
 
           return jsonResponse({ id })

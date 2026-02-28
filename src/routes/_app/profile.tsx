@@ -14,48 +14,45 @@ const getProfileData = createServerFn({ method: 'GET' })
   .handler(async ({ data: userId }) => {
     const db = await createDb(getCfEnv().DB)
 
-  const [
-    currencyRow,
-    totalCreatures,
-    uniqueSpecies,
-    totalSpeciesCount,
-    tradeCount,
-  ] = await Promise.all([
-    db
-      .select()
-      .from(currency)
-      .where(eq(currency.userId, userId))
-      .get(),
-    db
-      .select({ count: count() })
-      .from(userCreature)
-      .where(eq(userCreature.userId, userId))
-      .get(),
-    db
-      .select({
-        count: sql<number>`count(distinct ${userCreature.creatureId})`,
-      })
-      .from(userCreature)
-      .where(eq(userCreature.userId, userId))
-      .get(),
-    db.select({ count: count() }).from(creature).get(),
-    db
-      .select({ count: count() })
-      .from(tradeHistory)
-      .where(
-        sql`${tradeHistory.giverId} = ${userId} OR ${tradeHistory.receiverId} = ${userId}`,
-      )
-      .get(),
-  ])
+    const [
+      currencyRow,
+      totalCreatures,
+      uniqueSpecies,
+      totalSpeciesCount,
+      tradeCount,
+    ] = await Promise.all([
+      db.select().from(currency).where(eq(currency.userId, userId)).get(),
+      db
+        .select({ count: count() })
+        .from(userCreature)
+        .where(eq(userCreature.userId, userId))
+        .get(),
+      db
+        .select({
+          count: sql<number>`count(distinct ${userCreature.creatureId})`,
+        })
+        .from(userCreature)
+        .where(eq(userCreature.userId, userId))
+        .get(),
+      db.select({ count: count() }).from(creature).get(),
+      db
+        .select({ count: count() })
+        .from(tradeHistory)
+        .where(
+          sql`${tradeHistory.giverId} = ${userId} OR ${tradeHistory.receiverId} = ${userId}`,
+        )
+        .get(),
+    ])
 
-  return {
-    fossils: currencyRow?.fossils ?? 0,
-    totalPulls: totalCreatures?.count ?? 0,
-    uniqueSpecies: (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
-    totalSpecies: totalSpeciesCount?.count ?? 0,
-    tradeCount: tradeCount?.count ?? 0,
-  }
-})
+    return {
+      fossils: currencyRow?.fossils ?? 0,
+      totalPulls: totalCreatures?.count ?? 0,
+      uniqueSpecies:
+        (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
+      totalSpecies: totalSpeciesCount?.count ?? 0,
+      tradeCount: tradeCount?.count ?? 0,
+    }
+  })
 
 export const Route = createFileRoute('/_app/profile')({
   loader: ({ context }) => getProfileData({ data: context.session.user.id }),

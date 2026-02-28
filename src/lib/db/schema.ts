@@ -198,7 +198,7 @@ export const tradeOffer = sqliteTable(
       () => userCreature.id,
     ),
     wantedCreatureId: text('wanted_creature_id').references(() => creature.id),
-    status: text('status').notNull().default('open'), // open | pending | accepted | cancelled
+    status: text('status').notNull().default('open'), // open | pending | accepted | cancelled | expired
     createdAt: integer('created_at', { mode: 'timestamp' }).default(
       sql`(unixepoch())`,
     ),
@@ -211,27 +211,34 @@ export const tradeOffer = sqliteTable(
   ],
 )
 
-export const tradeHistory = sqliteTable('trade_history', {
-  id: text('id').primaryKey(),
-  tradeOfferId: text('trade_offer_id')
-    .notNull()
-    .references(() => tradeOffer.id),
-  giverId: text('giver_id')
-    .notNull()
-    .references(() => user.id),
-  receiverId: text('receiver_id')
-    .notNull()
-    .references(() => user.id),
-  givenCreatureId: text('given_creature_id')
-    .notNull()
-    .references(() => userCreature.id),
-  receivedCreatureId: text('received_creature_id')
-    .notNull()
-    .references(() => userCreature.id),
-  completedAt: integer('completed_at', { mode: 'timestamp' }).default(
-    sql`(unixepoch())`,
-  ),
-})
+export const tradeHistory = sqliteTable(
+  'trade_history',
+  {
+    id: text('id').primaryKey(),
+    tradeOfferId: text('trade_offer_id')
+      .notNull()
+      .references(() => tradeOffer.id),
+    giverId: text('giver_id')
+      .notNull()
+      .references(() => user.id),
+    receiverId: text('receiver_id')
+      .notNull()
+      .references(() => user.id),
+    givenCreatureId: text('given_creature_id')
+      .notNull()
+      .references(() => userCreature.id),
+    receivedCreatureId: text('received_creature_id')
+      .notNull()
+      .references(() => userCreature.id),
+    completedAt: integer('completed_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+  },
+  (table) => [
+    index('th_giver_id_idx').on(table.giverId),
+    index('th_receiver_id_idx').on(table.receiverId),
+  ],
+)
 
 export const wishlist = sqliteTable(
   'wishlist',

@@ -86,8 +86,14 @@ export function EncyclopediaGrid({
 
   const deferredSearch = useDeferredValue(search)
 
-  const eras = useMemo(() => [...new Set(creatures.map((c) => c.era))], [creatures])
-  const diets = useMemo(() => [...new Set(creatures.map((c) => c.diet))], [creatures])
+  const eras = useMemo(
+    () => [...new Set(creatures.map((c) => c.era))],
+    [creatures],
+  )
+  const diets = useMemo(
+    () => [...new Set(creatures.map((c) => c.diet))],
+    [creatures],
+  )
 
   const filtered = useMemo(
     () =>

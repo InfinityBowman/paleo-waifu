@@ -19,29 +19,29 @@ const getGachaData = createServerFn({ method: 'GET' })
   .handler(async ({ data: userId }) => {
     const db = await createDb(getCfEnv().DB)
 
-  await ensureUserCurrency(db, userId)
+    await ensureUserCurrency(db, userId)
 
-  const [banners, fossils, currencyRow] = await Promise.all([
-    db.select().from(banner).where(eq(banner.isActive, true)).all(),
-    getFossils(db, userId),
-    db
-      .select({ lastDailyClaim: currency.lastDailyClaim })
-      .from(currency)
-      .where(eq(currency.userId, userId))
-      .get(),
-  ])
+    const [banners, fossils, currencyRow] = await Promise.all([
+      db.select().from(banner).where(eq(banner.isActive, true)).all(),
+      getFossils(db, userId),
+      db
+        .select({ lastDailyClaim: currency.lastDailyClaim })
+        .from(currency)
+        .where(eq(currency.userId, userId))
+        .get(),
+    ])
 
-  const now = Math.floor(Date.now() / 1000)
-  const startOfDay = now - (now % 86400)
-  const lastClaim = currencyRow?.lastDailyClaim
-    ? Math.floor(currencyRow.lastDailyClaim.getTime() / 1000)
-    : 0
-  const canClaimDaily = lastClaim < startOfDay
+    const now = Math.floor(Date.now() / 1000)
+    const startOfDay = now - (now % 86400)
+    const lastClaim = currencyRow?.lastDailyClaim
+      ? Math.floor(currencyRow.lastDailyClaim.getTime() / 1000)
+      : 0
+    const canClaimDaily = lastClaim < startOfDay
 
-  const activeBannerId = banners[0]?.id ?? null
+    const activeBannerId = banners[0]?.id ?? null
 
-  return { activeBannerId, fossils, canClaimDaily }
-})
+    return { activeBannerId, fossils, canClaimDaily }
+  })
 
 export const Route = createFileRoute('/_app/gacha')({
   loader: ({ context }) => getGachaData({ data: context.session.user.id }),
@@ -67,10 +67,7 @@ function GachaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'claim_daily' }),
       })
-      const data = (await res.json()) as {
-        claimed?: boolean
-        fossils?: number
-      }
+      const data = (await res.json())
       if (data.claimed) {
         if (data.fossils != null) setFossils(data.fossils)
         setCanClaim(false)

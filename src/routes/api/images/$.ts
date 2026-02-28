@@ -7,9 +7,7 @@ export const Route = createFileRoute('/api/images/$')({
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url)
-        const key = decodeURIComponent(
-          url.pathname.replace('/api/images/', ''),
-        )
+        const key = decodeURIComponent(url.pathname.replace('/api/images/', ''))
         if (
           !key ||
           key.startsWith('/') ||

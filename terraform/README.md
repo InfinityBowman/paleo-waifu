@@ -37,15 +37,15 @@ terraform destroy
 
 ## What's Managed
 
-| Resource | Description |
-|----------|-------------|
+| Resource                           | Description                                   |
+| ---------------------------------- | --------------------------------------------- |
 | `cloudflare_ruleset.rate_limiting` | Rate limiting rule for all `/api/*` endpoints |
 
 ### Current Rule
 
-| Expression | Limit | Period | Block Duration |
-|-----------|-------|--------|----------------|
-| `starts_with(http.request.uri.path, "/api/")` | 10 requests | 10 seconds | 10 seconds |
+| Expression                                    | Limit       | Period     | Block Duration |
+| --------------------------------------------- | ----------- | ---------- | -------------- |
+| `starts_with(http.request.uri.path, "/api/")` | 10 requests | 10 seconds | 10 seconds     |
 
 Rate limiting is per-IP per-colo (Cloudflare data center). If a single IP exceeds 5 API requests in 10 seconds, they're blocked for 10 seconds.
 
@@ -59,15 +59,15 @@ Edit `main.tf` and run `terraform apply`. Common changes:
 
 ## Files
 
-| File | Purpose | Git tracked? |
-|------|---------|-------------|
-| `main.tf` | Provider config + rate limiting ruleset | Yes |
-| `variables.tf` | Variable declarations | Yes |
-| `terraform.tfvars` | Your credentials (secrets) | **No** (gitignored) |
-| `terraform.tfvars.example` | Template for credentials | Yes |
-| `.terraform.lock.hcl` | Provider version lock | Yes |
-| `.terraform/` | Provider binaries (auto-downloaded) | No |
-| `terraform.tfstate` | State file (tracks what's deployed) | **No** (gitignored) |
+| File                       | Purpose                                 | Git tracked?        |
+| -------------------------- | --------------------------------------- | ------------------- |
+| `main.tf`                  | Provider config + rate limiting ruleset | Yes                 |
+| `variables.tf`             | Variable declarations                   | Yes                 |
+| `terraform.tfvars`         | Your credentials (secrets)              | **No** (gitignored) |
+| `terraform.tfvars.example` | Template for credentials                | Yes                 |
+| `.terraform.lock.hcl`      | Provider version lock                   | Yes                 |
+| `.terraform/`              | Provider binaries (auto-downloaded)     | No                  |
+| `terraform.tfstate`        | State file (tracks what's deployed)     | **No** (gitignored) |
 
 ## Important Notes
 
