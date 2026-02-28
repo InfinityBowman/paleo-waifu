@@ -1,13 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { getCfEnv } from '@/lib/env'
-import { withSecurityHeaders } from '@/lib/utils'
+
+const CDN_BASE = 'https://cdn.jacobmaynard.dev'
 
 export const Route = createFileRoute('/api/images/$')({
   server: {
     handlers: {
       GET: async ({ request }) => {
         const url = new URL(request.url)
-        const key = decodeURIComponent(url.pathname.replace('/api/images/', ''))
+        const key = decodeURIComponent(
+          url.pathname.replace('/api/images/', ''),
+        )
         if (
           !key ||
           key.startsWith('/') ||
@@ -19,20 +21,13 @@ export const Route = createFileRoute('/api/images/$')({
           return new Response('Not found', { status: 404 })
         }
 
-        const cfEnv = getCfEnv()
-        const object = await cfEnv.IMAGES.get(key)
-        if (!object) {
-          return new Response('Not found', { status: 404 })
-        }
-
-        return withSecurityHeaders(
-          new Response(object.body, {
-            headers: {
-              'Content-Type': object.httpMetadata?.contentType ?? 'image/webp',
-              'Cache-Control': 'public, max-age=31536000, immutable',
-            },
-          }),
-        )
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: `${CDN_BASE}/${key}`,
+            'Cache-Control': 'public, max-age=31536000, immutable',
+          },
+        })
       },
     },
   },
