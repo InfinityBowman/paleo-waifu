@@ -126,13 +126,15 @@ if (
 
 ---
 
-### MED-03: Trade Expiry Stored But Never Enforced
+### MED-03: Trade Expiry Stored But Never Enforced — ✅ RESOLVED
 
-**Files:** `src/lib/db/schema.ts:197`, `src/routes/api/trade.ts:39-81`
+**Files:** `src/lib/db/schema.ts:197`, `src/routes/api/trade.ts`, `src/routes/_app/trade.tsx`
 
-**Description:** The `trade_offer` table has an `expires_at` column, but it is never set when creating a trade, and the open trades query does not filter by expiry. Trades accumulate forever, and creatures can be permanently locked if a user creates a trade and never cancels it.
+**Status:** Fixed (2026-02-28)
 
-**Recommended Fix:** Set `expiresAt` on creation (e.g., 7 days), filter expired trades from queries, and add a Cloudflare Worker Cron Trigger to periodically expire old trades.
+**Description:** `expiresAt` is now set to 7 days from creation on every new trade. The `expireStaleTradesIfAny` function runs on every trade page load, atomically expiring stale trades and unlocking their creatures. A per-user cap of 5 active trades also prevents unbounded accumulation.
+
+**Remaining:** A scheduled Cloudflare Worker cron trigger (Tier 3) would provide guaranteed cleanup independent of page visits.
 
 ---
 
@@ -267,7 +269,7 @@ All database queries use Drizzle ORM with parameterized queries. No string-conca
 | HIGH-05 | High     | `layout/Nav.tsx`, `profile.tsx`                 | Unvalidated user avatar URL                     |
 | MED-01  | Medium   | `wrangler.jsonc`                                | No security response headers                    |
 | MED-02  | Medium   | `api/images/$.ts:8-9`                           | Path traversal not sanitized                    |
-| MED-03  | Medium   | `lib/db/schema.ts:197`, `api/trade.ts`          | Trade expiry never enforced                     |
+| MED-03  | ✅ Fixed | `lib/db/schema.ts:197`, `api/trade.ts`          | Trade expiry now enforced (7-day + lazy cleanup)|
 | MED-04  | Medium   | `lib/gacha.ts:117`                              | `Math.random()` not cryptographically secure    |
 | MED-05  | Medium   | `routes/_app/trade.tsx`                         | All trader names/avatars exposed                |
 | MED-06  | Medium   | `api/dev/switch-user.ts:90`                     | Session cookie missing `Secure` flag            |

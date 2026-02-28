@@ -66,23 +66,19 @@ CREATE INDEX trade_offer_receiver_idx ON trade_offer (receiver_id);
 
 ---
 
-### 1-D — High: Two-phase query pattern for pending trades
+### 1-D — High: Two-phase query pattern for pending trades — ✅ RESOLVED
 
-**Location:** `src/routes/_app/trade.tsx:78-118`
+**Location:** `src/routes/_app/trade.tsx`
 
-After fetching `openTrades`, `pendingTrades`, and `myCreatures` in parallel, a second `Promise.all` hydrates pending trades with creature names and user names. This could be eliminated by rewriting the pending trades query to use proper joins (like the open trades query already does).
-
-**Recommended optimization:** Rewrite as a single `SELECT` with four joins.
+**Status:** Fixed (2026-02-28). Pending trades now use a single query with Drizzle table aliases (`offererUser`, `receiverUser`, `offeredCreature`, `receiverCreature`) for JOIN-based hydration, matching the open trades pattern. The secondary `Promise.all` hydration pass has been eliminated.
 
 ---
 
-### 1-E — Medium: Profile page raw SQL OR without indexes
+### 1-E — Medium: Profile page raw SQL OR without indexes — ✅ PARTIALLY RESOLVED
 
-**Location:** `src/routes/_app/profile.tsx:17-49`
+**Location:** `src/routes/_app/profile.tsx:17-49`, `src/lib/db/schema.ts`
 
-The `tradeCount` query uses raw SQL `` sql`${tradeHistory.giverId} = ... OR ${tradeHistory.receiverId} = ...` `` — neither `giver_id` nor `receiver_id` is indexed, causing a full table scan.
-
-**Recommended optimization:** Add indexes on `trade_history.giver_id` and `trade_history.receiver_id`. Use Drizzle's `or(eq(...), eq(...))` instead of raw SQL.
+**Status:** Indexes added (2026-02-28). `th_giver_id_idx` on `trade_history.giver_id` and `th_receiver_id_idx` on `trade_history.receiver_id` added via migration `drizzle/0004_red_xorn.sql`. The raw SQL `OR` could still be replaced with Drizzle's `or(eq(...), eq(...))` for consistency.
 
 ---
 
@@ -348,7 +344,7 @@ The pity state is read before the pull loop for rollback purposes. Rollback is o
 | 5-A | Critical | Rendering      | 393 items rendered without virtualization                                                                  |
 | 1-B | High     | DB Queries     | Extra SELECT for rate-up rarity inside every `selectCreature`                                              |
 | 1-C | High     | DB Queries     | Missing indexes on `banner_pool.banner_id`, `creature.rarity`, `session.userId`, `trade_offer.receiver_id` |
-| 1-D | High     | DB Queries     | Two-phase query for pending trade hydration                                                                |
+| 1-D | ✅ Fixed | DB Queries     | Pending trade hydration now uses single JOIN query                                                          |
 | 2-A | High     | SSR            | `defaultPreloadStaleTime: 0` re-runs all loaders on every navigation                                       |
 | 2-B | High     | SSR            | `SELECT *` fetches 393 full creature rows for grid view                                                    |
 | 4-A | High     | Images         | No ETag/304 support; should bypass Worker with R2 public URL                                               |
@@ -356,7 +352,7 @@ The pity state is read before the pull loop for rollback purposes. Rollback is o
 | 5-B | High     | Rendering      | CollectionGrid filter arrays not memoized                                                                  |
 | 6-A | High     | Caching        | No HTTP caching headers on any response                                                                    |
 | 7-B | High     | Workers        | Image streaming through Workers wastes CPU/memory                                                          |
-| 1-E | Medium   | DB Queries     | Raw SQL OR on `trade_history` without indexes                                                              |
+| 1-E | ✅ Fixed | DB Queries     | `trade_history` indexes added; raw SQL OR remains (cosmetic)                                               |
 | 1-F | Medium   | DB Queries     | Post-insert COUNT for `isNew` — extra round-trip                                                           |
 | 2-C | Medium   | SSR            | Double session fetch per auth'd page load                                                                  |
 | 2-D | Medium   | SSR            | Redundant `getFossils` query after deduction                                                               |

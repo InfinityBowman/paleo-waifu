@@ -73,13 +73,11 @@ The "start of day" UTC calculation exists in both `claimDaily()` and `getGachaDa
 
 ---
 
-### 2.3 — Medium: Trade page hydrates pending trades with N+1-style logic
+### 2.3 — Medium: Trade page hydrates pending trades with N+1-style logic — ✅ RESOLVED
 
-**Location:** `src/routes/_app/trade.tsx:77-142`
+**Location:** `src/routes/_app/trade.tsx`
 
-The initial open trades query uses `innerJoin` to hydrate creature data, but the pending trades query fetches raw IDs then re-hydrates — an inconsistency.
-
-**Recommendation:** Refactor pending trades query to use joins like the open trades query. Eliminates ~50 lines and the secondary fetch.
+**Status:** Fixed (2026-02-28). Pending trades now use a single JOIN query with Drizzle table aliases, matching the open trades pattern. The secondary `Promise.all` hydration pass has been eliminated.
 
 ---
 
@@ -153,13 +151,11 @@ rarity: text('rarity', { enum: ['common', 'uncommon', 'rare', 'epic', 'legendary
 
 ---
 
-### 4.2 — High: `tradeOffer.status` is unvalidated text with type mismatch
+### 4.2 — High: `tradeOffer.status` is unvalidated text with type mismatch — ✅ PARTIALLY RESOLVED
 
 **Location:** `src/lib/db/schema.ts:193`
 
-The `TradeStatus` type in `src/lib/types.ts` includes `'expired'`, but no code path ever sets `status = 'expired'`. The schema comment does not list `'expired'`.
-
-**Recommendation:** Either implement expiry logic or remove `'expired'` from the TypeScript type. Apply an enum constraint.
+**Status:** Partially fixed (2026-02-28). The `'expired'` status is now set by `expireStaleTradesIfAny` when trades pass their 7-day expiry. The schema comment has been updated to list all five statuses. A DB-level CHECK constraint (enum enforcement) remains as a Tier 4 enhancement.
 
 ---
 
@@ -501,13 +497,13 @@ The link list is duplicated verbatim. Any route addition requires updating two p
 | 5.2 | High     | API Design     | No runtime validation on request bodies                                |
 | 7.1 | High     | Type Safety    | Pervasive `env as unknown as Env` double-cast (12 occurrences)         |
 | 4.1 | High     | Schema         | `creature.rarity` has no DB-level CHECK constraint                     |
-| 4.2 | High     | Schema         | `tradeOffer.status` has no CHECK constraint; `'expired'` type mismatch |
+| 4.2 | ✅ Partial| Schema         | `'expired'` now used; CHECK constraint still missing                   |
 | 5.1 | High     | API Design     | Action-dispatch pattern lacks per-operation HTTP semantics             |
 | 3.1 | High     | State          | Fossil count dual-source of truth (Zustand + loader)                   |
 | 8.2 | High     | Error Handling | Silent catch blocks swallow errors                                     |
 | 2.1 | Medium   | Data Flow      | `startOfDay` logic duplicated                                          |
 | 2.2 | Medium   | Data Flow      | Encyclopedia loads all columns for all creatures                       |
-| 2.3 | Medium   | Data Flow      | Inconsistent query strategy for pending vs open trades                 |
+| 2.3 | ✅ Fixed | Data Flow      | Pending trades now use JOIN-based hydration                            |
 | 4.3 | Medium   | Schema         | `isNew` flag unreliable in multi-pull batches                          |
 | 4.4 | Medium   | Schema         | `tradeHistory` ownership semantics undocumented                        |
 | 5.3 | Medium   | API Design     | `createAuth()` recreated per-request (inherent, undocumented)          |

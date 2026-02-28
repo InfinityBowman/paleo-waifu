@@ -46,7 +46,7 @@ Bigger refactors that address critical production risks.
 | --- | ----------------------------------------------------------- | ------------------ | ----------------- | -------------------------------------------------------------- |
 | 15  | **Batch gacha D1 queries** — collapse 90 round-trips to ~10 | Perf 1-A, 7-A      | Large refactor    | The single biggest production risk: Worker timeout on 10-pull  |
 | 16  | **Add rate limiting** (Cloudflare WAF or DO token bucket)   | Sec HIGH-01        | Infra config      | Required before public launch, but needs Cloudflare-side setup |
-| 17  | **Implement trade expiry** + per-user trade cap             | Sec MED-03, Low-04 | ~40 lines + cron  | Prevents creature lock-up and unbounded trade accumulation     |
+| 17  | **Implement trade expiry** + per-user trade cap             | Sec MED-03, Low-04 | ~40 lines + cron  | ✅ COMPLETED (2026-02-28) — 5-trade cap, 7-day expiry with lazy cleanup on read |
 | 18  | **Fix fossil dual source of truth** — remove from Zustand   | Arch 3.1           | Moderate refactor | Eliminates stale state divergence risk                         |
 | 19  | **R2 public bucket / ETag support** on image proxy          | Perf 4-A, 7-B      | Infra + code      | Offloads image traffic from Worker CPU/memory entirely         |
 | 20  | **Double session fetch** — pass session via route context   | Perf 2-C           | ~20 lines         | Saves one DB round-trip per auth'd page load                   |
@@ -63,7 +63,7 @@ Lower severity, do as time allows.
 | 22  | Add `width`/`height` to `<img>` tags (CLS fix)                 | Perf 4-B           | ~5 lines          |
 | 23  | Preload gacha card reveal images                               | Perf 4-D           | ~10 lines         |
 | 24  | Rarity enum constraint in schema                               | Arch 4.1, 4.2      | Migration         |
-| 25  | Trade pending query — use joins like open trades               | Perf 1-D, Arch 2.3 | ~30 lines         |
+| 25  | Trade pending query — use joins like open trades               | Perf 1-D, Arch 2.3 | ✅ COMPLETED (2026-02-28) |
 | 26  | Deduplicate DiscordIcon SVG                                    | Arch 6.1           | Extract component |
 | 27  | Fix `pnpm format` no-op                                        | Arch 9.2           | 1 line            |
 | 28  | Granular Zustand selectors for PullButton                      | Perf 5-D           | ~3 lines          |

@@ -4,6 +4,7 @@ dist
 .wrangler
 .env
 .env.local
+.env.production
 routeTree.gen.ts
 .vinxi
 .tanstack

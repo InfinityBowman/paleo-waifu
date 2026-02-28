@@ -68,17 +68,17 @@ Built `paleo-waifu` by forking `syntch-template` and rewiring it entirely for a 
 1. Set secrets on the worker:
 
    ```bash
-   wrangler secret put AUTH_SECRET
-   wrangler secret put AUTH_BASE_URL
-   wrangler secret put DISCORD_CLIENT_ID
-   wrangler secret put DISCORD_CLIENT_SECRET
+   wrangler secret put AUTH_SECRET --env production
+   wrangler secret put AUTH_BASE_URL --env production
+   wrangler secret put DISCORD_CLIENT_ID --env production
+   wrangler secret put DISCORD_CLIENT_SECRET --env production
    ```
 
-2. Run remote migration and seed:
+2. Run production migration and seed:
 
    ```bash
-   pnpm db:migrate:remote
-   wrangler d1 execute paleo-waifu-db --remote --file=./drizzle/seed.sql
+   pnpm db:migrate:prod
+   pnpm db:seed:prod
    ```
 
 3. Deploy:

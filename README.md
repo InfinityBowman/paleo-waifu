@@ -63,15 +63,15 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 ## Deploy
 
 ```bash
-# Set secrets
-wrangler secret put AUTH_SECRET
-wrangler secret put AUTH_BASE_URL
-wrangler secret put DISCORD_CLIENT_ID
-wrangler secret put DISCORD_CLIENT_SECRET
+# Set secrets (production env)
+wrangler secret put AUTH_SECRET --env production
+wrangler secret put AUTH_BASE_URL --env production
+wrangler secret put DISCORD_CLIENT_ID --env production
+wrangler secret put DISCORD_CLIENT_SECRET --env production
 
 # Apply remote migrations and seed
-pnpm db:migrate:remote
-wrangler d1 execute paleo-waifu-db --remote --file=./drizzle/seed.sql
+pnpm db:migrate:prod
+pnpm db:seed:prod
 
 # Deploy
 pnpm deploy
@@ -115,7 +115,7 @@ python/                # Data pipeline for creature seeding
 | `pnpm deploy`            | Build + deploy to Cloudflare Workers |
 | `pnpm db:generate`       | Generate Drizzle migration files     |
 | `pnpm db:migrate:local`  | Apply migrations to local D1         |
-| `pnpm db:migrate:remote` | Apply migrations to remote D1        |
+| `pnpm db:migrate:prod`   | Apply migrations to production D1    |
 | `pnpm db:seed:local`     | Seed local D1 with creature data     |
 | `pnpm lint`              | ESLint                               |
 | `pnpm format`            | Prettier                             |
