@@ -70,7 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-v4 min-h-screen bg-background text-foreground antialiased">
+      <body className="bg-paleo min-h-screen bg-background text-foreground antialiased">
         {children}
         {import.meta.env.DEV && <DevAccountSwitcher />}
         <Toaster />

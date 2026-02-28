@@ -224,7 +224,7 @@ export function Hero() {
       {/* ═══ HERO ═══ */}
       <section className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5">
         {/* Poetic whisper badge */}
-        <div className="animate-drift-in drift-d1 v4-badge mb-6 border border-primary/15 bg-primary/8 text-lavender/70">
+        <div className="animate-drift-in drift-d1 paleo-badge mb-6 border border-primary/15 bg-primary/8 text-lavender/70">
           <span style={{ fontSize: 12 }}>&#10022;</span>
           <span className="font-hand text-xs tracking-wider">
             where ancient things dream again
@@ -235,7 +235,7 @@ export function Hero() {
         {/* Animated title */}
         <div className="animate-drift-in drift-d2 text-center">
           <div className="animate-sway">
-            <h1 className="v4-title-grad font-display text-6xl leading-[1.08] font-medium sm:text-8xl md:text-[9rem]">
+            <h1 className="paleo-title-grad font-display text-6xl leading-[1.08] font-medium sm:text-8xl md:text-[9rem]">
               Paleo
               <br />
               <span className="font-normal italic">Waifu</span>
@@ -256,7 +256,7 @@ export function Hero() {
           {session ? (
             <Link
               to="/gacha"
-              className="v4-pull-btn flex items-center gap-3 px-12 py-4 text-lg font-bold tracking-wide text-white"
+              className="paleo-pull-btn flex items-center gap-3 px-12 py-4 text-lg font-bold tracking-wide text-white"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 <path
@@ -270,7 +270,7 @@ export function Hero() {
           ) : (
             <button
               onClick={() => signIn.social({ provider: 'discord' })}
-              className="v4-pull-btn flex items-center gap-3 px-12 py-4 text-lg font-bold tracking-wide text-white"
+              className="paleo-pull-btn flex items-center gap-3 px-12 py-4 text-lg font-bold tracking-wide text-white"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 <path
@@ -291,7 +291,7 @@ export function Hero() {
         {/* Secondary CTA */}
         <Link
           to="/encyclopedia"
-          className="v4-outline-btn animate-drift-in drift-d5 mt-4 px-8 py-2.5 text-xs font-medium tracking-wider"
+          className="paleo-outline-btn animate-drift-in drift-d5 mt-4 px-8 py-2.5 text-xs font-medium tracking-wider"
         >
           Browse Encyclopedia &rarr;
         </Link>
@@ -607,7 +607,7 @@ export function Hero() {
           <h2 className="mb-4 font-display text-4xl font-light text-heading sm:text-5xl">
             Will you wake
             <br />
-            <span className="v4-title-grad font-normal italic">
+            <span className="paleo-title-grad font-normal italic">
               what sleeps below?
             </span>
           </h2>
@@ -619,7 +619,7 @@ export function Hero() {
           {session ? (
             <Link
               to="/gacha"
-              className="v4-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+              className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 <path
@@ -633,7 +633,7 @@ export function Hero() {
           ) : (
             <button
               onClick={() => signIn.social({ provider: 'discord' })}
-              className="v4-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+              className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 <path

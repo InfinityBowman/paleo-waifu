@@ -269,7 +269,7 @@
   }
 }
 
-/* V4 ethereal keyframes */
+/* Ethereal keyframes */
 @keyframes drift-in {
   from {
     opacity: 0;
@@ -446,9 +446,9 @@
   animation: shimmer 2s ease-in-out infinite;
 }
 
-/* ═══ V4 Background ═══ */
+/* ═══ Paleo Background ═══ */
 
-.bg-v4 {
+.bg-paleo {
   background: linear-gradient(
     165deg,
     #140c22 0%,
@@ -459,7 +459,7 @@
     #120e28 100%
   );
 }
-.bg-v4::before {
+.bg-paleo::before {
   content: '';
   position: fixed;
   inset: 0;
@@ -483,7 +483,7 @@
   z-index: 0;
 }
 
-/* ═══ V4 UI Utilities ═══ */
+/* ═══ Paleo UI Utilities ═══ */
 
 .glass-card {
   background: oklch(1 0 0 / 2%);
@@ -498,8 +498,8 @@
   box-shadow: 0 16px 48px oklch(0 0 0 / 12%);
 }
 
-/* V4 title gradient text */
-.v4-title-grad {
+/* Paleo title gradient text */
+.paleo-title-grad {
   background: linear-gradient(
     90deg,
     oklch(0.83 0.06 320 / 90%),
@@ -515,8 +515,8 @@
   animation: title-gradient 6s ease infinite;
 }
 
-/* V4 pull button */
-.v4-pull-btn {
+/* Paleo pull button */
+.paleo-pull-btn {
   position: relative;
   background: linear-gradient(
     135deg,
@@ -529,7 +529,7 @@
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.v4-pull-btn:hover {
+.paleo-pull-btn:hover {
   transform: translateY(-3px) scale(1.02);
   box-shadow:
     0 8px 36px oklch(0.65 0.13 340 / 25%),
@@ -537,7 +537,7 @@
     inset 0 1px 0 oklch(1 0 0 / 25%);
   border-color: oklch(1 0 0 / 30%);
 }
-.v4-pull-btn::before {
+.paleo-pull-btn::before {
   content: '';
   position: absolute;
   top: 0;
@@ -553,23 +553,23 @@
   animation: btn-shine 3.5s ease infinite;
 }
 
-/* V4 outline button */
-.v4-outline-btn {
+/* Paleo outline button */
+.paleo-outline-btn {
   background: transparent;
   border: 1px solid oklch(from var(--color-lavender) l c h / 0.2);
   color: oklch(from var(--color-lavender) l c h / 0.6);
   border-radius: 50px;
   transition: all 0.4s ease;
 }
-.v4-outline-btn:hover {
+.paleo-outline-btn:hover {
   border-color: oklch(from var(--color-lavender) l c h / 0.4);
   color: oklch(from var(--color-lavender) l c h / 0.85);
   transform: translateY(-2px);
   box-shadow: 0 6px 24px oklch(from var(--color-lavender) l c h / 0.08);
 }
 
-/* V4 badge */
-.v4-badge {
+/* Paleo badge */
+.paleo-badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
