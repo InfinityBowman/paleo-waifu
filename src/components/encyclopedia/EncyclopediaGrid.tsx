@@ -46,6 +46,27 @@ interface Props {
   filters: EncyclopediaFilters
 }
 
+function distributeToColumns(
+  items: Array<CreatureGridItem>,
+  columnCount: number,
+) {
+  const cols: Array<Array<CreatureGridItem>> = Array.from(
+    { length: columnCount },
+    () => [],
+  )
+  const heights = new Array<number>(columnCount).fill(0)
+  for (const item of items) {
+    let minIdx = 0
+    for (let i = 1; i < columnCount; i++) {
+      if (heights[i]! < heights[minIdx]!) minIdx = i
+    }
+    cols[minIdx]!.push(item)
+    const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
+    heights[minIdx] += imgH + 0.3
+  }
+  return cols
+}
+
 export function EncyclopediaGrid({
   creatures,
   hasMore: initialHasMore,
@@ -63,9 +84,11 @@ export function EncyclopediaGrid({
 
   // Reset when loader fires a new initial page (filters/sort changed)
   const creaturesRef = useRef(creatures)
+  const generationRef = useRef(0)
   useEffect(() => {
     if (creaturesRef.current !== creatures) {
       creaturesRef.current = creatures
+      generationRef.current++
       setExtraItems([])
       setHasMore(initialHasMore)
       setCursor(initialCursor)
@@ -185,23 +208,11 @@ export function EncyclopediaGrid({
     return () => observer.disconnect()
   }, [])
 
-  const columns = useMemo(() => {
-    const cols: Array<Array<CreatureGridItem>> = Array.from(
-      { length: columnCount },
-      () => [],
-    )
-    const heights = new Array<number>(columnCount).fill(0)
-    for (const item of allCreatures) {
-      let minIdx = 0
-      for (let i = 1; i < columnCount; i++) {
-        if (heights[i]! < heights[minIdx]!) minIdx = i
-      }
-      cols[minIdx]!.push(item)
-      const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
-      heights[minIdx] += imgH + 0.3
-    }
-    return cols
-  }, [allCreatures, columnCount])
+  const columns = useMemo(
+    () => distributeToColumns(allCreatures, columnCount),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [creatures, extraItems, columnCount],
+  )
 
   const selectedGridItem = selectedId
     ? (allCreatures.find((c) => c.id === selectedId) ?? null)
@@ -230,12 +241,14 @@ export function EncyclopediaGrid({
   const handleLoadMore = useCallback(async () => {
     if (!cursorRef.current || loadingMoreRef.current || !hasMoreRef.current)
       return
+    const gen = generationRef.current
     setLoadingMore(true)
     observerRef.current?.disconnect()
     try {
       const result = await loadMoreCreatures({
         data: { filters, cursor: cursorRef.current },
       })
+      if (generationRef.current !== gen) return
       setExtraItems((prev) => [...prev, ...result.creatures])
       setHasMore(result.hasMore)
       setCursor(result.nextCursor)
