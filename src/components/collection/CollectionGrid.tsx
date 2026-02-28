@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import { Search, Skull, Star } from 'lucide-react'
 import { CreatureModal } from './CreatureModal'
 import type { Rarity } from '@/lib/types'
@@ -38,16 +38,25 @@ export function CollectionGrid({
   const [eraFilter, setEraFilter] = useState<string>('all')
   const [selected, setSelected] = useState<CollectionItem | null>(null)
 
-  const eras = [...new Set(collection.map((c) => c.era))]
+  const deferredSearch = useDeferredValue(search)
+
+  const eras = useMemo(() => [...new Set(collection.map((c) => c.era))], [collection])
   const rarities = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
-  const filtered = collection.filter((c) => {
-    if (search && !c.name.toLowerCase().includes(search.toLowerCase()))
-      return false
-    if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
-    if (eraFilter !== 'all' && c.era !== eraFilter) return false
-    return true
-  })
+  const filtered = useMemo(
+    () =>
+      collection.filter((c) => {
+        if (
+          deferredSearch &&
+          !c.name.toLowerCase().includes(deferredSearch.toLowerCase())
+        )
+          return false
+        if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
+        if (eraFilter !== 'all' && c.era !== eraFilter) return false
+        return true
+      }),
+    [collection, deferredSearch, rarityFilter, eraFilter],
+  )
 
   return (
     <>
@@ -63,7 +72,7 @@ export function CollectionGrid({
           />
         </div>
         <Select value={rarityFilter} onValueChange={setRarityFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -76,7 +85,7 @@ export function CollectionGrid({
           </SelectContent>
         </Select>
         <Select value={eraFilter} onValueChange={setEraFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -110,7 +119,7 @@ export function CollectionGrid({
                   RARITY_BG[rarity],
                 )}
               >
-                <div className="aspect-[3/4] overflow-hidden p-2">
+                <div className="aspect-3/4 overflow-hidden p-2">
                   {item.imageUrl ? (
                     <img
                       src={item.imageUrl}

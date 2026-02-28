@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { and, eq } from 'drizzle-orm'
+import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
@@ -16,12 +17,27 @@ import {
   PULL_COST_MULTI,
   PULL_COST_SINGLE,
 } from '@/lib/types'
-import { jsonResponse } from '@/lib/utils'
+import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+
+const GachaBody = z.discriminatedUnion('action', [
+  z.object({ action: z.literal('claim_daily') }),
+  z.object({
+    action: z.literal('pull'),
+    bannerId: z.string().min(1).max(50),
+  }),
+  z.object({
+    action: z.literal('pull_multi'),
+    bannerId: z.string().min(1).max(50),
+  }),
+])
 
 export const Route = createFileRoute('/api/gacha')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const originError = checkCsrfOrigin(request)
+        if (originError) return originError
+
         const cfEnv = getCfEnv()
         const auth = await createAuth(cfEnv)
         const session = await auth.api.getSession({ headers: request.headers })
@@ -29,10 +45,17 @@ export const Route = createFileRoute('/api/gacha')({
           return jsonResponse({ error: 'Unauthorized' }, 401)
         }
 
-        const body = (await request.json()) as {
-          action: string
-          bannerId?: string
+        let rawBody: unknown
+        try {
+          rawBody = await request.json()
+        } catch {
+          return jsonResponse({ error: 'Invalid JSON' }, 400)
         }
+        const parsed = GachaBody.safeParse(rawBody)
+        if (!parsed.success) {
+          return jsonResponse({ error: 'Invalid request body' }, 400)
+        }
+        const body = parsed.data
         const db = await createDb(cfEnv.DB)
 
         // Daily claim
@@ -44,9 +67,6 @@ export const Route = createFileRoute('/api/gacha')({
         // Pull
         if (body.action === 'pull' || body.action === 'pull_multi') {
           const bannerId = body.bannerId
-          if (!bannerId) {
-            return jsonResponse({ error: 'bannerId required' }, 400)
-          }
 
           // Validate banner exists and is active, fetch rateUpId for pulls
           const bannerRow = await db

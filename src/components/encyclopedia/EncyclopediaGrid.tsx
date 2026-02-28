@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useDeferredValue, useMemo, useRef, useState } from 'react'
 import { Search, Skull } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
 import { cn } from '@/lib/utils'
@@ -84,20 +84,26 @@ export function EncyclopediaGrid({
     ? { ...selectedGridItem, ...selectedDetails }
     : null
 
-  const eras = [...new Set(creatures.map((c) => c.era))]
-  const diets = [...new Set(creatures.map((c) => c.diet))]
+  const deferredSearch = useDeferredValue(search)
 
-  const filtered = creatures.filter((c) => {
-    if (
-      search &&
-      !c.name.toLowerCase().includes(search.toLowerCase()) &&
-      !c.scientificName.toLowerCase().includes(search.toLowerCase())
-    )
-      return false
-    if (eraFilter !== 'all' && c.era !== eraFilter) return false
-    if (dietFilter !== 'all' && c.diet !== dietFilter) return false
-    return true
-  })
+  const eras = useMemo(() => [...new Set(creatures.map((c) => c.era))], [creatures])
+  const diets = useMemo(() => [...new Set(creatures.map((c) => c.diet))], [creatures])
+
+  const filtered = useMemo(
+    () =>
+      creatures.filter((c) => {
+        if (
+          deferredSearch &&
+          !c.name.toLowerCase().includes(deferredSearch.toLowerCase()) &&
+          !c.scientificName.toLowerCase().includes(deferredSearch.toLowerCase())
+        )
+          return false
+        if (eraFilter !== 'all' && c.era !== eraFilter) return false
+        if (dietFilter !== 'all' && c.diet !== dietFilter) return false
+        return true
+      }),
+    [creatures, deferredSearch, eraFilter, dietFilter],
+  )
 
   return (
     <>
@@ -113,7 +119,7 @@ export function EncyclopediaGrid({
           />
         </div>
         <Select value={eraFilter} onValueChange={setEraFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -126,7 +132,7 @@ export function EncyclopediaGrid({
           </SelectContent>
         </Select>
         <Select value={dietFilter} onValueChange={setDietFilter}>
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">

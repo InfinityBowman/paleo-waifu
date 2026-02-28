@@ -98,8 +98,8 @@ export function TradeList({
         onSuccess?.()
         router.invalidate()
       }
-    } catch {
-      // Network error — user can retry
+    } catch (err) {
+      console.error('Trade action failed:', err)
     } finally {
       setLoading(null)
     }

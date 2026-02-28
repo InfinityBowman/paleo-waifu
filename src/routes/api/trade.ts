@@ -1,16 +1,39 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { and, eq, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
+import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { createAuth } from '@/lib/auth'
 import { tradeHistory, tradeOffer, userCreature } from '@/lib/db/schema'
-import { jsonResponse } from '@/lib/utils'
+import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+
+const idField = z.string().min(1).max(50)
+
+const TradeBody = z.discriminatedUnion('action', [
+  z.object({
+    action: z.literal('create'),
+    offeredCreatureId: idField,
+    wantedCreatureId: idField.optional(),
+  }),
+  z.object({ action: z.literal('cancel'), tradeId: idField }),
+  z.object({
+    action: z.literal('accept'),
+    tradeId: idField,
+    myCreatureId: idField,
+  }),
+  z.object({ action: z.literal('confirm'), tradeId: idField }),
+  z.object({ action: z.literal('reject'), tradeId: idField }),
+  z.object({ action: z.literal('withdraw'), tradeId: idField }),
+])
 
 export const Route = createFileRoute('/api/trade')({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const originError = checkCsrfOrigin(request)
+        if (originError) return originError
+
         const cfEnv = getCfEnv()
         const auth = await createAuth(cfEnv)
         const session = await auth.api.getSession({ headers: request.headers })
@@ -18,13 +41,17 @@ export const Route = createFileRoute('/api/trade')({
           return jsonResponse({ error: 'Unauthorized' }, 401)
         }
 
-        const body = (await request.json()) as {
-          action: string
-          offeredCreatureId?: string
-          wantedCreatureId?: string
-          tradeId?: string
-          myCreatureId?: string
+        let rawBody: unknown
+        try {
+          rawBody = await request.json()
+        } catch {
+          return jsonResponse({ error: 'Invalid JSON' }, 400)
         }
+        const parsed = TradeBody.safeParse(rawBody)
+        if (!parsed.success) {
+          return jsonResponse({ error: 'Invalid request body' }, 400)
+        }
+        const body = parsed.data
         const db = await createDb(cfEnv.DB)
         const userId = session.user.id
 
@@ -77,10 +104,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Create trade offer
         if (body.action === 'create') {
-          if (!body.offeredCreatureId) {
-            return jsonResponse({ error: 'offeredCreatureId required' }, 400)
-          }
-
           // Atomically verify ownership + lock in one step to prevent race conditions
           const locked = await db
             .update(userCreature)
@@ -114,10 +137,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Cancel trade (offerer only, from open or pending)
         if (body.action === 'cancel') {
-          if (!body.tradeId) {
-            return jsonResponse({ error: 'tradeId required' }, 400)
-          }
-
           const trade = await db
             .select()
             .from(tradeOffer)
@@ -165,13 +184,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Propose to accept (sets trade to pending — offerer must confirm)
         if (body.action === 'accept') {
-          if (!body.tradeId || !body.myCreatureId) {
-            return jsonResponse(
-              { error: 'tradeId and myCreatureId required' },
-              400,
-            )
-          }
-
           // Lock the acceptor's creature FIRST — verify ownership before touching the trade
           const myLocked = await db
             .update(userCreature)
@@ -259,10 +271,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Offerer confirms a pending trade — executes the swap
         if (body.action === 'confirm') {
-          if (!body.tradeId) {
-            return jsonResponse({ error: 'tradeId required' }, 400)
-          }
-
           // Only the offerer can confirm, and only pending trades
           const trade = await db
             .select()
@@ -366,9 +374,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Offerer rejects a pending proposal — trade returns to open
         if (body.action === 'reject') {
-          if (!body.tradeId) {
-            return jsonResponse({ error: 'tradeId required' }, 400)
-          }
           return (
             (await resetPendingTrade(body.tradeId, 'offererId')) ??
             jsonResponse({ success: true })
@@ -377,9 +382,6 @@ export const Route = createFileRoute('/api/trade')({
 
         // Receiver withdraws their pending proposal — trade returns to open
         if (body.action === 'withdraw') {
-          if (!body.tradeId) {
-            return jsonResponse({ error: 'tradeId required' }, 400)
-          }
           return (
             (await resetPendingTrade(body.tradeId, 'receiverId')) ??
             jsonResponse({ success: true })

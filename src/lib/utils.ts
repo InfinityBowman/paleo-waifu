@@ -31,3 +31,22 @@ export function withSecurityHeaders(response: Response): Response {
   }
   return newResponse
 }
+
+/** Returns an error Response if Origin header doesn't match, or null if OK.
+ *  Non-browser clients don't send Origin — the session cookie's SameSite=Lax
+ *  defends cross-site form POSTs; this adds a second layer for fetch-based CSRF. */
+export function checkCsrfOrigin(request: Request): Response | null {
+  const origin = request.headers.get('Origin')
+  if (!origin) return null
+  let parsedOrigin: URL
+  try {
+    parsedOrigin = new URL(origin)
+  } catch {
+    return jsonResponse({ error: 'Origin mismatch' }, 403)
+  }
+  const requestUrl = new URL(request.url)
+  if (parsedOrigin.origin !== requestUrl.origin) {
+    return jsonResponse({ error: 'Origin mismatch' }, 403)
+  }
+  return null
+}

@@ -84,8 +84,8 @@ function GachaPage() {
         if (data.fossils != null) setFossils(data.fossils)
         setCanClaim(false)
       }
-    } catch {
-      // Silently fail — user can retry
+    } catch (err) {
+      console.error('Daily claim failed:', err)
     } finally {
       setClaiming(false)
     }
@@ -120,7 +120,7 @@ function GachaPage() {
           )}
           <Card
             size="sm"
-            className="flex-row items-center gap-2 border-primary/20 bg-gradient-to-r from-primary/5 to-amber-400/5 px-5 py-3"
+            className="flex-row items-center gap-2 border-primary/20 bg-linear-to-r from-primary/5 to-amber-400/5 px-5 py-3"
           >
             <Bone className="h-6 w-6 text-primary/70" />
             <span className="font-display text-2xl font-bold text-primary">
