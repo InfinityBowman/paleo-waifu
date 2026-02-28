@@ -140,7 +140,7 @@ async function queryCreaturePage(
   const page = hasMore ? rows.slice(0, PAGE_SIZE) : rows
 
   const last = page[page.length - 1]
-  const nextCursor: string | null = hasMore && last
+  const nextCursor: string | null = hasMore
     ? encodeCursor({
         v:
           sort === 'name'
@@ -188,27 +188,25 @@ export const loadMoreCreatures = createServerFn({ method: 'GET' })
     )
   })
 
-const getFilterOptions = createServerFn({ method: 'GET' }).handler(
-  async () => {
-    const db = await createDb(getCfEnv().DB)
-    const [eras, diets] = await Promise.all([
-      db
-        .selectDistinct({ era: creature.era })
-        .from(creature)
-        .orderBy(asc(creature.era))
-        .all(),
-      db
-        .selectDistinct({ diet: creature.diet })
-        .from(creature)
-        .orderBy(asc(creature.diet))
-        .all(),
-    ])
-    return {
-      eras: eras.map((r) => r.era),
-      diets: diets.map((r) => r.diet),
-    }
-  },
-)
+const getFilterOptions = createServerFn({ method: 'GET' }).handler(async () => {
+  const db = await createDb(getCfEnv().DB)
+  const [eras, diets] = await Promise.all([
+    db
+      .selectDistinct({ era: creature.era })
+      .from(creature)
+      .orderBy(asc(creature.era))
+      .all(),
+    db
+      .selectDistinct({ diet: creature.diet })
+      .from(creature)
+      .orderBy(asc(creature.diet))
+      .all(),
+  ])
+  return {
+    eras: eras.map((r) => r.era),
+    diets: diets.map((r) => r.diet),
+  }
+})
 
 export const getCreatureDetails = createServerFn({ method: 'GET' })
   .inputValidator((id: string) => id)
@@ -237,6 +235,10 @@ interface EncyclopediaSearch {
 }
 
 export const Route = createFileRoute('/_public/encyclopedia')({
+  headers: () => ({
+    'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=86400',
+  }),
+
   validateSearch: (raw: Record<string, unknown>): EncyclopediaSearch => ({
     search: typeof raw.search === 'string' ? raw.search : undefined,
     era: typeof raw.era === 'string' ? raw.era : undefined,
@@ -253,7 +255,7 @@ export const Route = createFileRoute('/_public/encyclopedia')({
     search: search.search ?? '',
     era: search.era ?? '',
     diet: search.diet ?? '',
-    sort: (search.sort ?? 'name') as EncyclopediaSort,
+    sort: search.sort ?? 'name',
   }),
 
   loader: async ({ deps }) => {

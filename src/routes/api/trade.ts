@@ -410,14 +410,10 @@ export const Route = createFileRoute('/api/trade')({
         }
 
         // Receiver withdraws their pending proposal — trade returns to open
-        if (body.action === 'withdraw') {
-          return (
-            (await resetPendingTrade(body.tradeId, 'receiverId')) ??
-            jsonResponse({ success: true })
-          )
-        }
-
-        return jsonResponse({ error: 'Unknown action' }, 400)
+        return (
+          (await resetPendingTrade(body.tradeId, 'receiverId')) ??
+          jsonResponse({ success: true })
+        )
       },
     },
   },

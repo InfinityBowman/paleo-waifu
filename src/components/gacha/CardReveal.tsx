@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Skull, Sparkles } from 'lucide-react'
 import type { PullResult } from '@/lib/gacha'
+import { IconFossil, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import {
   RARITY_BG,
@@ -31,7 +31,7 @@ export function CardReveal({
   if (!revealed) {
     return (
       <div className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted bg-gradient-to-b from-muted/40 to-muted/20">
-        <Skull className="h-8 w-8 animate-pulse text-muted-foreground/50" />
+        <IconFossil className="h-8 w-8 animate-pulse text-muted-foreground/50" />
         <div className="h-1 w-12 overflow-hidden rounded-full bg-muted">
           <div
             className="h-full w-full animate-shimmer rounded-full bg-gradient-to-r from-transparent via-muted-foreground/30 to-transparent"
@@ -74,7 +74,7 @@ export function CardReveal({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <Skull className="h-10 w-10 text-muted-foreground/30" />
+            <IconFossil className="h-10 w-10 text-muted-foreground/30" />
           </div>
         )}
       </div>
@@ -83,7 +83,7 @@ export function CardReveal({
         <div className="flex items-center gap-1">
           {result.isNew && (
             <Badge className="bg-primary/20 text-primary">
-              <Sparkles className="h-3 w-3" />
+              <IconSparkles className="h-3 w-3" />
               NEW
             </Badge>
           )}

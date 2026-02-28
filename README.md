@@ -108,15 +108,15 @@ python/                # Data pipeline for creature seeding
 
 ## Scripts
 
-| Command                  | Description                          |
-| ------------------------ | ------------------------------------ |
-| `pnpm dev`               | Dev server on http://localhost:3000  |
-| `pnpm build`             | Production build                     |
-| `pnpm deploy`            | Build + deploy to Cloudflare Workers |
-| `pnpm db:generate`       | Generate Drizzle migration files     |
-| `pnpm db:migrate:local`  | Apply migrations to local D1         |
-| `pnpm db:migrate:prod`   | Apply migrations to production D1    |
-| `pnpm db:seed:local`     | Seed local D1 with creature data     |
-| `pnpm lint`              | ESLint                               |
-| `pnpm format`            | Prettier                             |
-| `pnpm check`             | Prettier --write + ESLint --fix      |
+| Command                 | Description                          |
+| ----------------------- | ------------------------------------ |
+| `pnpm dev`              | Dev server on http://localhost:3000  |
+| `pnpm build`            | Production build                     |
+| `pnpm deploy`           | Build + deploy to Cloudflare Workers |
+| `pnpm db:generate`      | Generate Drizzle migration files     |
+| `pnpm db:migrate:local` | Apply migrations to local D1         |
+| `pnpm db:migrate:prod`  | Apply migrations to production D1    |
+| `pnpm db:seed:local`    | Seed local D1 with creature data     |
+| `pnpm lint`             | ESLint                               |
+| `pnpm format`           | Prettier                             |
+| `pnpm check`            | Prettier --write + ESLint --fix      |

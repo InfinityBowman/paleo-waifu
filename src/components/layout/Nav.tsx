@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { LogOut, Menu } from 'lucide-react'
 import {
-  Archive,
-  ArrowLeftRight,
-  BookOpen,
-  Gem,
-  LogOut,
-  Menu,
-  Skull,
-  User,
-} from 'lucide-react'
+  IconBookshelf,
+  IconCardExchange,
+  IconCrystalCluster,
+  IconFossil,
+  IconOpenBook,
+  IconPerson,
+} from '@/components/icons'
 import { signIn, signOut, useSession } from '@/lib/auth-client'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -37,10 +36,10 @@ import {
 } from '@/components/ui/tooltip'
 
 const NAV_LINK_CLASS =
-  'flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground [&.active]:text-primary'
+  'flex items-center gap-1.5 text-sm font-medium text-lavender/60 hover:text-lavender-light/90 transition-colors [&.active]:text-primary'
 
 const MOBILE_NAV_LINK_CLASS =
-  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground [&.active]:bg-accent [&.active]:text-foreground'
+  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-lavender/60 hover:bg-white/4 hover:text-lavender-light/90 [&.active]:bg-white/4 [&.active]:text-primary'
 
 function DiscordIcon({ className }: { className?: string }) {
   return (
@@ -56,7 +55,7 @@ export function Nav() {
 
   return (
     <TooltipProvider>
-      <header className="shrink-0 border-b bg-background">
+      <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="flex h-14 items-center justify-between px-4">
           {/* Left: Logo + Desktop Nav */}
           <div className="flex items-center gap-6">
@@ -64,26 +63,26 @@ export function Nav() {
               to="/"
               className="flex items-center gap-2 font-display text-lg font-bold"
             >
-              <Skull className="h-5 w-5 text-primary" />
+              <IconFossil className="h-5 w-5 text-primary" />
               PaleoWaifu
             </Link>
             <nav className="hidden items-center gap-4 md:flex">
               <Link to="/encyclopedia" className={NAV_LINK_CLASS}>
-                <BookOpen className="h-4 w-4" />
+                <IconOpenBook className="h-4 w-4" />
                 Encyclopedia
               </Link>
               {session && (
                 <>
                   <Link to="/gacha" className={NAV_LINK_CLASS}>
-                    <Gem className="h-4 w-4" />
+                    <IconCrystalCluster className="h-4 w-4" />
                     Gacha
                   </Link>
                   <Link to="/collection" className={NAV_LINK_CLASS}>
-                    <Archive className="h-4 w-4" />
+                    <IconBookshelf className="h-4 w-4" />
                     Collection
                   </Link>
                   <Link to="/trade" className={NAV_LINK_CLASS}>
-                    <ArrowLeftRight className="h-4 w-4" />
+                    <IconCardExchange className="h-4 w-4" />
                     Trade
                   </Link>
                 </>
@@ -120,7 +119,7 @@ export function Nav() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link to="/profile">
-                        <User className="h-4 w-4" />
+                        <IconPerson className="h-4 w-4" />
                         Profile
                       </Link>
                     </DropdownMenuItem>
@@ -157,7 +156,7 @@ export function Nav() {
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2 font-display">
-                    <Skull className="h-5 w-5 text-primary" />
+                    <IconFossil className="h-5 w-5 text-primary" />
                     PaleoWaifu
                   </SheetTitle>
                 </SheetHeader>
@@ -167,7 +166,7 @@ export function Nav() {
                     className={MOBILE_NAV_LINK_CLASS}
                     onClick={() => setMobileOpen(false)}
                   >
-                    <BookOpen className="h-4 w-4" />
+                    <IconOpenBook className="h-4 w-4" />
                     Encyclopedia
                   </Link>
                   {session && (
@@ -177,7 +176,7 @@ export function Nav() {
                         className={MOBILE_NAV_LINK_CLASS}
                         onClick={() => setMobileOpen(false)}
                       >
-                        <Gem className="h-4 w-4" />
+                        <IconCrystalCluster className="h-4 w-4" />
                         Gacha
                       </Link>
                       <Link
@@ -185,7 +184,7 @@ export function Nav() {
                         className={MOBILE_NAV_LINK_CLASS}
                         onClick={() => setMobileOpen(false)}
                       >
-                        <Archive className="h-4 w-4" />
+                        <IconBookshelf className="h-4 w-4" />
                         Collection
                       </Link>
                       <Link
@@ -193,7 +192,7 @@ export function Nav() {
                         className={MOBILE_NAV_LINK_CLASS}
                         onClick={() => setMobileOpen(false)}
                       >
-                        <ArrowLeftRight className="h-4 w-4" />
+                        <IconCardExchange className="h-4 w-4" />
                         Trade
                       </Link>
                     </>

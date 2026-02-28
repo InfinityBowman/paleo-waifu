@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
-import { Pickaxe, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { CardReveal } from './CardReveal'
+import { IconMining } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/appStore'
 
@@ -31,10 +32,10 @@ export function PullAnimation() {
   if (isPulling) {
     return (
       <div className="relative flex items-center justify-center rounded-xl border bg-gradient-to-b from-card to-card/80 p-16">
-        <div className="absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,oklch(0.75_0.16_75/0.06)_0%,transparent_70%)]" />
+        <div className="absolute inset-0 rounded-xl bg-[radial-gradient(ellipse_at_center,oklch(0.55_0.18_340/0.06)_0%,transparent_70%)]" />
         <div className="relative flex flex-col items-center gap-4">
           <div className="animate-dig text-4xl">
-            <Pickaxe className="h-12 w-12 text-primary" />
+            <IconMining className="h-12 w-12 text-primary" />
           </div>
           <p className="font-display text-lg text-muted-foreground">
             Excavating

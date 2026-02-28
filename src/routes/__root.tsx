@@ -21,7 +21,19 @@ export const Route = createRootRoute({
         content: 'Collect waifu-fied prehistoric creatures in this gacha game!',
       },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [
+      { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+      {
+        rel: 'preconnect',
+        href: 'https://fonts.gstatic.com',
+        crossOrigin: 'anonymous',
+      },
+      {
+        rel: 'stylesheet',
+        href: 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&family=Klee+One:wght@400;600&display=swap',
+      },
+      { rel: 'stylesheet', href: appCss },
+    ],
     scripts: [
       {
         children: `document.documentElement.classList.add('dark')`,
@@ -58,7 +70,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="bg-noise min-h-screen bg-background text-foreground antialiased">
+      <body className="bg-v4 min-h-screen bg-background text-foreground antialiased">
         {children}
         {import.meta.env.DEV && <DevAccountSwitcher />}
         <Toaster />

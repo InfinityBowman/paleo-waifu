@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
-import { Loader2, Search, Skull } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
+import type { EncyclopediaFilters } from '@/routes/_public/encyclopedia'
+import { IconFossil, IconMagnifyingGlass } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { CreatureModal } from '@/components/collection/CreatureModal'
@@ -17,7 +19,6 @@ import {
   getCreatureDetails,
   loadMoreCreatures,
 } from '@/routes/_public/encyclopedia'
-import type { EncyclopediaFilters } from '@/routes/_public/encyclopedia'
 
 interface CreatureGridItem {
   id: string
@@ -58,9 +59,9 @@ function distributeToColumns(
   for (const item of items) {
     let minIdx = 0
     for (let i = 1; i < columnCount; i++) {
-      if (heights[i]! < heights[minIdx]!) minIdx = i
+      if (heights[i] < heights[minIdx]) minIdx = i
     }
-    cols[minIdx]!.push(item)
+    cols[minIdx].push(item)
     const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
     heights[minIdx] += imgH + 0.3
   }
@@ -168,7 +169,7 @@ export function EncyclopediaGrid({
         prefetchInFlight.current.add(id)
         getCreatureDetails({ data: id }).then((result) => {
           prefetchInFlight.current.delete(id)
-          if (result) prefetchCache.current.set(id, result)
+          prefetchCache.current.set(id, result)
         })
       }, 200)
     },
@@ -183,10 +184,8 @@ export function EncyclopediaGrid({
     } else {
       setSelectedDetails(null)
       getCreatureDetails({ data: id }).then((result) => {
-        if (result) {
-          prefetchCache.current.set(id, result)
-          setSelectedDetails(result)
-        }
+        prefetchCache.current.set(id, result)
+        setSelectedDetails(result)
       })
     }
   }, [])
@@ -201,7 +200,7 @@ export function EncyclopediaGrid({
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
-      const w = entry!.contentRect.width
+      const w = entry.contentRect.width
       setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
     })
     observer.observe(el)
@@ -210,7 +209,6 @@ export function EncyclopediaGrid({
 
   const columns = useMemo(
     () => distributeToColumns(allCreatures, columnCount),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [creatures, extraItems, columnCount],
   )
 
@@ -282,7 +280,7 @@ export function EncyclopediaGrid({
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <IconMagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search by name or scientific name..."
@@ -370,7 +368,7 @@ export function EncyclopediaGrid({
                       />
                     ) : (
                       <div className="flex aspect-square items-center justify-center bg-muted/20">
-                        <Skull className="h-10 w-10 text-muted-foreground/30" />
+                        <IconFossil className="h-10 w-10 text-muted-foreground/30" />
                       </div>
                     )}
                   </div>

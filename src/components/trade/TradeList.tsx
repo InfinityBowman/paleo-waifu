@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { ArrowLeftRight, Check, Clock, Loader2, Plus, X } from 'lucide-react'
+import { Loader2, Plus, X } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
+import {
+  IconCardExchange,
+  IconCheckMark,
+  IconHourglass,
+} from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { Button } from '@/components/ui/button'
@@ -297,7 +302,7 @@ export function TradeList({
       {pendingTrades.length > 0 && (
         <div className="space-y-4">
           <h2 className="font-display flex items-center gap-2 text-lg font-semibold">
-            <Clock className="h-4 w-4 text-amber-500" />
+            <IconHourglass className="h-4 w-4 text-primary" />
             Pending Trades
           </h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -307,7 +312,7 @@ export function TradeList({
               const receiverRarity =
                 trade.receiverCreatureRarity as Rarity | null
               return (
-                <Card key={trade.id} className="border-2 border-amber-500/30">
+                <Card key={trade.id} className="border-2 border-primary/30">
                   <CardContent>
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -322,7 +327,7 @@ export function TradeList({
                       </div>
                       <Badge
                         variant="secondary"
-                        className="bg-amber-500/15 text-amber-500"
+                        className="bg-primary/15 text-primary"
                       >
                         PENDING
                       </Badge>
@@ -342,7 +347,7 @@ export function TradeList({
                           {trade.offeredCreatureName}
                         </div>
                       </div>
-                      <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                      <IconCardExchange className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1 text-right">
                         {receiverRarity && (
                           <span
@@ -368,13 +373,13 @@ export function TradeList({
                         <Button
                           onClick={() => handleConfirm(trade.id)}
                           disabled={loading === trade.id}
-                          className="flex-1 bg-green-600 text-white hover:bg-green-700"
+                          className="flex-1 bg-primary text-white hover:bg-primary/90"
                           size="sm"
                         >
                           {loading === trade.id ? (
                             <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           ) : (
-                            <Check className="h-3.5 w-3.5" />
+                            <IconCheckMark className="h-3.5 w-3.5" />
                           )}
                           Accept
                         </Button>
@@ -461,7 +466,7 @@ export function TradeList({
                           {trade.offeredCreatureName}
                         </div>
                       </div>
-                      <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                      <IconCardExchange className="h-4 w-4 text-muted-foreground" />
                       <div className="flex-1 text-right text-sm text-muted-foreground">
                         Open to offers
                       </div>

@@ -35,7 +35,7 @@ export function DevAccountSwitcher() {
       if (res.ok) {
         window.location.reload()
       } else {
-        const data = (await res.json()) as { error?: string }
+        const data: { error?: string } = await res.json()
         console.error('Dev switch failed:', data.error)
       }
     } finally {
@@ -46,9 +46,9 @@ export function DevAccountSwitcher() {
   return (
     <div className="fixed bottom-4 left-4 z-50">
       {open ? (
-        <div className="w-72 rounded-lg border border-amber-500/30 bg-background/95 shadow-lg backdrop-blur">
-          <div className="flex items-center justify-between border-b border-amber-500/20 px-3 py-2">
-            <span className="text-xs font-semibold text-amber-500">
+        <div className="w-72 rounded-lg border border-primary/30 bg-background/95 shadow-lg backdrop-blur">
+          <div className="flex items-center justify-between border-b border-primary/20 px-3 py-2">
+            <span className="text-xs font-semibold text-primary">
               DEV ACCOUNT SWITCHER
             </span>
             <button
@@ -60,16 +60,14 @@ export function DevAccountSwitcher() {
           </div>
           <div className="space-y-1 p-2">
             {DEV_USERS.map((u) => {
-              const isActive = session?.user?.id === u.id
+              const isActive = session?.user.id === u.id
               return (
                 <button
                   key={u.id}
                   onClick={() => switchUser(u.id)}
                   disabled={loading || isActive}
                   className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors ${
-                    isActive
-                      ? 'bg-amber-500/15 text-amber-500'
-                      : 'hover:bg-muted'
+                    isActive ? 'bg-primary/15 text-primary' : 'hover:bg-muted'
                   } disabled:opacity-50`}
                 >
                   <img
@@ -81,7 +79,7 @@ export function DevAccountSwitcher() {
                     <div className="flex items-center gap-2">
                       <span className="truncate font-medium">{u.name}</span>
                       {isActive && (
-                        <span className="shrink-0 rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-amber-500">
+                        <span className="shrink-0 rounded-full bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold text-primary">
                           active
                         </span>
                       )}
@@ -98,7 +96,7 @@ export function DevAccountSwitcher() {
       ) : (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-1.5 rounded-full bg-amber-500/15 px-3 py-1.5 text-xs font-semibold text-amber-500 shadow-sm transition-colors hover:bg-amber-500/25"
+          className="flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary shadow-sm transition-colors hover:bg-primary/25"
         >
           <Bug className="h-3.5 w-3.5" />
           DEV

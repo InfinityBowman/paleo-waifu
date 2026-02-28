@@ -16,35 +16,35 @@ export const RARITY_ORDER: Record<Rarity, number> = {
 }
 
 export const RARITY_COLORS: Record<Rarity, string> = {
-  common: 'text-neutral-400',
-  uncommon: 'text-green-400',
-  rare: 'text-blue-400',
-  epic: 'text-purple-400',
-  legendary: 'text-amber-400',
+  common: 'text-rarity-common',
+  uncommon: 'text-rarity-uncommon',
+  rare: 'text-rarity-rare',
+  epic: 'text-rarity-epic',
+  legendary: 'text-rarity-legendary',
 }
 
 export const RARITY_BORDER: Record<Rarity, string> = {
-  common: 'border-neutral-400/30',
-  uncommon: 'border-green-400/30',
-  rare: 'border-blue-400/30',
-  epic: 'border-purple-400/30',
-  legendary: 'border-amber-400/30',
+  common: 'border-rarity-common/30',
+  uncommon: 'border-rarity-uncommon/40',
+  rare: 'border-rarity-rare/45',
+  epic: 'border-rarity-epic/50',
+  legendary: 'border-rarity-legendary/60',
 }
 
 export const RARITY_BG: Record<Rarity, string> = {
-  common: 'bg-neutral-400/10',
-  uncommon: 'bg-green-400/10',
-  rare: 'bg-blue-400/10',
-  epic: 'bg-purple-400/10',
-  legendary: 'bg-amber-400/10',
+  common: 'bg-rarity-common/8',
+  uncommon: 'bg-rarity-uncommon/10',
+  rare: 'bg-rarity-rare/12',
+  epic: 'bg-rarity-epic/15',
+  legendary: 'bg-rarity-legendary/15',
 }
 
 export const RARITY_GLOW: Record<Rarity, string> = {
   common: '',
-  uncommon: 'shadow-green-400/20',
-  rare: 'shadow-blue-400/20',
-  epic: 'shadow-purple-400/30',
-  legendary: 'shadow-amber-400/40',
+  uncommon: 'shadow-rarity-uncommon/25',
+  rare: 'shadow-rarity-rare/35',
+  epic: 'shadow-rarity-epic/40',
+  legendary: 'shadow-rarity-legendary/50',
 }
 
 export const RARITY_SHIMMER: Partial<Record<Rarity, string>> = {

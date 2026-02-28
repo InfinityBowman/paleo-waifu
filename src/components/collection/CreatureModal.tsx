@@ -1,5 +1,5 @@
-import { Skull, Sparkles } from 'lucide-react'
 import type { Rarity } from '@/lib/types'
+import { IconFossil, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/types'
 import {
@@ -25,11 +25,11 @@ interface Creature {
 }
 
 const RARITY_IMAGE_GRADIENT: Record<string, string> = {
-  common: 'from-neutral-500/10 to-background',
-  uncommon: 'from-green-500/10 to-background',
-  rare: 'from-blue-500/15 to-background',
-  epic: 'from-purple-500/20 to-background',
-  legendary: 'from-amber-500/20 to-background',
+  common: 'from-rarity-common/10 to-background',
+  uncommon: 'from-rarity-uncommon/14 to-background',
+  rare: 'from-rarity-rare/18 to-background',
+  epic: 'from-rarity-epic/22 to-background',
+  legendary: 'from-rarity-legendary/25 to-background',
 }
 
 export function CreatureModal({
@@ -89,7 +89,7 @@ export function CreatureModal({
             />
           ) : (
             <div className="flex h-40 w-full items-center justify-center">
-              <Skull className="h-20 w-20 text-muted-foreground/20" />
+              <IconFossil className="h-20 w-20 text-muted-foreground/20" />
             </div>
           )}
         </div>
@@ -150,7 +150,7 @@ export function CreatureModal({
               {funFacts.length > 0 && (
                 <div className="mt-4">
                   <div className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <IconSparkles className="h-3.5 w-3.5 text-primary" />
                     Fun Facts
                   </div>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">

@@ -8,15 +8,15 @@ Paleo Waifu is a prehistoric creature gacha game. Players pull creatures from ba
 
 Fossils are the sole in-game currency. They are earned passively and spent on pulls.
 
-| Source | Amount | Notes |
-|---|---|---|
-| New user bonus | +20 | Awarded on first gacha page visit (idempotent) |
-| Daily login | +3 | Once per UTC day, manual claim via button |
+| Source         | Amount | Notes                                          |
+| -------------- | ------ | ---------------------------------------------- |
+| New user bonus | +20    | Awarded on first gacha page visit (idempotent) |
+| Daily login    | +3     | Once per UTC day, manual claim via button      |
 
-| Cost | Amount |
-|---|---|
-| Single pull | 1 Fossil |
-| 10-pull | 10 Fossils |
+| Cost        | Amount     |
+| ----------- | ---------- |
+| Single pull | 1 Fossil   |
+| 10-pull     | 10 Fossils |
 
 Fossil balance cannot go negative — the deduction query includes a `WHERE fossils >= cost` guard. If insufficient, the pull fails with HTTP 402.
 
@@ -26,13 +26,13 @@ Fossil balance cannot go negative — the deduction query includes a `WHERE foss
 
 ### Rarity Tiers
 
-| Rarity | Base Rate | Color |
-|---|---|---|
-| Common | 50% | Neutral/Gray |
-| Uncommon | 30% | Green |
-| Rare | 15% | Blue |
-| Epic | 4% | Purple |
-| Legendary | 1% | Amber/Gold |
+| Rarity    | Base Rate | Color        |
+| --------- | --------- | ------------ |
+| Common    | 50%       | Neutral/Gray |
+| Uncommon  | 30%       | Green        |
+| Rare      | 15%       | Blue         |
+| Epic      | 4%        | Purple       |
+| Legendary | 1%        | Amber/Gold   |
 
 Base rates sum to exactly 100% and are used directly as probabilities under normal conditions.
 
@@ -71,16 +71,16 @@ extraPulls = pullsSinceLegendary - 50
 legendaryRate = 0.01 × 2^(extraPulls + 1)
 ```
 
-| Pull # | Legendary Rate |
-|---|---|
-| 1–49 | 1% (base) |
-| 50 | 2% |
-| 51 | 4% |
-| 52 | 8% |
-| 53 | 16% |
-| 54 | 32% |
-| 55 | 64% |
-| 56+ | Effectively guaranteed |
+| Pull # | Legendary Rate         |
+| ------ | ---------------------- |
+| 1–49   | 1% (base)              |
+| 50     | 2%                     |
+| 51     | 4%                     |
+| 52     | 8%                     |
+| 53     | 16%                    |
+| 54     | 32%                    |
+| 55     | 64%                    |
+| 56+    | Effectively guaranteed |
 
 **Rare/Epic soft pity** (when `pullsSinceRare >= 50`):
 
@@ -97,6 +97,7 @@ For 10-pulls, pity is handled atomically: the counter is pre-incremented by the 
 Banners can designate a single **rate-up creature** via `rateUpId`.
 
 When the rarity roll matches the rate-up creature's rarity:
+
 - **50% chance** (`RATE_UP_SHARE = 0.5`) to select the rate-up creature
 - **50% chance** to select uniformly at random from all other creatures of that rarity in the banner pool
 
@@ -116,6 +117,7 @@ The gacha page displays the first active banner. Players can only pull from the 
 ### "Is New" Detection
 
 A creature is flagged as `isNew` if:
+
 1. The player has never owned that species before (no existing `user_creature` rows for that `creatureId`)
 2. AND it hasn't already appeared earlier in the same batch (prevents the second copy in a 10-pull from being marked new)
 
@@ -141,23 +143,25 @@ Terminal states: `accepted`, `cancelled`, `expired`
 
 ### Actions
 
-| Action | Actor | From | To | Description |
-|---|---|---|---|---|
-| Create | Offerer | — | `open` | Offer a creature; optionally specify a wanted species |
-| Cancel | Offerer | `open`/`pending` | `cancelled` | Withdraw the offer entirely |
-| Accept | Receiver | `open` | `pending` | Propose a creature to swap; must match `wantedCreatureId` if set |
-| Confirm | Offerer | `pending` | `accepted` | Finalize the swap; creatures change ownership atomically |
-| Reject | Offerer | `pending` | `open` | Decline the proposed swap; offer returns to marketplace |
-| Withdraw | Receiver | `pending` | `open` | Retract the proposed swap |
+| Action   | Actor    | From             | To          | Description                                                      |
+| -------- | -------- | ---------------- | ----------- | ---------------------------------------------------------------- |
+| Create   | Offerer  | —                | `open`      | Offer a creature; optionally specify a wanted species            |
+| Cancel   | Offerer  | `open`/`pending` | `cancelled` | Withdraw the offer entirely                                      |
+| Accept   | Receiver | `open`           | `pending`   | Propose a creature to swap; must match `wantedCreatureId` if set |
+| Confirm  | Offerer  | `pending`        | `accepted`  | Finalize the swap; creatures change ownership atomically         |
+| Reject   | Offerer  | `pending`        | `open`      | Decline the proposed swap; offer returns to marketplace          |
+| Withdraw | Receiver | `pending`        | `open`      | Retract the proposed swap                                        |
 
 ### Creature Locking
 
 When a creature is involved in a trade, it is **locked** (`isLocked = true`):
+
 - Locked on **create** (offerer's creature)
 - Locked on **accept** (receiver's creature)
 - Unlocked on **cancel**, **reject**, **withdraw**, **confirm**, or **expiry**
 
 A locked creature cannot be:
+
 - Offered in a new trade
 - Proposed against another trade
 - Shown in the "available creatures" list on the trade page
@@ -173,6 +177,7 @@ A locked creature cannot be:
 ### Atomic Swap
 
 The confirm step executes a single `db.batch()` that atomically:
+
 1. Sets trade status to `accepted`
 2. Reassigns the offerer's creature to the receiver
 3. Reassigns the receiver's creature to the offerer
@@ -182,6 +187,7 @@ The confirm step executes a single `db.batch()` that atomically:
 ### Expiration
 
 Expiration is **lazy** — stale trades are cleaned up on each trade page load, not via a scheduled job. The sweep:
+
 1. Finds all `open`/`pending` trades where `expiresAt < now()`
 2. Sets their status to `expired`
 3. Unlocks all associated creatures
@@ -201,6 +207,7 @@ Each pull creates a new `user_creature` row, even for duplicates. A player can o
 ### Display
 
 The collection page shows all owned creatures with:
+
 - Name, scientific name, rarity, era, diet
 - Image (loaded from CDN)
 - Favorite indicator (gold star)
@@ -212,12 +219,12 @@ The collection page shows all owned creatures with:
 
 ### Profile Stats
 
-| Stat | Calculation |
-|---|---|
-| Total Pulls | `COUNT(*)` from `user_creature` |
-| Unique Species | `COUNT(DISTINCT creature_id)` from `user_creature` |
-| Total Species | `COUNT(*)` from `creature` |
-| Completion % | `ROUND(unique / total × 100)` |
+| Stat             | Calculation                                                     |
+| ---------------- | --------------------------------------------------------------- |
+| Total Pulls      | `COUNT(*)` from `user_creature`                                 |
+| Unique Species   | `COUNT(DISTINCT creature_id)` from `user_creature`              |
+| Total Species    | `COUNT(*)` from `creature`                                      |
+| Completion %     | `ROUND(unique / total × 100)`                                   |
 | Trades Completed | `COUNT(*)` from `trade_history` where user is giver or receiver |
 
 ---
@@ -235,6 +242,7 @@ Server-side cursor-based keyset pagination, 30 creatures per page. Infinite scro
 ### Filtering
 
 Server-side filtering via URL search params:
+
 - **Search**: Name or scientific name (LIKE query, case-insensitive)
 - **Era**: Exact match dropdown (options from `SELECT DISTINCT`)
 - **Diet**: Exact match dropdown (options from `SELECT DISTINCT`)
@@ -242,6 +250,7 @@ Server-side filtering via URL search params:
 ### Sorting
 
 Three sort modes, all ascending:
+
 - **Name** (default): Alphabetical by creature name
 - **Rarity**: Common → Uncommon → Rare → Epic → Legendary
 - **Era**: Alphabetical by era
@@ -256,21 +265,21 @@ Clicking a creature opens a modal with full details (description, period, size, 
 
 ## Creature Data Model
 
-| Field | Type | Notes |
-|---|---|---|
-| `id` | text | nanoid primary key |
-| `name` | text | Display name |
-| `scientificName` | text | Latin binomial |
-| `era` | text | e.g., "Mesozoic" |
-| `period` | text? | e.g., "Jurassic" |
-| `diet` | text | e.g., "Carnivore" |
-| `sizeMeters` | real? | Body length in meters |
-| `weightKg` | real? | Weight in kilograms |
-| `rarity` | text | common / uncommon / rare / epic / legendary |
-| `description` | text | Flavor text |
-| `funFacts` | text? | JSON array of strings |
-| `imageUrl` | text? | Path rewritten to CDN URL server-side |
-| `imageAspectRatio` | real? | Pre-computed for layout stability |
+| Field              | Type  | Notes                                       |
+| ------------------ | ----- | ------------------------------------------- |
+| `id`               | text  | nanoid primary key                          |
+| `name`             | text  | Display name                                |
+| `scientificName`   | text  | Latin binomial                              |
+| `era`              | text  | e.g., "Mesozoic"                            |
+| `period`           | text? | e.g., "Jurassic"                            |
+| `diet`             | text  | e.g., "Carnivore"                           |
+| `sizeMeters`       | real? | Body length in meters                       |
+| `weightKg`         | real? | Weight in kilograms                         |
+| `rarity`           | text  | common / uncommon / rare / epic / legendary |
+| `description`      | text  | Flavor text                                 |
+| `funFacts`         | text? | JSON array of strings                       |
+| `imageUrl`         | text? | Path rewritten to CDN URL server-side       |
+| `imageAspectRatio` | real? | Pre-computed for layout stability           |
 
 ---
 

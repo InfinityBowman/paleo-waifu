@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Bone, Pickaxe } from 'lucide-react'
+import type { PullResult } from '@/lib/gacha'
+import { IconDinosaurBones, IconMining } from '@/components/icons'
 import { useAppStore } from '@/store/appStore'
 import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@/lib/types'
-import type { PullResult } from '@/lib/gacha'
 import { Button } from '@/components/ui/button'
 
 export function PullButton({
@@ -33,11 +33,11 @@ export function PullButton({
         body: JSON.stringify({ action, bannerId }),
       })
 
-      const data = (await res.json()) as {
+      const data: {
         error?: string
         fossils?: number
         results?: Array<PullResult>
-      }
+      } = await res.json()
       if (!res.ok) {
         setError(data.error ?? 'Pull failed')
         if (data.fossils != null) onFossilsChange(data.fossils)
@@ -67,10 +67,10 @@ export function PullButton({
           size="lg"
           className="group h-12 px-5"
         >
-          <Pickaxe className="h-5 w-5 transition-transform group-hover:rotate-[-20deg]" />
+          <IconMining className="h-5 w-5 transition-transform group-hover:rotate-[-20deg]" />
           <span className="font-display">Pull x1</span>
           <span className="flex items-center gap-0.5 text-xs opacity-70">
-            ({PULL_COST_SINGLE} <Bone className="h-3 w-3" />)
+            ({PULL_COST_SINGLE} <IconDinosaurBones className="h-3 w-3" />)
           </span>
         </Button>
         <Button
@@ -80,10 +80,10 @@ export function PullButton({
           size="lg"
           className="group relative h-12 overflow-hidden border-primary bg-primary/10 px-5 text-primary hover:bg-primary/20"
         >
-          <Pickaxe className="h-5 w-5 transition-transform group-hover:rotate-[-20deg]" />
+          <IconMining className="h-5 w-5 transition-transform group-hover:rotate-[-20deg]" />
           <span className="font-display">Pull x10</span>
           <span className="flex items-center gap-0.5 text-xs opacity-70">
-            ({PULL_COST_MULTI} <Bone className="h-3 w-3" />)
+            ({PULL_COST_MULTI} <IconDinosaurBones className="h-3 w-3" />)
           </span>
           {/* Shimmer on hover */}
           <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100 rarity-shimmer-legendary" />

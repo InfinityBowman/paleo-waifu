@@ -1,8 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { count, eq, sql } from 'drizzle-orm'
-import { Bone, Dices, Handshake, Microscope } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { Dices } from 'lucide-react'
+import {
+  IconArchiveResearch,
+  IconDinosaurBones,
+  IconTrade,
+} from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
@@ -83,7 +87,7 @@ function ProfilePage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard label="Fossils" value={fossils} icon={Bone} />
+        <StatCard label="Fossils" value={fossils} icon={IconDinosaurBones} />
         <StatCard label="Total Pulls" value={totalPulls} icon={Dices} />
         <Card
           size="sm"
@@ -93,7 +97,7 @@ function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Microscope className="h-4 w-4" />
+                  <IconArchiveResearch className="h-4 w-4" />
                   Species Found
                 </div>
                 <div className="mt-1 font-display text-2xl font-bold">
@@ -103,21 +107,26 @@ function ProfilePage() {
                   {completionPct}% complete
                 </div>
               </div>
-              <Microscope className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
+              <IconArchiveResearch className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
             </div>
             <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-primary to-amber-400 transition-all duration-500"
+                className="h-full rounded-full bg-gradient-to-r from-primary to-rarity-epic/80 transition-all duration-500"
                 style={{ width: `${completionPct}%` }}
               />
             </div>
           </CardContent>
         </Card>
-        <StatCard label="Trades" value={tradeCount} icon={Handshake} />
+        <StatCard label="Trades" value={tradeCount} icon={IconTrade} />
       </div>
     </div>
   )
 }
+
+type IconComponent = React.ComponentType<{
+  className?: string
+  style?: React.CSSProperties
+}>
 
 function StatCard({
   label,
@@ -126,7 +135,7 @@ function StatCard({
 }: {
   label: string
   value: string | number
-  icon: LucideIcon
+  icon: IconComponent
 }) {
   return (
     <Card size="sm" className="group transition-shadow hover:shadow-md">

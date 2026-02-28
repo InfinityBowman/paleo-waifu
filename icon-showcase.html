@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PaleoWaifu Icon Showcase - game-icons.net</title>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700&family=Shippori+Mincho:wght@400;700&display=swap');
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'M PLUS Rounded 1c', sans-serif;
+        background: #0f0a1a;
+        color: #e8dff0;
+        min-height: 100vh;
+        padding: 2rem;
+      }
+
+      h1 {
+        font-family: 'Shippori Mincho', serif;
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #ffb4e0, #a088ff, #7ec8e3);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .subtitle {
+        text-align: center;
+        color: #8a7a9a;
+        margin-bottom: 2rem;
+        font-size: 0.9rem;
+      }
+
+      .category {
+        margin-bottom: 2.5rem;
+      }
+
+      .category-header {
+        font-family: 'Shippori Mincho', serif;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(160, 136, 255, 0.2);
+        color: #d4c0f0;
+      }
+
+      .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 1rem;
+      }
+
+      .icon-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 1rem 0.5rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .icon-card:hover {
+        background: rgba(160, 136, 255, 0.1);
+        border-color: rgba(160, 136, 255, 0.3);
+        transform: translateY(-2px);
+      }
+
+      .icon-card.selected {
+        background: rgba(160, 136, 255, 0.2);
+        border-color: rgba(160, 136, 255, 0.5);
+        box-shadow: 0 0 20px rgba(160, 136, 255, 0.15);
+      }
+
+      .icon-card.selected::after {
+        content: '\2713';
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 14px;
+        color: #a088ff;
+        font-weight: bold;
+      }
+
+      .icon-card img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.5rem;
+        transition: filter 0.2s;
+      }
+
+      .icon-card:hover img {
+        filter: brightness(1.3);
+      }
+
+      .icon-card.error-icon img {
+        display: none;
+      }
+
+      .icon-name {
+        font-size: 0.7rem;
+        text-align: center;
+        color: #9a8aaa;
+        word-break: break-word;
+        line-height: 1.3;
+      }
+
+      .icon-author {
+        font-size: 0.6rem;
+        color: #6a5a7a;
+        margin-top: 2px;
+      }
+
+      .selection-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(15, 10, 26, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(160, 136, 255, 0.2);
+        padding: 1rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        z-index: 100;
+        transition: transform 0.3s;
+      }
+
+      .selection-bar.hidden {
+        transform: translateY(100%);
+      }
+
+      .selection-count {
+        color: #a088ff;
+        font-weight: 700;
+      }
+
+      .selection-list {
+        color: #9a8aaa;
+        font-size: 0.8rem;
+        max-width: 60%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .btn-copy {
+        background: linear-gradient(135deg, #a088ff, #7e6acc);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        font-family: 'M PLUS Rounded 1c', sans-serif;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s;
+      }
+
+      .btn-copy:hover {
+        opacity: 0.85;
+      }
+
+      .btn-clear {
+        background: transparent;
+        color: #9a8aaa;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-family: 'M PLUS Rounded 1c', sans-serif;
+        cursor: pointer;
+        margin-left: 0.5rem;
+      }
+
+      .btn-clear:hover {
+        color: #e8dff0;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem 0 4rem;
+        color: #4a3a5a;
+        font-size: 0.75rem;
+      }
+
+      footer a {
+        color: #7e6acc;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>PaleoWaifu Icon Showcase</h1>
+    <p class="subtitle">
+      Click icons to select ones you like. All icons from game-icons.net (CC BY
+      3.0)
+    </p>
+
+    <div id="categories"></div>
+
+    <div class="selection-bar hidden" id="selectionBar">
+      <div>
+        <span class="selection-count" id="selCount">0 selected</span>
+        <div class="selection-list" id="selList"></div>
+      </div>
+      <div>
+        <button class="btn-copy" onclick="copySelection()">
+          Copy Selection
+        </button>
+        <button class="btn-clear" onclick="clearSelection()">Clear</button>
+      </div>
+    </div>
+
+    <footer>
+      All icons by
+      <a href="https://game-icons.net" target="_blank">game-icons.net</a>
+      contributors, licensed under
+      <a href="https://creativecommons.org/licenses/by/3.0/" target="_blank"
+        >CC BY 3.0</a
+      >. <br />Artists: Lorc, Delapouite, Caro Asercion, Faithtoken, Skoll, Carl
+      Olsen
+    </footer>
+
+    <script>
+      const CATEGORIES = {
+        'Currency / Fossils': [
+          { name: 'fossil', author: 'lorc' },
+          { name: 'ammonite-fossil', author: 'lorc' },
+          { name: 'dinosaur-bones', author: 'lorc' },
+          { name: 'amber-mosquito', author: 'delapouite' },
+          { name: 'trilobite', author: 'lorc' },
+          { name: 'minerals', author: 'faithtoken' },
+          { name: 'crystal-cluster', author: 'lorc' },
+          { name: 'crystal-shine', author: 'lorc' },
+          { name: 'emerald', author: 'lorc' },
+          { name: 'gems', author: 'lorc' },
+          { name: 'gold-nuggets', author: 'delapouite' },
+          { name: 'coins', author: 'delapouite' },
+        ],
+        'Gacha / Pulling': [
+          { name: 'mining', author: 'lorc' },
+          { name: 'war-pick', author: 'delapouite' },
+          { name: 'dig-hole', author: 'delapouite' },
+          { name: 'stone-crafting', author: 'lorc' },
+          { name: 'miner', author: 'delapouite' },
+          { name: 'gold-mine', author: 'delapouite' },
+          { name: 'open-treasure-chest', author: 'skoll' },
+          { name: 'locked-box', author: 'delapouite' },
+          { name: 'card-draw', author: 'faithtoken' },
+          { name: 'card-pick', author: 'faithtoken' },
+          { name: 'treasure-map', author: 'lorc' },
+          { name: 'stone-axe', author: 'lorc' },
+        ],
+        'Collection / Encyclopedia': [
+          { name: 'bookshelf', author: 'delapouite' },
+          { name: 'archive-research', author: 'delapouite' },
+          { name: 'book-cover', author: 'delapouite' },
+          { name: 'open-book', author: 'lorc' },
+          { name: 'book-pile', author: 'delapouite' },
+          { name: 'skull-in-jar', author: 'lorc' },
+          { name: 'tied-scroll', author: 'lorc' },
+          { name: 'scroll-unfurled', author: 'lorc' },
+          { name: 'magnifying-glass', author: 'lorc' },
+          { name: 'spyglass', author: 'lorc' },
+          { name: 'secret-book', author: 'delapouite' },
+          { name: 'quill-ink', author: 'lorc' },
+        ],
+        Trading: [
+          { name: 'trade', author: 'lorc' },
+          { name: 'card-exchange', author: 'delapouite' },
+          { name: 'swap-bag', author: 'lorc' },
+          { name: 'body-swapping', author: 'lorc' },
+          { name: 'token', author: 'delapouite' },
+          { name: 'price-tag', author: 'delapouite' },
+          { name: 'shop', author: 'delapouite' },
+          { name: 'shopping-cart', author: 'delapouite' },
+        ],
+        'Creatures / Prehistoric': [
+          { name: 'dinosaur-rex', author: 'lorc' },
+          { name: 't-rex-skull', author: 'delapouite' },
+          { name: 'triceratops-head', author: 'delapouite' },
+          { name: 'sauropod-head', author: 'delapouite' },
+          { name: 'diplodocus', author: 'delapouite' },
+          { name: 'parasaurolophus', author: 'delapouite' },
+          { name: 'stegosaurus-scales', author: 'delapouite' },
+          { name: 'velociraptor', author: 'delapouite' },
+          { name: 'ninja-velociraptor', author: 'delapouite' },
+          { name: 'velociraptor-tracks', author: 'delapouite' },
+          { name: 'pterodactylus', author: 'delapouite' },
+          { name: 'plesiosaurus', author: 'delapouite' },
+          { name: 'dimetrodon', author: 'delapouite' },
+          { name: 'mammoth', author: 'delapouite' },
+          { name: 'saber-toothed-cat-head', author: 'delapouite' },
+          { name: 'dinosaur-egg', author: 'lorc' },
+          { name: 'nest-eggs', author: 'delapouite' },
+          { name: 'egg-clutch', author: 'lorc' },
+          { name: 'grasping-claws', author: 'lorc' },
+          { name: 'feather', author: 'lorc' },
+          { name: 'footprint', author: 'lorc' },
+          { name: 'paw', author: 'lorc' },
+          { name: 'archaeopteryx-fossil', author: 'caro-asercion' },
+          { name: 'sauropod-skeleton', author: 'caro-asercion' },
+          { name: 'ivory-tusks', author: 'delapouite' },
+          { name: 'rhinoceros-horn', author: 'delapouite' },
+          { name: 'boar-tusks', author: 'lorc' },
+          { name: 'reptile-tail', author: 'delapouite' },
+        ],
+        'Rarity / Special': [
+          { name: 'round-star', author: 'delapouite' },
+          { name: 'sparkles', author: 'delapouite' },
+          { name: 'stars-stack', author: 'delapouite' },
+          { name: 'falling-star', author: 'delapouite' },
+          { name: 'rainbow-star', author: 'lorc' },
+          { name: 'crown', author: 'lorc' },
+          { name: 'queen-crown', author: 'lorc' },
+          { name: 'laurel-crown', author: 'lorc' },
+          { name: 'jewel-crown', author: 'delapouite' },
+          { name: 'imperial-crown', author: 'delapouite' },
+          { name: 'cut-diamond', author: 'lorc' },
+          { name: 'fire-gem', author: 'delapouite' },
+          { name: 'diamond-hard', author: 'lorc' },
+          { name: 'aura', author: 'lorc' },
+          { name: 'beams-aura', author: 'lorc' },
+          { name: 'magic-swirl', author: 'lorc' },
+          { name: 'embrassed-energy', author: 'lorc' },
+          { name: 'burning-embers', author: 'lorc' },
+          { name: 'fireball', author: 'lorc' },
+          { name: 'flame', author: 'carl-olsen' },
+          { name: 'trophy', author: 'lorc' },
+          { name: 'laurels-trophy', author: 'delapouite' },
+          { name: 'achievement', author: 'skoll' },
+          { name: 'ribbon-medal', author: 'delapouite' },
+        ],
+        'Navigation / General': [
+          { name: 'compass', author: 'lorc' },
+          { name: 'atlas', author: 'delapouite' },
+          { name: 'house', author: 'delapouite' },
+          { name: 'person', author: 'delapouite' },
+          { name: 'telescope', author: 'delapouite' },
+          { name: 'rule-book', author: 'delapouite' },
+          { name: 'spell-book', author: 'delapouite' },
+        ],
+        'Daily / Rewards': [
+          { name: 'present', author: 'delapouite' },
+          { name: 'open-treasure-chest', author: 'skoll' },
+          { name: 'open-chest', author: 'skoll' },
+          { name: 'chest', author: 'delapouite' },
+          { name: 'calendar', author: 'delapouite' },
+          { name: 'sunrise', author: 'delapouite' },
+          { name: 'hourglass', author: 'lorc' },
+          { name: 'sands-of-time', author: 'lorc' },
+          { name: 'sundial', author: 'lorc' },
+          { name: 'pocket-watch', author: 'skoll' },
+          { name: 'check-mark', author: 'delapouite' },
+          { name: 'star-medal', author: 'delapouite' },
+        ],
+        'Stone Age / Primitive': [
+          { name: 'caveman', author: 'delapouite' },
+          { name: 'cave-entrance', author: 'delapouite' },
+          { name: 'primitive-necklace', author: 'delapouite' },
+          { name: 'primitive-torch', author: 'delapouite' },
+          { name: 'flint-spark', author: 'delapouite' },
+          { name: 'tribal-mask', author: 'lorc' },
+          { name: 'tribal-pendant', author: 'delapouite' },
+          { name: 'campfire', author: 'lorc' },
+          { name: 'dolmen', author: 'delapouite' },
+          { name: 'silex', author: 'delapouite' },
+          { name: 'venus-of-willendorf', author: 'delapouite' },
+          { name: 'bone-knife', author: 'delapouite' },
+        ],
+      }
+
+      let selected = new Set()
+
+      function iconUrl(author, name) {
+        return `https://game-icons.net/icons/ffffff/transparent/1x1/${author}/${name}.svg`
+      }
+
+      function toggleSelect(card, key) {
+        if (selected.has(key)) {
+          selected.delete(key)
+          card.classList.remove('selected')
+        } else {
+          selected.add(key)
+          card.classList.add('selected')
+        }
+        updateSelectionBar()
+      }
+
+      function updateSelectionBar() {
+        const bar = document.getElementById('selectionBar')
+        const count = document.getElementById('selCount')
+        const list = document.getElementById('selList')
+        if (selected.size === 0) {
+          bar.classList.add('hidden')
+        } else {
+          bar.classList.remove('hidden')
+          count.textContent = `${selected.size} selected`
+          list.textContent = [...selected].join(', ')
+        }
+      }
+
+      function clearSelection() {
+        selected.clear()
+        document
+          .querySelectorAll('.icon-card.selected')
+          .forEach((c) => c.classList.remove('selected'))
+        updateSelectionBar()
+      }
+
+      function copySelection() {
+        const text = [...selected].join('\n')
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('.btn-copy')
+          btn.textContent = 'Copied!'
+          setTimeout(() => (btn.textContent = 'Copy Selection'), 1500)
+        })
+      }
+
+      // Render
+      const container = document.getElementById('categories')
+      for (const [catName, icons] of Object.entries(CATEGORIES)) {
+        const section = document.createElement('div')
+        section.className = 'category'
+        section.innerHTML = `<h2 class="category-header">${catName}</h2>`
+
+        const grid = document.createElement('div')
+        grid.className = 'icon-grid'
+
+        for (const icon of icons) {
+          const key = `${icon.author}/${icon.name}`
+          const card = document.createElement('div')
+          card.className = 'icon-card'
+          card.onclick = () => toggleSelect(card, key)
+
+          const img = document.createElement('img')
+          img.src = iconUrl(icon.author, icon.name)
+          img.alt = icon.name
+          img.loading = 'lazy'
+          img.onerror = function () {
+            this.style.opacity = '0.2'
+            this.parentElement.querySelector('.icon-name').style.color =
+              '#ff6b6b'
+          }
+
+          const nameEl = document.createElement('div')
+          nameEl.className = 'icon-name'
+          nameEl.textContent = icon.name
+
+          const authorEl = document.createElement('div')
+          authorEl.className = 'icon-author'
+          authorEl.textContent = icon.author
+
+          card.appendChild(img)
+          card.appendChild(nameEl)
+          card.appendChild(authorEl)
+          grid.appendChild(card)
+        }
+
+        section.appendChild(grid)
+        container.appendChild(section)
+      }
+    </script>
+  </body>
+</html>

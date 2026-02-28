@@ -15,9 +15,9 @@ import {
   RATE_UP_SHARE,
   SOFT_PITY_THRESHOLD,
 } from './types'
+import { toCdnUrl } from './utils'
 import type { Rarity } from './types'
 import type { Database } from './db/client'
-import { toCdnUrl } from './utils'
 
 function secureRandom(): number {
   const array = new Uint32Array(1)

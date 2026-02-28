@@ -1,7 +1,11 @@
 import { useDeferredValue, useMemo, useState } from 'react'
-import { Search, Skull, Star } from 'lucide-react'
 import { CreatureModal } from './CreatureModal'
 import type { Rarity } from '@/lib/types'
+import {
+  IconFossil,
+  IconMagnifyingGlass,
+  IconRoundStar,
+} from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { Input } from '@/components/ui/input'
@@ -65,7 +69,7 @@ export function CollectionGrid({
     <>
       <div className="mb-6 flex flex-wrap gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <IconMagnifyingGlass className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="text"
             placeholder="Search creatures..."
@@ -131,7 +135,7 @@ export function CollectionGrid({
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <Skull className="h-10 w-10 text-muted-foreground/30" />
+                      <IconFossil className="h-10 w-10 text-muted-foreground/30" />
                     </div>
                   )}
                 </div>
@@ -152,7 +156,7 @@ export function CollectionGrid({
                   </div>
                 </div>
                 {item.isFavorite && (
-                  <Star className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-amber-400 text-amber-400" />
+                  <IconRoundStar className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-rarity-legendary/85 text-rarity-legendary/85" />
                 )}
               </button>
             )

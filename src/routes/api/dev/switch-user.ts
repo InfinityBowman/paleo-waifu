@@ -26,7 +26,7 @@ export const Route = createFileRoute('/api/dev/switch-user')({
             const { session, user } = await import('@/lib/db/schema')
             const { ensureUserCurrency } = await import('@/lib/gacha')
 
-            const body = (await request.json()) as { userId?: string }
+            const body: { userId?: string } = await request.json()
             const { userId } = body
 
             if (!userId?.startsWith('dev-user-')) {

@@ -5,7 +5,7 @@ const CDN_BASE = 'https://cdn.jacobmaynard.dev'
 export const Route = createFileRoute('/api/images/$')({
   server: {
     handlers: {
-      GET: async ({ request }) => {
+      GET: ({ request }) => {
         const url = new URL(request.url)
         const key = decodeURIComponent(url.pathname.replace('/api/images/', ''))
         if (

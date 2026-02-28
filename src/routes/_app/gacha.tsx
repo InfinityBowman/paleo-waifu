@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
-import { Bone, CalendarCheck, Gift } from 'lucide-react'
+import {
+  IconDinosaurBones,
+  IconSunrise,
+  IconTreasureChest,
+} from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
 import { banner, currency } from '@/lib/db/schema'
@@ -67,10 +71,7 @@ function GachaPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'claim_daily' }),
       })
-      const data = (await res.json()) as {
-        claimed?: boolean
-        fossils?: number
-      }
+      const data: { claimed?: boolean; fossils?: number } = await res.json()
       if (data.claimed) {
         if (data.fossils != null) setFossils(data.fossils)
         setCanClaim(false)
@@ -98,23 +99,23 @@ function GachaPage() {
               onClick={handleClaimDaily}
               disabled={claiming}
               variant="outline"
-              className="group border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20"
+              className="group border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
             >
-              <Gift className="h-4 w-4 transition-transform group-hover:rotate-12" />
+              <IconTreasureChest className="h-4 w-4 transition-transform group-hover:rotate-12" />
               <span className="font-display">Claim +{DAILY_FOSSILS}</span>
-              <Bone className="h-3.5 w-3.5" />
+              <IconDinosaurBones className="h-3.5 w-3.5" />
             </Button>
           ) : (
             <div className="flex items-center gap-1.5 rounded-md border border-border/50 px-3 py-2 text-xs text-muted-foreground">
-              <CalendarCheck className="h-3.5 w-3.5" />
+              <IconSunrise className="h-3.5 w-3.5" />
               Daily claimed
             </div>
           )}
           <Card
             size="sm"
-            className="flex-row items-center gap-2 border-primary/20 bg-linear-to-r from-primary/5 to-amber-400/5 px-5 py-3"
+            className="flex-row items-center gap-2 border-primary/20 bg-linear-to-r from-primary/5 to-rarity-epic/5 px-5 py-3"
           >
-            <Bone className="h-6 w-6 text-primary/70" />
+            <IconDinosaurBones className="h-6 w-6 text-primary/70" />
             <span className="font-display text-2xl font-bold text-primary">
               {fossils}
             </span>
