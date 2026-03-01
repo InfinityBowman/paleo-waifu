@@ -19,7 +19,12 @@
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "bot:dev": "cd bot && pnpm dev",
+    "bot:deploy": "cd bot && pnpm deploy:prod",
+    "bot:register": "cd bot && pnpm register",
+    "bot:register:prod": "cd bot && pnpm register:prod",
+    "bot:typecheck": "cd bot && pnpm typecheck"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",

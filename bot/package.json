@@ -1,0 +1,20 @@
+{
+  "name": "paleo-waifu-bot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev -c wrangler.jsonc",
+    "deploy": "wrangler deploy -c wrangler.jsonc",
+    "deploy:prod": "wrangler deploy -c wrangler.jsonc --env production",
+    "register": "npx tsx register.ts",
+    "register:prod": "npx tsx register.ts --prod",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260226.1",
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.2",
+    "wrangler": "^4.67.0"
+  }
+}
