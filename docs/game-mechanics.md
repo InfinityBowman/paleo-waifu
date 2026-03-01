@@ -296,13 +296,24 @@ A Cloudflare Worker-based Discord bot provides access to core gameplay via slash
 | `/daily`  | Deferred + embed     | Claim daily 3 Fossils                            |
 | `/balance`| Immediate, ephemeral | Show fossil count                                |
 | `/pity`   | Immediate, ephemeral | Show pity counters for active banner             |
+| `/level`  | Immediate, ephemeral | Show XP, level, and progress bar (optional @user)|
 | `/help`   | Immediate, ephemeral | List available commands                          |
 
 ### Interaction Model
 
-- **Immediate commands** (`/balance`, `/pity`, `/help`) return a response directly within Discord's 3-second window
+- **Immediate commands** (`/balance`, `/pity`, `/level`, `/help`) return a response directly within Discord's 3-second window
 - **Deferred commands** (`/pull`, `/pull10`, `/daily`) return a "thinking..." state immediately, then use `ctx.waitUntil()` to run DB operations and PATCH the final response via Discord REST API
 - **Ephemeral** responses are only visible to the invoking user
+
+### XP API Endpoint
+
+The bot Worker exposes a `POST /api/xp` endpoint for the Gateway Listener. This route is authenticated via a shared secret (`Authorization: Bearer <XP_API_SECRET>`) rather than Discord's Ed25519 signature verification.
+
+- **Request**: `{ discordUserId: string }`
+- **Response**: `{ xp: number, level: number, leveledUp: boolean }`
+- Awards 15–25 random XP per call
+- Level is computed atomically in the database upsert: `level = floor(sqrt(xp / 100))`
+- Returns 404 for unlinked Discord users
 
 ### Account Linking
 
@@ -316,6 +327,98 @@ The bot imports game logic directly from the main app via a `@/` path alias — 
 - `src/lib/db/schema.ts` — All table definitions
 - `src/lib/db/client.ts` — `createDb()` factory
 - `src/lib/types.ts` — Constants (`PULL_COST_SINGLE`, `PULL_COST_MULTI`, etc.)
+- `src/lib/xp-config.ts` — Level math (`xpForLevel`, `levelFromXp`, `xpToNextLevel`) and XP constants
+
+---
+
+## XP & Leveling System
+
+### Overview
+
+Players earn XP by chatting in Discord. XP accumulates into levels, providing a passive progression path alongside the gacha. The system is designed to reward natural conversation without enabling spam grinding.
+
+### Architecture
+
+```
+Discord Gateway ──MESSAGE_CREATE──▶ Gateway Listener (homelab Docker container)
+                                        │
+                                        ▼
+                                   Eligibility check (in-memory)
+                                        │
+                                        ▼ (if eligible)
+                                   POST /api/xp ──▶ Bot Worker (Cloudflare)
+                                                        │
+                                                        ▼
+                                                   D1: upsert user_xp
+                                                   D1: recalculate level
+                                                        │
+                                        ◀── { xp, level, leveledUp } ──┘
+                                        │
+                                        ▼ (if leveledUp)
+                                   Send level-up embed to channel
+```
+
+The Gateway Listener is a standalone Node.js process (discord.js) running on a homelab server. It connects to Discord's Gateway WebSocket, listens for `MESSAGE_CREATE` events, and calls the bot Worker's XP endpoint for eligible messages. The bot Worker handles all database writes. If the homelab goes down, only XP tracking stops — slash commands continue working independently.
+
+### XP Rules
+
+| Rule | Value | Notes |
+|---|---|---|
+| XP per eligible message | 15–25 (random) | Randomized to feel less mechanical |
+| Cooldown | 60 seconds per user | In-memory on the Gateway Listener; prevents spam grinding |
+| Minimum message length | 5 characters | Filters reactions, single emoji, etc. |
+| Bot messages | Ignored | `message.author.bot` check |
+| DMs | Ignored | Only guild (server) messages count |
+| Unlinked users | Ignored | Discord ID must exist in `account` table |
+
+### Level Curve
+
+Quadratic scaling — early levels come fast, later ones take real engagement.
+
+```
+XP required for level N = 100 × N²
+Level from XP = floor(sqrt(xp / 100))
+```
+
+| Level | Total XP | Approx. messages to reach |
+|---|---|---|
+| 1 | 100 | ~5 |
+| 2 | 400 | ~20 |
+| 3 | 900 | ~45 |
+| 5 | 2,500 | ~125 |
+| 10 | 10,000 | ~500 |
+| 15 | 22,500 | ~1,125 |
+| 20 | 40,000 | ~2,000 |
+
+### Cooldown Behavior
+
+- Cooldown is set **before** the API call to prevent concurrent messages from both earning XP during a slow network round-trip
+- On **network error**: cooldown is cleared so the user isn't penalized for a transient failure
+- On **404** (unlinked user): cooldown is kept to avoid hammering the API
+- On **5xx/429** (server error): cooldown is cleared so users don't silently lose XP
+- On **restart**: all cooldowns reset (in-memory only). A few extra XP awards on restart is acceptable.
+
+### Database
+
+The `user_xp` table tracks per-user XP and level:
+
+| Field | Type | Notes |
+|---|---|---|
+| `id` | text | nanoid primary key |
+| `userId` | text | Unique FK to `user`, cascade delete |
+| `xp` | integer | Cumulative XP (default 0) |
+| `level` | integer | Current level (default 0) |
+| `updatedAt` | integer | Unix timestamp |
+
+Level is computed atomically in the database upsert (`CAST(SQRT((xp + delta) / 100.0) AS INTEGER)`), not in application code. This prevents race conditions from concurrent XP awards.
+
+### CI/CD
+
+The Gateway Listener is deployed via a fully automated pipeline:
+
+1. Push changes to `gateway/` on main → GitHub Actions builds Docker image → pushes to `ghcr.io/infinitybowman/paleo-waifu-gateway:latest`
+2. Repository dispatch triggers the homelab to pull the new image and restart the container
+3. The homelab service (`services/paleo-gateway/`) runs the pre-built image with env vars for bot token, API URL, and shared secret
 
 ---
 
@@ -326,5 +429,4 @@ These exist in the database schema or docs but have no application code:
 - **Wishlist**: `wishlist` table with `(userId, creatureId)` unique pairs. No API or UI.
 - **Favorite toggle**: `isFavorite` column is read but never written by any endpoint.
 - **Bot: `/collection`**, **`/creature`**, **`/encyclopedia`** — planned slash commands for browsing creatures via Discord. Not registered or implemented.
-- **Bot: `/level`** — planned XP/leveling command. Depends on the Gateway listener and `user_xp` table, neither of which exist yet.
-- **Gateway Listener** — planned Node.js process for Discord message XP tracking. No `gateway/` directory exists. See `docs/discord-bot.md` for full spec.
+- **Level rewards** — the leveling system tracks XP and levels but does not yet grant rewards (fossils, guaranteed rarity pulls, exclusive creatures). The `user_xp` table has columns reserved for future reward tracking. See `docs/discord-bot.md` for the planned reward table.
