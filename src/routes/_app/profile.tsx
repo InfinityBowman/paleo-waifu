@@ -73,7 +73,7 @@ function ProfilePage() {
     totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
+    <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl">
       <div className="mb-8 flex items-center gap-4">
         <Avatar className="size-16">
           {user.image ? <AvatarImage src={user.image} alt={user.name} /> : null}
@@ -86,12 +86,12 @@ function ProfilePage() {
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Fossils" value={fossils} icon={IconDinosaurBones} />
         <StatCard label="Total Pulls" value={totalPulls} icon={Dices} />
         <Card
           size="sm"
-          className="group transition-shadow hover:shadow-md sm:col-span-2"
+          className="group transition-shadow hover:shadow-md sm:col-span-2 lg:col-span-3"
         >
           <CardContent>
             <div className="flex items-center justify-between">

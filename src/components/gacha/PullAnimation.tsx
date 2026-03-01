@@ -488,6 +488,19 @@ function MultiReveal({
   const [revealedCount, setRevealedCount] = useState(0)
   const [currentDrama, setCurrentDrama] = useState<Rarity | null>(null)
   const timeoutsRef = useRef<Array<ReturnType<typeof setTimeout>>>([])
+  const gridRef = useRef<HTMLDivElement | null>(null)
+  const [gridCols, setGridCols] = useState(5)
+
+  useEffect(() => {
+    const el = gridRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width
+      setGridCols(w < 500 ? 3 : 5)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   // Sort by rarity ascending so best cards reveal last
   const sortedResults = useMemo(() => {
@@ -590,18 +603,13 @@ function MultiReveal({
 
       {/* Card grid */}
       <div
-        className={`relative z-20 grid gap-3 ${
-          useDoubleRow
-            ? 'grid-cols-5 sm:grid-cols-5'
-            : `grid-cols-${Math.min(cardCount, 5)}`
-        }`}
-        style={
-          !useDoubleRow
-            ? {
-                gridTemplateColumns: `repeat(${Math.min(cardCount, 5)}, minmax(0, 1fr))`,
-              }
-            : undefined
-        }
+        ref={gridRef}
+        className="relative z-20 grid gap-3"
+        style={{
+          gridTemplateColumns: useDoubleRow
+            ? `repeat(${gridCols}, minmax(0, 1fr))`
+            : `repeat(${Math.min(cardCount, 5)}, minmax(0, 1fr))`,
+        }}
       >
         {sortedResults.map((result, i) => {
           const isRevealed = i < revealedCount
@@ -668,7 +676,9 @@ function MasonryBrowse({
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
-      setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
+      setColumnCount(
+        w >= 1400 ? 7 : w >= 1200 ? 6 : w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2,
+      )
     })
     observer.observe(el)
     return () => observer.disconnect()

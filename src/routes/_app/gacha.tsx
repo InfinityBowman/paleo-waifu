@@ -117,8 +117,8 @@ function GachaPage() {
   }
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mx-auto max-w-4xl px-4 py-8 xl:max-w-6xl">
+      <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-3xl font-bold">Gacha</h1>
           <p className="mt-1 text-muted-foreground">

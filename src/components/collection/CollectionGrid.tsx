@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { CreatureModal } from './CreatureModal'
 import { IconMagnifyingGlass } from '@/components/icons'
 import { distributeToColumns } from '@/lib/utils'
@@ -60,18 +60,23 @@ export function CollectionGrid({
   )
 
   // ── Masonry column distribution ──────────────────────────────────────────
-  const containerRef = useRef<HTMLDivElement | null>(null)
   const [columnCount, setColumnCount] = useState(5)
+  const observerRef = useRef<ResizeObserver | null>(null)
 
-  useEffect(() => {
-    const el = containerRef.current
+  const containerRef = useCallback((el: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+      observerRef.current = null
+    }
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
-      setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
+      setColumnCount(
+        w >= 1400 ? 7 : w >= 1200 ? 6 : w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2,
+      )
     })
     observer.observe(el)
-    return () => observer.disconnect()
+    observerRef.current = observer
   }, [])
 
   const columns = useMemo(
@@ -93,7 +98,7 @@ export function CollectionGrid({
           />
         </div>
         <Select value={rarityFilter} onValueChange={setRarityFilter}>
-          <SelectTrigger className="w-35">
+          <SelectTrigger className="w-full sm:w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -106,7 +111,7 @@ export function CollectionGrid({
           </SelectContent>
         </Select>
         <Select value={eraFilter} onValueChange={setEraFilter}>
-          <SelectTrigger className="w-35">
+          <SelectTrigger className="w-full sm:w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">

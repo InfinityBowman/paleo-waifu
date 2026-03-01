@@ -211,7 +211,7 @@ export function TradeList({
             <h3 className="font-display mb-3 font-medium">
               Select a creature to offer
             </h3>
-            <div className="grid gap-2 sm:grid-cols-3 md:grid-cols-4">
+            <div className="grid gap-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5">
               {myCreatures.map((c) => {
                 const rarity = c.rarity as Rarity
                 return (
@@ -305,7 +305,7 @@ export function TradeList({
             <IconHourglass className="h-4 w-4 text-primary" />
             Pending Trades
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {pendingTrades.map((trade) => {
               const iAmOfferer = trade.offererId === userId
               const offeredRarity = trade.offeredCreatureRarity as Rarity
@@ -431,7 +431,7 @@ export function TradeList({
         </Card>
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {allTrades.map((trade) => {
               const rarity = trade.offeredCreatureRarity as Rarity
               const isMine = trade.offererId === userId

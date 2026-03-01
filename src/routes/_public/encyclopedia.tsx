@@ -280,7 +280,7 @@ function EncyclopediaPage() {
     Route.useLoaderData()
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-[1600px]">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold">Encyclopedia</h1>
         <p className="mt-2 text-muted-foreground">

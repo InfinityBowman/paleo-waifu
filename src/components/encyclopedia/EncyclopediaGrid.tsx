@@ -179,7 +179,9 @@ export function EncyclopediaGrid({
     if (!el) return
     const observer = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
-      setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
+      setColumnCount(
+        w >= 1400 ? 7 : w >= 1200 ? 6 : w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2,
+      )
     })
     observer.observe(el)
     return () => observer.disconnect()
@@ -271,7 +273,7 @@ export function EncyclopediaGrid({
           value={filters.era || 'all'}
           onValueChange={(v) => handleEraChange(v === 'all' ? '' : v)}
         >
-          <SelectTrigger className="w-35">
+          <SelectTrigger className="w-full sm:w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -287,7 +289,7 @@ export function EncyclopediaGrid({
           value={filters.diet || 'all'}
           onValueChange={(v) => handleDietChange(v === 'all' ? '' : v)}
         >
-          <SelectTrigger className="w-35">
+          <SelectTrigger className="w-full sm:w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
@@ -300,7 +302,7 @@ export function EncyclopediaGrid({
           </SelectContent>
         </Select>
         <Select value={filters.sort} onValueChange={handleSortChange}>
-          <SelectTrigger className="w-35">
+          <SelectTrigger className="w-full sm:w-35">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper">
