@@ -10,6 +10,8 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 - **Auth**: better-auth (Discord OAuth)
 - **Database**: Cloudflare D1 + Drizzle ORM
 - **Deploy**: Cloudflare Workers
+- **Discord Bot**: Cloudflare Worker (slash commands) + Node.js Gateway listener (XP system)
+- **CI/CD**: GitHub Actions (auto-deploy website, bot, and gateway on push)
 
 ## Features
 
@@ -19,6 +21,8 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 - **Encyclopedia** — View all 101 creatures with real paleontology data and fun facts
 - **Trading** — Create open trade offers, browse the marketplace, swap creatures with other players
 - **Daily rewards** — Log in daily for free fossils
+- **Discord bot** — Pull creatures, claim dailies, check balance and pity via slash commands
+- **XP & leveling** — Earn XP by chatting in Discord, level up passively alongside the gacha
 
 ## Setup
 
@@ -62,20 +66,40 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 
 ## Deploy
 
+Deployments are automated via GitHub Actions. Pushing to `main` triggers the relevant workflow based on which files changed:
+
+| Workflow | Trigger paths | What it does |
+|---|---|---|
+| Deploy Website | `src/`, `drizzle/`, `wrangler.jsonc`, etc. | D1 migrations + `wrangler deploy` |
+| Deploy Bot | `bot/`, `src/lib/`, `drizzle/` | D1 migrations + `wrangler deploy` (bot worker) |
+| Gateway Docker | `gateway/` | Docker build + push to GHCR + repository dispatch to homelab |
+
+### Manual deploy (first time or secrets)
+
 ```bash
-# Set secrets (production env)
+# Website secrets
 wrangler secret put AUTH_SECRET --env production
 wrangler secret put AUTH_BASE_URL --env production
 wrangler secret put DISCORD_CLIENT_ID --env production
 wrangler secret put DISCORD_CLIENT_SECRET --env production
 
+# Bot secrets
+cd bot
+wrangler secret put DISCORD_APPLICATION_ID --env production
+wrangler secret put DISCORD_PUBLIC_KEY --env production
+wrangler secret put DISCORD_BOT_TOKEN --env production
+wrangler secret put XP_API_SECRET --env production
+
 # Apply remote migrations and seed
 pnpm db:migrate:prod
 pnpm db:seed:prod
-
-# Deploy
-pnpm deploy
 ```
+
+### GitHub Actions secrets required
+
+- `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Workers/D1 permissions
+- `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account ID
+- `HOMELAB_DEPLOY_TOKEN` — Fine-grained PAT for triggering repository dispatch on the homelab repo
 
 ## Project Structure
 
@@ -104,6 +128,22 @@ src/
 ├── store/             # Zustand store
 └── styles.css         # Warm amber OKLCH theme
 python/                # Data pipeline for creature seeding
+
+bot/                   # Discord bot (Cloudflare Worker)
+├── src/
+│   ├── commands/      # Slash command handlers (pull, daily, balance, pity, level, help)
+│   ├── lib/           # Discord types, auth, embeds, XP logic
+│   └── index.ts       # Worker entry: signature verification + routing
+├── register.ts        # Script to register slash commands with Discord API
+└── wrangler.jsonc     # Shares D1 database with main app
+
+gateway/               # Discord Gateway listener (Node.js, runs on homelab)
+├── src/
+│   ├── index.ts       # Gateway WebSocket connection + MESSAGE_CREATE handler
+│   └── xp.ts          # Eligibility checks, cooldowns, XP API calls
+└── Dockerfile         # Pushed to GHCR, deployed via repository dispatch
+
+docs/                  # Detailed reference docs
 ```
 
 ## Scripts
@@ -120,3 +160,8 @@ python/                # Data pipeline for creature seeding
 | `pnpm lint`             | ESLint                               |
 | `pnpm format`           | Prettier                             |
 | `pnpm check`            | Prettier --write + ESLint --fix      |
+| `pnpm bot:dev`          | Local bot worker dev server           |
+| `pnpm bot:deploy`       | Deploy bot to Cloudflare Workers      |
+| `pnpm bot:register`     | Register slash commands (dev guild)   |
+| `pnpm bot:register:prod`| Register slash commands (global)      |
+| `pnpm bot:typecheck`    | Typecheck bot                         |

@@ -17,6 +17,13 @@ pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
 pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
+
+# Bot commands
+pnpm bot:dev          # Local bot worker dev server
+pnpm bot:deploy       # Deploy bot to Cloudflare Workers
+pnpm bot:register     # Register slash commands (dev guild)
+pnpm bot:register:prod # Register slash commands (global)
+pnpm bot:typecheck    # Typecheck bot
 ```
 
 ## Environment
@@ -80,7 +87,29 @@ Uses better-auth with Discord OAuth only. Server-side session validation via `ge
 
 ### Database Schema
 
-Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_history, wishlist.
+Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_history, wishlist, user_xp.
+
+### Discord Bot (`bot/`)
+
+Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports game logic from `src/lib/` via `@/` path alias (no code duplication).
+
+Slash commands: `/pull`, `/pull10`, `/daily`, `/balance`, `/pity`, `/level`, `/help`
+
+Uses Discord Interactions API (webhook-based). Ed25519 signature verification via Web Crypto API. Deferred responses for DB-heavy commands (`/pull`, `/daily`), immediate ephemeral responses for read-only commands.
+
+### Gateway Listener (`gateway/`)
+
+Standalone Node.js process (discord.js) that runs on a homelab server. Connects to Discord Gateway via WebSocket, listens for `MESSAGE_CREATE` events, and calls the bot Worker's `POST /api/xp` endpoint for eligible messages. Handles XP cooldowns (60s per user, in-memory), message length filtering, and sends level-up embeds to the channel.
+
+Deployed as a Docker container via GHCR. Push to `gateway/` on main triggers: Docker build → push to `ghcr.io/infinitybowman/paleo-waifu-gateway` → repository dispatch to homelab repo → pull and restart.
+
+### CI/CD
+
+Three GitHub Actions workflows, triggered by path-filtered pushes to `main`:
+
+- **Deploy Website** (`src/`, `drizzle/`, etc.) — D1 migrations + `wrangler deploy`
+- **Deploy Bot** (`bot/`, `src/lib/`, `drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
+- **Gateway Docker** (`gateway/`) — Docker build + GHCR push + repository dispatch to homelab
 
 ## Conventions
 
