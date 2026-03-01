@@ -6,8 +6,8 @@
     "dev": "wrangler dev -c wrangler.jsonc",
     "deploy": "wrangler deploy -c wrangler.jsonc",
     "deploy:prod": "wrangler deploy -c wrangler.jsonc --env production",
-    "register": "npx tsx register.ts",
-    "register:prod": "npx tsx register.ts --prod",
+    "register": "node --env-file=.env --import=tsx/esm register.ts",
+    "register:prod": "node --env-file=.env --import=tsx/esm register.ts --prod",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
