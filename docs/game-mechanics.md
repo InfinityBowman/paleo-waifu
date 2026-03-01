@@ -10,7 +10,7 @@ Fossils are the sole in-game currency. They are earned passively and spent on pu
 
 | Source         | Amount | Notes                                          |
 | -------------- | ------ | ---------------------------------------------- |
-| New user bonus | +20    | Awarded on first gacha page visit (idempotent) |
+| New user bonus | +10    | Awarded on first gacha page visit (idempotent) |
 | Daily login    | +3     | Once per UTC day, manual claim via button      |
 
 | Cost        | Amount     |
