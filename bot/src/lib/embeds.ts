@@ -1,4 +1,5 @@
 import { RARITY_EMOJI, RARITY_HEX, RARITY_LABEL } from './constants'
+import { xpForLevel, xpToNextLevel } from '@/lib/xp-config'
 import type { Rarity } from '@/lib/types'
 import type { PullResult } from '@/lib/gacha'
 import type { Embed } from './discord'
@@ -60,4 +61,31 @@ export function multiPullEmbed(
   }
 
   return embed
+}
+
+/** Build an embed for the /level command */
+export function levelEmbed(username: string, xp: number, level: number): Embed {
+  const nextLevelXp = xpForLevel(level + 1)
+  const currentLevelXp = xpForLevel(level)
+  const progress = Math.min(1, Math.max(0,
+    nextLevelXp > currentLevelXp
+      ? (xp - currentLevelXp) / (nextLevelXp - currentLevelXp)
+      : 1,
+  ))
+  const toNext = xpToNextLevel(xp)
+
+  const barLength = 10
+  const filled = Math.round(progress * barLength)
+  const bar = '\u2588'.repeat(filled) + '\u2591'.repeat(barLength - filled)
+  const pct = Math.round(progress * 100)
+
+  return {
+    title: `${username}'s Level`,
+    description: [
+      `**Level ${level}**`,
+      `\`${bar}\` ${pct}%`,
+      `**${xp.toLocaleString()}** XP total \u2022 **${toNext.toLocaleString()}** XP to next level`,
+    ].join('\n'),
+    color: 0xe8c95a,
+  }
 }

@@ -249,6 +249,19 @@ export const tradeHistory = sqliteTable(
   ],
 )
 
+export const userXp = sqliteTable('user_xp', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .unique()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  xp: integer('xp').default(0).notNull(),
+  level: integer('level').default(0).notNull(),
+  updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
+    sql`(unixepoch())`,
+  ),
+})
+
 export const wishlist = sqliteTable(
   'wishlist',
   {

@@ -6,7 +6,7 @@
     "prettier.config.js",
     "vite.config.js"
   ],
-  "exclude": ["bot"],
+  "exclude": ["bot", "gateway"],
 
   "compilerOptions": {
     "target": "ES2022",

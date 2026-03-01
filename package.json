@@ -24,7 +24,10 @@
     "bot:deploy": "cd bot && pnpm deploy:prod",
     "bot:register": "cd bot && pnpm register",
     "bot:register:prod": "cd bot && pnpm register:prod",
-    "bot:typecheck": "cd bot && pnpm typecheck"
+    "bot:typecheck": "cd bot && pnpm typecheck",
+    "gateway:dev": "cd gateway && pnpm dev",
+    "gateway:build": "cd gateway && pnpm build",
+    "gateway:typecheck": "cd gateway && pnpm typecheck"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",

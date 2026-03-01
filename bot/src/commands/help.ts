@@ -9,6 +9,7 @@ const HELP_TEXT = [
   '\u2728 `/pull` — Pull a creature (1 Fossil)',
   '\uD83C\uDF1F `/pull10` — Pull 10 creatures (10 Fossils)',
   '\uD83D\uDCCA `/pity` — Check your pity counters',
+  '\uD83D\uDCC8 `/level` — Check your XP and level',
   '',
   `Play on the web: ${APP_URL}`,
 ].join('\n')

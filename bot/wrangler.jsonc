@@ -17,6 +17,7 @@
   // Secrets: wrangler secret put DISCORD_APPLICATION_ID --env production
   //          wrangler secret put DISCORD_PUBLIC_KEY --env production
   //          wrangler secret put DISCORD_BOT_TOKEN --env production
+  //          wrangler secret put XP_API_SECRET --env production
   "env": {
     "production": {
       "name": "paleo-waifu-bot-prod",

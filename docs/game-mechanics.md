@@ -1,6 +1,6 @@
 # Game Mechanics Spec
 
-Paleo Waifu is a prehistoric creature gacha game. Players pull creatures from banners using Fossils (in-game currency), build collections, and trade with other players.
+Paleo Waifu is a prehistoric creature gacha game. Players pull creatures from banners using Fossils (in-game currency), build collections, and trade with other players. The game is playable through both the web app and a Discord bot — both share the same database, so progress is unified across both interfaces.
 
 ---
 
@@ -11,14 +11,14 @@ Fossils are the sole in-game currency. They are earned passively and spent on pu
 | Source         | Amount | Notes                                          |
 | -------------- | ------ | ---------------------------------------------- |
 | New user bonus | +10    | Awarded on first gacha page visit (idempotent) |
-| Daily login    | +3     | Once per UTC day, manual claim via button      |
+| Daily login    | +3     | Once per UTC day, via web button or `/daily` slash command |
 
 | Cost        | Amount     |
 | ----------- | ---------- |
 | Single pull | 1 Fossil   |
 | 10-pull     | 10 Fossils |
 
-Fossil balance cannot go negative — the deduction query includes a `WHERE fossils >= cost` guard. If insufficient, the pull fails with HTTP 402.
+Fossil balance cannot go negative — the deduction query includes a `WHERE fossils >= cost` guard. If insufficient, the pull fails with HTTP 402 (web) or an ephemeral error message (Discord).
 
 ---
 
@@ -38,7 +38,7 @@ Base rates sum to exactly 100% and are used directly as probabilities under norm
 
 ### Pull Flow
 
-1. Player selects a banner and chooses single or 10-pull
+1. Player selects a banner and chooses single or 10-pull (web) or uses `/pull` / `/pull10` (Discord)
 2. Fossils are deducted atomically (fails if insufficient)
 3. For each pull in the batch:
    a. Rarity is determined (see Pity System below)
@@ -283,9 +283,48 @@ Clicking a creature opens a modal with full details (description, period, size, 
 
 ---
 
+## Discord Bot
+
+A Cloudflare Worker-based Discord bot provides access to core gameplay via slash commands. It shares the same D1 database as the web app — pulls, fossils, and pity counters are unified across both interfaces. Users are linked via their Discord OAuth account (the `account` table maps Discord IDs to app user IDs).
+
+### Available Commands
+
+| Command   | Type                 | Description                                      |
+| --------- | -------------------- | ------------------------------------------------ |
+| `/pull`   | Deferred + embed     | Single pull (1 Fossil), shows creature card      |
+| `/pull10` | Deferred + embed     | 10-pull (10 Fossils), shows list with best image |
+| `/daily`  | Deferred + embed     | Claim daily 3 Fossils                            |
+| `/balance`| Immediate, ephemeral | Show fossil count                                |
+| `/pity`   | Immediate, ephemeral | Show pity counters for active banner             |
+| `/help`   | Immediate, ephemeral | List available commands                          |
+
+### Interaction Model
+
+- **Immediate commands** (`/balance`, `/pity`, `/help`) return a response directly within Discord's 3-second window
+- **Deferred commands** (`/pull`, `/pull10`, `/daily`) return a "thinking..." state immediately, then use `ctx.waitUntil()` to run DB operations and PATCH the final response via Discord REST API
+- **Ephemeral** responses are only visible to the invoking user
+
+### Account Linking
+
+Users must have signed into the web app via Discord OAuth at least once. The bot looks up `account` rows where `providerId = 'discord'` and `accountId` matches the slash command user's Discord ID. Unlinked users receive an ephemeral message directing them to sign in on the web app.
+
+### Shared Code
+
+The bot imports game logic directly from the main app via a `@/` path alias — no code duplication:
+
+- `src/lib/gacha.ts` — `executePullBatch`, `claimDaily`, `deductFossils`, `getFossils`, `ensureUserCurrency`, `refundFossils`
+- `src/lib/db/schema.ts` — All table definitions
+- `src/lib/db/client.ts` — `createDb()` factory
+- `src/lib/types.ts` — Constants (`PULL_COST_SINGLE`, `PULL_COST_MULTI`, etc.)
+
+---
+
 ## Unimplemented Features
 
-These exist in the database schema but have no application code:
+These exist in the database schema or docs but have no application code:
 
 - **Wishlist**: `wishlist` table with `(userId, creatureId)` unique pairs. No API or UI.
 - **Favorite toggle**: `isFavorite` column is read but never written by any endpoint.
+- **Bot: `/collection`**, **`/creature`**, **`/encyclopedia`** — planned slash commands for browsing creatures via Discord. Not registered or implemented.
+- **Bot: `/level`** — planned XP/leveling command. Depends on the Gateway listener and `user_xp` table, neither of which exist yet.
+- **Gateway Listener** — planned Node.js process for Discord message XP tracking. No `gateway/` directory exists. See `docs/discord-bot.md` for full spec.

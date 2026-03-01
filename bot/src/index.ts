@@ -13,7 +13,9 @@ import { handleBalance } from './commands/balance'
 import { handlePity } from './commands/pity'
 import { handleDaily } from './commands/daily'
 import { handleHelp } from './commands/help'
+import { handleLevel } from './commands/level'
 import { handlePull } from './commands/pull'
+import { awardXp } from './lib/xp'
 import type { Interaction } from './lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from './lib/auth'
@@ -23,6 +25,7 @@ interface Env {
   DISCORD_APPLICATION_ID: string
   DISCORD_PUBLIC_KEY: string
   DISCORD_BOT_TOKEN: string
+  XP_API_SECRET: string
 }
 
 export default {
@@ -35,7 +38,14 @@ export default {
       return new Response('Method not allowed', { status: 405 })
     }
 
-    // Verify Discord signature
+    const url = new URL(request.url)
+
+    // XP endpoint — shared secret auth, not Discord signature
+    if (url.pathname === '/api/xp') {
+      return handleXpRequest(request, env)
+    }
+
+    // All other routes: Discord interaction flow
     const isValid = await verifySignature(request, env.DISCORD_PUBLIC_KEY)
     if (!isValid) {
       return new Response('Invalid signature', { status: 401 })
@@ -81,6 +91,34 @@ export default {
   },
 }
 
+async function handleXpRequest(request: Request, env: Env): Promise<Response> {
+  const auth = request.headers.get('Authorization')
+  if (auth !== `Bearer ${env.XP_API_SECRET}`) {
+    return jsonResponse({ error: 'Unauthorized' }, 401)
+  }
+
+  let body: { discordUserId?: string }
+  try {
+    body = await request.json()
+  } catch {
+    return jsonResponse({ error: 'Bad request' }, 400)
+  }
+
+  if (!body.discordUserId) {
+    return jsonResponse({ error: 'Missing discordUserId' }, 400)
+  }
+
+  const db = await createDb(env.DB)
+  const appUser = await resolveDiscordUser(db, body.discordUserId)
+
+  if (!appUser) {
+    return jsonResponse({ error: 'User not linked' }, 404)
+  }
+
+  const result = await awardXp(db, appUser.id)
+  return jsonResponse(result)
+}
+
 function routeCommand(
   name: string,
   interaction: Interaction,
@@ -95,6 +133,8 @@ function routeCommand(
       return handleBalance(db, appUser)
     case 'pity':
       return handlePity(db, appUser)
+    case 'level':
+      return handleLevel(interaction, db, appUser)
 
     // Deferred commands — return type 5 immediately, do work in waitUntil
     case 'daily':

@@ -33,6 +33,18 @@ const commands = [
     description: 'Check your pity counters for the active banner',
   },
   {
+    name: 'level',
+    description: 'Check your XP and level',
+    options: [
+      {
+        name: 'user',
+        description: 'Check another user\'s level',
+        type: 6, // USER
+        required: false,
+      },
+    ],
+  },
+  {
     name: 'help',
     description: 'Show available commands',
   },
