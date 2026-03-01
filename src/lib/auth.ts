@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { admin } from 'better-auth/plugins'
 import { createDb } from './db/client'
 import * as schema from './db/schema'
 
@@ -16,6 +17,12 @@ export async function createAuth(env: Env) {
         verification: schema.verification,
       },
     }),
+
+    plugins: [
+      admin({
+        defaultRole: 'user',
+      }),
+    ],
 
     socialProviders: {
       discord: {

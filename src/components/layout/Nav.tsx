@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { LogOut, Menu } from 'lucide-react'
+import { LogOut, Menu, Shield } from 'lucide-react'
 import {
   IconBookshelf,
   IconCardExchange,
@@ -85,6 +85,12 @@ export function Nav() {
                     <IconCardExchange className="h-4 w-4" />
                     Trade
                   </Link>
+                  {(session.user as { role?: string }).role === 'admin' && (
+                    <Link to="/admin" className={NAV_LINK_CLASS}>
+                      <Shield className="h-4 w-4" />
+                      Admin
+                    </Link>
+                  )}
                 </>
               )}
             </nav>
@@ -195,6 +201,16 @@ export function Nav() {
                         <IconCardExchange className="h-4 w-4" />
                         Trade
                       </Link>
+                      {(session.user as { role?: string }).role === 'admin' && (
+                        <Link
+                          to="/admin"
+                          className={MOBILE_NAV_LINK_CLASS}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Link>
+                      )}
                     </>
                   )}
                 </nav>

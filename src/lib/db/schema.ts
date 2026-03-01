@@ -16,6 +16,10 @@ export const user = sqliteTable('user', {
   email: text('email').notNull().unique(),
   emailVerified: integer('emailVerified', { mode: 'boolean' }).default(false),
   image: text('image'),
+  role: text('role').default('user'),
+  banned: integer('banned', { mode: 'boolean' }).default(false),
+  banReason: text('banReason'),
+  banExpires: integer('banExpires', { mode: 'timestamp' }),
   createdAt: integer('createdAt', { mode: 'timestamp' }).default(
     sql`(unixepoch())`,
   ),
@@ -39,6 +43,7 @@ export const session = sqliteTable('session', {
   userId: text('userId')
     .notNull()
     .references(() => user.id, { onDelete: 'cascade' }),
+  impersonatedBy: text('impersonatedBy'),
 })
 
 export const account = sqliteTable('account', {

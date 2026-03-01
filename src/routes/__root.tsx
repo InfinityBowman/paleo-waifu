@@ -39,6 +39,13 @@ export const Route = createRootRoute({
       {
         children: `document.documentElement.classList.add('dark')`,
       },
+      {
+        src: 'https://plausible.jacobmaynard.dev/js/pa-3bdzy4_fgkECTn6E-iKcY.js',
+        async: true,
+      },
+      {
+        children: `window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};plausible.init()`,
+      },
     ],
   }),
 
@@ -72,9 +79,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="bg-paleo min-h-screen bg-background text-foreground antialiased">
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
+        <TooltipProvider>{children}</TooltipProvider>
         {import.meta.env.DEV && <DevAccountSwitcher />}
         <Toaster />
         <Scripts />

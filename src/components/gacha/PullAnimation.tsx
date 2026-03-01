@@ -322,7 +322,7 @@ function SingleReveal({
 
   return (
     <div
-      className="relative flex min-h-[300px] cursor-pointer items-center justify-center"
+      className="relative flex min-h-75 cursor-pointer items-center justify-center"
       onClick={() => {
         if (stage !== 'orb') onSkip()
       }}
@@ -363,7 +363,11 @@ function SingleReveal({
           className="relative z-10"
           initial={{ opacity: 0, scale: 0 }}
           animate={{ opacity: [0, 1, 1, 0], scale: [0, 1.1, 1.05, 0] }}
-          transition={{ duration: 0.8, times: [0, 0.35, 0.75, 1], ease: 'easeInOut' }}
+          transition={{
+            duration: 0.8,
+            times: [0, 0.35, 0.75, 1],
+            ease: 'easeInOut',
+          }}
         >
           <div className="grid place-items-center [&>*]:[grid-area:1/1]">
             <div
@@ -609,7 +613,7 @@ function MultiReveal({
             <div key={result.userCreatureId} className="relative">
               {!isRevealed ? (
                 /* Glow dot placeholder */
-                <div className="flex aspect-[3/4] items-center justify-center rounded-xl border border-dashed border-muted/30 bg-muted/5">
+                <div className="flex aspect-3/4 items-center justify-center rounded-xl border border-dashed border-muted/30 bg-muted/5">
                   <div
                     className="h-2 w-2 rounded-full"
                     style={{
