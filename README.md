@@ -68,11 +68,11 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 
 Deployments are automated via GitHub Actions. Pushing to `main` triggers the relevant workflow based on which files changed:
 
-| Workflow | Trigger paths | What it does |
-|---|---|---|
-| Deploy Website | `src/`, `drizzle/`, `wrangler.jsonc`, etc. | D1 migrations + `wrangler deploy` |
-| Deploy Bot | `bot/`, `src/lib/`, `drizzle/` | D1 migrations + `wrangler deploy` (bot worker) |
-| Gateway Docker | `gateway/` | Docker build + push to GHCR + repository dispatch to homelab |
+| Workflow       | Trigger paths                              | What it does                                                 |
+| -------------- | ------------------------------------------ | ------------------------------------------------------------ |
+| Deploy Website | `src/`, `drizzle/`, `wrangler.jsonc`, etc. | D1 migrations + `wrangler deploy`                            |
+| Deploy Bot     | `bot/`, `src/lib/`, `drizzle/`             | D1 migrations + `wrangler deploy` (bot worker)               |
+| Gateway Docker | `gateway/`                                 | Docker build + push to GHCR + repository dispatch to homelab |
 
 ### Manual deploy (first time or secrets)
 
@@ -148,20 +148,20 @@ docs/                  # Detailed reference docs
 
 ## Scripts
 
-| Command                 | Description                          |
-| ----------------------- | ------------------------------------ |
-| `pnpm dev`              | Dev server on http://localhost:3000  |
-| `pnpm build`            | Production build                     |
-| `pnpm deploy`           | Build + deploy to Cloudflare Workers |
-| `pnpm db:generate`      | Generate Drizzle migration files     |
-| `pnpm db:migrate:local` | Apply migrations to local D1         |
-| `pnpm db:migrate:prod`  | Apply migrations to production D1    |
-| `pnpm db:seed:local`    | Seed local D1 with creature data     |
-| `pnpm lint`             | ESLint                               |
-| `pnpm format`           | Prettier                             |
-| `pnpm check`            | Prettier --write + ESLint --fix      |
-| `pnpm bot:dev`          | Local bot worker dev server           |
-| `pnpm bot:deploy`       | Deploy bot to Cloudflare Workers      |
-| `pnpm bot:register`     | Register slash commands (dev guild)   |
-| `pnpm bot:register:prod`| Register slash commands (global)      |
-| `pnpm bot:typecheck`    | Typecheck bot                         |
+| Command                  | Description                          |
+| ------------------------ | ------------------------------------ |
+| `pnpm dev`               | Dev server on http://localhost:3000  |
+| `pnpm build`             | Production build                     |
+| `pnpm deploy`            | Build + deploy to Cloudflare Workers |
+| `pnpm db:generate`       | Generate Drizzle migration files     |
+| `pnpm db:migrate:local`  | Apply migrations to local D1         |
+| `pnpm db:migrate:prod`   | Apply migrations to production D1    |
+| `pnpm db:seed:local`     | Seed local D1 with creature data     |
+| `pnpm lint`              | ESLint                               |
+| `pnpm format`            | Prettier                             |
+| `pnpm check`             | Prettier --write + ESLint --fix      |
+| `pnpm bot:dev`           | Local bot worker dev server          |
+| `pnpm bot:deploy`        | Deploy bot to Cloudflare Workers     |
+| `pnpm bot:register`      | Register slash commands (dev guild)  |
+| `pnpm bot:register:prod` | Register slash commands (global)     |
+| `pnpm bot:typecheck`     | Typecheck bot                        |

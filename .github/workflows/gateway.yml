@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "gateway/**"
-      - ".github/workflows/gateway.yml"
+      - 'gateway/**'
+      - '.github/workflows/gateway.yml'
 
 env:
   REGISTRY: ghcr.io

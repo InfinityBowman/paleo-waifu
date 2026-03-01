@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm'
-import { account, user } from '@/lib/db/schema'
 import type { Database } from '@/lib/db/client'
+import { account, user } from '@/lib/db/schema'
 
 export interface AppUser {
   id: string

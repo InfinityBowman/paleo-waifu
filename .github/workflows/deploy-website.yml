@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - "src/**"
-      - "drizzle/**"
-      - "public/**"
-      - "wrangler.jsonc"
-      - "vite.config.ts"
-      - "package.json"
-      - "pnpm-lock.yaml"
-      - ".github/workflows/deploy-website.yml"
+      - 'src/**'
+      - 'drizzle/**'
+      - 'public/**'
+      - 'wrangler.jsonc'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-website.yml'
 
 concurrency:
   group: deploy-website
@@ -30,8 +30,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
 
@@ -54,8 +54,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
 

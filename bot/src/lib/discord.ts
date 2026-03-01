@@ -30,7 +30,7 @@ export interface InteractionOption {
 export interface InteractionData {
   id: string
   name: string
-  options?: InteractionOption[]
+  options?: Array<InteractionOption>
 }
 
 export interface InteractionUser {
@@ -69,7 +69,7 @@ export interface InteractionResponse {
   type: InteractionResponseType
   data?: {
     content?: string
-    embeds?: Embed[]
+    embeds?: Array<Embed>
     flags?: number
   }
 }
@@ -91,7 +91,7 @@ export function jsonResponse(body: unknown, status = 200): Response {
 
 export function immediateResponse(
   content: string,
-  options?: { ephemeral?: boolean; embeds?: Embed[] },
+  options?: { ephemeral?: boolean; embeds?: Array<Embed> },
 ): Response {
   return jsonResponse({
     type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
@@ -103,10 +103,7 @@ export function immediateResponse(
   })
 }
 
-export function ephemeralResponse(
-  content: string,
-  embeds?: Embed[],
-): Response {
+export function ephemeralResponse(content: string, embeds?: Array<Embed>): Response {
   return immediateResponse(content, { ephemeral: true, embeds })
 }
 
@@ -123,7 +120,7 @@ export function deferredResponse(ephemeral = false): Response {
 export async function editDeferredResponse(
   applicationId: string,
   interactionToken: string,
-  body: { content?: string; embeds?: Embed[] },
+  body: { content?: string; embeds?: Array<Embed> },
 ): Promise<void> {
   const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}/messages/@original`
   const res = await fetch(url, {

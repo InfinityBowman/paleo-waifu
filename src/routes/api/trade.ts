@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { and, count, eq, inArray, ne } from 'drizzle-orm'
+import { and, count, eq, inArray, ne, or } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
@@ -104,10 +104,12 @@ export const Route = createFileRoute('/api/trade')({
 
         // Create trade offer
         if (body.action === 'create') {
-          // Lock first — this is the natural serialization point for concurrent requests
-          const locked = await db
-            .update(userCreature)
-            .set({ isLocked: true })
+          // Validate creature exists, belongs to user, and is not locked
+          // (locked = committed as receiver on another pending trade)
+          // No lock on create — the same creature can be in multiple open trades
+          const owned = await db
+            .select({ id: userCreature.id })
+            .from(userCreature)
             .where(
               and(
                 eq(userCreature.id, body.offeredCreatureId),
@@ -115,13 +117,13 @@ export const Route = createFileRoute('/api/trade')({
                 eq(userCreature.isLocked, false),
               ),
             )
-            .returning({ id: userCreature.id })
+            .get()
 
-          if (locked.length === 0) {
+          if (!owned) {
             return jsonResponse({ error: 'Creature not found or locked' }, 400)
           }
 
-          // Enforce 5-trade cap AFTER lock to avoid TOCTOU race
+          // Enforce 5-trade cap
           const [capRow] = await db
             .select({ total: count() })
             .from(tradeOffer)
@@ -133,11 +135,6 @@ export const Route = createFileRoute('/api/trade')({
             )
 
           if (capRow.total >= 5) {
-            // Undo the lock since we're rejecting the trade
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, body.offeredCreatureId))
             return jsonResponse(
               {
                 error:
@@ -187,33 +184,76 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Atomically unlock creatures and cancel trade in one batch
-          await db.batch([
-            db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, trade.offeredCreatureId)),
-            // If pending, also unlock the receiver's creature
-            ...(trade.status === 'pending' && trade.receiverCreatureId
-              ? [
-                  db
-                    .update(userCreature)
-                    .set({ isLocked: false })
-                    .where(eq(userCreature.id, trade.receiverCreatureId)),
-                ]
-              : []),
-            db
+          // If pending, unlock receiver's creature + cancel in one batch
+          // If open, just cancel — offerer's creature was never locked
+          if (trade.status === 'pending' && trade.receiverCreatureId) {
+            await db.batch([
+              db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, trade.receiverCreatureId)),
+              db
+                .update(tradeOffer)
+                .set({ status: 'cancelled' })
+                .where(eq(tradeOffer.id, body.tradeId)),
+            ])
+          } else {
+            await db
               .update(tradeOffer)
               .set({ status: 'cancelled' })
-              .where(eq(tradeOffer.id, body.tradeId)),
-          ])
+              .where(eq(tradeOffer.id, body.tradeId))
+          }
 
           return jsonResponse({ success: true })
         }
 
         // Propose to accept (sets trade to pending — offerer must confirm)
         if (body.action === 'accept') {
-          // Lock the acceptor's creature FIRST — verify ownership before touching the trade
+          // Fetch trade FIRST to validate before locking anything
+          const trade = await db
+            .select({
+              offeredCreatureId: tradeOffer.offeredCreatureId,
+              offererId: tradeOffer.offererId,
+              wantedCreatureId: tradeOffer.wantedCreatureId,
+              status: tradeOffer.status,
+            })
+            .from(tradeOffer)
+            .where(eq(tradeOffer.id, body.tradeId))
+            .get()
+
+          if (!trade || trade.status !== 'open') {
+            return jsonResponse({ error: 'Trade not found or not open' }, 404)
+          }
+
+          if (trade.offererId === userId) {
+            return jsonResponse(
+              { error: 'You cannot accept your own trade' },
+              409,
+            )
+          }
+
+          // Validate offerer's creature is still available (owned + not locked)
+          // UX guard to prevent accepting a trade that can never be confirmed
+          const offererCreature = await db
+            .select({ id: userCreature.id })
+            .from(userCreature)
+            .where(
+              and(
+                eq(userCreature.id, trade.offeredCreatureId),
+                eq(userCreature.userId, trade.offererId),
+                eq(userCreature.isLocked, false),
+              ),
+            )
+            .get()
+
+          if (!offererCreature) {
+            return jsonResponse(
+              { error: "Offerer's creature is no longer available" },
+              409,
+            )
+          }
+
+          // Lock the acceptor's creature — verify ownership before touching the trade
           const myLocked = await db
             .update(userCreature)
             .set({ isLocked: true })
@@ -234,16 +274,7 @@ export const Route = createFileRoute('/api/trade')({
           }
 
           // Validate wantedCreatureId constraint if the trade specifies one
-          const trade = await db
-            .select({
-              wantedCreatureId: tradeOffer.wantedCreatureId,
-              status: tradeOffer.status,
-            })
-            .from(tradeOffer)
-            .where(eq(tradeOffer.id, body.tradeId))
-            .get()
-
-          if (trade?.wantedCreatureId) {
+          if (trade.wantedCreatureId) {
             const mySpecies = await db
               .select({ creatureId: userCreature.creatureId })
               .from(userCreature)
@@ -263,7 +294,7 @@ export const Route = createFileRoute('/api/trade')({
             }
           }
 
-          // Now atomically claim the trade as pending — prevents double-propose and self-trade
+          // Now atomically claim the trade as pending — prevents double-propose
           const claimed = await db
             .update(tradeOffer)
             .set({
@@ -320,48 +351,65 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Re-verify creature ownership at confirm time to prevent tampering
-          const [offererOwns, receiverOwns] = await Promise.all([
-            db
-              .select({ id: userCreature.id })
-              .from(userCreature)
-              .where(
-                and(
-                  eq(userCreature.id, trade.offeredCreatureId),
-                  eq(userCreature.userId, trade.offererId),
-                  eq(userCreature.isLocked, true),
-                ),
-              )
-              .get(),
-            db
-              .select({ id: userCreature.id })
-              .from(userCreature)
-              .where(
-                and(
-                  eq(userCreature.id, trade.receiverCreatureId),
-                  eq(userCreature.userId, trade.receiverId),
-                  eq(userCreature.isLocked, true),
-                ),
-              )
-              .get(),
-          ])
+          // Atomic lock of offerer's creature — this is the serialization point
+          // Prevents two confirms from racing for the same creature
+          const locked = await db
+            .update(userCreature)
+            .set({ isLocked: true })
+            .where(
+              and(
+                eq(userCreature.id, trade.offeredCreatureId),
+                eq(userCreature.userId, trade.offererId),
+                eq(userCreature.isLocked, false),
+              ),
+            )
+            .returning({ id: userCreature.id })
 
-          if (!offererOwns || !receiverOwns) {
-            // Integrity violation — cancel the trade and unlock creatures
-            await db
-              .update(tradeOffer)
-              .set({ status: 'cancelled' })
-              .where(eq(tradeOffer.id, body.tradeId))
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, trade.offeredCreatureId))
-            if (trade.receiverCreatureId) {
-              await db
+          if (locked.length === 0) {
+            // Creature no longer available — cancel trade + unlock receiver's creature
+            await db.batch([
+              db
+                .update(tradeOffer)
+                .set({ status: 'cancelled' })
+                .where(eq(tradeOffer.id, body.tradeId)),
+              db
                 .update(userCreature)
                 .set({ isLocked: false })
-                .where(eq(userCreature.id, trade.receiverCreatureId))
-            }
+                .where(eq(userCreature.id, trade.receiverCreatureId)),
+            ])
+            return jsonResponse(
+              {
+                error: 'Your creature is no longer available — trade cancelled',
+              },
+              409,
+            )
+          }
+
+          // Verify receiver's creature is still locked and owned
+          const receiverOwns = await db
+            .select({ id: userCreature.id })
+            .from(userCreature)
+            .where(
+              and(
+                eq(userCreature.id, trade.receiverCreatureId),
+                eq(userCreature.userId, trade.receiverId),
+                eq(userCreature.isLocked, true),
+              ),
+            )
+            .get()
+
+          if (!receiverOwns) {
+            // Integrity violation — cancel trade, unlock offerer's creature
+            await db.batch([
+              db
+                .update(tradeOffer)
+                .set({ status: 'cancelled' })
+                .where(eq(tradeOffer.id, body.tradeId)),
+              db
+                .update(userCreature)
+                .set({ isLocked: false })
+                .where(eq(userCreature.id, trade.offeredCreatureId)),
+            ])
             return jsonResponse(
               { error: 'Trade integrity error — trade cancelled' },
               409,
@@ -369,7 +417,6 @@ export const Route = createFileRoute('/api/trade')({
           }
 
           // Execute the entire confirm + swap atomically in one batch
-          // This prevents partial failure from leaving creatures locked
           await db.batch([
             db
               .update(tradeOffer)
@@ -397,6 +444,49 @@ export const Route = createFileRoute('/api/trade')({
               receivedCreatureId: trade.receiverCreatureId,
             }),
           ])
+
+          // Cascade cancel: find all other open/pending trades offering the same creature
+          const staleTrades = await db
+            .select({
+              id: tradeOffer.id,
+              status: tradeOffer.status,
+              receiverCreatureId: tradeOffer.receiverCreatureId,
+            })
+            .from(tradeOffer)
+            .where(
+              and(
+                eq(tradeOffer.offeredCreatureId, trade.offeredCreatureId),
+                ne(tradeOffer.id, body.tradeId),
+                or(
+                  eq(tradeOffer.status, 'open'),
+                  eq(tradeOffer.status, 'pending'),
+                ),
+              ),
+            )
+            .all()
+
+          if (staleTrades.length > 0) {
+            const staleIds = staleTrades.map((t) => t.id)
+            // Unlock receiver creatures from cancelled pending trades
+            const receiverCreatureIds = staleTrades
+              .filter((t) => t.status === 'pending' && t.receiverCreatureId)
+              .map((t) => t.receiverCreatureId as string)
+
+            await db.batch([
+              db
+                .update(tradeOffer)
+                .set({ status: 'cancelled' })
+                .where(inArray(tradeOffer.id, staleIds)),
+              ...(receiverCreatureIds.length > 0
+                ? [
+                    db
+                      .update(userCreature)
+                      .set({ isLocked: false })
+                      .where(inArray(userCreature.id, receiverCreatureIds)),
+                  ]
+                : []),
+            ])
+          }
 
           return jsonResponse({ success: true })
         }

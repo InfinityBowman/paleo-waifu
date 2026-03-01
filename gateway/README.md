@@ -30,26 +30,26 @@ Discord Gateway ──MESSAGE_CREATE──▶ Gateway Listener (homelab)
 
 ## XP Rules
 
-| Rule | Value |
-|---|---|
-| XP per eligible message | 15–25 (random) |
-| Cooldown | 60 seconds per user |
-| Minimum message length | 5 characters |
-| Bot messages | Ignored |
-| DMs | Ignored |
-| Unlinked users | Ignored (404 from API) |
+| Rule                    | Value                  |
+| ----------------------- | ---------------------- |
+| XP per eligible message | 15–25 (random)         |
+| Cooldown                | 60 seconds per user    |
+| Minimum message length  | 5 characters           |
+| Bot messages            | Ignored                |
+| DMs                     | Ignored                |
+| Unlinked users          | Ignored (404 from API) |
 
 ## Level Curve
 
 XP required for level N = `100 × N²`
 
 | Level | Total XP | Approx. messages |
-|---|---|---|
-| 1 | 100 | ~5 |
-| 2 | 400 | ~20 |
-| 5 | 2,500 | ~125 |
-| 10 | 10,000 | ~500 |
-| 20 | 40,000 | ~2,000 |
+| ----- | -------- | ---------------- |
+| 1     | 100      | ~5               |
+| 2     | 400      | ~20              |
+| 5     | 2,500    | ~125             |
+| 10    | 10,000   | ~500             |
+| 20    | 40,000   | ~2,000           |
 
 ## Deployment
 

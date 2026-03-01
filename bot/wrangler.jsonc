@@ -9,8 +9,8 @@
     {
       "binding": "DB",
       "database_name": "paleo-waifu-db",
-      "database_id": "6ac6d424-2a7c-4087-9f42-0cd1a2ab367a"
-    }
+      "database_id": "6ac6d424-2a7c-4087-9f42-0cd1a2ab367a",
+    },
   ],
 
   // ─── Production ─────────────────────────────────────────────────────
@@ -25,9 +25,9 @@
         {
           "binding": "DB",
           "database_name": "paleo-waifu-db-prod",
-          "database_id": "61839285-28e1-4de9-9954-1a77b296c092"
-        }
-      ]
-    }
-  }
+          "database_id": "61839285-28e1-4de9-9954-1a77b296c092",
+        },
+      ],
+    },
+  },
 }

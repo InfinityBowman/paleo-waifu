@@ -11,10 +11,10 @@ export const RARITY_HEX: Record<Rarity, number> = {
 
 /** Rarity emoji labels for compact displays */
 export const RARITY_EMOJI: Record<Rarity, string> = {
-  common: '\u2B1C',     // white square
+  common: '\u2B1C', // white square
   uncommon: '\uD83D\uDFE9', // green square
-  rare: '\uD83D\uDFE6',     // blue square
-  epic: '\uD83D\uDFEA',     // purple square
+  rare: '\uD83D\uDFE6', // blue square
+  epic: '\uD83D\uDFEA', // purple square
   legendary: '\uD83D\uDFE8', // yellow square
 }
 

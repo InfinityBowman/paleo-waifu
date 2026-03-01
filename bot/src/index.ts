@@ -1,12 +1,11 @@
 import {
-  InteractionType,
   InteractionResponseType,
+  InteractionType,
+  ephemeralResponse,
   getInteractionUser,
   jsonResponse,
   verifySignature,
-  ephemeralResponse,
 } from './lib/discord'
-import { createDb } from '@/lib/db/client'
 import { resolveDiscordUser } from './lib/auth'
 import { BANNED_MESSAGE, UNLINKED_MESSAGE } from './lib/constants'
 import { handleBalance } from './commands/balance'
@@ -19,6 +18,7 @@ import { awardXp } from './lib/xp'
 import type { Interaction } from './lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from './lib/auth'
+import { createDb } from '@/lib/db/client'
 
 interface Env {
   DB: D1Database

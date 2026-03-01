@@ -180,7 +180,17 @@ export function EncyclopediaGrid({
     const observer = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
       setColumnCount(
-        w >= 1400 ? 7 : w >= 1200 ? 6 : w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2,
+        w >= 1400
+          ? 7
+          : w >= 1200
+            ? 6
+            : w >= 980
+              ? 5
+              : w >= 730
+                ? 4
+                : w >= 500
+                  ? 3
+                  : 2,
       )
     })
     observer.observe(el)

@@ -1,9 +1,9 @@
-import { ensureUserCurrency, claimDaily } from '@/lib/gacha'
-import { DAILY_FOSSILS } from '@/lib/types'
 import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import type { Interaction } from '../lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from '../lib/auth'
+import { DAILY_FOSSILS } from '@/lib/types'
+import { claimDaily, ensureUserCurrency } from '@/lib/gacha'
 
 /** /daily — Claim daily fossils (deferred) */
 export function handleDaily(
@@ -45,10 +45,8 @@ async function doDailyClaim(
       )
     }
   } catch {
-    await editDeferredResponse(
-      env.DISCORD_APPLICATION_ID,
-      interaction.token,
-      { content: 'Something went wrong claiming your daily reward. Try again!' },
-    )
+    await editDeferredResponse(env.DISCORD_APPLICATION_ID, interaction.token, {
+      content: 'Something went wrong claiming your daily reward. Try again!',
+    })
   }
 }

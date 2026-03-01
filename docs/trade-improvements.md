@@ -47,6 +47,16 @@
 - Migration generated via `pnpm db:generate`
 - Apply with `pnpm db:migrate:local` / `pnpm db:migrate:prod`
 
+### 7. Deferred Trade Locking
+
+- **Files:** `src/routes/api/trade.ts`, `src/routes/_app/trade.tsx`
+- Offerer's creature is no longer locked on trade creation — allows the same creature in multiple open trades
+- Receiver's creature is still locked on ACCEPT (they're committing to a specific proposal)
+- Atomic lock at CONFIRM is the serialization point — prevents two confirms from racing for the same creature
+- Cascade cancel on CONFIRM — after a swap, all other open/pending trades offering the same creature are auto-cancelled, and any receiver creatures on those pending trades are unlocked
+- Open trade expiry no longer unlocks offerer creatures (they were never locked)
+- Cancel of open trades no longer unlocks offerer creatures
+
 ---
 
 ## TODO — High Impact
@@ -127,7 +137,7 @@
 
 ### Confirmation Dialog for Trade Creation
 
-- Creating a trade instantly locks your creature with no "are you sure?" dialog
+- Creating a trade lists your creature with no "are you sure?" dialog
 - Accepting a trade already has a confirmation dialog — creation should too
 - Prevents accidental trades, especially on mobile
 - **File:** `src/components/trade/TradeList.tsx`

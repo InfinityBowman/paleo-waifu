@@ -4,10 +4,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "bot/**"
-      - "src/lib/**"
-      - "drizzle/**"
-      - ".github/workflows/deploy-bot.yml"
+      - 'bot/**'
+      - 'src/lib/**'
+      - 'drizzle/**'
+      - '.github/workflows/deploy-bot.yml'
 
 concurrency:
   group: deploy-bot
@@ -26,8 +26,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
 
@@ -50,8 +50,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "pnpm"
+          node-version: '22'
+          cache: 'pnpm'
 
       # Root deps needed - bot imports shared code from src/lib/ (drizzle-orm, nanoid, etc.)
       - run: pnpm install --frozen-lockfile

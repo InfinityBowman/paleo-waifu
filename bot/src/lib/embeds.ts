@@ -1,19 +1,27 @@
 import { RARITY_EMOJI, RARITY_HEX, RARITY_LABEL } from './constants'
-import { xpForLevel, xpToNextLevel } from '@/lib/xp-config'
 import type { Rarity } from '@/lib/types'
 import type { PullResult } from '@/lib/gacha'
 import type { Embed } from './discord'
+import { xpForLevel, xpToNextLevel } from '@/lib/xp-config'
 
 /** Build a full creature embed for a single pull */
 export function creatureEmbed(pull: PullResult): Embed {
-  const rarity = pull.rarity as Rarity
+  const rarity = pull.rarity
   const fields: Embed['fields'] = [
-    { name: 'Rarity', value: `${RARITY_EMOJI[rarity]} ${RARITY_LABEL[rarity]}`, inline: true },
+    {
+      name: 'Rarity',
+      value: `${RARITY_EMOJI[rarity]} ${RARITY_LABEL[rarity]}`,
+      inline: true,
+    },
     { name: 'Era', value: pull.era, inline: true },
   ]
 
   if (pull.isNew) {
-    fields.push({ name: '\u2728 NEW', value: 'First time pulling this creature!', inline: false })
+    fields.push({
+      name: '\u2728 NEW',
+      value: 'First time pulling this creature!',
+      inline: false,
+    })
   }
 
   const embed: Embed = {
@@ -31,20 +39,23 @@ export function creatureEmbed(pull: PullResult): Embed {
 }
 
 /** Build a compact list embed for a 10-pull */
-export function multiPullEmbed(
-  pulls: PullResult[],
-  newBalance: number,
-): Embed {
+export function multiPullEmbed(pulls: Array<PullResult>, newBalance: number): Embed {
   // Find the best pull by rarity order
-  const rarityOrder: Rarity[] = ['legendary', 'epic', 'rare', 'uncommon', 'common']
+  const rarityOrder: Array<Rarity> = [
+    'legendary',
+    'epic',
+    'rare',
+    'uncommon',
+    'common',
+  ]
   const bestPull = pulls.reduce((best, pull) => {
-    const bestIdx = rarityOrder.indexOf(best.rarity as Rarity)
-    const pullIdx = rarityOrder.indexOf(pull.rarity as Rarity)
+    const bestIdx = rarityOrder.indexOf(best.rarity)
+    const pullIdx = rarityOrder.indexOf(pull.rarity)
     return pullIdx < bestIdx ? pull : best
   })
 
   const lines = pulls.map((p) => {
-    const rarity = p.rarity as Rarity
+    const rarity = p.rarity
     const newBadge = p.isNew ? ' **NEW!**' : ''
     return `${RARITY_EMOJI[rarity]} **${p.name}** (${RARITY_LABEL[rarity]})${newBadge}`
   })
@@ -52,7 +63,7 @@ export function multiPullEmbed(
   const embed: Embed = {
     title: '10-Pull Results',
     description: lines.join('\n'),
-    color: RARITY_HEX[bestPull.rarity as Rarity],
+    color: RARITY_HEX[bestPull.rarity],
     footer: { text: `Balance: ${newBalance} Fossils` },
   }
 
@@ -67,11 +78,15 @@ export function multiPullEmbed(
 export function levelEmbed(username: string, xp: number, level: number): Embed {
   const nextLevelXp = xpForLevel(level + 1)
   const currentLevelXp = xpForLevel(level)
-  const progress = Math.min(1, Math.max(0,
-    nextLevelXp > currentLevelXp
-      ? (xp - currentLevelXp) / (nextLevelXp - currentLevelXp)
-      : 1,
-  ))
+  const progress = Math.min(
+    1,
+    Math.max(
+      0,
+      nextLevelXp > currentLevelXp
+        ? (xp - currentLevelXp) / (nextLevelXp - currentLevelXp)
+        : 1,
+    ),
+  )
   const toNext = xpToNextLevel(xp)
 
   const barLength = 10

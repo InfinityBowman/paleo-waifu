@@ -1,5 +1,6 @@
-import { EmbedBuilder, type Message } from 'discord.js'
+import { EmbedBuilder  } from 'discord.js'
 import { logger } from './logger.js'
+import type {Message} from 'discord.js';
 
 // These mirror src/lib/xp-config.ts — kept local since the gateway
 // is a standalone Node.js process without the @/ path alias
@@ -92,9 +93,7 @@ async function sendLevelUpEmbed(
   const embed = new EmbedBuilder()
     .setColor(0xe8c95a)
     .setTitle('Level Up!')
-    .setDescription(
-      `<@${message.author.id}> reached **Level ${data.level}**!`,
-    )
+    .setDescription(`<@${message.author.id}> reached **Level ${data.level}**!`)
     .setFooter({ text: `Total XP: ${data.xp.toLocaleString()}` })
     .setTimestamp()
 

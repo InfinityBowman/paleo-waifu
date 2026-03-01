@@ -18,7 +18,6 @@ async function expireStaleTradesIfAny(
   const staleTrades = await db
     .select({
       id: tradeOffer.id,
-      offeredCreatureId: tradeOffer.offeredCreatureId,
       receiverCreatureId: tradeOffer.receiverCreatureId,
     })
     .from(tradeOffer)
@@ -33,24 +32,24 @@ async function expireStaleTradesIfAny(
   if (staleTrades.length === 0) return
 
   const tradeIds = staleTrades.map((t) => t.id)
-  const creatureIdsToUnlock = staleTrades.flatMap(
-    (t) =>
-      [t.offeredCreatureId, t.receiverCreatureId].filter(
-        Boolean,
-      ) as Array<string>,
-  )
+  // Only receiver creatures are locked — offerer's creatures are never locked until confirm
+  const receiverCreatureIds = staleTrades
+    .map((t) => t.receiverCreatureId)
+    .filter(Boolean) as Array<string>
 
-  // offeredCreatureId is NOT NULL so creatureIdsToUnlock is always non-empty
-  // when staleTrades is non-empty, but guard defensively
   await db.batch([
     db
       .update(tradeOffer)
       .set({ status: 'expired' })
       .where(inArray(tradeOffer.id, tradeIds)),
-    db
-      .update(userCreature)
-      .set({ isLocked: false })
-      .where(inArray(userCreature.id, creatureIdsToUnlock)),
+    ...(receiverCreatureIds.length > 0
+      ? [
+          db
+            .update(userCreature)
+            .set({ isLocked: false })
+            .where(inArray(userCreature.id, receiverCreatureIds)),
+        ]
+      : []),
   ])
 }
 
@@ -242,7 +241,7 @@ function TradePage() {
     Route.useLoaderData()
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-[1600px]">
+    <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-400">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold">Trade Market</h1>
         <p className="mt-2 text-muted-foreground">

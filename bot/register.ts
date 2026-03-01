@@ -38,7 +38,7 @@ const commands = [
     options: [
       {
         name: 'user',
-        description: 'Check another user\'s level',
+        description: "Check another user's level",
         type: 6, // USER
         required: false,
       },
@@ -70,12 +70,8 @@ async function register() {
     console.log('Registering commands globally (may take up to 1 hour)...')
   } else {
     if (!guildId) {
-      console.error(
-        'Missing DISCORD_DEV_GUILD_ID for dev registration.',
-      )
-      console.error(
-        'Set it in bot/.env or use --prod for global registration.',
-      )
+      console.error('Missing DISCORD_DEV_GUILD_ID for dev registration.')
+      console.error('Set it in bot/.env or use --prod for global registration.')
       process.exit(1)
     }
     url = `https://discord.com/api/v10/applications/${appId}/guilds/${guildId}/commands`

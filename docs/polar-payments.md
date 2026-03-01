@@ -48,11 +48,11 @@ No new infrastructure. Everything runs on the existing Cloudflare Worker + D1 da
 
 ## Product Tiers
 
-| Tier | Fossils | Bonus | Total | Price (USD) | Fossils/$ |
-|------|---------|-------|-------|-------------|-----------|
-| Starter | 50 | — | 50 | $4.99 | 10.0 |
-| Excavation | 150 | +50 | 200 | $14.99 | 13.3 |
-| Expedition | 400 | +100 | 500 | $34.99 | 14.3 |
+| Tier       | Fossils | Bonus | Total | Price (USD) | Fossils/$ |
+| ---------- | ------- | ----- | ----- | ----------- | --------- |
+| Starter    | 50      | —     | 50    | $4.99       | 10.0      |
+| Excavation | 150     | +50   | 200   | $14.99      | 13.3      |
+| Expedition | 400     | +100  | 500   | $34.99      | 14.3      |
 
 Bonus fossils reward larger purchases. Each tier maps to a Polar product created in the dashboard. Product IDs are stored in a `FOSSIL_PRODUCTS` constant (not in the database — these rarely change and are referenced by both server and client code).
 
@@ -184,7 +184,9 @@ onOrderPaid: async (payload) => {
   const customerId = order.customer?.externalId // This is the better-auth user.id
   if (!customerId) return
 
-  const product = FOSSIL_PRODUCTS.find((p) => p.polarProductId === order.productId)
+  const product = FOSSIL_PRODUCTS.find(
+    (p) => p.polarProductId === order.productId,
+  )
   if (!product) return
 
   const db = await createDb(env.DB)
@@ -217,6 +219,7 @@ onOrderPaid: async (payload) => {
 ```
 
 The better-auth Polar plugin automatically handles:
+
 - Webhook signature verification (via `POLAR_WEBHOOK_SECRET`)
 - Routing to the correct handler based on event type
 - The webhook endpoint is served at `/api/auth/polar/webhooks` (under the existing better-auth catch-all route)
@@ -227,12 +230,12 @@ New file `src/lib/products.ts`:
 
 ```ts
 export interface FossilProduct {
-  id: string            // Internal identifier
+  id: string // Internal identifier
   name: string
-  fossils: number       // Total fossils awarded (base + bonus)
-  priceCents: number    // Display price
+  fossils: number // Total fossils awarded (base + bonus)
+  priceCents: number // Display price
   polarProductId: string // Polar product ID (from dashboard)
-  badge?: string        // Optional UI badge ("Best Value", etc.)
+  badge?: string // Optional UI badge ("Best Value", etc.)
 }
 
 export const FOSSIL_PRODUCTS: FossilProduct[] = [

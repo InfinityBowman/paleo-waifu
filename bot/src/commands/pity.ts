@@ -1,9 +1,9 @@
-import { eq, and } from 'drizzle-orm'
-import { banner, pityCounter } from '@/lib/db/schema'
-import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@/lib/types'
+import { and, eq } from 'drizzle-orm'
 import { ephemeralResponse } from '../lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from '../lib/auth'
+import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@/lib/types'
+import { banner, pityCounter } from '@/lib/db/schema'
 
 /** /pity — Show pity counters for active banner (immediate, ephemeral) */
 export async function handlePity(

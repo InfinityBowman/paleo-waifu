@@ -1,25 +1,22 @@
 import { eq } from 'drizzle-orm'
-import {
-  ensureUserCurrency,
-  deductFossils,
-  executePullBatch,
-  getFossils,
-  refundFossils,
-} from '@/lib/gacha'
-import { banner } from '@/lib/db/schema'
-import {
-  PULL_COST_SINGLE,
-  PULL_COST_MULTI,
-  MULTI_PULL_COUNT,
-} from '@/lib/types'
-import {
-  deferredResponse,
-  editDeferredResponse,
-} from '../lib/discord'
+import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import { creatureEmbed, multiPullEmbed } from '../lib/embeds'
 import type { Interaction } from '../lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from '../lib/auth'
+import {
+  MULTI_PULL_COUNT,
+  PULL_COST_MULTI,
+  PULL_COST_SINGLE,
+} from '@/lib/types'
+import { banner } from '@/lib/db/schema'
+import {
+  deductFossils,
+  ensureUserCurrency,
+  executePullBatch,
+  getFossils,
+  refundFossils,
+} from '@/lib/gacha'
 
 /** /pull or /pull10 — Gacha pull (deferred) */
 export function handlePull(
@@ -41,7 +38,10 @@ async function doPull(
   env: { DISCORD_APPLICATION_ID: string },
   count: 1 | 10,
 ): Promise<void> {
-  const edit = (body: { content?: string; embeds?: Parameters<typeof editDeferredResponse>[2]['embeds'] }) =>
+  const edit = (body: {
+    content?: string
+    embeds?: Parameters<typeof editDeferredResponse>[2]['embeds']
+  }) =>
     editDeferredResponse(env.DISCORD_APPLICATION_ID, interaction.token, body)
 
   try {

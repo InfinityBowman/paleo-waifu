@@ -8,9 +8,9 @@ Paleo Waifu is a prehistoric creature gacha game. Players pull creatures from ba
 
 Fossils are the sole in-game currency. They are earned passively and spent on pulls.
 
-| Source         | Amount | Notes                                          |
-| -------------- | ------ | ---------------------------------------------- |
-| New user bonus | +10    | Awarded on first gacha page visit (idempotent) |
+| Source         | Amount | Notes                                                      |
+| -------------- | ------ | ---------------------------------------------------------- |
+| New user bonus | +10    | Awarded on first gacha page visit (idempotent)             |
 | Daily login    | +3     | Once per UTC day, via web button or `/daily` slash command |
 
 | Cost        | Amount     |
@@ -289,15 +289,15 @@ A Cloudflare Worker-based Discord bot provides access to core gameplay via slash
 
 ### Available Commands
 
-| Command   | Type                 | Description                                      |
-| --------- | -------------------- | ------------------------------------------------ |
-| `/pull`   | Deferred + embed     | Single pull (1 Fossil), shows creature card      |
-| `/pull10` | Deferred + embed     | 10-pull (10 Fossils), shows list with best image |
-| `/daily`  | Deferred + embed     | Claim daily 3 Fossils                            |
-| `/balance`| Immediate, ephemeral | Show fossil count                                |
-| `/pity`   | Immediate, ephemeral | Show pity counters for active banner             |
-| `/level`  | Immediate, ephemeral | Show XP, level, and progress bar (optional @user)|
-| `/help`   | Immediate, ephemeral | List available commands                          |
+| Command    | Type                 | Description                                       |
+| ---------- | -------------------- | ------------------------------------------------- |
+| `/pull`    | Deferred + embed     | Single pull (1 Fossil), shows creature card       |
+| `/pull10`  | Deferred + embed     | 10-pull (10 Fossils), shows list with best image  |
+| `/daily`   | Deferred + embed     | Claim daily 3 Fossils                             |
+| `/balance` | Immediate, ephemeral | Show fossil count                                 |
+| `/pity`    | Immediate, ephemeral | Show pity counters for active banner              |
+| `/level`   | Immediate, ephemeral | Show XP, level, and progress bar (optional @user) |
+| `/help`    | Immediate, ephemeral | List available commands                           |
 
 ### Interaction Model
 
@@ -362,14 +362,14 @@ The Gateway Listener is a standalone Node.js process (discord.js) running on a h
 
 ### XP Rules
 
-| Rule | Value | Notes |
-|---|---|---|
-| XP per eligible message | 15–25 (random) | Randomized to feel less mechanical |
-| Cooldown | 60 seconds per user | In-memory on the Gateway Listener; prevents spam grinding |
-| Minimum message length | 5 characters | Filters reactions, single emoji, etc. |
-| Bot messages | Ignored | `message.author.bot` check |
-| DMs | Ignored | Only guild (server) messages count |
-| Unlinked users | Ignored | Discord ID must exist in `account` table |
+| Rule                    | Value               | Notes                                                     |
+| ----------------------- | ------------------- | --------------------------------------------------------- |
+| XP per eligible message | 15–25 (random)      | Randomized to feel less mechanical                        |
+| Cooldown                | 60 seconds per user | In-memory on the Gateway Listener; prevents spam grinding |
+| Minimum message length  | 5 characters        | Filters reactions, single emoji, etc.                     |
+| Bot messages            | Ignored             | `message.author.bot` check                                |
+| DMs                     | Ignored             | Only guild (server) messages count                        |
+| Unlinked users          | Ignored             | Discord ID must exist in `account` table                  |
 
 ### Level Curve
 
@@ -381,14 +381,14 @@ Level from XP = floor(sqrt(xp / 100))
 ```
 
 | Level | Total XP | Approx. messages to reach |
-|---|---|---|
-| 1 | 100 | ~5 |
-| 2 | 400 | ~20 |
-| 3 | 900 | ~45 |
-| 5 | 2,500 | ~125 |
-| 10 | 10,000 | ~500 |
-| 15 | 22,500 | ~1,125 |
-| 20 | 40,000 | ~2,000 |
+| ----- | -------- | ------------------------- |
+| 1     | 100      | ~5                        |
+| 2     | 400      | ~20                       |
+| 3     | 900      | ~45                       |
+| 5     | 2,500    | ~125                      |
+| 10    | 10,000   | ~500                      |
+| 15    | 22,500   | ~1,125                    |
+| 20    | 40,000   | ~2,000                    |
 
 ### Cooldown Behavior
 
@@ -402,13 +402,13 @@ Level from XP = floor(sqrt(xp / 100))
 
 The `user_xp` table tracks per-user XP and level:
 
-| Field | Type | Notes |
-|---|---|---|
-| `id` | text | nanoid primary key |
-| `userId` | text | Unique FK to `user`, cascade delete |
-| `xp` | integer | Cumulative XP (default 0) |
-| `level` | integer | Current level (default 0) |
-| `updatedAt` | integer | Unix timestamp |
+| Field       | Type    | Notes                               |
+| ----------- | ------- | ----------------------------------- |
+| `id`        | text    | nanoid primary key                  |
+| `userId`    | text    | Unique FK to `user`, cascade delete |
+| `xp`        | integer | Cumulative XP (default 0)           |
+| `level`     | integer | Current level (default 0)           |
+| `updatedAt` | integer | Unix timestamp                      |
 
 Level is computed atomically in the database upsert (`CAST(SQRT((xp + delta) / 100.0) AS INTEGER)`), not in application code. This prevents race conditions from concurrent XP awards.
 

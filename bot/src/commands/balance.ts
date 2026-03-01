@@ -1,7 +1,7 @@
-import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 import { ephemeralResponse } from '../lib/discord'
 import type { Database } from '@/lib/db/client'
 import type { AppUser } from '../lib/auth'
+import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 
 /** /balance — Show fossil count (immediate, ephemeral) */
 export async function handleBalance(

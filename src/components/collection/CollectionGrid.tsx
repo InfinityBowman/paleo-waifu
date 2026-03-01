@@ -47,10 +47,7 @@ export function CollectionGrid({
   const filtered = useMemo(
     () =>
       collection.filter((c) => {
-        if (
-          search &&
-          !c.name.toLowerCase().includes(search.toLowerCase())
-        )
+        if (search && !c.name.toLowerCase().includes(search.toLowerCase()))
           return false
         if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
         if (eraFilter !== 'all' && c.era !== eraFilter) return false
@@ -72,7 +69,17 @@ export function CollectionGrid({
     const observer = new ResizeObserver(([entry]) => {
       const w = entry.contentRect.width
       setColumnCount(
-        w >= 1400 ? 7 : w >= 1200 ? 6 : w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2,
+        w >= 1400
+          ? 7
+          : w >= 1200
+            ? 6
+            : w >= 980
+              ? 5
+              : w >= 730
+                ? 4
+                : w >= 500
+                  ? 3
+                  : 2,
       )
     })
     observer.observe(el)

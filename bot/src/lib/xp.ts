@@ -1,8 +1,12 @@
 import { eq, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import { userXp } from '@/lib/db/schema'
-import { levelFromXp, XP_MIN_PER_MESSAGE, XP_MAX_PER_MESSAGE } from '@/lib/xp-config'
 import type { Database } from '@/lib/db/client'
+import { userXp } from '@/lib/db/schema'
+import {
+  XP_MAX_PER_MESSAGE,
+  XP_MIN_PER_MESSAGE,
+  levelFromXp,
+} from '@/lib/xp-config'
 
 export interface XpAwardResult {
   xp: number
@@ -11,7 +15,10 @@ export interface XpAwardResult {
 }
 
 function randomXpDelta(): number {
-  return Math.floor(Math.random() * (XP_MAX_PER_MESSAGE - XP_MIN_PER_MESSAGE + 1)) + XP_MIN_PER_MESSAGE
+  return (
+    Math.floor(Math.random() * (XP_MAX_PER_MESSAGE - XP_MIN_PER_MESSAGE + 1)) +
+    XP_MIN_PER_MESSAGE
+  )
 }
 
 /** Award XP to a user, recalculate level atomically, return result */

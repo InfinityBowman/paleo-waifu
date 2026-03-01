@@ -1,9 +1,13 @@
-import { Client, GatewayIntentBits, Events } from 'discord.js'
+import { Client, Events, GatewayIntentBits } from 'discord.js'
 import { handleXp, isEligible } from './xp.js'
 import { logger } from './logger.js'
 
 // Validate required env vars at startup
-const REQUIRED_ENV = ['DISCORD_BOT_TOKEN', 'XP_API_URL', 'XP_API_SECRET'] as const
+const REQUIRED_ENV = [
+  'DISCORD_BOT_TOKEN',
+  'XP_API_URL',
+  'XP_API_SECRET',
+] as const
 
 for (const key of REQUIRED_ENV) {
   if (!process.env[key]) {

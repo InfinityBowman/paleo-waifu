@@ -68,7 +68,7 @@ gateway/
 | `/collection`   | `page?` `rarity?`                  | Deferred + embed     | Paginated collection (10 per page)                        |
 | `/creature`     | `name` (autocomplete)              | Deferred + embed     | Full creature details with image, stats, fun facts        |
 | `/encyclopedia` | `search?` `rarity?` `era?` `page?` | Deferred + embed     | Browse all creatures (10 per page)                        |
-| `/level`        | `user?`                             | Immediate, ephemeral | Show XP, level, progress bar, and next reward             |
+| `/level`        | `user?`                            | Immediate, ephemeral | Show XP, level, progress bar, and next reward             |
 
 ## Key Implementation Details
 
@@ -132,14 +132,14 @@ The Gateway listener runs on the homelab as a Docker container. It connects to D
 
 ### XP Rules
 
-| Rule | Value | Notes |
-|---|---|---|
-| XP per eligible message | 15–25 (random) | Randomized to feel less mechanical |
-| Cooldown | 60 seconds per user | Prevents spam grinding; tracked in-memory on the Gateway listener |
-| Minimum message length | 5 characters | Filters out reactions, single emoji, etc. |
-| Bot messages | Ignored | `message.author.bot` check |
-| DMs | Ignored | Only guild (server) messages count |
-| Unlinked users | Ignored | Discord ID must exist in `account` table |
+| Rule                    | Value               | Notes                                                             |
+| ----------------------- | ------------------- | ----------------------------------------------------------------- |
+| XP per eligible message | 15–25 (random)      | Randomized to feel less mechanical                                |
+| Cooldown                | 60 seconds per user | Prevents spam grinding; tracked in-memory on the Gateway listener |
+| Minimum message length  | 5 characters        | Filters out reactions, single emoji, etc.                         |
+| Bot messages            | Ignored             | `message.author.bot` check                                        |
+| DMs                     | Ignored             | Only guild (server) messages count                                |
+| Unlinked users          | Ignored             | Discord ID must exist in `account` table                          |
 
 ### Level Curve
 
@@ -150,32 +150,32 @@ XP required for level N = 100 × N²
 ```
 
 | Level | Total XP | Approx. messages to reach (from 0) |
-|---|---|---|
-| 1 | 100 | ~5 |
-| 2 | 400 | ~20 |
-| 3 | 900 | ~45 |
-| 5 | 2,500 | ~125 |
-| 10 | 10,000 | ~500 |
-| 15 | 22,500 | ~1,125 |
-| 20 | 40,000 | ~2,000 |
-| 25 | 62,500 | ~3,125 |
+| ----- | -------- | ---------------------------------- |
+| 1     | 100      | ~5                                 |
+| 2     | 400      | ~20                                |
+| 3     | 900      | ~45                                |
+| 5     | 2,500    | ~125                               |
+| 10    | 10,000   | ~500                               |
+| 15    | 22,500   | ~1,125                             |
+| 20    | 40,000   | ~2,000                             |
+| 25    | 62,500   | ~3,125                             |
 
 ### Level Rewards
 
 Rewards are defined in a static config (not a DB table) so they can be referenced by both the Worker and the web app.
 
-| Level | Reward | Description |
-|---|---|---|
-| 1 | +5 Fossils | Welcome bonus |
-| 3 | +10 Fossils | — |
-| 5 | Guaranteed Rare pull | Next pull is rare or higher |
-| 7 | +15 Fossils | — |
-| 10 | Guaranteed Epic pull | Next pull is epic or higher |
-| 13 | +20 Fossils | — |
-| 15 | Exclusive creature unlock | Creature only obtainable via leveling |
-| 18 | +25 Fossils | — |
-| 20 | Guaranteed Legendary pull | Next pull is guaranteed legendary |
-| 25 | Exclusive creature unlock | Second leveling-exclusive creature |
+| Level | Reward                    | Description                           |
+| ----- | ------------------------- | ------------------------------------- |
+| 1     | +5 Fossils                | Welcome bonus                         |
+| 3     | +10 Fossils               | —                                     |
+| 5     | Guaranteed Rare pull      | Next pull is rare or higher           |
+| 7     | +15 Fossils               | —                                     |
+| 10    | Guaranteed Epic pull      | Next pull is epic or higher           |
+| 13    | +20 Fossils               | —                                     |
+| 15    | Exclusive creature unlock | Creature only obtainable via leveling |
+| 18    | +25 Fossils               | —                                     |
+| 20    | Guaranteed Legendary pull | Next pull is guaranteed legendary     |
+| 25    | Exclusive creature unlock | Second leveling-exclusive creature    |
 
 **Guaranteed rarity pulls** are implemented as a `guaranteedRarity` field on `user_xp`. When set (e.g., `'rare'`), the next pull overrides `calculateRarity()` to return at least that rarity, then clears the field. This requires a small change to `executePullBatch` to check the guarantee before rolling.
 
@@ -226,6 +226,7 @@ New route on the bot Worker: `POST /api/xp`
 ### `/level` Command
 
 Shows an embed with:
+
 - Current level and total XP
 - XP progress bar to next level (e.g., `████████░░ 80%`)
 - Next reward and how much XP until it

@@ -4,20 +4,36 @@ Cloudflare Worker that handles Discord slash commands for the PaleoWaifu gacha g
 
 ## Commands
 
-| Command    | Description                          | Visibility |
-| ---------- | ------------------------------------ | ---------- |
-| `/balance` | Check your Fossil balance            | Ephemeral  |
+| Command    | Description                           | Visibility |
+| ---------- | ------------------------------------- | ---------- |
+| `/balance` | Check your Fossil balance             | Ephemeral  |
 | `/pity`    | Check pity counters for active banner | Ephemeral  |
-| `/daily`   | Claim daily 3 free Fossils           | Ephemeral  |
-| `/pull`    | Pull a creature (1 Fossil)           | Public     |
-| `/pull10`  | Pull 10 creatures (10 Fossils)       | Public     |
+| `/daily`   | Claim daily 3 free Fossils            | Ephemeral  |
+| `/pull`    | Pull a creature (1 Fossil)            | Public     |
+| `/pull10`  | Pull 10 creatures (10 Fossils)        | Public     |
 
 ## Setup
 
 ### Prerequisites
 
 - Same Discord application used for the main app's OAuth
-- Bot added to your server with `bot` + `applications.commands` scopes
+- **Message Content Intent** enabled under Bot settings in the Developer Portal (required for the Gateway listener to read message content for XP)
+
+### Bot Invite
+
+Use guild install with `bot` + `applications.commands` scopes and these bot permissions:
+
+| Permission    | Reason                                          |
+| ------------- | ----------------------------------------------- |
+| View Channels | See channels to send messages in                |
+| Send Messages | Slash command responses, level-up messages      |
+| Embed Links   | Rich embeds for creature cards and pull results |
+
+Invite URL (permissions integer `19456` = View Channels + Send Messages + Embed Links):
+
+```
+https://discord.com/oauth2/authorize?client_id=YOUR_APP_ID&permissions=19456&integration_type=0&scope=bot+applications.commands
+```
 
 ### 1. Install dependencies
 
