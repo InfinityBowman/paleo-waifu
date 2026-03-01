@@ -4,12 +4,20 @@ import { count, eq, sql } from 'drizzle-orm'
 import { Dices } from 'lucide-react'
 import {
   IconArchiveResearch,
+  IconCrystalCluster,
   IconDinosaurBones,
   IconTrade,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
-import { creature, currency, tradeHistory, userCreature } from '@/lib/db/schema'
+import {
+  creature,
+  currency,
+  tradeHistory,
+  userCreature,
+  userXp,
+} from '@/lib/db/schema'
+import { xpForLevel } from '@/lib/xp-config'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -24,6 +32,7 @@ const getProfileData = createServerFn({ method: 'GET' })
       uniqueSpecies,
       totalSpeciesCount,
       tradeCount,
+      xpRow,
     ] = await Promise.all([
       db.select().from(currency).where(eq(currency.userId, userId)).get(),
       db
@@ -46,6 +55,11 @@ const getProfileData = createServerFn({ method: 'GET' })
           sql`${tradeHistory.giverId} = ${userId} OR ${tradeHistory.receiverId} = ${userId}`,
         )
         .get(),
+      db
+        .select({ xp: userXp.xp, level: userXp.level })
+        .from(userXp)
+        .where(eq(userXp.userId, userId))
+        .get(),
     ])
 
     return {
@@ -55,6 +69,8 @@ const getProfileData = createServerFn({ method: 'GET' })
         (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
       totalSpecies: totalSpeciesCount?.count ?? 0,
       tradeCount: tradeCount?.count ?? 0,
+      xp: xpRow?.xp ?? 0,
+      level: xpRow?.level ?? 0,
     }
   })
 
@@ -64,13 +80,36 @@ export const Route = createFileRoute('/_app/profile')({
 })
 
 function ProfilePage() {
-  const { fossils, totalPulls, uniqueSpecies, totalSpecies, tradeCount } =
-    Route.useLoaderData()
+  const {
+    fossils,
+    totalPulls,
+    uniqueSpecies,
+    totalSpecies,
+    tradeCount,
+    xp,
+    level,
+  } = Route.useLoaderData()
   const { session } = Route.useRouteContext()
   const user = session.user
 
   const completionPct =
     totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0
+
+  const currentLevelXp = xpForLevel(level)
+  const nextLevelXp = xpForLevel(level + 1)
+  const xpProgress =
+    nextLevelXp > currentLevelXp
+      ? Math.min(
+          100,
+          Math.max(
+            0,
+            Math.round(
+              ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100,
+            ),
+          ),
+        )
+      : 100
+  const xpToNext = Math.max(0, nextLevelXp - xp)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl">
@@ -85,6 +124,36 @@ function ProfilePage() {
           <h1 className="font-display text-2xl font-bold">{user.name}</h1>
         </div>
       </div>
+
+      <Card
+        size="sm"
+        className="group mb-6 transition-shadow hover:shadow-md"
+      >
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <IconCrystalCluster className="h-4 w-4" />
+                Discord Level
+              </div>
+              <div className="mt-1 font-display text-2xl font-bold">
+                Level {level}
+              </div>
+              <div className="mt-0.5 text-xs text-muted-foreground">
+                {xp.toLocaleString()} XP total &middot;{' '}
+                {xpToNext.toLocaleString()} XP to next level
+              </div>
+            </div>
+            <IconCrystalCluster className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
+          </div>
+          <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-primary to-rarity-epic/80 transition-all duration-500"
+              style={{ width: `${xpProgress}%` }}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <StatCard label="Fossils" value={fossils} icon={IconDinosaurBones} />
