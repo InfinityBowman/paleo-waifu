@@ -45,6 +45,7 @@ export async function handleXp(message: Message): Promise<void> {
         Authorization: `Bearer ${API_SECRET}`,
       },
       body: JSON.stringify({ discordUserId: message.author.id }),
+      signal: AbortSignal.timeout(5000),
     })
   } catch (err) {
     logger.error('XP API fetch failed', {
