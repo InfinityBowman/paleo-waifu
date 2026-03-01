@@ -17,6 +17,12 @@ const DEV_USERS = [
     fossils: 75,
     purpose: 'Trade-focused',
   },
+  {
+    id: 'dev-user-5',
+    name: 'AdminRex',
+    fossils: 9999,
+    purpose: 'Admin',
+  },
 ]
 
 export function DevAccountSwitcher() {

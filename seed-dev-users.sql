@@ -15,6 +15,9 @@ VALUES ('dev-user-3', 'MesozoicMax', 'dev3@paleowaifu.test', 0, 'https://api.dic
 INSERT OR IGNORE INTO user (id, name, email, emailVerified, image, createdAt, updatedAt)
 VALUES ('dev-user-4', 'TradeTyrant', 'dev4@paleowaifu.test', 0, 'https://api.dicebear.com/9.x/thumbs/svg?seed=TradeTyrant', unixepoch(), unixepoch());
 
+INSERT OR IGNORE INTO user (id, name, email, emailVerified, image, createdAt, updatedAt, role)
+VALUES ('dev-user-5', 'AdminRex', 'dev5@paleowaifu.test', 0, 'https://api.dicebear.com/9.x/thumbs/svg?seed=AdminRex', unixepoch(), unixepoch(), 'admin');
+
 -- ─── Discord OAuth accounts (fake provider entries) ─────────────────
 
 INSERT OR IGNORE INTO account (id, accountId, providerId, userId, createdAt, updatedAt)
@@ -29,6 +32,9 @@ VALUES ('dev-account-3', '100000000000000003', 'discord', 'dev-user-3', unixepoc
 INSERT OR IGNORE INTO account (id, accountId, providerId, userId, createdAt, updatedAt)
 VALUES ('dev-account-4', '100000000000000004', 'discord', 'dev-user-4', unixepoch(), unixepoch());
 
+INSERT OR IGNORE INTO account (id, accountId, providerId, userId, createdAt, updatedAt)
+VALUES ('dev-account-5', '100000000000000005', 'discord', 'dev-user-5', unixepoch(), unixepoch());
+
 -- ─── Currency (fossils) ─────────────────────────────────────────────
 
 INSERT OR IGNORE INTO currency (id, user_id, fossils, updated_at)
@@ -42,6 +48,9 @@ VALUES ('dev-currency-3', 'dev-user-3', 500, unixepoch());
 
 INSERT OR IGNORE INTO currency (id, user_id, fossils, updated_at)
 VALUES ('dev-currency-4', 'dev-user-4', 75, unixepoch());
+
+INSERT OR IGNORE INTO currency (id, user_id, fossils, updated_at)
+VALUES ('dev-currency-5', 'dev-user-5', 9999, unixepoch());
 
 -- ─── Collections for dev-user-2 (FossilQueen — mid-game) ───────────
 
