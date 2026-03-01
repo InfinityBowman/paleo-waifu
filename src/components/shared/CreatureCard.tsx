@@ -1,5 +1,5 @@
 import type { Rarity } from '@/lib/types'
-import { IconFossil, IconSparkles } from '@/components/icons'
+import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
 import { Badge } from '@/components/ui/badge'
@@ -13,6 +13,7 @@ export interface CreatureCardData {
   imageAspectRatio?: number | null
   diet?: string
   isNew?: boolean
+  isFavorite?: boolean | null
 }
 
 export function CreatureCard({
@@ -40,7 +41,7 @@ export function CreatureCard({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className={cn(
-        'group overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
+        'group relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
         RARITY_BORDER[rarity],
         RARITY_BG[rarity],
         className,
@@ -97,6 +98,9 @@ export function CreatureCard({
           </div>
         )}
       </div>
+      {creature.isFavorite && (
+        <IconRoundStar className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-rarity-legendary/85 text-rarity-legendary/85" />
+      )}
     </button>
   )
 }

@@ -25,6 +25,7 @@ const getCollection = createServerFn({ method: 'GET' })
         era: creature.era,
         diet: creature.diet,
         imageUrl: creature.imageUrl,
+        imageAspectRatio: creature.imageAspectRatio,
         description: creature.description,
       })
       .from(userCreature)

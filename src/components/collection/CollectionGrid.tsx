@@ -1,13 +1,8 @@
-import { useDeferredValue, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CreatureModal } from './CreatureModal'
-import type { Rarity } from '@/lib/types'
-import {
-  IconFossil,
-  IconMagnifyingGlass,
-  IconRoundStar,
-} from '@/components/icons'
-import { cn } from '@/lib/utils'
-import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
+import { IconMagnifyingGlass } from '@/components/icons'
+import { distributeToColumns } from '@/lib/utils'
+import { CreatureCard } from '@/components/shared/CreatureCard'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import {
@@ -27,6 +22,7 @@ interface CollectionItem {
   era: string
   diet: string
   imageUrl: string | null
+  imageAspectRatio: number | null
   description: string
   isFavorite: boolean | null
   isLocked: boolean | null
@@ -42,8 +38,6 @@ export function CollectionGrid({
   const [eraFilter, setEraFilter] = useState<string>('all')
   const [selected, setSelected] = useState<CollectionItem | null>(null)
 
-  const deferredSearch = useDeferredValue(search)
-
   const eras = useMemo(
     () => [...new Set(collection.map((c) => c.era))],
     [collection],
@@ -54,15 +48,35 @@ export function CollectionGrid({
     () =>
       collection.filter((c) => {
         if (
-          deferredSearch &&
-          !c.name.toLowerCase().includes(deferredSearch.toLowerCase())
+          search &&
+          !c.name.toLowerCase().includes(search.toLowerCase())
         )
           return false
         if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
         if (eraFilter !== 'all' && c.era !== eraFilter) return false
         return true
       }),
-    [collection, deferredSearch, rarityFilter, eraFilter],
+    [collection, search, rarityFilter, eraFilter],
+  )
+
+  // ── Masonry column distribution ──────────────────────────────────────────
+  const containerRef = useRef<HTMLDivElement | null>(null)
+  const [columnCount, setColumnCount] = useState(5)
+
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new ResizeObserver(([entry]) => {
+      const w = entry.contentRect.width
+      setColumnCount(w >= 980 ? 5 : w >= 730 ? 4 : w >= 500 ? 3 : 2)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  const columns = useMemo(
+    () => distributeToColumns(filtered, columnCount),
+    [filtered, columnCount],
   )
 
   return (
@@ -113,54 +127,18 @@ export function CollectionGrid({
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {filtered.map((item) => {
-            const rarity = item.rarity as Rarity
-            return (
-              <button
-                key={item.id}
-                onClick={() => setSelected(item)}
-                className={cn(
-                  'group relative overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1',
-                  RARITY_BORDER[rarity],
-                  RARITY_BG[rarity],
-                )}
-              >
-                <div className="aspect-3/4 overflow-hidden p-2">
-                  {item.imageUrl ? (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="h-full w-full rounded object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center">
-                      <IconFossil className="h-10 w-10 text-muted-foreground/30" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-2 pt-0">
-                  <span
-                    className={cn(
-                      'font-display text-[10px] font-semibold uppercase',
-                      RARITY_COLORS[rarity],
-                    )}
-                  >
-                    {rarity}
-                  </span>
-                  <div className="font-display text-sm font-bold leading-tight">
-                    {item.name}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground">
-                    {item.era}
-                  </div>
-                </div>
-                {item.isFavorite && (
-                  <IconRoundStar className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-rarity-legendary/85 text-rarity-legendary/85" />
-                )}
-              </button>
-            )
-          })}
+        <div ref={containerRef} className="flex gap-4">
+          {columns.map((col, colIdx) => (
+            <div key={colIdx} className="flex flex-1 flex-col gap-4">
+              {col.map((item) => (
+                <CreatureCard
+                  key={item.id}
+                  creature={item}
+                  onClick={() => setSelected(item)}
+                />
+              ))}
+            </div>
+          ))}
         </div>
       )}
 
