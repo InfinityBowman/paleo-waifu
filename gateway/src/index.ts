@@ -12,6 +12,12 @@ for (const key of REQUIRED_ENV) {
   }
 }
 
+logger.info('Gateway starting', {
+  version: process.env.npm_package_version ?? 'unknown',
+  nodeVersion: process.version,
+  env: process.env.NODE_ENV ?? 'development',
+})
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -30,6 +36,22 @@ client.once(Events.ClientReady, (readyClient) => {
 client.on(Events.MessageCreate, async (message) => {
   if (!isEligible(message)) return
   await handleXp(message)
+})
+
+client.on(Events.ShardDisconnect, (event, shardId) => {
+  logger.warn('Shard disconnected', { shardId, code: event.code })
+})
+
+client.on(Events.ShardReconnecting, (shardId) => {
+  logger.info('Shard reconnecting', { shardId })
+})
+
+client.on(Events.ShardResume, (shardId, replayedEvents) => {
+  logger.info('Shard resumed', { shardId, replayedEvents })
+})
+
+client.on(Events.ShardReady, (shardId) => {
+  logger.info('Shard ready', { shardId })
 })
 
 client.on(Events.Warn, (info) => {
