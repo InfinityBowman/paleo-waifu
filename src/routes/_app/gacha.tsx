@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
@@ -17,6 +17,11 @@ import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 const getGachaData = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
@@ -41,10 +46,11 @@ const getGachaData = createServerFn({ method: 'GET' })
       ? Math.floor(currencyRow.lastDailyClaim.getTime() / 1000)
       : 0
     const canClaimDaily = lastClaim < startOfDay
+    const nextResetIn = canClaimDaily ? 0 : startOfDay + 86400 - now
 
     const activeBannerId = banners[0]?.id ?? null
 
-    return { activeBannerId, fossils, canClaimDaily }
+    return { activeBannerId, fossils, canClaimDaily, nextResetIn }
   })
 
 export const Route = createFileRoute('/_app/gacha')({
@@ -52,16 +58,42 @@ export const Route = createFileRoute('/_app/gacha')({
   component: GachaPage,
 })
 
+function formatTimeLeft(totalSeconds: number): string {
+  const h = Math.floor(totalSeconds / 3600)
+  const m = Math.floor((totalSeconds % 3600) / 60)
+  const s = totalSeconds % 60
+  if (h > 0) return `${h}h ${m}m`
+  if (m > 0) return `${m}m ${s}s`
+  return `${s}s`
+}
+
 function GachaPage() {
   const {
     activeBannerId,
     fossils: initialFossils,
     canClaimDaily: initialCanClaim,
+    nextResetIn: initialNextResetIn,
   } = Route.useLoaderData()
   const router = useRouter()
   const [fossils, setFossils] = useState(initialFossils)
   const [canClaim, setCanClaim] = useState(initialCanClaim)
   const [claiming, setClaiming] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(initialNextResetIn)
+
+  useEffect(() => {
+    if (canClaim || secondsLeft <= 0) return
+    const interval = setInterval(() => {
+      setSecondsLeft((s) => {
+        if (s <= 1) {
+          clearInterval(interval)
+          setCanClaim(true)
+          return 0
+        }
+        return s - 1
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [canClaim, secondsLeft])
 
   const handleClaimDaily = async () => {
     setClaiming(true)
@@ -106,10 +138,17 @@ function GachaPage() {
               <IconDinosaurBones className="h-3.5 w-3.5" />
             </Button>
           ) : (
-            <div className="flex items-center gap-1.5 rounded-md border border-border/50 px-3 py-2 text-xs text-muted-foreground">
-              <IconSunrise className="h-3.5 w-3.5" />
-              Daily claimed
-            </div>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex cursor-default items-center gap-1.5 rounded-md border border-border/50 px-3 py-2 text-xs text-muted-foreground">
+                  <IconSunrise className="h-3.5 w-3.5" />
+                  Daily claimed
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                Come back in {formatTimeLeft(secondsLeft)}
+              </TooltipContent>
+            </Tooltip>
           )}
           <Card
             size="sm"

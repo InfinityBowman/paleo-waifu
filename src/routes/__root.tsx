@@ -9,6 +9,7 @@ import appCss from '../styles.css?url'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
 import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -71,7 +72,9 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="bg-paleo min-h-screen bg-background text-foreground antialiased">
-        {children}
+        <TooltipProvider>
+          {children}
+        </TooltipProvider>
         {import.meta.env.DEV && <DevAccountSwitcher />}
         <Toaster />
         <Scripts />
