@@ -17,4 +17,4 @@ export function xpToNextLevel(xp: number): number {
 export const XP_MIN_PER_MESSAGE = 15
 export const XP_MAX_PER_MESSAGE = 25
 export const XP_COOLDOWN_MS = 60_000
-export const XP_MIN_MESSAGE_LENGTH = 5
+export const XP_MIN_MESSAGE_LENGTH = 4

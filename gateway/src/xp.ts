@@ -4,7 +4,7 @@ import { logger } from './logger.js'
 // These mirror src/lib/xp-config.ts — kept local since the gateway
 // is a standalone Node.js process without the @/ path alias
 const COOLDOWN_MS = 60_000
-const MIN_MESSAGE_LENGTH = 5
+const MIN_MESSAGE_LENGTH = 4
 
 // Validated at startup in index.ts
 const API_URL = process.env.XP_API_URL!
