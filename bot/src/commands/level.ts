@@ -37,7 +37,7 @@ export async function handleLevel(
   if (!row) {
     const msg = targetDiscordId
       ? `That user hasn't earned any XP yet.`
-      : `You haven't earned any XP yet — chat in the server to start leveling!`
+      : `You haven't earned any XP yet! Chat in the server to start leveling.`
     return ephemeralResponse(msg)
   }
 

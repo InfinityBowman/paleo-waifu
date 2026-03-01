@@ -46,7 +46,7 @@ export function multiPullEmbed(
   const lines = pulls.map((p) => {
     const rarity = p.rarity as Rarity
     const newBadge = p.isNew ? ' **NEW!**' : ''
-    return `${RARITY_EMOJI[rarity]} **${p.name}** — ${RARITY_LABEL[rarity]}${newBadge}`
+    return `${RARITY_EMOJI[rarity]} **${p.name}** (${RARITY_LABEL[rarity]})${newBadge}`
   })
 
   const embed: Embed = {
