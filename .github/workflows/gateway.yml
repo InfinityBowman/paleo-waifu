@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "gateway/**"
+      - ".github/workflows/gateway.yml"
 
 env:
   REGISTRY: ghcr.io
