@@ -39,7 +39,10 @@ export function creatureEmbed(pull: PullResult): Embed {
 }
 
 /** Build a compact list embed for a 10-pull */
-export function multiPullEmbed(pulls: Array<PullResult>, newBalance: number): Embed {
+export function multiPullEmbed(
+  pulls: Array<PullResult>,
+  newBalance: number,
+): Embed {
   // Find the best pull by rarity order
   const rarityOrder: Array<Rarity> = [
     'legendary',

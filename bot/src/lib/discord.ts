@@ -103,7 +103,10 @@ export function immediateResponse(
   })
 }
 
-export function ephemeralResponse(content: string, embeds?: Array<Embed>): Response {
+export function ephemeralResponse(
+  content: string,
+  embeds?: Array<Embed>,
+): Response {
   return immediateResponse(content, { ephemeral: true, embeds })
 }
 

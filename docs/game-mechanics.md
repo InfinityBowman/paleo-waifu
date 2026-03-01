@@ -127,74 +127,101 @@ A creature is flagged as `isNew` if:
 
 ### Overview
 
-Players can offer creatures for trade on a public marketplace. Trades are creature-for-creature with no fossil exchange. A trade goes through a multi-step confirmation flow to prevent accidental swaps.
+Players can offer creatures for trade on a public marketplace. Trades are creature-for-creature with no fossil exchange. The system uses a **proposal-based flow** — multiple users can propose on a single trade, and the offerer picks the winning proposal.
 
-### Trade States
+### Data Model
+
+Two tables drive the trade system:
+
+- **`trade_offer`** — The listing. An offerer puts up a creature; the trade stays `open` while proposals come in.
+- **`trade_proposal`** — Individual offers on a trade. Each proposal locks the proposer's creature and waits for the offerer to accept or for the proposer to withdraw. One pending proposal per user per trade (unique index on `tradeId + proposerId`).
+
+### Trade Offer States
 
 ```
-(create) → open → (accept) → pending → (confirm) → accepted
-                                      → (reject)  → open
-                                      → (withdraw) → open
-           open → (cancel) → cancelled
-           open/pending → (expiry sweep) → expired
+(create) → open → (confirm a proposal) → accepted
+           open → (cancel)              → cancelled
+           open → (expiry sweep)        → expired
 ```
 
 Terminal states: `accepted`, `cancelled`, `expired`
 
+### Proposal States
+
+```
+(propose) → pending → (confirm / trade accepted)  → accepted   (winning proposal)
+            pending → (confirm / trade accepted)   → cancelled  (losing proposals)
+            pending → (withdraw)                   → withdrawn
+            pending → (trade cancelled / expired)  → cancelled
+```
+
+Terminal states: `accepted`, `withdrawn`, `cancelled`
+
 ### Actions
 
-| Action   | Actor    | From             | To          | Description                                                      |
-| -------- | -------- | ---------------- | ----------- | ---------------------------------------------------------------- |
-| Create   | Offerer  | —                | `open`      | Offer a creature; optionally specify a wanted species            |
-| Cancel   | Offerer  | `open`/`pending` | `cancelled` | Withdraw the offer entirely                                      |
-| Accept   | Receiver | `open`           | `pending`   | Propose a creature to swap; must match `wantedCreatureId` if set |
-| Confirm  | Offerer  | `pending`        | `accepted`  | Finalize the swap; creatures change ownership atomically         |
-| Reject   | Offerer  | `pending`        | `open`      | Decline the proposed swap; offer returns to marketplace          |
-| Withdraw | Receiver | `pending`        | `open`      | Retract the proposed swap                                        |
+| Action   | Actor    | From   | To                | Description                                                                        |
+| -------- | -------- | ------ | ----------------- | ---------------------------------------------------------------------------------- |
+| Create   | Offerer  | —      | trade `open`      | Offer a creature; optionally specify a wanted species. Locks the offerer's creature |
+| Cancel   | Offerer  | `open` | trade `cancelled` | Withdraw the listing; cancels all pending proposals and unlocks all creatures       |
+| Propose  | Proposer | `open` | proposal `pending` | Propose a creature to swap; locks the proposer's creature. One proposal per user per trade |
+| Confirm  | Offerer  | `open` | trade `accepted`  | Accept a specific proposal; executes the swap atomically, cancels all other proposals |
+| Withdraw | Proposer | —      | proposal `withdrawn` | Retract own proposal; unlocks the proposer's creature                            |
 
 ### Creature Locking
 
 When a creature is involved in a trade, it is **locked** (`isLocked = true`):
 
 - Locked on **create** (offerer's creature)
-- Locked on **accept** (receiver's creature)
-- Unlocked on **cancel**, **reject**, **withdraw**, **confirm**, or **expiry**
+- Locked on **propose** (proposer's creature)
+- Unlocked on **cancel**, **withdraw**, **confirm**, or **expiry**
 
 A locked creature cannot be:
 
 - Offered in a new trade
 - Proposed against another trade
-- Shown in the "available creatures" list on the trade page
+- Shown in the "available creatures" picker on the trade page
 
 ### Constraints
 
-- **5-trade cap**: A user can have at most 5 open or pending trades at a time. Enforced after locking to prevent race conditions.
-- **No self-trades**: The offerer cannot accept their own trade (`offerer_id != userId` guard).
-- **Wanted species**: If `wantedCreatureId` is set, the receiver's creature must match that species.
-- **Ownership verification at confirm**: Both creatures' ownership and lock status are re-verified before the swap executes. If either check fails, the trade is cancelled.
+- **5-trade cap**: A user can have at most 5 open trades as offerer. Enforced after locking to prevent race conditions; lock is rolled back if cap is exceeded.
+- **No self-proposals**: The offerer cannot propose on their own trade.
+- **One proposal per user per trade**: Enforced by unique index on `(tradeId, proposerId)` and an application-level check for pending status.
+- **Wanted species**: If `wantedCreatureId` is set, the proposer's creature must match that species. Validated on propose; lock is rolled back on mismatch.
+- **Ownership verification at confirm**: Both the offerer's and proposer's creature ownership and lock status are re-verified before the swap executes. If either check fails, the proposal is cancelled.
 - **Expiration**: Trades expire after **7 days** from creation.
 
 ### Atomic Swap
 
 The confirm step executes a single `db.batch()` that atomically:
 
-1. Sets trade status to `accepted`
-2. Reassigns the offerer's creature to the receiver
-3. Reassigns the receiver's creature to the offerer
-4. Unlocks both creatures
-5. Inserts a `trade_history` audit record
+1. Sets trade status to `accepted` with the winning proposer as receiver
+2. Sets the winning proposal status to `accepted`
+3. Reassigns the offerer's creature to the proposer
+4. Reassigns the proposer's creature to the offerer
+5. Unlocks both creatures
+6. Inserts a `trade_history` audit record
+7. Cancels all other pending proposals on the same trade
+8. Unlocks all losing proposals' creatures
 
 ### Expiration
 
 Expiration is **lazy** — stale trades are cleaned up on each trade page load, not via a scheduled job. The sweep:
 
-1. Finds all `open`/`pending` trades where `expiresAt < now()`
+1. Finds all `open` trades where `expiresAt < now()`
 2. Sets their status to `expired`
-3. Unlocks all associated creatures
+3. Cancels all pending proposals on those trades
+4. Unlocks all associated creatures (both offerer and proposer creatures)
 
 ### Pagination
 
 Open trades are paginated at 20 per page using cursor-based pagination on `createdAt`.
+
+### UI
+
+The trade page is organized into two tabs:
+
+- **Marketplace** — Browse all open trades, make proposals, cancel your own listings. Includes "Load more" pagination.
+- **My Offers** — Incoming proposals on your trades (with accept buttons) and your outgoing proposals on others' trades (with withdraw buttons). Badge on the tab shows the total count when non-zero.
 
 ---
 

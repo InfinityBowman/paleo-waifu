@@ -1,10 +1,16 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, inArray, lt, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, lt } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { getCfEnv } from '@/lib/env'
 import { createDb } from '@/lib/db/client'
-import { creature, tradeOffer, user, userCreature } from '@/lib/db/schema'
+import {
+  creature,
+  tradeOffer,
+  tradeProposal,
+  user,
+  userCreature,
+} from '@/lib/db/schema'
 import { toCdnUrl } from '@/lib/utils'
 import { TradeList } from '@/components/trade/TradeList'
 
@@ -16,38 +22,69 @@ async function expireStaleTradesIfAny(
   const now = new Date()
 
   const staleTrades = await db
-    .select({
-      id: tradeOffer.id,
-      receiverCreatureId: tradeOffer.receiverCreatureId,
-    })
+    .select({ id: tradeOffer.id })
     .from(tradeOffer)
-    .where(
-      and(
-        inArray(tradeOffer.status, ['open', 'pending']),
-        lt(tradeOffer.expiresAt, now),
-      ),
-    )
+    .where(and(eq(tradeOffer.status, 'open'), lt(tradeOffer.expiresAt, now)))
     .all()
 
   if (staleTrades.length === 0) return
 
   const tradeIds = staleTrades.map((t) => t.id)
-  // Only receiver creatures are locked — offerer's creatures are never locked until confirm
-  const receiverCreatureIds = staleTrades
-    .map((t) => t.receiverCreatureId)
-    .filter(Boolean) as Array<string>
+
+  // Fetch pending proposals on these trades so we can unlock their creatures
+  const pendingProposals = await db
+    .select({ proposerCreatureId: tradeProposal.proposerCreatureId })
+    .from(tradeProposal)
+    .where(
+      and(
+        inArray(tradeProposal.tradeId, tradeIds),
+        eq(tradeProposal.status, 'pending'),
+      ),
+    )
+    .all()
+
+  const proposalCreatureIds = pendingProposals.map((p) => p.proposerCreatureId)
+
+  // Collect offeredCreatureIds to unlock
+  const offeredCreatureIds = (
+    await db
+      .select({ offeredCreatureId: tradeOffer.offeredCreatureId })
+      .from(tradeOffer)
+      .where(inArray(tradeOffer.id, tradeIds))
+      .all()
+  ).map((t) => t.offeredCreatureId)
 
   await db.batch([
     db
       .update(tradeOffer)
       .set({ status: 'expired' })
       .where(inArray(tradeOffer.id, tradeIds)),
-    ...(receiverCreatureIds.length > 0
+    // Cancel pending proposals on expired trades
+    db
+      .update(tradeProposal)
+      .set({ status: 'cancelled' })
+      .where(
+        and(
+          inArray(tradeProposal.tradeId, tradeIds),
+          eq(tradeProposal.status, 'pending'),
+        ),
+      ),
+    // Unlock offerer creatures
+    ...(offeredCreatureIds.length > 0
       ? [
           db
             .update(userCreature)
             .set({ isLocked: false })
-            .where(inArray(userCreature.id, receiverCreatureIds)),
+            .where(inArray(userCreature.id, offeredCreatureIds)),
+        ]
+      : []),
+    // Unlock proposal creatures
+    ...(proposalCreatureIds.length > 0
+      ? [
+          db
+            .update(userCreature)
+            .set({ isLocked: false })
+            .where(inArray(userCreature.id, proposalCreatureIds)),
         ]
       : []),
   ])
@@ -60,13 +97,13 @@ const getTradeData = createServerFn({ method: 'GET' })
 
     await expireStaleTradesIfAny(db)
 
-    // Alias tables for the pending trade JOIN
-    const offererUser = alias(user, 'offerer_user')
-    const receiverUser = alias(user, 'receiver_user')
-    const offeredUc = alias(userCreature, 'offered_uc')
-    const receiverUc = alias(userCreature, 'receiver_uc')
-    const offeredCreature = alias(creature, 'offered_creature')
-    const receiverCreature = alias(creature, 'receiver_creature')
+    // Aliases for proposal queries
+    const proposerUser = alias(user, 'proposer_user')
+    const proposerUc = alias(userCreature, 'proposer_uc')
+    const proposerCreature = alias(creature, 'proposer_creature')
+    const tradeCreature = alias(creature, 'trade_creature')
+    const tradeUc = alias(userCreature, 'trade_uc')
+    const tradeOwner = alias(user, 'trade_owner')
 
     const openTradesWhere = cursor
       ? and(
@@ -75,90 +112,133 @@ const getTradeData = createServerFn({ method: 'GET' })
         )
       : eq(tradeOffer.status, 'open')
 
-    const [openTradesRaw, pendingTrades, myCreatures] = await Promise.all([
-      db
-        .select({
-          id: tradeOffer.id,
-          offererId: tradeOffer.offererId,
-          offererName: user.name,
-          offererImage: user.image,
-          offeredCreatureName: creature.name,
-          offeredCreatureRarity: creature.rarity,
-          offeredCreatureImage: creature.imageUrl,
-          wantedCreatureId: tradeOffer.wantedCreatureId,
-          createdAt: tradeOffer.createdAt,
-        })
-        .from(tradeOffer)
-        .innerJoin(user, eq(user.id, tradeOffer.offererId))
-        .innerJoin(
-          userCreature,
-          eq(userCreature.id, tradeOffer.offeredCreatureId),
-        )
-        .innerJoin(creature, eq(creature.id, userCreature.creatureId))
-        .where(openTradesWhere)
-        .orderBy(desc(tradeOffer.createdAt))
-        .limit(PAGE_SIZE + 1)
-        .all(),
+    const [openTradesRaw, myProposals, incomingProposals, myCreatures] =
+      await Promise.all([
+        // Open trades for the marketplace
+        db
+          .select({
+            id: tradeOffer.id,
+            offererId: tradeOffer.offererId,
+            offererName: user.name,
+            offererImage: user.image,
+            offeredCreatureName: creature.name,
+            offeredCreatureRarity: creature.rarity,
+            offeredCreatureImage: creature.imageUrl,
+            wantedCreatureId: tradeOffer.wantedCreatureId,
+            createdAt: tradeOffer.createdAt,
+          })
+          .from(tradeOffer)
+          .innerJoin(user, eq(user.id, tradeOffer.offererId))
+          .innerJoin(
+            userCreature,
+            eq(userCreature.id, tradeOffer.offeredCreatureId),
+          )
+          .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+          .where(openTradesWhere)
+          .orderBy(desc(tradeOffer.createdAt))
+          .limit(PAGE_SIZE + 1)
+          .all(),
 
-      // Pending trades: single JOIN query replacing the N+1 pattern
-      db
-        .select({
-          id: tradeOffer.id,
-          offererId: tradeOffer.offererId,
-          receiverId: tradeOffer.receiverId,
-          createdAt: tradeOffer.createdAt,
-          offererName: offererUser.name,
-          offererImage: offererUser.image,
-          receiverName: receiverUser.name,
-          receiverImage: receiverUser.image,
-          offeredCreatureName: offeredCreature.name,
-          offeredCreatureRarity: offeredCreature.rarity,
-          receiverCreatureName: receiverCreature.name,
-          receiverCreatureRarity: receiverCreature.rarity,
-        })
-        .from(tradeOffer)
-        .innerJoin(offererUser, eq(offererUser.id, tradeOffer.offererId))
-        .leftJoin(receiverUser, eq(receiverUser.id, tradeOffer.receiverId))
-        .innerJoin(offeredUc, eq(offeredUc.id, tradeOffer.offeredCreatureId))
-        .innerJoin(
-          offeredCreature,
-          eq(offeredCreature.id, offeredUc.creatureId),
-        )
-        .leftJoin(receiverUc, eq(receiverUc.id, tradeOffer.receiverCreatureId))
-        .leftJoin(
-          receiverCreature,
-          eq(receiverCreature.id, receiverUc.creatureId),
-        )
-        .where(
-          and(
-            eq(tradeOffer.status, 'pending'),
-            or(
-              eq(tradeOffer.offererId, userId),
-              eq(tradeOffer.receiverId, userId),
+        // Proposals I've made on other people's trades
+        db
+          .select({
+            proposalId: tradeProposal.id,
+            tradeId: tradeProposal.tradeId,
+            proposerCreatureId: tradeProposal.proposerCreatureId,
+            createdAt: tradeProposal.createdAt,
+            // Trade info
+            tradeOwnerName: tradeOwner.name,
+            tradeOwnerImage: tradeOwner.image,
+            tradeCreatureName: tradeCreature.name,
+            tradeCreatureRarity: tradeCreature.rarity,
+            // My proposed creature
+            proposerCreatureName: proposerCreature.name,
+            proposerCreatureRarity: proposerCreature.rarity,
+          })
+          .from(tradeProposal)
+          .innerJoin(tradeOffer, eq(tradeOffer.id, tradeProposal.tradeId))
+          .innerJoin(tradeOwner, eq(tradeOwner.id, tradeOffer.offererId))
+          .innerJoin(tradeUc, eq(tradeUc.id, tradeOffer.offeredCreatureId))
+          .innerJoin(tradeCreature, eq(tradeCreature.id, tradeUc.creatureId))
+          .innerJoin(
+            proposerUc,
+            eq(proposerUc.id, tradeProposal.proposerCreatureId),
+          )
+          .innerJoin(
+            proposerCreature,
+            eq(proposerCreature.id, proposerUc.creatureId),
+          )
+          .where(
+            and(
+              eq(tradeProposal.proposerId, userId),
+              eq(tradeProposal.status, 'pending'),
             ),
-          ),
-        )
-        .all(),
+          )
+          .all(),
 
-      db
-        .select({
-          id: userCreature.id,
-          creatureId: userCreature.creatureId,
-          name: creature.name,
-          rarity: creature.rarity,
-          imageUrl: creature.imageUrl,
-          isLocked: userCreature.isLocked,
-        })
-        .from(userCreature)
-        .innerJoin(creature, eq(creature.id, userCreature.creatureId))
-        .where(
-          and(
-            eq(userCreature.userId, userId),
-            eq(userCreature.isLocked, false),
-          ),
-        )
-        .all(),
-    ])
+        // Proposals on MY trades (incoming offers for me to review)
+        db
+          .select({
+            proposalId: tradeProposal.id,
+            tradeId: tradeProposal.tradeId,
+            proposerId: tradeProposal.proposerId,
+            proposerCreatureId: tradeProposal.proposerCreatureId,
+            createdAt: tradeProposal.createdAt,
+            // Proposer info
+            proposerName: proposerUser.name,
+            proposerImage: proposerUser.image,
+            proposerCreatureName: proposerCreature.name,
+            proposerCreatureRarity: proposerCreature.rarity,
+            // My trade creature
+            tradeCreatureName: tradeCreature.name,
+            tradeCreatureRarity: tradeCreature.rarity,
+          })
+          .from(tradeProposal)
+          .innerJoin(tradeOffer, eq(tradeOffer.id, tradeProposal.tradeId))
+          .innerJoin(tradeUc, eq(tradeUc.id, tradeOffer.offeredCreatureId))
+          .innerJoin(tradeCreature, eq(tradeCreature.id, tradeUc.creatureId))
+          .innerJoin(
+            proposerUser,
+            eq(proposerUser.id, tradeProposal.proposerId),
+          )
+          .innerJoin(
+            proposerUc,
+            eq(proposerUc.id, tradeProposal.proposerCreatureId),
+          )
+          .innerJoin(
+            proposerCreature,
+            eq(proposerCreature.id, proposerUc.creatureId),
+          )
+          .where(
+            and(
+              eq(tradeOffer.offererId, userId),
+              eq(tradeOffer.status, 'open'),
+              eq(tradeProposal.status, 'pending'),
+            ),
+          )
+          .all(),
+
+        // My unlocked creatures for making proposals
+        db
+          .select({
+            id: userCreature.id,
+            creatureId: userCreature.creatureId,
+            name: creature.name,
+            rarity: creature.rarity,
+            imageUrl: creature.imageUrl,
+            imageAspectRatio: creature.imageAspectRatio,
+            isLocked: userCreature.isLocked,
+          })
+          .from(userCreature)
+          .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+          .where(
+            and(
+              eq(userCreature.userId, userId),
+              eq(userCreature.isLocked, false),
+            ),
+          )
+          .all(),
+      ])
 
     const hasMore = openTradesRaw.length > PAGE_SIZE
     const openTrades = hasMore
@@ -175,7 +255,8 @@ const getTradeData = createServerFn({ method: 'GET' })
 
     return {
       openTrades: mapCdn(openTrades),
-      pendingTrades,
+      myProposals,
+      incomingProposals,
       myCreatures: myCreatures.map((c) => ({
         ...c,
         imageUrl: toCdnUrl(c.imageUrl),
@@ -237,8 +318,14 @@ export const Route = createFileRoute('/_app/trade')({
 })
 
 function TradePage() {
-  const { openTrades, pendingTrades, myCreatures, userId, hasMore } =
-    Route.useLoaderData()
+  const {
+    openTrades,
+    myProposals,
+    incomingProposals,
+    myCreatures,
+    userId,
+    hasMore,
+  } = Route.useLoaderData()
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-400">
@@ -250,7 +337,8 @@ function TradePage() {
       </div>
       <TradeList
         trades={openTrades}
-        pendingTrades={pendingTrades}
+        myProposals={myProposals}
+        incomingProposals={incomingProposals}
         myCreatures={myCreatures}
         userId={userId}
         hasMore={hasMore}

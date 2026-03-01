@@ -47,15 +47,23 @@
 - Migration generated via `pnpm db:generate`
 - Apply with `pnpm db:migrate:local` / `pnpm db:migrate:prod`
 
-### 7. Deferred Trade Locking
+### 7. Proposal-Based Trade Flow
 
-- **Files:** `src/routes/api/trade.ts`, `src/routes/_app/trade.tsx`
-- Offerer's creature is no longer locked on trade creation — allows the same creature in multiple open trades
-- Receiver's creature is still locked on ACCEPT (they're committing to a specific proposal)
-- Atomic lock at CONFIRM is the serialization point — prevents two confirms from racing for the same creature
-- Cascade cancel on CONFIRM — after a swap, all other open/pending trades offering the same creature are auto-cancelled, and any receiver creatures on those pending trades are unlocked
-- Open trade expiry no longer unlocks offerer creatures (they were never locked)
-- Cancel of open trades no longer unlocks offerer creatures
+- **Files:** `src/routes/api/trade.ts`, `src/routes/_app/trade.tsx`, `src/lib/db/schema.ts`
+- Replaced the old accept/confirm/reject flow with a proposal-based system using a separate `trade_proposal` table
+- Multiple users can propose on a single open trade simultaneously
+- Offerer's creature is locked on create; proposer's creature is locked on propose
+- Offerer picks a winning proposal via confirm — executes the atomic swap and auto-cancels + unlocks all losing proposals
+- One pending proposal per user per trade (unique index on `tradeId + proposerId`)
+- Proposers can withdraw their own proposals at any time
+
+### 8. Tabbed Trade UI
+
+- **File:** `src/components/trade/TradeList.tsx`
+- Trade page split into two tabs: **Marketplace** (browse + propose) and **My Offers** (incoming + outgoing proposals)
+- Badge on My Offers tab shows combined count of incoming + outgoing proposals
+- Glass-morphism tab styling matching the app's dark ethereal aesthetic
+- New Trade button sits outside tabs, always accessible
 
 ---
 
@@ -140,14 +148,6 @@
 - Creating a trade lists your creature with no "are you sure?" dialog
 - Accepting a trade already has a confirmation dialog — creation should too
 - Prevents accidental trades, especially on mobile
-- **File:** `src/components/trade/TradeList.tsx`
-
-### Visual Card Picker for Accept Flow
-
-- When accepting a trade, you pick your creature from a basic `<select>` dropdown
-- The creation form uses a visual card grid — the accept flow should match
-- Show creature cards with rarity styling instead of a text dropdown
-- Much better UX, especially when users have many creatures
 - **File:** `src/components/trade/TradeList.tsx`
 
 ### Better Empty State

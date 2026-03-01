@@ -249,6 +249,31 @@ export const tradeHistory = sqliteTable(
   ],
 )
 
+export const tradeProposal = sqliteTable(
+  'trade_proposal',
+  {
+    id: text('id').primaryKey(),
+    tradeId: text('trade_id')
+      .notNull()
+      .references(() => tradeOffer.id, { onDelete: 'cascade' }),
+    proposerId: text('proposer_id')
+      .notNull()
+      .references(() => user.id),
+    proposerCreatureId: text('proposer_creature_id')
+      .notNull()
+      .references(() => userCreature.id),
+    status: text('status').notNull().default('pending'), // pending | accepted | withdrawn | cancelled
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+  },
+  (table) => [
+    uniqueIndex('tp_trade_proposer_idx').on(table.tradeId, table.proposerId),
+    index('tp_trade_id_idx').on(table.tradeId),
+    index('tp_proposer_id_idx').on(table.proposerId),
+  ],
+)
+
 export const userXp = sqliteTable('user_xp', {
   id: text('id').primaryKey(),
   userId: text('user_id')

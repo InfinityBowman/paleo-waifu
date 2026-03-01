@@ -1,7 +1,7 @@
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CreatureModal } from './CreatureModal'
 import { IconMagnifyingGlass } from '@/components/icons'
-import { distributeToColumns } from '@/lib/utils'
+import { useMasonryColumns } from '@/hooks/useMasonryColumns'
 import { CreatureCard } from '@/components/shared/CreatureCard'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -56,40 +56,7 @@ export function CollectionGrid({
     [collection, search, rarityFilter, eraFilter],
   )
 
-  // ── Masonry column distribution ──────────────────────────────────────────
-  const [columnCount, setColumnCount] = useState(5)
-  const observerRef = useRef<ResizeObserver | null>(null)
-
-  const containerRef = useCallback((el: HTMLDivElement | null) => {
-    if (observerRef.current) {
-      observerRef.current.disconnect()
-      observerRef.current = null
-    }
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      const w = entry.contentRect.width
-      setColumnCount(
-        w >= 1400
-          ? 7
-          : w >= 1200
-            ? 6
-            : w >= 980
-              ? 5
-              : w >= 730
-                ? 4
-                : w >= 500
-                  ? 3
-                  : 2,
-      )
-    })
-    observer.observe(el)
-    observerRef.current = observer
-  }, [])
-
-  const columns = useMemo(
-    () => distributeToColumns(filtered, columnCount),
-    [filtered, columnCount],
-  )
+  const { containerRef, columns } = useMasonryColumns(filtered)
 
   return (
     <>

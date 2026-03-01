@@ -1,6 +1,6 @@
-import { EmbedBuilder  } from 'discord.js'
+import { EmbedBuilder } from 'discord.js'
 import { logger } from './logger.js'
-import type {Message} from 'discord.js';
+import type { Message } from 'discord.js'
 
 // These mirror src/lib/xp-config.ts — kept local since the gateway
 // is a standalone Node.js process without the @/ path alias
