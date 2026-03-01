@@ -577,6 +577,200 @@
   border-radius: 50px;
 }
 
+/* ═══ Gacha Reveal Keyframes ═══ */
+
+@keyframes excavate-shake {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-1px, 1px);
+  }
+  30% {
+    transform: translate(2px, -1px);
+  }
+  50% {
+    transform: translate(-2px, 2px);
+  }
+  70% {
+    transform: translate(1px, -2px);
+  }
+  90% {
+    transform: translate(-1px, 0px);
+  }
+}
+
+@keyframes crack-spread {
+  from {
+    stroke-dashoffset: 200;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes glow-intensify {
+  0% {
+    opacity: 0.02;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0.15;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes orb-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes orb-burst {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.8);
+  }
+}
+
+@keyframes card-materialize {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes ring-expand {
+  0% {
+    opacity: 0.8;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+@keyframes light-rays {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes reveal-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes crossfade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out-down {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+}
+
+@keyframes particle-burst {
+  0% {
+    opacity: 0.8;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) scale(0.3);
+  }
+}
+
+@keyframes glow-dot-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+}
+
+/* Gacha animation utilities */
+.animate-excavate-shake {
+  animation: excavate-shake 0.15s ease-in-out infinite;
+}
+.animate-crack-spread {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: crack-spread 2s ease-out forwards;
+}
+.animate-glow-intensify {
+  animation: glow-intensify 2.5s ease-in-out forwards;
+}
+.animate-orb-appear {
+  animation: orb-appear 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-orb-burst {
+  animation: orb-burst 0.4s ease-out forwards;
+}
+.animate-card-materialize {
+  animation: card-materialize 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-ring-expand {
+  animation: ring-expand 0.8s ease-out forwards;
+}
+.animate-reveal-flash {
+  animation: reveal-flash 0.6s ease-out forwards;
+}
+.animate-crossfade-in {
+  animation: crossfade-in 0.4s ease-out forwards;
+}
+.animate-fade-out-down {
+  animation: fade-out-down 0.35s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
 /* Subtle noise texture background */
 .bg-noise::before {
   content: '';

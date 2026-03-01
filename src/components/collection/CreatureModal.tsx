@@ -15,7 +15,7 @@ interface Creature {
   scientificName: string
   rarity: string
   era: string
-  diet: string
+  diet?: string
   imageUrl: string | null
   description?: string | null
   period?: string | null
@@ -68,7 +68,7 @@ export function CreatureModal({
       >
         <div
           className={cn(
-            'relative flex max-h-72 shrink-0 items-center justify-center bg-gradient-to-b p-6',
+            'relative flex max-h-72 shrink-0 items-center justify-center bg-linear-to-b p-6',
             RARITY_IMAGE_GRADIENT[rarity] ?? 'from-muted/30 to-background',
           )}
         >
@@ -117,10 +117,12 @@ export function CreatureModal({
               <span className="text-muted-foreground">Era:</span>{' '}
               <span className="font-medium">{creature.era}</span>
             </span>
-            <span className="rounded-full bg-muted/50 px-3 py-1.5">
-              <span className="text-muted-foreground">Diet:</span>{' '}
-              <span className="font-medium">{creature.diet}</span>
-            </span>
+            {creature.diet && (
+              <span className="rounded-full bg-muted/50 px-3 py-1.5">
+                <span className="text-muted-foreground">Diet:</span>{' '}
+                <span className="font-medium">{creature.diet}</span>
+              </span>
+            )}
             {creature.period && (
               <span className="rounded-full bg-muted/50 px-3 py-1.5">
                 <span className="text-muted-foreground">Period:</span>{' '}

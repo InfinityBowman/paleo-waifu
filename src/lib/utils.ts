@@ -44,6 +44,24 @@ export function withSecurityHeaders(response: Response): Response {
   return newResponse
 }
 
+/** Distribute items into columns for masonry layout, balancing by estimated height. */
+export function distributeToColumns<
+  T extends { imageAspectRatio?: number | null },
+>(items: Array<T>, columnCount: number): Array<Array<T>> {
+  const cols: Array<Array<T>> = Array.from({ length: columnCount }, () => [])
+  const heights = new Array<number>(columnCount).fill(0)
+  for (const item of items) {
+    let minIdx = 0
+    for (let i = 1; i < columnCount; i++) {
+      if (heights[i] < heights[minIdx]) minIdx = i
+    }
+    cols[minIdx].push(item)
+    const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
+    heights[minIdx] += imgH + 0.3
+  }
+  return cols
+}
+
 /** Returns an error Response if Origin header doesn't match, or null if OK.
  *  Non-browser clients don't send Origin — the session cookie's SameSite=Lax
  *  defends cross-site form POSTs; this adds a second layer for fetch-based CSRF. */

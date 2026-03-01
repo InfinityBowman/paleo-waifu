@@ -171,6 +171,7 @@ interface PoolCreature {
   imageUrl: string | null
   description: string
   era: string
+  imageAspectRatio: number | null
 }
 
 /** Select a creature from pre-fetched pool data (no DB queries) */
@@ -204,6 +205,7 @@ export interface PullResult {
   scientificName: string
   rarity: Rarity
   imageUrl: string | null
+  imageAspectRatio: number | null
   description: string
   era: string
   isNew: boolean
@@ -258,6 +260,7 @@ export async function executePullBatch(
         imageUrl: creature.imageUrl,
         description: creature.description,
         era: creature.era,
+        imageAspectRatio: creature.imageAspectRatio,
       })
       .from(bannerPool)
       .innerJoin(creature, eq(creature.id, bannerPool.creatureId))
@@ -310,6 +313,7 @@ export async function executePullBatch(
           description: creature.description,
           era: creature.era,
           rarity: creature.rarity,
+          imageAspectRatio: creature.imageAspectRatio,
         })
         .from(creature)
         .where(eq(creature.rarity, rarity))
@@ -326,6 +330,7 @@ export async function executePullBatch(
         imageUrl: picked.imageUrl,
         description: picked.description,
         era: picked.era,
+        imageAspectRatio: picked.imageAspectRatio,
       })
     }
 
@@ -394,6 +399,7 @@ export async function executePullBatch(
       scientificName: data.scientificName,
       rarity: p.rarity,
       imageUrl: toCdnUrl(data.imageUrl),
+      imageAspectRatio: data.imageAspectRatio,
       description: data.description,
       era: data.era,
       isNew,

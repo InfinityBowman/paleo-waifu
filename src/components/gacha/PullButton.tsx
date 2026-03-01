@@ -26,12 +26,17 @@ export function PullButton({
     store.setIsPulling(true)
     store.clearPullResults()
 
+    const minExcavation = new Promise((r) => setTimeout(r, 1500))
+
     try {
-      const res = await fetch('/api/gacha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, bannerId }),
-      })
+      const [, res] = await Promise.all([
+        minExcavation,
+        fetch('/api/gacha', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, bannerId }),
+        }),
+      ])
 
       const data: {
         error?: string

@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import type { Rarity } from '@/lib/types'
 import type { EncyclopediaFilters } from '@/routes/_public/encyclopedia'
-import { IconFossil, IconMagnifyingGlass } from '@/components/icons'
-import { cn } from '@/lib/utils'
-import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
+import { IconMagnifyingGlass } from '@/components/icons'
+import { distributeToColumns } from '@/lib/utils'
 import { CreatureModal } from '@/components/collection/CreatureModal'
+import { CreatureCard } from '@/components/shared/CreatureCard'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -45,27 +44,6 @@ interface Props {
   initialCursor: string | null
   filterOptions: { eras: Array<string>; diets: Array<string> }
   filters: EncyclopediaFilters
-}
-
-function distributeToColumns(
-  items: Array<CreatureGridItem>,
-  columnCount: number,
-) {
-  const cols: Array<Array<CreatureGridItem>> = Array.from(
-    { length: columnCount },
-    () => [],
-  )
-  const heights = new Array<number>(columnCount).fill(0)
-  for (const item of items) {
-    let minIdx = 0
-    for (let i = 1; i < columnCount; i++) {
-      if (heights[i] < heights[minIdx]) minIdx = i
-    }
-    cols[minIdx].push(item)
-    const imgH = item.imageAspectRatio ? 1 / item.imageAspectRatio : 1
-    heights[minIdx] += imgH + 0.3
-  }
-  return cols
 }
 
 export function EncyclopediaGrid({
@@ -337,63 +315,15 @@ export function EncyclopediaGrid({
       <div ref={containerRef} className="flex gap-4">
         {columns.map((col, colIdx) => (
           <div key={colIdx} className="flex flex-1 flex-col gap-4">
-            {col.map((c) => {
-              const rarity = c.rarity as Rarity
-              return (
-                <button
-                  key={c.id}
-                  onMouseEnter={() => prefetch(c.id)}
-                  onMouseLeave={cancelPrefetch}
-                  onClick={() => handleClick(c.id)}
-                  className={cn(
-                    'group overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:scale-[1.02] hover:-translate-y-1',
-                    RARITY_BORDER[rarity],
-                    RARITY_BG[rarity],
-                  )}
-                >
-                  <div
-                    className="overflow-hidden"
-                    style={
-                      c.imageAspectRatio
-                        ? { aspectRatio: c.imageAspectRatio }
-                        : undefined
-                    }
-                  >
-                    {c.imageUrl ? (
-                      <img
-                        src={c.imageUrl}
-                        alt={c.name}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="flex aspect-square items-center justify-center bg-muted/20">
-                        <IconFossil className="h-10 w-10 text-muted-foreground/30" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-2">
-                    <span
-                      className={cn(
-                        'font-display text-[10px] font-semibold uppercase',
-                        RARITY_COLORS[rarity],
-                      )}
-                    >
-                      {rarity}
-                    </span>
-                    <div className="font-display text-sm font-bold leading-tight">
-                      {c.name}
-                    </div>
-                    <div className="text-[11px] italic text-muted-foreground">
-                      {c.scientificName}
-                    </div>
-                    <div className="mt-1 text-[11px] text-muted-foreground">
-                      {c.era} · {c.diet}
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
+            {col.map((c) => (
+              <CreatureCard
+                key={c.id}
+                creature={c}
+                onMouseEnter={() => prefetch(c.id)}
+                onMouseLeave={cancelPrefetch}
+                onClick={() => handleClick(c.id)}
+              />
+            ))}
           </div>
         ))}
       </div>

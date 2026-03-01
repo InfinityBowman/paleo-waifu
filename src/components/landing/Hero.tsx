@@ -246,9 +246,9 @@ export function Hero() {
         {/* Description */}
         <p className="animate-drift-in drift-d3 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/50 sm:text-base">
           Collect{' '}
-          <span className="text-primary/80">100+ prehistoric companions</span>{' '}
+          <span className="text-primary/80">300+ prehistoric companions</span>{' '}
           from across the ages. Pull, discover, and trade. Each fossil holds a
-          gentle secret.
+          secret.
         </p>
 
         {/* CTA buttons */}
@@ -319,7 +319,7 @@ export function Hero() {
               </h2>
               <p className="text-sm leading-[1.9] font-light text-lavender-light/40">
                 Deep beneath stone and sediment, they slept for millions of
-                years. Now they stir, reimagined as gentle companions, ready to
+                years. Now they stir, reimagined as fun companions, ready to
                 walk beside you. Over one hundred species across three ancient
                 eras, each one waiting to be found.
               </p>
@@ -447,7 +447,7 @@ export function Hero() {
                   }}
                 >
                   <div
-                    className="h-2 w-2 flex-shrink-0 rounded-full"
+                    className="h-2 w-2 shrink-0 rounded-full"
                     style={{
                       background: color,
                       boxShadow: `0 0 10px ${color}`,
@@ -554,7 +554,7 @@ export function Hero() {
 
       {/* ═══ STATS ═══ */}
       <section className="relative z-20 px-5 py-12">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-white/[0.03] bg-white/[0.015] px-8 py-8">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-white/3 bg-white/1.5 px-8 py-8">
           <div className="flex flex-wrap items-center justify-around gap-8">
             {[
               {
@@ -612,14 +612,10 @@ export function Hero() {
             </span>
           </h2>
 
-          <p className="mb-10 text-sm font-light text-lavender-light/30">
-            Every fossil holds a gentle secret &#10022;
-          </p>
-
           {session ? (
             <Link
               to="/gacha"
-              className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+              className="mt-10 paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
             >
               <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                 <path

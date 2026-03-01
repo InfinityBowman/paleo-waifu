@@ -134,7 +134,6 @@ function GachaPage() {
         </Card>
       ) : (
         <div className="space-y-6">
-          <PullAnimation />
           <div className="flex items-center justify-between gap-4">
             <PityCounter />
             <PullButton
@@ -146,6 +145,7 @@ function GachaPage() {
               }}
             />
           </div>
+          <PullAnimation />
         </div>
       )}
     </div>
