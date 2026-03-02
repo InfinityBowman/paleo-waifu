@@ -20,3 +20,4 @@ python/data/cache/
 python/data/images/
 python/data/nhm_dinosaurs.csv
 assets-preview/
+seed.sql

@@ -18,6 +18,9 @@ pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
 pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
 
+# Data pipeline
+pnpm pipeline         # Pipeline dashboard UI (http://localhost:4200)
+
 # Bot commands
 pnpm bot:dev          # Local bot worker dev server
 pnpm bot:deploy       # Deploy bot to Cloudflare Workers
@@ -72,7 +75,8 @@ Routes:
 - `src/lib/` — Auth, gacha logic, types, utilities
 - `src/lib/db/` — Drizzle schema and D1 client factory
 - `src/store/` — Zustand store (fossils, pull results)
-- `python/` — Data pipeline for creature seeding
+- `python/` — Data pipeline for creature seeding (scrape, enrich, images, seed)
+- `tools/pipeline-dashboard/` — React + Hono dashboard for running pipeline steps visually
 
 ### Auth
 

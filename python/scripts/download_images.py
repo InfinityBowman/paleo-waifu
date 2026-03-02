@@ -9,6 +9,7 @@ Usage:
 """
 
 import json
+import random
 import re
 import sys
 import time
@@ -21,7 +22,7 @@ from tqdm import tqdm
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 IMAGES_DIR = DATA_DIR / "images"
-USER_AGENT = "PaleoWaifuBot/1.0 (paleo-waifu gacha game; educational)"
+USER_AGENT = "PaleoWaifuBot/1.0 (https://github.com/infinitybowman/paleo-waifu; jacobamaynard@proton.me)"
 
 # Target dimensions (3:4 aspect ratio to match frontend card display)
 TARGET_WIDTH = 600
@@ -35,17 +36,25 @@ def slugify(name: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
-def download_with_retry(url: str, max_retries: int = 3) -> bytes:
-    """Download with exponential backoff on 429s."""
+def download_with_retry(url: str, max_retries: int = 5) -> bytes:
+    """Download with Retry-After header support and connection error retry."""
     for attempt in range(max_retries):
-        resp = SESSION.get(url, timeout=30)
-        if resp.status_code == 429:
-            wait = 30 * (2 ** attempt)  # 30s, 60s, 120s
-            tqdm.write(f"  Rate limited, waiting {wait}s...")
+        try:
+            resp = SESSION.get(url, timeout=30)
+            if resp.status_code == 429:
+                retry_after = int(resp.headers.get("Retry-After", 10))
+                wait = max(retry_after, 10) + (5 * attempt)
+                tqdm.write(f"  Rate limited, waiting {wait}s (attempt {attempt + 1}/{max_retries})...")
+                time.sleep(wait)
+                continue
+            resp.raise_for_status()
+            return resp.content
+        except (requests.ConnectionError, requests.Timeout) as e:
+            if attempt == max_retries - 1:
+                raise
+            wait = 5 * (2 ** attempt)
+            tqdm.write(f"  Connection error, retrying in {wait}s... ({e.__class__.__name__})")
             time.sleep(wait)
-            continue
-        resp.raise_for_status()
-        return resp.content
     raise requests.HTTPError(f"Still rate-limited after {max_retries} retries")
 
 
@@ -107,7 +116,7 @@ def main():
             stats["failed"] += 1
             tqdm.write(f"  Failed: {creature['name']} ({url[:60]}...)")
 
-        time.sleep(3)  # Rate limit — Wikimedia enforces strict throttling
+        time.sleep(3 + random.uniform(0, 4))  # 3-7s jitter to avoid rate limiting
 
     print(f"\nDone!")
     print(f"  Downloaded: {stats['downloaded']}")

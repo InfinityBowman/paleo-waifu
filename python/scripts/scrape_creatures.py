@@ -23,7 +23,7 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 CACHE_DIR = DATA_DIR / "cache"
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-USER_AGENT = "PaleoWaifuBot/1.0 (paleo-waifu gacha game; educational)"
+USER_AGENT = "PaleoWaifuBot/1.0 (https://github.com/infinitybowman/paleo-waifu; jacobamaynard@proton.me)"
 
 SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": USER_AGENT})
@@ -437,7 +437,7 @@ def query_commons_image(name: str, suffix: str = "restoration") -> str | None:
         for info in page.get("imageinfo", []):
             mime = info.get("mime", "")
             if mime.startswith("image/") and mime != "image/svg+xml":
-                return info.get("thumburl") or info.get("url")
+                return info.get("url")
 
     return None
 

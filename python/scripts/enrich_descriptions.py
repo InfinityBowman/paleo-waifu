@@ -23,7 +23,7 @@ from tqdm import tqdm
 DATA_DIR = Path(__file__).parent.parent / "data"
 CACHE_DIR = DATA_DIR / "cache"
 WIKI_API = "https://en.wikipedia.org/w/api.php"
-USER_AGENT = "PaleoWaifuBot/1.0 (paleo-waifu gacha game; educational)"
+USER_AGENT = "PaleoWaifuBot/1.0 (https://github.com/infinitybowman/paleo-waifu; jacobamaynard@proton.me)"
 
 SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": USER_AGENT})

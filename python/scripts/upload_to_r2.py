@@ -8,7 +8,8 @@ Prerequisites:
     - Images must be downloaded to data/images/
 
 Usage:
-    uv run python scripts/upload_to_r2.py [--dry-run] [--remote] [--bucket BUCKET]
+    uv run python scripts/upload_to_r2.py [--remote] [--bucket BUCKET]   # dry run (default)
+    uv run python scripts/upload_to_r2.py --yolo [--remote]              # actually upload
 """
 
 import json
@@ -71,7 +72,7 @@ def upload_to_r2(local_path: Path, key: str, bucket: str, remote: bool = False) 
 
 
 def main():
-    dry_run = "--dry-run" in sys.argv
+    dry_run = "--yolo" not in sys.argv
     remote = "--remote" in sys.argv
     bucket = PROD_BUCKET if remote else DEFAULT_BUCKET
 

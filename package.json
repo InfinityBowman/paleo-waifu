@@ -28,7 +28,8 @@
     "bot:typecheck": "cd bot && pnpm typecheck",
     "gateway:dev": "cd gateway && pnpm dev",
     "gateway:build": "cd gateway && pnpm build",
-    "gateway:typecheck": "cd gateway && pnpm typecheck"
+    "gateway:typecheck": "cd gateway && pnpm typecheck",
+    "pipeline": "cd tools/pipeline-dashboard && pnpm dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",

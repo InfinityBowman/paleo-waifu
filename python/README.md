@@ -18,7 +18,9 @@ uv sync
 ## Pipeline Overview
 
 ```
-scrape_creatures.py → creatures_enriched.json
+scrape_creatures.py → creatures_enriched.json (393 NHM + Wikipedia)
+                          ↓
+scrape_pbdb.py      → creatures_enriched.json (+ PBDB genera)
                           ↓
 download_images.py  → data/images/*.webp
                           ↓
@@ -65,6 +67,30 @@ Rarity distribution (bottom-heavy by design for gacha):
 - rare: ~11%
 - epic: ~6%
 - legendary: ~4%
+
+## Step 1b: Add PBDB Creatures
+
+```bash
+uv run python scripts/scrape_pbdb.py              # Dry run (preview only)
+uv run python scripts/scrape_pbdb.py --yolo        # Actually write to creatures_enriched.json
+uv run python scripts/scrape_pbdb.py --min-occs 5  # Override min occurrence threshold
+```
+
+Queries the [Paleobiology Database](https://paleobiodb.org/) for genera across 12 target clades (Dinosauria, Pterosauria, marine reptiles, synapsids, trilobites, etc.) and merges new genera into `creatures_enriched.json`.
+
+**Default is dry-run** — shows you what would be added without writing anything. Pass `--yolo` to actually merge.
+
+Filtering:
+
+- Per-clade minimum fossil occurrences (n_occs >= 2-5 depending on clade size)
+- Per-clade genus count caps (prevents any single group from dominating)
+- Global cap: ~450 new genera
+- Deduplication against existing creatures
+- Excludes extant (still-living) taxa
+
+Rarity is assigned using a composite score of fossil occurrence count + Wikipedia article existence. No new legendaries — legendary status is reserved for manually curated iconic creatures.
+
+After running, use `enrich_descriptions.py` to backfill Wikipedia descriptions for the new creatures.
 
 ## Step 2: Download Images
 
@@ -134,7 +160,8 @@ python/
 ├── pyproject.toml
 ├── README.md
 ├── scripts/
-│   ├── scrape_creatures.py     # Step 1: Scrape data + image URLs
+│   ├── scrape_creatures.py     # Step 1: Scrape NHM + Wikipedia data
+│   ├── scrape_pbdb.py          # Step 1b: Add PBDB genera
 │   ├── download_images.py      # Step 2: Download & process images
 │   ├── upload_to_r2.py         # Step 3: Upload to R2, set imageUrl
 │   └── generate_seed.py        # Step 4: Generate seed.sql
@@ -167,6 +194,8 @@ The `IMAGES: R2Bucket` type is declared in `src/env.d.ts`.
 cd python
 uv sync
 uv run python scripts/scrape_creatures.py        # ~15 min (API rate limits)
+uv run python scripts/scrape_pbdb.py --yolo       # ~10-20 min (PBDB + Wikipedia checks)
+uv run python scripts/enrich_descriptions.py      # backfill descriptions for new creatures
 uv run python scripts/download_images.py          # ~20-40 min (run multiple times)
 uv run python scripts/upload_to_r2.py             # ~5 min
 uv run python scripts/generate_seed.py            # instant
