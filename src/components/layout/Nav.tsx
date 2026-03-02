@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from '@tanstack/react-router'
 import { LogOut, Menu, Shield } from 'lucide-react'
 import {
   IconBookshelf,
@@ -11,6 +11,7 @@ import {
   IconPerson,
 } from '@/components/icons'
 import { signIn, signOut, useSession } from '@/lib/auth-client'
+import { type BadgeData, getBadges } from '@/lib/badges'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -50,9 +51,36 @@ function DiscordIcon({ className }: { className?: string }) {
   )
 }
 
+function NotificationDot() {
+  return (
+    <span className="absolute -right-1 -top-1 flex h-2 w-2">
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+      <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+    </span>
+  )
+}
+
+function CountBadge({ count }: { count: number }) {
+  return (
+    <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold leading-none text-primary-foreground">
+      {count}
+    </span>
+  )
+}
+
 export function Nav() {
   const { data: session } = useSession()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [badges, setBadges] = useState<BadgeData | null>(null)
+  const location = useLocation()
+
+  useEffect(() => {
+    if (!session) {
+      setBadges(null)
+      return
+    }
+    getBadges().then(setBadges).catch(() => setBadges(null))
+  }, [session, location.pathname])
 
   return (
     <TooltipProvider>
@@ -79,7 +107,10 @@ export function Nav() {
               {session && (
                 <>
                   <Link to="/gacha" className={NAV_LINK_CLASS}>
-                    <IconCrystalCluster className="h-4 w-4" />
+                    <span className="relative">
+                      <IconCrystalCluster className="h-4 w-4" />
+                      {badges?.canClaimDaily && <NotificationDot />}
+                    </span>
                     Gacha
                   </Link>
                   <Link to="/collection" className={NAV_LINK_CLASS}>
@@ -89,6 +120,9 @@ export function Nav() {
                   <Link to="/trade" className={NAV_LINK_CLASS}>
                     <IconCardExchange className="h-4 w-4" />
                     Trade
+                    {badges && badges.incomingProposals > 0 && (
+                      <CountBadge count={badges.incomingProposals} />
+                    )}
                   </Link>
                   {(session.user as { role?: string }).role === 'admin' && (
                     <Link to="/admin" className={NAV_LINK_CLASS}>
@@ -195,7 +229,10 @@ export function Nav() {
                         className={MOBILE_NAV_LINK_CLASS}
                         onClick={() => setMobileOpen(false)}
                       >
-                        <IconCrystalCluster className="h-4 w-4" />
+                        <span className="relative">
+                          <IconCrystalCluster className="h-4 w-4" />
+                          {badges?.canClaimDaily && <NotificationDot />}
+                        </span>
                         Gacha
                       </Link>
                       <Link
@@ -213,6 +250,9 @@ export function Nav() {
                       >
                         <IconCardExchange className="h-4 w-4" />
                         Trade
+                        {badges && badges.incomingProposals > 0 && (
+                          <CountBadge count={badges.incomingProposals} />
+                        )}
                       </Link>
                       {(session.user as { role?: string }).role === 'admin' && (
                         <Link
