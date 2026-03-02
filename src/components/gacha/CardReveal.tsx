@@ -30,11 +30,11 @@ export function CardReveal({
 
   if (!revealed) {
     return (
-      <div className="flex aspect-[3/4] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted bg-gradient-to-b from-muted/40 to-muted/20">
+      <div className="flex aspect-3/4 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-muted bg-linear-to-b from-muted/40 to-muted/20">
         <IconFossil className="h-8 w-8 animate-pulse text-muted-foreground/50" />
         <div className="h-1 w-12 overflow-hidden rounded-full bg-muted">
           <div
-            className="h-full w-full animate-shimmer rounded-full bg-gradient-to-r from-transparent via-muted-foreground/30 to-transparent"
+            className="h-full w-full animate-shimmer rounded-full bg-linear-to-r from-transparent via-muted-foreground/30 to-transparent"
             style={{ backgroundSize: '200% 100%' }}
           />
         </div>
@@ -65,7 +65,7 @@ export function CardReveal({
         />
       )}
 
-      <div className="aspect-[3/4] bg-gradient-to-b from-transparent to-background/80 p-3">
+      <div className="aspect-3/4 bg-linear-to-b from-transparent to-background/80 p-3">
         {result.imageUrl ? (
           <img
             src={result.imageUrl}
