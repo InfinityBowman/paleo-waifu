@@ -1,5 +1,7 @@
+import { useEffect, useState } from 'react'
+import { useRouter } from '@tanstack/react-router'
 import type { Rarity } from '@/lib/types'
-import { IconFossil, IconSparkles } from '@/components/icons'
+import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/types'
 import {
@@ -11,6 +13,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 
 interface Creature {
+  id?: string
   name: string
   scientificName: string
   rarity: string
@@ -22,6 +25,7 @@ interface Creature {
   sizeMeters?: number | null
   weightKg?: number | null
   funFacts?: string | null
+  isFavorite?: boolean | null
 }
 
 const RARITY_IMAGE_GRADIENT: Record<string, string> = {
@@ -41,10 +45,48 @@ export function CreatureModal({
   open: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const router = useRouter()
+  const [toggling, setToggling] = useState(false)
+  const [optimisticFavorite, setOptimisticFavorite] = useState<boolean | null>(
+    null,
+  )
+
+  useEffect(() => {
+    setOptimisticFavorite(null)
+  }, [creature?.id])
+
+  const isFavorite =
+    optimisticFavorite ?? creature?.isFavorite ?? false
+
   if (!creature) return null
 
   const rarity = creature.rarity as Rarity
   const shimmerClass = RARITY_SHIMMER[rarity]
+
+  const toggleFavorite = async () => {
+    if (!creature.id || toggling) return
+    setToggling(true)
+    setOptimisticFavorite(!isFavorite)
+    try {
+      const res = await fetch('/api/collection', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggleFavorite',
+          userCreatureId: creature.id,
+        }),
+      })
+      if (res.ok) {
+        router.invalidate()
+      } else {
+        setOptimisticFavorite(null)
+      }
+    } catch {
+      setOptimisticFavorite(null)
+    } finally {
+      setToggling(false)
+    }
+  }
 
   let funFacts: Array<string> = []
   if (creature.funFacts) {
@@ -95,16 +137,37 @@ export function CreatureModal({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-6">
-          <Badge
-            variant="secondary"
-            className={cn(
-              'font-display uppercase',
-              RARITY_COLORS[rarity],
-              'bg-transparent px-0',
+          <div className="flex items-center justify-between">
+            <Badge
+              variant="secondary"
+              className={cn(
+                'font-display uppercase',
+                RARITY_COLORS[rarity],
+                'bg-transparent px-0',
+              )}
+            >
+              {rarity}
+            </Badge>
+            {creature.id && (
+              <button
+                onClick={toggleFavorite}
+                disabled={toggling}
+                className={cn(
+                  'rounded-full p-1.5 transition-colors',
+                  isFavorite
+                    ? 'text-rarity-legendary'
+                    : 'text-muted-foreground/40 hover:text-rarity-legendary/60',
+                )}
+              >
+                <IconRoundStar
+                  className={cn(
+                    'h-5 w-5',
+                    isFavorite && 'fill-rarity-legendary',
+                  )}
+                />
+              </button>
             )}
-          >
-            {rarity}
-          </Badge>
+          </div>
           <DialogTitle className="mt-1 font-display text-2xl font-bold">
             {creature.name}
           </DialogTitle>
