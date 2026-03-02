@@ -4,6 +4,7 @@ import { LogOut, Menu, Shield } from 'lucide-react'
 import {
   IconBookshelf,
   IconCardExchange,
+  IconCrown,
   IconCrystalCluster,
   IconFossil,
   IconOpenBook,
@@ -71,6 +72,10 @@ export function Nav() {
                 <IconOpenBook className="h-4 w-4" />
                 Encyclopedia
               </Link>
+              <Link to="/leaderboard" className={NAV_LINK_CLASS}>
+                <IconCrown className="h-4 w-4" />
+                Leaderboard
+              </Link>
               {session && (
                 <>
                   <Link to="/gacha" className={NAV_LINK_CLASS}>
@@ -99,7 +104,7 @@ export function Nav() {
           {/* Right: Auth + Mobile Menu */}
           <div className="flex items-center gap-2">
             {/* Desktop auth area — fixed width to prevent layout shift */}
-            <div className="hidden min-w-[120px] items-center justify-end gap-2 md:flex">
+            <div className="hidden min-w-30 items-center justify-end gap-2 md:flex">
               {session ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -115,7 +120,7 @@ export function Nav() {
                           {session.user.name[0].toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
-                      <span className="max-w-[100px] truncate text-sm">
+                      <span className="max-w-25 truncate text-sm">
                         {session.user.name}
                       </span>
                     </Button>
@@ -174,6 +179,14 @@ export function Nav() {
                   >
                     <IconOpenBook className="h-4 w-4" />
                     Encyclopedia
+                  </Link>
+                  <Link
+                    to="/leaderboard"
+                    className={MOBILE_NAV_LINK_CLASS}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <IconCrown className="h-4 w-4" />
+                    Leaderboard
                   </Link>
                   {session && (
                     <>

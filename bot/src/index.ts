@@ -12,6 +12,10 @@ import { handleBalance } from './commands/balance'
 import { handlePity } from './commands/pity'
 import { handleDaily } from './commands/daily'
 import { handleHelp } from './commands/help'
+import {
+  handleLeaderboardCollection,
+  handleLeaderboardXp,
+} from './commands/leaderboard'
 import { handleLevel } from './commands/level'
 import { handlePull } from './commands/pull'
 import { awardXp } from './lib/xp'
@@ -68,9 +72,17 @@ export default {
       return new Response('Missing command name', { status: 400 })
     }
 
-    // Help doesn't require auth
+    // Commands that don't require auth
     if (commandName === 'help') {
       return handleHelp()
+    }
+    if (commandName === 'leaderboard-xp') {
+      const db = await createDb(env.DB)
+      return handleLeaderboardXp(db)
+    }
+    if (commandName === 'leaderboard-collection') {
+      const db = await createDb(env.DB)
+      return handleLeaderboardCollection(db)
     }
 
     // Resolve Discord user to app user

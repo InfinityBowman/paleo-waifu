@@ -45,6 +45,14 @@ const commands = [
     ],
   },
   {
+    name: 'leaderboard-xp',
+    description: 'Top 10 players by XP level',
+  },
+  {
+    name: 'leaderboard-collection',
+    description: 'Top 10 players by species collected',
+  },
+  {
     name: 'help',
     description: 'Show available commands',
   },

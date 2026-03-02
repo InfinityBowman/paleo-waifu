@@ -77,6 +77,58 @@ export function multiPullEmbed(
   return embed
 }
 
+/** Build an embed for the /leaderboard-xp command */
+export function leaderboardXpEmbed(
+  rows: Array<{ name: string; xp: number; level: number }>,
+): Embed {
+  if (rows.length === 0) {
+    return {
+      title: '\uD83C\uDFC6 XP Leaderboard',
+      description: 'No players yet.',
+      color: 0xe8c95a,
+    }
+  }
+
+  const MEDALS = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49']
+  const lines = rows.map((r, i) => {
+    const prefix = MEDALS[i] ?? `${i + 1}.`
+    return `${prefix} **${r.name}** — Level ${r.level} (${r.xp.toLocaleString()} XP)`
+  })
+
+  return {
+    title: '\uD83C\uDFC6 XP Leaderboard',
+    description: lines.join('\n'),
+    color: 0xe8c95a,
+  }
+}
+
+/** Build an embed for the /leaderboard-collection command */
+export function leaderboardCollectionEmbed(
+  rows: Array<{ name: string; uniqueSpecies: number }>,
+  totalSpecies: number,
+): Embed {
+  if (rows.length === 0) {
+    return {
+      title: '\uD83D\uDCDA Collection Leaderboard',
+      description: 'No players yet.',
+      color: 0x5a8be8,
+    }
+  }
+
+  const MEDALS = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49']
+  const lines = rows.map((r, i) => {
+    const prefix = MEDALS[i] ?? `${i + 1}.`
+    const pct = totalSpecies > 0 ? Math.round((r.uniqueSpecies / totalSpecies) * 100) : 0
+    return `${prefix} **${r.name}** — ${r.uniqueSpecies}/${totalSpecies} species (${pct}%)`
+  })
+
+  return {
+    title: '\uD83D\uDCDA Collection Leaderboard',
+    description: lines.join('\n'),
+    color: 0x5a8be8,
+  }
+}
+
 /** Build an embed for the /level command */
 export function levelEmbed(username: string, xp: number, level: number): Embed {
   const nextLevelXp = xpForLevel(level + 1)

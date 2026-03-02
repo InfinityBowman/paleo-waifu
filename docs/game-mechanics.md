@@ -290,6 +290,42 @@ Clicking a creature opens a modal with full details (description, period, size, 
 
 ---
 
+## Leaderboard
+
+### Overview
+
+A public (no auth required) page at `/leaderboard` showing the top 10 players in two categories, switchable via tabs.
+
+### XP Leaderboard
+
+Ranks players by level (descending), then by total XP (descending) as a tiebreaker. Each entry shows:
+
+- Rank (1–3 get gold/silver/bronze styling)
+- Avatar and name
+- Current level
+- XP progress bar toward the next level
+- Total XP
+
+### Collection Leaderboard
+
+Ranks players by unique species collected (descending), then by total creatures owned (descending), then by user ID (ascending) as a final tiebreaker. Each entry shows:
+
+- Rank (1–3 get gold/silver/bronze styling)
+- Avatar and name
+- Species count out of total (`N/M species`)
+- Completion percentage progress bar
+- Total creatures owned
+
+### Caching
+
+The leaderboard route sets `Cache-Control: public, s-maxage=60, stale-while-revalidate=300` — results are cached at the edge for 60 seconds and served stale for up to 5 minutes while revalidating in the background.
+
+### Discord
+
+Both leaderboards are available via `/leaderboard-xp` and `/leaderboard-collection` slash commands, which return embeds with medal emoji for the top 3. These commands don't require account linking.
+
+---
+
 ## Creature Data Model
 
 | Field              | Type  | Notes                                       |
@@ -316,21 +352,24 @@ A Cloudflare Worker-based Discord bot provides access to core gameplay via slash
 
 ### Available Commands
 
-| Command    | Type                 | Description                                       |
-| ---------- | -------------------- | ------------------------------------------------- |
-| `/pull`    | Deferred + embed     | Single pull (1 Fossil), shows creature card       |
-| `/pull10`  | Deferred + embed     | 10-pull (10 Fossils), shows list with best image  |
-| `/daily`   | Deferred + embed     | Claim daily 3 Fossils                             |
-| `/balance` | Immediate, ephemeral | Show fossil count                                 |
-| `/pity`    | Immediate, ephemeral | Show pity counters for active banner              |
-| `/level`   | Immediate, ephemeral | Show XP, level, and progress bar (optional @user) |
-| `/help`    | Immediate, ephemeral | List available commands                           |
+| Command                  | Type                 | Description                                       |
+| ------------------------ | -------------------- | ------------------------------------------------- |
+| `/pull`                  | Deferred + embed     | Single pull (1 Fossil), shows creature card       |
+| `/pull10`                | Deferred + embed     | 10-pull (10 Fossils), shows list with best image  |
+| `/daily`                 | Deferred + embed     | Claim daily 3 Fossils                             |
+| `/balance`               | Immediate, ephemeral | Show fossil count                                 |
+| `/pity`                  | Immediate, ephemeral | Show pity counters for active banner              |
+| `/level`                 | Immediate, ephemeral | Show XP, level, and progress bar (optional @user) |
+| `/leaderboard-xp`       | Immediate + embed    | Top 10 players by XP level                        |
+| `/leaderboard-collection`| Immediate + embed   | Top 10 players by species collected               |
+| `/help`                  | Immediate, ephemeral | List available commands                           |
 
 ### Interaction Model
 
-- **Immediate commands** (`/balance`, `/pity`, `/level`, `/help`) return a response directly within Discord's 3-second window
+- **Immediate commands** (`/balance`, `/pity`, `/level`, `/help`, `/leaderboard-xp`, `/leaderboard-collection`) return a response directly within Discord's 3-second window
 - **Deferred commands** (`/pull`, `/pull10`, `/daily`) return a "thinking..." state immediately, then use `ctx.waitUntil()` to run DB operations and PATCH the final response via Discord REST API
 - **Ephemeral** responses are only visible to the invoking user
+- **No-auth commands** (`/help`, `/leaderboard-xp`, `/leaderboard-collection`) do not require a linked web app account — they query public data or show static text
 
 ### XP API Endpoint
 

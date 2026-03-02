@@ -10,6 +10,8 @@ const HELP_TEXT = [
   '\uD83C\uDF1F `/pull10` - Pull 10 creatures (10 Fossils)',
   '\uD83D\uDCCA `/pity` - Check your pity counters',
   '\uD83D\uDCC8 `/level` - Check your XP and level',
+  '\uD83C\uDFC6 `/leaderboard-xp` - Top 10 players by XP level',
+  '\uD83D\uDCDA `/leaderboard-collection` - Top 10 by species collected',
   '',
   `Play on the web: ${APP_URL}`,
 ].join('\n')

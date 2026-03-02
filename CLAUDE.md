@@ -43,13 +43,14 @@ Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanS
 
 File-based routing via TanStack Router. Route tree auto-generated in `src/routeTree.gen.ts` — do not edit manually. Two layout groups:
 
-- `_public` — Public layout with nav (landing, encyclopedia)
+- `_public` — Public layout with nav (landing, encyclopedia, leaderboard)
 - `_app` — Auth-guarded layout (gacha, collection, trade, profile)
 
 Routes:
 
 - `/` — Landing page
 - `/encyclopedia` — Browse all creatures (public)
+- `/leaderboard` — Top players by XP and collection (public)
 - `/gacha` — Pull screen (auth required)
 - `/collection` — My collection (auth required)
 - `/trade` — Trade marketplace (auth required)
@@ -93,7 +94,7 @@ Auth tables (user, session, account, verification) managed by better-auth. Game 
 
 Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports game logic from `src/lib/` via `@/` path alias (no code duplication).
 
-Slash commands: `/pull`, `/pull10`, `/daily`, `/balance`, `/pity`, `/level`, `/help`
+Slash commands: `/pull`, `/pull10`, `/daily`, `/balance`, `/pity`, `/level`, `/leaderboard-xp`, `/leaderboard-collection`, `/help`
 
 Uses Discord Interactions API (webhook-based). Ed25519 signature verification via Web Crypto API. Deferred responses for DB-heavy commands (`/pull`, `/daily`), immediate ephemeral responses for read-only commands.
 

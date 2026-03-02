@@ -254,17 +254,9 @@ export function TradeList({
 
       <Tabs defaultValue="marketplace">
         <div className="flex items-center justify-between">
-          <TabsList className="h-auto gap-1 rounded-full border border-white/[0.04] bg-white/[0.03] p-1.5 backdrop-blur-sm group-data-horizontal/tabs:h-auto">
-            <TabsTrigger
-              value="marketplace"
-              className="h-auto rounded-full px-5 py-2.5 text-sm text-muted-foreground transition-all data-active:bg-white/[0.08] data-active:text-foreground data-active:shadow-[0_0_12px_oklch(0.65_0.15_340/0.15)]"
-            >
-              Marketplace
-            </TabsTrigger>
-            <TabsTrigger
-              value="my-offers"
-              className="h-auto rounded-full px-5 py-2.5 text-sm text-muted-foreground transition-all data-active:bg-white/[0.08] data-active:text-foreground data-active:shadow-[0_0_12px_oklch(0.65_0.15_340/0.15)]"
-            >
+          <TabsList variant="glass">
+            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+            <TabsTrigger value="my-offers">
               My Offers
               {myOffersCount > 0 && (
                 <Badge
