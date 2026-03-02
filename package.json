@@ -29,7 +29,9 @@
     "gateway:dev": "cd gateway && pnpm dev",
     "gateway:build": "cd gateway && pnpm build",
     "gateway:typecheck": "cd gateway && pnpm typecheck",
-    "pipeline": "cd tools/pipeline-dashboard && pnpm dev"
+    "pipeline": "cd tools/pipeline-dashboard && pnpm dev",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.0.6",
@@ -68,6 +70,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.7.2",
     "vite": "^7.1.7",
+    "vitest": "^4.0.18",
     "wrangler": "^4.67.0"
   },
   "pnpm": {
