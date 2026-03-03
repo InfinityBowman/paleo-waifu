@@ -11,7 +11,7 @@ export const Route = createFileRoute('/_public/')({
       {
         name: 'description',
         content:
-          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
+          'Collect and trade 600+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
       },
     ],
   }),

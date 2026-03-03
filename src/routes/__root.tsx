@@ -30,7 +30,7 @@ export const Route = createRootRoute({
       {
         name: 'description',
         content:
-          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
+          'Collect and trade 600+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
       },
       { property: 'og:type', content: 'website' },
       { property: 'og:site_name', content: 'PaleoWaifu' },
@@ -38,7 +38,7 @@ export const Route = createRootRoute({
       {
         property: 'og:description',
         content:
-          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
+          'Collect and trade 600+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
       },
       { property: 'og:image', content: `${SITE_URL}/og-image.png` },
       { property: 'og:url', content: SITE_URL },
@@ -47,7 +47,7 @@ export const Route = createRootRoute({
       {
         name: 'twitter:description',
         content:
-          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game.',
+          'Collect and trade 600+ waifu-fied prehistoric creatures in this gacha game.',
       },
       { name: 'twitter:image', content: `${SITE_URL}/og-image.png` },
     ],
