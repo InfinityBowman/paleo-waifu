@@ -29,7 +29,7 @@ Built `paleo-waifu` by forking `syntch-template` and rewiring it entirely for a 
 
 **Components** — Nav with Discord login, Hero landing, BannerSelect, PullButton, PullAnimation with staggered CardReveal, CollectionGrid with filters, EncyclopediaGrid, TradeList with create/accept/cancel
 
-**Data** — 101 prehistoric creatures in `python/data/creatures.json` spanning Cambrian through Pleistocene, with waifu personalities, real paleontology data, and fun facts. Seed SQL generated.
+**Data** — 600+ prehistoric creatures in `python/data/creatures_enriched.json` spanning Cambrian through Pleistocene, with waifu personalities, real paleontology data, and fun facts. Seed SQL generated.
 
 **Theme** — Warm amber OKLCH palette (shifted from template purple)
 

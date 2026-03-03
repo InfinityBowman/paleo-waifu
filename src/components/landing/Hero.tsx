@@ -246,7 +246,7 @@ export function Hero() {
         {/* Description */}
         <p className="animate-drift-in drift-d3 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/50 sm:text-base">
           Collect{' '}
-          <span className="text-primary/80">300+ prehistoric companions</span>{' '}
+          <span className="text-primary/80">600+ prehistoric companions</span>{' '}
           from across the ages. Pull, discover, and trade. Each fossil holds a
           secret.
         </p>

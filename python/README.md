@@ -18,7 +18,7 @@ uv sync
 ## Pipeline Overview
 
 ```
-scrape_creatures.py → creatures_enriched.json (393 NHM + Wikipedia)
+scrape_creatures.py → creatures_enriched.json (615 NHM + Wikipedia + PBDB)
                           ↓
 scrape_pbdb.py      → creatures_enriched.json (+ PBDB genera)
                           ↓
@@ -58,7 +58,7 @@ Options:
 
 Rate limiting: 1s between Wikipedia API requests. Responses are cached in `data/cache/` to avoid re-fetching.
 
-Output: `data/creatures_enriched.json` (~393 creatures)
+Output: `data/creatures_enriched.json` (~615 creatures)
 
 Rarity distribution (bottom-heavy by design for gacha):
 
@@ -167,7 +167,7 @@ python/
 │   └── generate_seed.py        # Step 4: Generate seed.sql
 └── data/
     ├── creatures.json           # Original 101 creatures (reference)
-    ├── creatures_enriched.json  # Pipeline output (393 creatures) — tracked in git
+    ├── creatures_enriched.json  # Pipeline output (615 creatures) — tracked in git
     ├── cache/                   # Cached API responses — gitignored
     ├── images/                  # Downloaded WebP images — gitignored
     └── nhm_dinosaurs.csv        # NHM dataset download — gitignored
