@@ -150,7 +150,7 @@ Reads `creatures_enriched.json` (falls back to `creatures.json`) and generates `
 ```bash
 # From project root
 pnpm db:seed:local    # Local D1
-pnpm db:seed:remote   # Remote D1 (production)
+pnpm db:seed:prod     # Remote D1 (production)
 ```
 
 ## File Structure

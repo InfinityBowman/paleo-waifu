@@ -68,6 +68,21 @@ export async function deductFossils(
   return result.length > 0
 }
 
+/** Grant fossils as a reward (e.g. level-up bonus) */
+export async function grantFossils(
+  db: Database,
+  userId: string,
+  amount: number,
+): Promise<void> {
+  await db
+    .update(currency)
+    .set({
+      fossils: sql`${currency.fossils} + ${amount}`,
+      updatedAt: sql`(unixepoch())`,
+    })
+    .where(eq(currency.userId, userId))
+}
+
 /** Refund fossils (used when pulls fail after deduction) */
 export async function refundFossils(
   db: Database,

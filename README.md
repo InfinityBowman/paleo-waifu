@@ -1,6 +1,6 @@
 # PaleoWaifu
 
-A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambrian through the Pleistocene, trade with other players, and build your ultimate paleontology collection.
+A prehistoric animal waifu gacha game. Collect 600+ creatures spanning the Cambrian through the Pleistocene, trade with other players, and build your ultimate paleontology collection.
 
 ## Tech Stack
 
@@ -18,7 +18,7 @@ A prehistoric animal waifu gacha game. Collect 101 creatures spanning the Cambri
 - **Gacha pulls** — Single or 10-pull with a full pity system (soft pity at 50, hard guarantee at 90)
 - **Rate-up banners** — Featured creatures get 50% of their rarity's drop share
 - **Collection** — Browse and filter your discovered creatures by rarity and era
-- **Encyclopedia** — View all 101 creatures with real paleontology data and fun facts
+- **Encyclopedia** — View all 600+ creatures with real paleontology data and fun facts
 - **Trading** — Create open trade offers, browse the marketplace, swap creatures with other players
 - **Daily rewards** — Log in daily for free fossils
 - **Discord bot** — Pull creatures, claim dailies, check balance and pity via slash commands
@@ -165,3 +165,5 @@ docs/                  # Detailed reference docs
 | `pnpm bot:register`      | Register slash commands (dev guild)  |
 | `pnpm bot:register:prod` | Register slash commands (global)     |
 | `pnpm bot:typecheck`     | Typecheck bot                        |
+| `pnpm test`              | Run production integration tests     |
+| `pnpm editor`            | Creature editor UI                   |

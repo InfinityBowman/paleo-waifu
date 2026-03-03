@@ -15,6 +15,7 @@ interface XpApiResponse {
   xp: number
   level: number
   leveledUp: boolean
+  fossilsEarned: number
 }
 
 // In-memory cooldown map — intentionally not persisted across restarts
@@ -90,10 +91,21 @@ async function sendLevelUpEmbed(
   message: Message,
   data: XpApiResponse,
 ): Promise<void> {
+  const isMilestone = data.level % 5 === 0
+
+  const lines = [`<@${message.author.id}> reached **Level ${data.level}**!`]
+  if (data.fossilsEarned > 0) {
+    lines.push(
+      isMilestone
+        ? `\u{1F31F} **Milestone bonus!** +${data.fossilsEarned} Fossils`
+        : `\u{1FAA8} +${data.fossilsEarned} Fossil${data.fossilsEarned !== 1 ? 's' : ''}`,
+    )
+  }
+
   const embed = new EmbedBuilder()
-    .setColor(0xe8c95a)
-    .setTitle('Level Up!')
-    .setDescription(`<@${message.author.id}> reached **Level ${data.level}**!`)
+    .setColor(isMilestone ? 0xffd700 : 0xe8c95a)
+    .setTitle(isMilestone ? '\u{1F31F} Milestone Level Up!' : 'Level Up!')
+    .setDescription(lines.join('\n'))
     .setFooter({ text: `Total XP: ${data.xp.toLocaleString()}` })
     .setTimestamp()
 

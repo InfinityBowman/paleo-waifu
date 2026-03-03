@@ -18,6 +18,10 @@ pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
 pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
 
+# Testing
+pnpm test             # Run production integration tests (hits live site)
+pnpm test:watch       # Run tests in watch mode
+
 # Creature editor
 pnpm editor           # Creature editor UI (http://localhost:4200)
 
@@ -58,9 +62,14 @@ Routes:
 - `/collection` — My collection (auth required)
 - `/trade` — Trade marketplace (auth required)
 - `/profile` — Profile & stats (auth required)
+- `/admin` — Admin dashboard (auth required, admin only)
+- `/sitemap.xml` — XML sitemap for crawlers
 - `/api/auth/$` — better-auth catch-all
 - `/api/gacha` — POST pull endpoint
 - `/api/trade` — POST create/accept/cancel trade
+- `/api/collection` — POST collection management
+- `/api/admin` — Admin API endpoint
+- `/api/images/$` — 302 redirect to CDN for creature images
 
 ### Code Organization
 
@@ -71,16 +80,18 @@ Routes:
 - `src/components/trade/` — Trade list, offer, card
 - `src/components/layout/` — Nav with auth state
 - `src/components/landing/` — Hero section
+- `src/components/admin/` — Admin dashboard components
+- `src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
 - `src/components/ui/` — shadcn/ui primitives
 - `src/lib/` — Auth, gacha logic, types, utilities
 - `src/lib/db/` — Drizzle schema and D1 client factory
 - `src/store/` — Zustand store (fossils, pull results)
-- `python/` — Creature data (`creatures_enriched.json`) and legacy scraping scripts
+- `python/` — Data pipeline for creature scraping, enrichment, image generation, and R2 upload
 - `tools/pipeline-dashboard/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
 
 ### Auth
 
-Uses better-auth with Discord OAuth only. Server-side session validation via `getSession()` / `ensureSession()` server functions. The `_app` layout guard redirects unauthenticated users to `/`.
+Uses better-auth with Discord OAuth only. Server-side session validation via `getSession()` server function. The `_app` layout guard redirects unauthenticated users to `/`.
 
 ### Gacha Mechanics
 
@@ -88,11 +99,11 @@ Uses better-auth with Discord OAuth only. Server-side session validation via `ge
 - Rarities: common (50%), uncommon (30%), rare (15%), epic (4%), legendary (1%)
 - Soft pity at 50 pulls, hard pity (guaranteed legendary) at 90
 - Rate-up: featured creature gets 50% of its rarity's share
-- New user bonus: 20 Fossils, daily login: 3 Fossils
+- New user bonus: 10 Fossils, daily login: 3 Fossils
 
 ### Database Schema
 
-Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_history, wishlist, user_xp.
+Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_proposal, trade_history, wishlist, user_xp.
 
 ### Discord Bot (`bot/`)
 
@@ -115,6 +126,17 @@ Three GitHub Actions workflows, triggered by path-filtered pushes to `main`:
 - **Deploy Website** (`src/`, `drizzle/`, etc.) — D1 migrations + `wrangler deploy`
 - **Deploy Bot** (`bot/`, `src/lib/`, `drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
 - **Gateway Docker** (`gateway/`) — Docker build + GHCR push + repository dispatch to homelab
+
+### Testing
+
+Production integration tests in `tests/production/` using Vitest. Tests hit the live site (or `TEST_BASE_URL` env var) and verify HTTP headers, security headers, SEO meta tags, SSR content, auth redirects, and API behavior. Run with `pnpm test`.
+
+### Static Assets & Caching
+
+- `public/_headers` — Cloudflare Workers Assets header rules (immutable cache for hashed `/assets/*`)
+- `public/og-image.png` — Open Graph social preview image
+- Creature images stored in R2, served via `cdn.jacobmaynard.dev` custom domain
+- Security headers (CSP, X-Frame-Options, etc.) applied globally via root route `headers()`
 
 ## Conventions
 

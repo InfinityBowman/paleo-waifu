@@ -5,13 +5,16 @@ import { userXp } from '@/lib/db/schema'
 import {
   XP_MAX_PER_MESSAGE,
   XP_MIN_PER_MESSAGE,
+  fossilsForLevel,
   levelFromXp,
 } from '@/lib/xp-config'
+import { ensureUserCurrency, grantFossils } from '@/lib/gacha'
 
 export interface XpAwardResult {
   xp: number
   level: number
   leveledUp: boolean
+  fossilsEarned: number
 }
 
 function randomXpDelta(): number {
@@ -62,9 +65,19 @@ export async function awardXp(
   const oldLevel = levelFromXp(row.xp - delta)
   const leveledUp = row.level > oldLevel
 
+  let fossilsEarned = 0
+  if (leveledUp) {
+    for (let lvl = oldLevel + 1; lvl <= row.level; lvl++) {
+      fossilsEarned += fossilsForLevel(lvl)
+    }
+    await ensureUserCurrency(db, userId)
+    await grantFossils(db, userId, fossilsEarned)
+  }
+
   return {
     xp: row.xp,
     level: row.level,
     leveledUp,
+    fossilsEarned,
   }
 }
