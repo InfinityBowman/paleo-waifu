@@ -91,7 +91,7 @@ describe('static asset caching', () => {
 
   test('hashed CSS assets have long-lived immutable cache', async () => {
     const html = await get('/').then((r) => r.text())
-    const cssMatch = html.match(/\/assets\/styles-[A-Za-z0-9]+\.css/)
+    const cssMatch = html.match(/\/assets\/styles-[A-Za-z0-9_]+\.css/)
     expect(cssMatch).toBeTruthy()
 
     const res = await head(cssMatch![0])
