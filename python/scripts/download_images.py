@@ -24,10 +24,6 @@ DATA_DIR = Path(__file__).parent.parent / "data"
 IMAGES_DIR = DATA_DIR / "images"
 USER_AGENT = "PaleoWaifuBot/1.0 (https://github.com/infinitybowman/paleo-waifu; jacobamaynard@proton.me)"
 
-# Target dimensions (3:4 aspect ratio to match frontend card display)
-TARGET_WIDTH = 600
-TARGET_HEIGHT = 800
-
 SESSION = requests.Session()
 SESSION.headers.update({"User-Agent": USER_AGENT})
 
@@ -59,7 +55,7 @@ def download_with_retry(url: str, max_retries: int = 5) -> bytes:
 
 
 def download_and_process(url: str, output_path: Path) -> bool:
-    """Download an image, resize to target dimensions, save as WebP."""
+    """Download an image and convert to WebP. No resizing or cropping — preserves original dimensions."""
     try:
         content = download_with_retry(url)
 
@@ -67,17 +63,13 @@ def download_and_process(url: str, output_path: Path) -> bool:
 
         # Convert to RGB if necessary (handles RGBA, palette, etc.)
         if img.mode in ("RGBA", "LA"):
-            # Paste onto white background
             bg = Image.new("RGB", img.size, (255, 255, 255))
             bg.paste(img, mask=img.split()[-1])
             img = bg
         elif img.mode != "RGB":
             img = img.convert("RGB")
 
-        # Resize to fit within max dimensions, preserving aspect ratio (no crop)
-        img.thumbnail((TARGET_WIDTH, TARGET_HEIGHT), Image.LANCZOS)
-
-        # Save as WebP
+        # Save as WebP — no resizing, original dimensions preserved
         img.save(output_path, "WebP", quality=85)
         return True
 

@@ -11,7 +11,17 @@ import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
+const SITE_URL = 'https://paleo-waifu.jacobmaynard.dev'
+
 export const Route = createRootRoute({
+  headers: () => ({
+    'X-Frame-Options': 'DENY',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+    'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
+    'Content-Security-Policy':
+      "default-src 'self'; img-src 'self' cdn.jacobmaynard.dev cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'",
+  }),
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -19,10 +29,30 @@ export const Route = createRootRoute({
       { title: 'PaleoWaifu — Prehistoric Gacha' },
       {
         name: 'description',
-        content: 'Collect waifu-fied prehistoric creatures in this gacha game!',
+        content:
+          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
       },
+      { property: 'og:type', content: 'website' },
+      { property: 'og:site_name', content: 'PaleoWaifu' },
+      { property: 'og:title', content: 'PaleoWaifu — Prehistoric Gacha' },
+      {
+        property: 'og:description',
+        content:
+          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game. Pull fossils, discover ancient companions, and build your collection.',
+      },
+      { property: 'og:image', content: `${SITE_URL}/og-image.png` },
+      { property: 'og:url', content: SITE_URL },
+      { name: 'twitter:card', content: 'summary_large_image' },
+      { name: 'twitter:title', content: 'PaleoWaifu — Prehistoric Gacha' },
+      {
+        name: 'twitter:description',
+        content:
+          'Collect and trade 300+ waifu-fied prehistoric creatures in this gacha game.',
+      },
+      { name: 'twitter:image', content: `${SITE_URL}/og-image.png` },
     ],
     links: [
+      { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
       { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
       {
         rel: 'preconnect',
@@ -36,9 +66,6 @@ export const Route = createRootRoute({
       { rel: 'stylesheet', href: appCss },
     ],
     scripts: [
-      {
-        children: `document.documentElement.classList.add('dark')`,
-      },
       {
         src: 'https://plausible.jacobmaynard.dev/js/pa-3bdzy4_fgkECTn6E-iKcY.js',
         async: true,

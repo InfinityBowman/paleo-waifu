@@ -18,8 +18,8 @@ pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
 pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
 
-# Data pipeline
-pnpm pipeline         # Pipeline dashboard UI (http://localhost:4200)
+# Creature editor
+pnpm editor           # Creature editor UI (http://localhost:4200)
 
 # Bot commands
 pnpm bot:dev          # Local bot worker dev server

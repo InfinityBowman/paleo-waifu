@@ -1,56 +1,73 @@
-import { useState, useEffect } from 'react'
-import { usePipeline } from './hooks/usePipeline'
-import { PipelineGraph } from './components/PipelineGraph'
-import { StageDetail } from './components/StageDetail'
-import { ControlBar } from './components/ControlBar'
-import { Loader2 } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { Header } from './components/Header'
+import { CreatureList } from './components/CreatureList'
+import { CreatureForm } from './components/CreatureForm'
+import { SeedPanel } from './components/SeedPanel'
+import { fetchCreatures } from './lib/api'
+import type { Creature, Stats } from './lib/types'
+
+type View = { kind: 'list' } | { kind: 'edit'; slug: string } | { kind: 'create' }
 
 export function App() {
-  const { stages, loading, hasRunning, completedCount } = usePipeline()
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [view, setView] = useState<View>({ kind: 'list' })
+  const [creatures, setCreatures] = useState<Creature[]>([])
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [showSeed, setShowSeed] = useState(false)
 
-  // Auto-select first stage on initial load
+  const loadCreatures = useCallback(async () => {
+    const data = await fetchCreatures()
+    setCreatures(data.creatures)
+    setStats(data.stats)
+  }, [])
+
   useEffect(() => {
-    if (selectedId || stages.length === 0) return
-    const running = stages.find((s) => s.state.status === 'running')
-    setSelectedId(running?.id ?? stages[0].id)
-  }, [selectedId, stages])
+    loadCreatures()
+  }, [loadCreatures])
 
-  const selectedStage = stages.find((s) => s.id === selectedId) ?? null
+  function handleSaved() {
+    loadCreatures()
+    setView({ kind: 'list' })
+  }
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Loader2 className="animate-spin text-muted-foreground" size={24} />
-      </div>
-    )
+  function handleDeleted() {
+    loadCreatures()
+    setView({ kind: 'list' })
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      <ControlBar
-        stages={stages}
-        hasRunning={hasRunning}
-        completedCount={completedCount}
+    <div className="flex h-screen flex-col bg-background text-foreground">
+      <Header
+        stats={stats}
+        onAddCreature={() => setView({ kind: 'create' })}
+        onSeed={() => setShowSeed(true)}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-72 flex-shrink-0 overflow-y-auto border-r border-border">
-          <PipelineGraph
-            stages={stages}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-          />
-        </div>
-        <div className="flex-1 overflow-hidden">
-          {selectedStage ? (
-            <StageDetail key={selectedStage.id} stage={selectedStage} />
-          ) : (
-            <div className="flex h-full items-center justify-center text-muted-foreground">
-              Select a stage to view details
-            </div>
-          )}
-        </div>
-      </div>
+
+      {view.kind === 'list' && (
+        <CreatureList
+          creatures={creatures}
+          onSelect={(slug) => setView({ kind: 'edit', slug })}
+        />
+      )}
+
+      {view.kind === 'edit' && (
+        <CreatureForm
+          slug={view.slug}
+          onBack={() => setView({ kind: 'list' })}
+          onSaved={handleSaved}
+          onDeleted={handleDeleted}
+        />
+      )}
+
+      {view.kind === 'create' && (
+        <CreatureForm
+          slug={null}
+          onBack={() => setView({ kind: 'list' })}
+          onSaved={handleSaved}
+          onDeleted={handleDeleted}
+        />
+      )}
+
+      {showSeed && <SeedPanel onClose={() => setShowSeed(false)} />}
     </div>
   )
 }

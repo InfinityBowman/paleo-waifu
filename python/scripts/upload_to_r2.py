@@ -59,6 +59,7 @@ def upload_to_r2(local_path: Path, key: str, bucket: str, remote: bool = False) 
         f"{bucket}/{key}",
         f"--file={local_path}",
         "--content-type=image/webp",
+        "--cache-control=public, max-age=31536000, immutable",
     ]
     if remote:
         cmd.append("--remote")
@@ -92,7 +93,7 @@ def main():
             creature["_status"] = "missing"
             continue
         key = f"creatures/{slug}.webp"
-        creature["imageUrl"] = f"https://cdn.jacobmaynard.dev/{key}"
+        creature["imageUrl"] = f"/api/images/{key}"
         creature["_status"] = "pending"
         tasks.append((creature, local_path, key))
 

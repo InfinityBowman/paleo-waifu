@@ -18,16 +18,16 @@
   --ring: oklch(0.65 0.15 340);
   --radius: 0.625rem;
 
-  /* Pipeline status colors */
-  --status-idle: oklch(0.55 0.03 290);
-  --status-running: oklch(0.7 0.15 250);
-  --status-success: oklch(0.7 0.17 165);
-  --status-failed: oklch(0.7 0.19 25);
+  /* Semantic */
+  --warning: oklch(0.7 0.19 25);
+  --success: oklch(0.7 0.17 165);
 
-  /* Terminal */
-  --terminal-bg: oklch(0.08 0.02 290);
-  --terminal-text: oklch(0.85 0.02 110);
-  --terminal-stderr: oklch(0.8 0.12 65);
+  /* Rarity colors (match main app) */
+  --rarity-common: oklch(0.7 0.04 260);
+  --rarity-uncommon: oklch(0.75 0.14 165);
+  --rarity-rare: oklch(0.7 0.17 245);
+  --rarity-epic: oklch(0.7 0.22 300);
+  --rarity-legendary: oklch(0.85 0.15 75);
 }
 
 @theme inline {
@@ -48,15 +48,13 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-ring: var(--ring);
-
-  --color-status-idle: var(--status-idle);
-  --color-status-running: var(--status-running);
-  --color-status-success: var(--status-success);
-  --color-status-failed: var(--status-failed);
-
-  --color-terminal-bg: var(--terminal-bg);
-  --color-terminal-text: var(--terminal-text);
-  --color-terminal-stderr: var(--terminal-stderr);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+  --color-rarity-common: var(--rarity-common);
+  --color-rarity-uncommon: var(--rarity-uncommon);
+  --color-rarity-rare: var(--rarity-rare);
+  --color-rarity-epic: var(--rarity-epic);
+  --color-rarity-legendary: var(--rarity-legendary);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -86,24 +84,4 @@
 ::-webkit-scrollbar-thumb {
   background: oklch(0.5 0.05 290 / 0.3);
   border-radius: 3px;
-}
-
-/* Terminal ANSI color overrides */
-.terminal-output span {
-  font-family: var(--font-mono);
-}
-
-/* Pulse animation for running status */
-@keyframes status-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
-.animate-status-pulse {
-  animation: status-pulse 1.5s ease-in-out infinite;
-}
-
-/* Connector line */
-.connector-line {
-  width: 2px;
-  background: linear-gradient(to bottom, var(--border), var(--border));
 }

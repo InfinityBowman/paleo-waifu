@@ -21,3 +21,7 @@ python/data/images/
 python/data/nhm_dinosaurs.csv
 assets-preview/
 seed.sql
+.pipeline-state.json
+
+# Localflare generated files
+.localflare/

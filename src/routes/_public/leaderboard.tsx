@@ -65,6 +65,16 @@ export const Route = createFileRoute('/_public/leaderboard')({
   headers: () => ({
     'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
   }),
+  head: () => ({
+    meta: [
+      { title: 'Leaderboard — PaleoWaifu' },
+      {
+        name: 'description',
+        content:
+          'See who leads the PaleoWaifu rankings. Top players by XP level and creature collection size.',
+      },
+    ],
+  }),
   loader: () => getLeaderboardData(),
   component: LeaderboardPage,
 })

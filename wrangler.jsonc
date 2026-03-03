@@ -14,13 +14,6 @@
       "migrations_dir": "drizzle",
     },
   ],
-  "r2_buckets": [
-    {
-      "binding": "IMAGES",
-      "bucket_name": "paleo-waifu-images",
-    },
-  ],
-
   // ─── Production ─────────────────────────────────────────────────────
   // Secrets managed via: wrangler secret put AUTH_SECRET --env production
   "env": {

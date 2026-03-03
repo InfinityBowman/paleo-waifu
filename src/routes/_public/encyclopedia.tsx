@@ -238,6 +238,16 @@ export const Route = createFileRoute('/_public/encyclopedia')({
   headers: () => ({
     'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=86400',
   }),
+  head: () => ({
+    meta: [
+      { title: 'Encyclopedia — PaleoWaifu' },
+      {
+        name: 'description',
+        content:
+          'Browse all prehistoric creatures in the PaleoWaifu encyclopedia. Filter by era, diet, and rarity to discover your next companion.',
+      },
+    ],
+  }),
 
   validateSearch: (raw: Record<string, unknown>): EncyclopediaSearch => ({
     search: typeof raw.search === 'string' ? raw.search : undefined,

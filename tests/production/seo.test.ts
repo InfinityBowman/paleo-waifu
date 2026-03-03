@@ -1,4 +1,4 @@
-import { describe, test, expect, beforeAll } from 'vitest'
+import { describe, test, expect } from 'vitest'
 
 const BASE = process.env.TEST_BASE_URL ?? 'https://paleo-waifu.jacobmaynard.dev'
 

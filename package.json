@@ -11,7 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply paleo-waifu-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply paleo-waifu-db-prod --remote --env production",
-    "db:clear:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
+    "clear:data:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
     "db:seed:local": "wrangler d1 execute paleo-waifu-db --local --file=./seed.sql",
     "db:seed:prod": "wrangler d1 execute paleo-waifu-db-prod --remote --env production --file=./seed.sql",
     "data:pipeline": "cd python && uv run python scripts/clean_descriptions.py && uv run python scripts/enrich_descriptions.py && cd .. && python3 python/scripts/generate_seed.py",
@@ -29,7 +29,7 @@
     "gateway:dev": "cd gateway && pnpm dev",
     "gateway:build": "cd gateway && pnpm build",
     "gateway:typecheck": "cd gateway && pnpm typecheck",
-    "pipeline": "cd tools/pipeline-dashboard && pnpm dev",
+    "editor": "cd tools/pipeline-dashboard && pnpm dev",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -66,6 +66,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
     "drizzle-kit": "^0.31.9",
     "prettier": "^3.5.3",
     "typescript": "^5.7.2",
@@ -76,6 +77,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
+      "sharp",
       "workerd"
     ]
   }
