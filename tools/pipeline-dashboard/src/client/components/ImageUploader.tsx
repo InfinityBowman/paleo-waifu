@@ -49,7 +49,7 @@ export function ImageUploader({
     (e: React.DragEvent) => {
       e.preventDefault()
       setDragging(false)
-      const file = e.dataTransfer.files[0]
+      const file = e.dataTransfer.files[0] as File | undefined
       if (file) handleFile(file)
     },
     [handleFile],
@@ -131,7 +131,7 @@ export function ImageUploader({
             <Upload className="h-3 w-3" />
             Replace image
           </button>
-          <PushToR2Button slug={slug!} />
+          <PushToR2Button slug={slug} />
         </div>
       )}
     </div>

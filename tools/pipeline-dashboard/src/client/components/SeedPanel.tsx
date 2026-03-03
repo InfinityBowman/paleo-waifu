@@ -8,7 +8,8 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { cleanR2, seedDb, syncR2, type SyncProgress } from '../lib/api'
+import {  cleanR2, seedDb, syncR2 } from '../lib/api'
+import type {SyncProgress} from '../lib/api';
 
 type Tab = 'seed' | 'r2'
 
@@ -29,7 +30,7 @@ export function SeedPanel({ onClose }: { onClose: () => void }) {
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null)
   const [cleanResult, setCleanResult] = useState<{
     deleted: number
-    errors: string[]
+    errors: Array<string>
   } | null>(null)
 
   async function handleSeed() {

@@ -3,7 +3,8 @@ import { createHash } from 'node:crypto'
 import { writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { promisify } from 'node:util'
-import { readCreatures, type Creature } from './creatures'
+import {  readCreatures } from './creatures'
+import type {Creature} from './creatures';
 
 const execFileAsync = promisify(execFile)
 
@@ -28,14 +29,14 @@ function sqlNum(val: number | null | undefined): string {
   return String(val)
 }
 
-export function generateSeedSql(creatures: Creature[]): string {
-  const lines: string[] = []
-  const creatureIds: string[] = []
+export function generateSeedSql(creatures: Array<Creature>): string {
+  const lines: Array<string> = []
+  const creatureIds: Array<string> = []
 
   for (const c of creatures) {
     const cid = nanoid(c.scientificName)
     creatureIds.push(cid)
-    const funFacts = JSON.stringify(c.funFacts ?? [])
+    const funFacts = JSON.stringify(c.funFacts)
 
     lines.push(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, period, diet, ` +
@@ -48,7 +49,7 @@ export function generateSeedSql(creatures: Creature[]): string {
         `${sqlStr(c.diet || 'Unknown')}, ` +
         `${sqlNum(c.sizeMeters)}, ` +
         `${sqlNum(c.weightKg)}, ` +
-        `${sqlStr(c.rarity || 'common')}, ` +
+        `${sqlStr(c.rarity)}, ` +
         `'${escapeSql(c.description || '')}', ` +
         `${sqlStr(funFacts)}, ` +
         `${sqlStr(c.imageUrl)}, ` +

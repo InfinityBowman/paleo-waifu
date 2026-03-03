@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
 import { LogOut, Menu, Shield } from 'lucide-react'
+import type {BadgeData} from '@/lib/badges';
 import {
   IconBookshelf,
   IconCardExchange,
@@ -11,7 +12,7 @@ import {
   IconPerson,
 } from '@/components/icons'
 import { signIn, signOut, useSession } from '@/lib/auth-client'
-import { type BadgeData, getBadges } from '@/lib/badges'
+import {  getBadges } from '@/lib/badges'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {

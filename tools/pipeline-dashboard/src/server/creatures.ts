@@ -1,6 +1,7 @@
 import { readFile, rename, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
-import { slugify, type Creature } from '../shared/types'
+import {  slugify } from '../shared/types'
+import type {Creature} from '../shared/types';
 
 export type { Creature }
 export { slugify }
@@ -8,22 +9,22 @@ export { slugify }
 const DATA_DIR = resolve(import.meta.dirname, '../../../../python/data')
 const JSON_PATH = resolve(DATA_DIR, 'creatures_enriched.json')
 
-export async function readCreatures(): Promise<Creature[]> {
+export async function readCreatures(): Promise<Array<Creature>> {
   const raw = await readFile(JSON_PATH, 'utf-8')
-  return JSON.parse(raw) as Creature[]
+  return JSON.parse(raw) as Array<Creature>
 }
 
 // Serialize all writes to prevent concurrent read-write data loss
 let writeQueue = Promise.resolve()
 
-async function atomicWrite(creatures: Creature[]): Promise<void> {
+async function atomicWrite(creatures: Array<Creature>): Promise<void> {
   const sorted = [...creatures].sort((a, b) => a.name.localeCompare(b.name))
   const tmp = JSON_PATH + '.tmp'
   await writeFile(tmp, JSON.stringify(sorted, null, 2) + '\n', 'utf-8')
   await rename(tmp, JSON_PATH)
 }
 
-export function writeCreatures(creatures: Creature[]): Promise<void> {
+export function writeCreatures(creatures: Array<Creature>): Promise<void> {
   const p = writeQueue.then(() => atomicWrite(creatures))
   writeQueue = p.catch(() => {})
   return p
@@ -87,13 +88,13 @@ export function removeCreature(slug: string): Promise<void> {
 }
 
 export function findBySlug(
-  creatures: Creature[],
+  creatures: Array<Creature>,
   slug: string,
 ): Creature | undefined {
   return creatures.find((c) => slugify(c.scientificName) === slug)
 }
 
-export function getStats(creatures: Creature[]) {
+export function getStats(creatures: Array<Creature>) {
   const byRarity: Record<string, number> = {}
   const byEra: Record<string, number> = {}
   const byDiet: Record<string, number> = {}

@@ -46,6 +46,7 @@ export const Route = createFileRoute('/api/collection')({
           )
           .limit(1)
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- row can be undefined if no match
         if (!row) {
           return jsonResponse({ error: 'Creature not found' }, 404)
         }

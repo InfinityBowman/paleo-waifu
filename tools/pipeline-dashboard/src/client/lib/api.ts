@@ -3,7 +3,7 @@ import type { Creature, Stats } from './types'
 const BASE = '/api'
 
 export async function fetchCreatures(): Promise<{
-  creatures: Creature[]
+  creatures: Array<Creature>
   stats: Stats
 }> {
   const res = await fetch(`${BASE}/creatures`)
@@ -84,7 +84,7 @@ export interface SyncProgress {
   skipped: number
   failed: number
   current: string
-  errors: string[]
+  errors: Array<string>
   done: boolean
 }
 
@@ -99,6 +99,7 @@ export async function syncR2(
   const decoder = new TextDecoder()
   let buffer = ''
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
@@ -118,7 +119,7 @@ export async function syncR2(
 
 export async function cleanR2(): Promise<{
   deleted: number
-  errors: string[]
+  errors: Array<string>
 }> {
   const res = await fetch(`${BASE}/r2/clean`, { method: 'POST' })
   if (!res.ok) throw new Error('Failed to clean R2')

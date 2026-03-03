@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { ArrowUpDown, ImageOff } from 'lucide-react'
+import {  slugify } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
-import { FilterBar, type Filters } from './FilterBar'
-import { slugify, type Creature } from '../lib/types'
+import { FilterBar  } from './FilterBar'
+import type {Creature} from '../lib/types';
+import type {Filters} from './FilterBar';
 
 type SortKey = 'name' | 'scientificName' | 'era' | 'rarity' | 'diet' | 'type'
 type SortDir = 'asc' | 'desc'
@@ -13,7 +15,7 @@ export function CreatureList({
   creatures,
   onSelect,
 }: {
-  creatures: Creature[]
+  creatures: Array<Creature>
   onSelect: (slug: string) => void
 }) {
   const [filters, setFilters] = useState<Filters>({
@@ -53,7 +55,7 @@ export function CreatureList({
       if (sortKey === 'rarity') {
         cmp = RARITY_ORDER[a.rarity] - RARITY_ORDER[b.rarity]
       } else {
-        cmp = (a[sortKey] ?? '').localeCompare(b[sortKey] ?? '')
+        cmp = a[sortKey].localeCompare(b[sortKey])
       }
       return sortDir === 'asc' ? cmp : -cmp
     })

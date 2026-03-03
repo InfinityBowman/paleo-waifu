@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ArrowLeft, Loader2, Save, Trash2 } from 'lucide-react'
-import { RarityBadge } from './RarityBadge'
-import { ImageUploader } from './ImageUploader'
 import {
   createCreature,
   deleteCreature,
   fetchCreature,
   updateCreature,
 } from '../lib/api'
-import { slugify, type Creature, type Rarity } from '../lib/types'
+import {   slugify } from '../lib/types'
+import { RarityBadge } from './RarityBadge'
+import { ImageUploader } from './ImageUploader'
+import type {Creature, Rarity} from '../lib/types';
 
-const RARITIES: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+const RARITIES: Array<Rarity> = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 const ERAS = [
   'Cambrian',
   'Ordovician',
@@ -83,7 +84,7 @@ export function CreatureForm({
   }, [slug])
 
   const set = useCallback(
-    <K extends keyof Creature>(key: K, value: Creature[K]) => {
+    <TKey extends keyof Creature>(key: TKey, value: Creature[TKey]) => {
       setForm((prev) => ({ ...prev, [key]: value }))
     },
     [],
@@ -405,7 +406,7 @@ function SelectField({
   label: string
   value: string
   onChange: (v: string) => void
-  options: string[]
+  options: Array<string>
 }) {
   return (
     <div className="space-y-1">
@@ -454,8 +455,8 @@ function FunFactsEditor({
   facts,
   onChange,
 }: {
-  facts: string[]
-  onChange: (v: string[]) => void
+  facts: Array<string>
+  onChange: (v: Array<string>) => void
 }) {
   return (
     <div className="space-y-2">

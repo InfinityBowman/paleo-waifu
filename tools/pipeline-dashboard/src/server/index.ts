@@ -2,26 +2,28 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import {
+  
+  VALID_RARITIES,
   addCreature,
   findBySlug,
   getStats,
   readCreatures,
   removeCreature,
   slugify,
-  updateCreature,
-  VALID_RARITIES,
-  type Creature,
+  updateCreature
 } from './creatures'
 import {
+  
   cleanOrphanedR2Objects,
   deleteImage,
   getLocalImage,
   processAndUploadImage,
   pushExistingImageToR2,
-  syncAllToR2,
-  type SyncProgress,
+  syncAllToR2
 } from './images'
 import { seedDatabase } from './seed'
+import type {Creature} from './creatures';
+import type {SyncProgress} from './images';
 
 const app = new Hono()
 
@@ -48,7 +50,7 @@ app.get('/api/creatures/:slug', async (c) => {
 })
 
 app.post('/api/creatures', async (c) => {
-  const body = (await c.req.json()) as Partial<Creature>
+  const body = (await c.req.json())
   if (!body.name || !body.scientificName || !body.era || !body.rarity) {
     return c.json(
       { error: 'Missing required fields: name, scientificName, era, rarity' },
@@ -92,7 +94,7 @@ app.post('/api/creatures', async (c) => {
 
 app.put('/api/creatures/:slug', async (c) => {
   const slug = c.req.param('slug')
-  const body = (await c.req.json()) as Partial<Creature>
+  const body = (await c.req.json())
 
   if (body.rarity && !VALID_RARITIES.has(body.rarity)) {
     return c.json({ error: `Invalid rarity: ${body.rarity}` }, 400)
@@ -180,7 +182,7 @@ app.post('/api/creatures/:slug/push-r2', async (c) => {
 
 // ─── R2 Sync ────────────────────────────────────────────────────────
 
-app.post('/api/r2/sync', async (c) => {
+app.post('/api/r2/sync', (c) => {
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     start(controller) {
@@ -222,7 +224,7 @@ app.post('/api/r2/clean', async (c) => {
 // ─── Seed ────────────────────────────────────────────────────────────
 
 app.post('/api/seed', async (c) => {
-  const { target } = (await c.req.json()) as { target: 'local' | 'prod' }
+  const { target } = (await c.req.json())
   if (target !== 'local' && target !== 'prod') {
     return c.json({ error: 'target must be "local" or "prod"' }, 400)
   }

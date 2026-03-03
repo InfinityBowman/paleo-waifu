@@ -1,7 +1,7 @@
 import { Search, X } from 'lucide-react'
-import { type Rarity } from '../lib/types'
+import type {Rarity} from '../lib/types';
 
-const RARITIES: Rarity[] = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+const RARITIES: Array<Rarity> = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
 export interface Filters {
   search: string
@@ -20,8 +20,8 @@ export function FilterBar({
 }: {
   filters: Filters
   onChange: (filters: Filters) => void
-  eras: string[]
-  diets: string[]
+  eras: Array<string>
+  diets: Array<string>
   filteredCount: number
   totalCount: number
 }) {

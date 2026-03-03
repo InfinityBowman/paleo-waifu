@@ -8,7 +8,7 @@ export interface Creature {
   weightKg: number | null
   rarity: Rarity
   description: string
-  funFacts: string[]
+  funFacts: Array<string>
   wikipediaImageUrl: string | null
   source: string
   type: string

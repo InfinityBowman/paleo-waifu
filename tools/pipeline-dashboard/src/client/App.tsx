@@ -10,7 +10,7 @@ type View = { kind: 'list' } | { kind: 'edit'; slug: string } | { kind: 'create'
 
 export function App() {
   const [view, setView] = useState<View>({ kind: 'list' })
-  const [creatures, setCreatures] = useState<Creature[]>([])
+  const [creatures, setCreatures] = useState<Array<Creature>>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [showSeed, setShowSeed] = useState(false)
 

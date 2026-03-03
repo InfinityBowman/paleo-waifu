@@ -113,7 +113,7 @@ export interface SyncProgress {
   skipped: number
   failed: number
   current: string
-  errors: string[]
+  errors: Array<string>
   done: boolean
 }
 
@@ -125,7 +125,7 @@ export async function syncAllToR2(
   let uploaded = 0
   let skipped = 0
   let failed = 0
-  const errors: string[] = []
+  const errors: Array<string> = []
 
   function emit(current: string, done = false) {
     onProgress({ total, uploaded, skipped, failed, current, errors: [...errors], done })
@@ -169,7 +169,7 @@ export async function syncAllToR2(
 
 export async function cleanOrphanedR2Objects(): Promise<{
   deleted: number
-  errors: string[]
+  errors: Array<string>
 }> {
   const creatures = await readCreatures()
   const validKeys = new Set(
@@ -177,7 +177,7 @@ export async function cleanOrphanedR2Objects(): Promise<{
   )
 
   // List all objects in the bucket
-  let allKeys: string[] = []
+  let allKeys: Array<string> = []
   try {
     const { stdout } = await execFileAsync('npx', [
       'wrangler', 'r2', 'object', 'list', R2_BUCKET,
@@ -194,7 +194,7 @@ export async function cleanOrphanedR2Objects(): Promise<{
 
   const orphaned = allKeys.filter((key) => !validKeys.has(key))
   let deleted = 0
-  const errors: string[] = []
+  const errors: Array<string> = []
 
   for (const key of orphaned) {
     try {
