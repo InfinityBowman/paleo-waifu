@@ -96,7 +96,7 @@ export function SeedPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-[560px] rounded-xl bg-card shadow-xl">
+      <div className="w-140 rounded-xl bg-card shadow-xl">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex rounded-lg border border-border">
@@ -336,7 +336,7 @@ function SyncProgressBar({ progress }: { progress: SyncProgress }) {
       )}
 
       {progress.errors.length > 0 && (
-        <pre className="mt-1 max-h-[100px] overflow-auto rounded bg-background/50 p-2 font-mono text-xs text-destructive">
+        <pre className="mt-1 max-h-25 overflow-auto rounded bg-background/50 p-2 font-mono text-xs text-destructive">
           {progress.errors.join('\n')}
         </pre>
       )}
@@ -370,7 +370,7 @@ function ResultBanner({
         </span>
       </div>
       {detail && (
-        <pre className="mt-2 max-h-[200px] overflow-auto rounded bg-background/50 p-2 font-mono text-xs text-muted-foreground">
+        <pre className="mt-2 max-h-50 overflow-auto rounded bg-background/50 p-2 font-mono text-xs text-muted-foreground">
           {detail}
         </pre>
       )}
