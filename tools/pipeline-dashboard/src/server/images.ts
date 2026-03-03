@@ -1,5 +1,5 @@
 import { execFile } from 'node:child_process'
-import { mkdir, readFile, unlink } from 'node:fs/promises'
+import { access, mkdir, readFile, unlink } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { promisify } from 'node:util'
 import sharp from 'sharp'
@@ -14,6 +14,7 @@ const execFileAsync = promisify(execFile)
 
 const PROJECT_ROOT = resolve(import.meta.dirname, '../../../..')
 const R2_BUCKET = 'paleo-waifu-images-prod'
+const CACHE_CONTROL = 'public,max-age=31536000,immutable'
 
 const SAFE_SLUG = /^[a-z0-9-]+$/
 
@@ -21,6 +22,18 @@ function validateSlug(slug: string): void {
   if (!SAFE_SLUG.test(slug)) {
     throw new Error(`Invalid slug: ${slug}`)
   }
+}
+
+async function uploadToR2(slug: string, filePath: string): Promise<void> {
+  const r2Key = `creatures/${slug}.webp`
+  await execFileAsync('npx', [
+    'wrangler', 'r2', 'object', 'put',
+    `${R2_BUCKET}/${r2Key}`,
+    `--file=${filePath}`,
+    '--content-type=image/webp',
+    `--cache-control=${CACHE_CONTROL}`,
+    '--remote',
+  ], { cwd: PROJECT_ROOT })
 }
 
 export async function processAndUploadImage(
@@ -39,17 +52,9 @@ export async function processAndUploadImage(
   await sharp(fileBuffer).webp({ quality: 85 }).toFile(webpPath)
   const imageAspectRatio = Math.round((width / height) * 10000) / 10000
 
-  // Upload to prod R2 (use execFile to avoid shell injection)
-  const r2Key = `creatures/${slug}.webp`
-  await execFileAsync('npx', [
-    'wrangler', 'r2', 'object', 'put',
-    `${R2_BUCKET}/${r2Key}`,
-    `--file=${webpPath}`,
-    '--content-type=image/webp',
-    '--remote',
-  ], { cwd: PROJECT_ROOT })
+  await uploadToR2(slug, webpPath)
 
-  const imageUrl = `/api/images/${r2Key}`
+  const imageUrl = `/api/images/creatures/${slug}.webp`
 
   // Atomically update creature in JSON
   await updateCreature(slug, { imageUrl, imageAspectRatio })
@@ -79,7 +84,6 @@ export async function deleteImage(slug: string): Promise<void> {
     // File may not exist
   }
 
-  // Delete from R2 (use execFile to avoid shell injection)
   const r2Key = `creatures/${slug}.webp`
   try {
     await execFileAsync('npx', [
@@ -90,4 +94,121 @@ export async function deleteImage(slug: string): Promise<void> {
   } catch {
     // May not exist in R2
   }
+}
+
+export async function pushExistingImageToR2(slug: string): Promise<void> {
+  validateSlug(slug)
+  const webpPath = resolve(IMAGES_DIR, `${slug}.webp`)
+  await access(webpPath)
+  await uploadToR2(slug, webpPath)
+}
+
+// ─── Bulk Operations ─────────────────────────────────────────────────
+
+const PARALLEL_UPLOADS = 4
+
+export interface SyncProgress {
+  total: number
+  uploaded: number
+  skipped: number
+  failed: number
+  current: string
+  errors: string[]
+  done: boolean
+}
+
+export async function syncAllToR2(
+  onProgress: (progress: SyncProgress) => void,
+): Promise<void> {
+  const creatures = await readCreatures()
+  const total = creatures.length
+  let uploaded = 0
+  let skipped = 0
+  let failed = 0
+  const errors: string[] = []
+
+  function emit(current: string, done = false) {
+    onProgress({ total, uploaded, skipped, failed, current, errors: [...errors], done })
+  }
+
+  emit('Starting sync...')
+
+  for (let i = 0; i < creatures.length; i += PARALLEL_UPLOADS) {
+    const batch = creatures.slice(i, i + PARALLEL_UPLOADS)
+    const results = await Promise.allSettled(
+      batch.map(async (creature) => {
+        const slug = slugify(creature.scientificName)
+        const webpPath = resolve(IMAGES_DIR, `${slug}.webp`)
+
+        try {
+          await access(webpPath)
+        } catch {
+          skipped++
+          emit(slug)
+          return
+        }
+
+        await uploadToR2(slug, webpPath)
+        uploaded++
+        emit(slug)
+      }),
+    )
+
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        failed++
+        const msg = result.reason?.message ?? String(result.reason)
+        errors.push(msg)
+        emit(msg)
+      }
+    }
+  }
+
+  emit('Done', true)
+}
+
+export async function cleanOrphanedR2Objects(): Promise<{
+  deleted: number
+  errors: string[]
+}> {
+  const creatures = await readCreatures()
+  const validKeys = new Set(
+    creatures.map((c) => `creatures/${slugify(c.scientificName)}.webp`),
+  )
+
+  // List all objects in the bucket
+  let allKeys: string[] = []
+  try {
+    const { stdout } = await execFileAsync('npx', [
+      'wrangler', 'r2', 'object', 'list', R2_BUCKET,
+      '--remote',
+    ], { cwd: PROJECT_ROOT })
+
+    // wrangler outputs JSON array of objects
+    const objects = JSON.parse(stdout) as Array<{ key: string }>
+    allKeys = objects.map((o) => o.key)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { deleted: 0, errors: [`Failed to list R2 objects: ${msg}`] }
+  }
+
+  const orphaned = allKeys.filter((key) => !validKeys.has(key))
+  let deleted = 0
+  const errors: string[] = []
+
+  for (const key of orphaned) {
+    try {
+      await execFileAsync('npx', [
+        'wrangler', 'r2', 'object', 'delete',
+        `${R2_BUCKET}/${key}`,
+        '--remote',
+      ], { cwd: PROJECT_ROOT })
+      deleted++
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      errors.push(`Failed to delete ${key}: ${msg}`)
+    }
+  }
+
+  return { deleted, errors }
 }

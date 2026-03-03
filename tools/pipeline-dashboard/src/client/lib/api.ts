@@ -78,6 +78,64 @@ export async function uploadImage(
   return res.json()
 }
 
+export interface SyncProgress {
+  total: number
+  uploaded: number
+  skipped: number
+  failed: number
+  current: string
+  errors: string[]
+  done: boolean
+}
+
+export async function syncR2(
+  onProgress: (progress: SyncProgress) => void,
+): Promise<void> {
+  const res = await fetch(`${BASE}/r2/sync`, { method: 'POST' })
+  if (!res.ok) throw new Error('Failed to sync R2')
+  if (!res.body) throw new Error('No response body')
+
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+
+    for (const line of lines) {
+      if (line.startsWith('data: ')) {
+        const data = JSON.parse(line.slice(6)) as SyncProgress
+        onProgress(data)
+      }
+    }
+  }
+}
+
+export async function cleanR2(): Promise<{
+  deleted: number
+  errors: string[]
+}> {
+  const res = await fetch(`${BASE}/r2/clean`, { method: 'POST' })
+  if (!res.ok) throw new Error('Failed to clean R2')
+  return res.json()
+}
+
+export async function pushImageToR2(slug: string): Promise<{ ok: boolean }> {
+  const res = await fetch(`${BASE}/creatures/${slug}/push-r2`, {
+    method: 'POST',
+  })
+  if (!res.ok) {
+    const body = (await res.json()) as { error?: string }
+    throw new Error(body.error || 'Failed to push to R2')
+  }
+  return res.json()
+}
+
 export async function seedDb(
   target: 'local' | 'prod',
 ): Promise<{ ok: boolean; creatureCount: number; output: string }> {

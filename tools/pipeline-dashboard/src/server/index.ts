@@ -12,7 +12,15 @@ import {
   VALID_RARITIES,
   type Creature,
 } from './creatures'
-import { deleteImage, getLocalImage, processAndUploadImage } from './images'
+import {
+  cleanOrphanedR2Objects,
+  deleteImage,
+  getLocalImage,
+  processAndUploadImage,
+  pushExistingImageToR2,
+  syncAllToR2,
+  type SyncProgress,
+} from './images'
 import { seedDatabase } from './seed'
 
 const app = new Hono()
@@ -157,6 +165,58 @@ app.get('/api/creatures/:slug/image', async (c) => {
   return new Response(new Uint8Array(result.buffer), {
     headers: { 'Content-Type': result.contentType },
   })
+})
+
+app.post('/api/creatures/:slug/push-r2', async (c) => {
+  const slug = c.req.param('slug')
+  try {
+    await pushExistingImageToR2(slug)
+    return c.json({ ok: true })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return c.json({ error: msg }, 500)
+  }
+})
+
+// ─── R2 Sync ────────────────────────────────────────────────────────
+
+app.post('/api/r2/sync', async (c) => {
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      function send(progress: SyncProgress) {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify(progress)}\n\n`),
+        )
+        if (progress.done) {
+          controller.close()
+        }
+      }
+
+      syncAllToR2(send).catch((err) => {
+        const msg = err instanceof Error ? err.message : String(err)
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ total: 0, uploaded: 0, skipped: 0, failed: 1, current: msg, errors: [msg], done: true })}\n\n`,
+          ),
+        )
+        controller.close()
+      })
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
+})
+
+app.post('/api/r2/clean', async (c) => {
+  const result = await cleanOrphanedR2Objects()
+  return c.json(result)
 })
 
 // ─── Seed ────────────────────────────────────────────────────────────

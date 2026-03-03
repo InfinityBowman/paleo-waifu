@@ -1,4 +1,4 @@
-import { Database, Plus } from 'lucide-react'
+import { Plus, Settings } from 'lucide-react'
 import type { Stats } from '../lib/types'
 
 export function Header({
@@ -37,8 +37,8 @@ export function Header({
           onClick={onSeed}
           className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
-          <Database className="h-4 w-4" />
-          Seed Database
+          <Settings className="h-4 w-4" />
+          Seed & Sync
         </button>
       </div>
     </header>

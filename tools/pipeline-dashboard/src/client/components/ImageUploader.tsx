@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react'
-import { ImagePlus, Loader2, Upload } from 'lucide-react'
-import { uploadImage } from '../lib/api'
+import { Check, Cloud, ImagePlus, Loader2, Upload } from 'lucide-react'
+import { pushImageToR2, uploadImage } from '../lib/api'
 
 export function ImageUploader({
   slug,
@@ -120,16 +120,64 @@ export function ImageUploader({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {!disabled && imgSrc && !uploading && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            inputRef.current?.click()
-          }}
-          className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <Upload className="h-3 w-3" />
-          Replace image
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              inputRef.current?.click()
+            }}
+            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <Upload className="h-3 w-3" />
+            Replace image
+          </button>
+          <PushToR2Button slug={slug!} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function PushToR2Button({ slug }: { slug: string }) {
+  const [state, setState] = useState<'idle' | 'pushing' | 'done' | 'error'>(
+    'idle',
+  )
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
+  async function handlePush() {
+    setState('pushing')
+    setErrorMsg(null)
+    try {
+      await pushImageToR2(slug)
+      setState('done')
+      setTimeout(() => setState('idle'), 3000)
+    } catch (err) {
+      setState('error')
+      setErrorMsg(err instanceof Error ? err.message : 'Push failed')
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-1.5">
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          handlePush()
+        }}
+        disabled={state === 'pushing'}
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+      >
+        {state === 'pushing' ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : state === 'done' ? (
+          <Check className="h-3 w-3 text-success" />
+        ) : (
+          <Cloud className="h-3 w-3" />
+        )}
+        {state === 'done' ? 'Pushed' : 'Push to R2'}
+      </button>
+      {state === 'error' && errorMsg && (
+        <span className="text-xs text-destructive">{errorMsg}</span>
       )}
     </div>
   )
