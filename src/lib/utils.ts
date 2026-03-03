@@ -8,11 +8,9 @@ export function cn(...inputs: Array<ClassValue>) {
 
 const CDN_BASE = 'https://cdn.jacobmaynard.dev'
 
-/** Rewrite `/api/images/…` paths to direct CDN URLs to avoid Worker round-trips.
- *  In dev, keep the `/api/images/` path so images are served from local R2. */
+/** Rewrite `/api/images/…` paths to direct CDN URLs to avoid Worker round-trips. */
 export function toCdnUrl(imageUrl: string | null): string | null {
   if (!imageUrl) return null
-  if (import.meta.env.DEV) return imageUrl
   if (imageUrl.startsWith('/api/images/')) {
     return `${CDN_BASE}/${imageUrl.slice('/api/images/'.length)}`
   }

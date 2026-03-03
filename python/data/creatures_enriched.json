@@ -10180,24 +10180,6 @@
     "imageUrl": "/api/images/creatures/eurypterygius.webp"
   },
   {
-    "name": "Gryphus",
-    "scientificName": "Gryphus",
-    "era": "Triassic",
-    "period": "Late Triassic",
-    "diet": "Carnivorous",
-    "sizeMeters": null,
-    "weightKg": null,
-    "rarity": "uncommon",
-    "description": "Gryphus may refer to: Gryphus, the Griffin Gryphus (brachiopod), a genus of brachiopods in the family Terebratulidae Gryphus, a genus of bivalves in the family Chamidae, synonym of Chama Gryphus, a genus of beetles in the family Terebratulidae, synonym of Grypus",
-    "funFacts": [],
-    "wikipediaImageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/The_black_tulip.djvu",
-    "source": "pbdb",
-    "type": "Ichthyosauria",
-    "foundIn": null,
-    "nameMeaning": null,
-    "pronunciation": null
-  },
-  {
     "name": "Platypterygius",
     "scientificName": "Platypterygius",
     "era": "Jurassic",
@@ -11996,24 +11978,6 @@
     "pronunciation": null,
     "imageAspectRatio": 0.8466,
     "imageUrl": "/api/images/creatures/lonchodomas.webp"
-  },
-  {
-    "name": "Encrinurus",
-    "scientificName": "Encrinurus",
-    "era": "Ordovician",
-    "period": null,
-    "diet": "Carnivorous",
-    "sizeMeters": null,
-    "weightKg": null,
-    "rarity": "rare",
-    "description": "Encrinurus is a long-lived genus of phacopid trilobites that lived in what are now Africa, Asia, Australia, Europe, North America, and South America from the middle Ordovician to the early Devonian from 472 to 412.3 mya, existing for approximately 59.7 million years",
-    "funFacts": [],
-    "wikipediaImageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4a/VCH_Worcestershire_1.djvu",
-    "source": "pbdb",
-    "type": "Phacopida",
-    "foundIn": null,
-    "nameMeaning": null,
-    "pronunciation": null
   },
   {
     "name": "Asaphellus",

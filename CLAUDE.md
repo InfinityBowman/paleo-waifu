@@ -75,8 +75,8 @@ Routes:
 - `src/lib/` — Auth, gacha logic, types, utilities
 - `src/lib/db/` — Drizzle schema and D1 client factory
 - `src/store/` — Zustand store (fossils, pull results)
-- `python/` — Data pipeline for creature seeding (scrape, enrich, images, seed)
-- `tools/pipeline-dashboard/` — React + Hono dashboard for running pipeline steps visually
+- `python/` — Creature data (`creatures_enriched.json`) and legacy scraping scripts
+- `tools/pipeline-dashboard/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
 
 ### Auth
 

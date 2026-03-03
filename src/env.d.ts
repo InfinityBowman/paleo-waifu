@@ -1,6 +1,5 @@
 interface Env {
   DB: D1Database
-  IMAGES: R2Bucket
   AUTH_SECRET: string
   AUTH_BASE_URL: string
   DISCORD_CLIENT_ID: string
