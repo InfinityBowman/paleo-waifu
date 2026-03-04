@@ -20,8 +20,8 @@ COPY tools/pipeline-dashboard/src/ ./src/
 RUN mkdir -p src/server/vendor
 COPY src/lib/db/schema.ts ./src/server/vendor/schema.ts
 
-# Build client (Vite) and server (tsc)
-RUN pnpm build
+# Build client (Vite) and server (esbuild) — skip prebuild since schema is already vendored above
+RUN pnpm build:client && pnpm build:server
 
 # ─── Production ───────────────────────────────────────────────────────
 FROM node:22-alpine
