@@ -26,3 +26,4 @@ seed.sql
 .localflare/
 .DS_Store
 *.pdf
+__pycache__/

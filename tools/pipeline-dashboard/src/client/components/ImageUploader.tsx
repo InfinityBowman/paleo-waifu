@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { Check, Cloud, ImagePlus, Loader2, Upload } from 'lucide-react'
 import { pushImageToR2, uploadImage } from '../lib/api'
+import { toCdnUrl } from '../lib/types'
 
 export function ImageUploader({
   slug,
@@ -55,7 +56,7 @@ export function ImageUploader({
     [handleFile],
   )
 
-  const imgSrc = preview || (slug && currentImageUrl ? currentImageUrl : null)
+  const imgSrc = preview || (slug && currentImageUrl ? toCdnUrl(currentImageUrl) : null)
   const disabled = !slug
 
   return (

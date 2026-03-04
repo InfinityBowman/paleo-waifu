@@ -18,6 +18,31 @@ export const VALID_RARITIES = new Set([
   'legendary',
 ])
 
+// ─── In-memory cache ──────────────────────────────────────────────────
+// Reduces D1 REST API calls since findRowBySlug does a full table scan.
+
+const CACHE_TTL = 60_000 // 1 minute
+let cachedRows: CreatureRow[] | null = null
+let cacheTime = 0
+
+async function getAllRows(db: EditorDatabase): Promise<CreatureRow[]> {
+  const now = Date.now()
+  if (cachedRows && now - cacheTime < CACHE_TTL) {
+    return cachedRows
+  }
+  cachedRows = await db
+    .select()
+    .from(schema.creature)
+    .orderBy(schema.creature.name)
+  cacheTime = now
+  return cachedRows
+}
+
+function invalidateCache() {
+  cachedRows = null
+  cacheTime = 0
+}
+
 function creatureId(scientificName: string): string {
   return createHash('sha256').update(scientificName).digest('hex').slice(0, 21)
 }
@@ -48,23 +73,21 @@ function rowToCreature(row: CreatureRow): Creature {
 /**
  * Find a creature row by slug. Since slugs are derived from scientificName
  * and D1/SQLite lacks a native slugify, we fetch all rows and filter in JS.
+ * Uses the in-memory cache to avoid hitting the D1 REST API on every call.
  * TODO: Add a `slug` column to the schema and use WHERE slug = ? instead.
  */
 async function findRowBySlug(
   db: EditorDatabase,
   slug: string,
 ): Promise<CreatureRow | undefined> {
-  const rows: CreatureRow[] = await db.select().from(schema.creature)
+  const rows = await getAllRows(db)
   return rows.find((r: CreatureRow) => slugify(r.scientificName) === slug)
 }
 
 export async function listCreatures(
   db: EditorDatabase,
 ): Promise<Array<Creature>> {
-  const rows = await db
-    .select()
-    .from(schema.creature)
-    .orderBy(schema.creature.name)
+  const rows = await getAllRows(db)
   return rows.map(rowToCreature)
 }
 
@@ -109,6 +132,7 @@ export async function insertCreature(
     pronunciation: data.pronunciation,
     wikipediaImageUrl: data.wikipediaImageUrl,
   })
+  invalidateCache()
 }
 
 export async function updateCreatureBySlug(
@@ -148,6 +172,7 @@ export async function updateCreatureBySlug(
     .update(schema.creature)
     .set(values)
     .where(eq(schema.creature.id, match.id))
+  invalidateCache()
 }
 
 export async function updateCreatureImage(
@@ -163,6 +188,7 @@ export async function updateCreatureImage(
     .update(schema.creature)
     .set({ imageUrl, imageAspectRatio })
     .where(eq(schema.creature.id, match.id))
+  invalidateCache()
 }
 
 export async function deleteCreatureBySlug(
@@ -175,6 +201,7 @@ export async function deleteCreatureBySlug(
   await db
     .delete(schema.creature)
     .where(eq(schema.creature.id, match.id))
+  invalidateCache()
 }
 
 export function getStats(creatures: Array<Creature>) {

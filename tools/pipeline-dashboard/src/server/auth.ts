@@ -17,8 +17,11 @@ export interface EditorUser {
 
 const COOKIE_NAME = 'editor_session'
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 7 // 7 days
-
 const ALLOWED_ROLES = new Set(['admin', 'editor'])
+
+function useSecureCookies(): boolean {
+  return envRef.EDITOR_URL.startsWith('https://')
+}
 
 let envRef: EditorEnv
 let dbRef: EditorDatabase
@@ -105,7 +108,7 @@ export function createAuthRoutes() {
     const state = randomUUID()
     setCookie(c, 'oauth_state', state, {
       httpOnly: true,
-      secure: envRef.NODE_ENV === 'production',
+      secure: useSecureCookies(),
       sameSite: 'Lax',
       maxAge: 300,
       path: '/auth',
@@ -191,7 +194,7 @@ export function createAuthRoutes() {
 
     setCookie(c, COOKIE_NAME, token, {
       httpOnly: true,
-      secure: envRef.NODE_ENV === 'production',
+      secure: useSecureCookies(),
       sameSite: 'Lax',
       maxAge: COOKIE_MAX_AGE,
       path: '/',

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ArrowUpDown, ImageOff } from 'lucide-react'
-import {  slugify } from '../lib/types'
+import { slugify, toCdnUrl } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
 import { FilterBar  } from './FilterBar'
 import type {Creature} from '../lib/types';
@@ -123,7 +123,7 @@ export function CreatureList({
                   <td className="px-4 py-2">
                     {c.imageUrl ? (
                       <img
-                        src={c.imageUrl}
+                        src={toCdnUrl(c.imageUrl)!}
                         alt=""
                         className="h-8 w-8 rounded object-cover"
                         loading="lazy"
