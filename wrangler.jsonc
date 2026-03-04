@@ -21,6 +21,7 @@
       "name": "paleo-waifu-prod",
       "routes": [
         { "pattern": "paleo-waifu.jacobmaynard.dev", "custom_domain": true },
+        { "pattern": "paleowaifu.com", "custom_domain": true },
       ],
       "d1_databases": [
         {

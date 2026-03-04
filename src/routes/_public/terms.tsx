@@ -127,10 +127,13 @@ function TermsOfService() {
             Intellectual Property
           </h2>
           <p>
-            All content on PaleoWaifu, including creature artwork, character
-            designs, game mechanics, and website design, is owned by Syntch LLC
-            or its licensors. You may not reproduce, distribute, or create
-            derivative works from our content without written permission.
+            The website design, game mechanics, and original code of PaleoWaifu
+            are owned by Syntch LLC. Creature artwork and descriptive content
+            are sourced from Wikipedia and other open data sources under their
+            respective licenses (such as Creative Commons). We do not claim
+            ownership of third-party artwork or content. You may not reproduce
+            or distribute PaleoWaifu&apos;s original code or design without
+            written permission.
           </p>
         </section>
 
@@ -192,7 +195,7 @@ function TermsOfService() {
             Governing Law
           </h2>
           <p>
-            These terms are governed by the laws of the State of Delaware,
+            These terms are governed by the laws of the State of Missouri,
             without regard to conflict of law principles.
           </p>
         </section>
