@@ -1,6 +1,6 @@
 # PaleoWaifu
 
-A prehistoric animal waifu gacha game. Collect 600+ creatures spanning the Cambrian through the Pleistocene, trade with other players, and build your ultimate paleontology collection.
+A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian through the Pleistocene, trade with other players, and build your ultimate paleontology collection.
 
 ## Tech Stack
 
@@ -18,11 +18,13 @@ A prehistoric animal waifu gacha game. Collect 600+ creatures spanning the Cambr
 - **Gacha pulls** — Single or 10-pull with a full pity system (soft pity at 50, hard guarantee at 90)
 - **Rate-up banners** — Featured creatures get 50% of their rarity's drop share
 - **Collection** — Browse and filter your discovered creatures by rarity and era
-- **Encyclopedia** — View all 600+ creatures with real paleontology data and fun facts
+- **Encyclopedia** — View all 615+ creatures with real paleontology data and fun facts
 - **Trading** — Create open trade offers, browse the marketplace, swap creatures with other players
+- **Leaderboard** — Top players by XP and collection size
 - **Daily rewards** — Log in daily for free fossils
 - **Discord bot** — Pull creatures, claim dailies, check balance and pity via slash commands
 - **XP & leveling** — Earn XP by chatting in Discord, level up passively alongside the gacha
+- **Admin dashboard** — Manage banners, view stats, and moderate the game
 
 ## Setup
 
@@ -50,11 +52,10 @@ A prehistoric animal waifu gacha game. Collect 600+ creatures spanning the Cambr
    # Copy the database_id into wrangler.jsonc
    ```
 
-4. **Run migrations and seed**
+4. **Run migrations**
 
    ```bash
    pnpm db:migrate:local
-   pnpm db:seed:local
    ```
 
 5. **Start development**
@@ -90,9 +91,8 @@ wrangler secret put DISCORD_PUBLIC_KEY --env production
 wrangler secret put DISCORD_BOT_TOKEN --env production
 wrangler secret put XP_API_SECRET --env production
 
-# Apply remote migrations and seed
+# Apply remote migrations
 pnpm db:migrate:prod
-pnpm db:seed:prod
 ```
 
 ### GitHub Actions secrets required
@@ -106,11 +106,13 @@ pnpm db:seed:prod
 ```
 src/
 ├── components/
+│   ├── admin/         # Admin dashboard components
 │   ├── collection/    # Collection grid, creature card, detail modal
 │   ├── encyclopedia/  # Browse and filter all creatures
 │   ├── gacha/         # Banner select, pull button, pull animation, card reveal, pity counter
 │   ├── landing/       # Hero section
 │   ├── layout/        # Nav with auth state
+│   ├── shared/        # Shared components (CreatureCard, CreaturePickerModal)
 │   ├── trade/         # Trade list, offer, accept flow
 │   └── ui/            # shadcn/ui primitives
 ├── lib/
@@ -122,16 +124,18 @@ src/
 │   ├── types.ts       # Rarity types, rates, constants
 │   └── utils.ts       # cn() utility
 ├── routes/
-│   ├── _public/       # Landing page, encyclopedia (no auth)
-│   ├── _app/          # Gacha, collection, trade, profile (auth guarded)
-│   └── api/           # Gacha pull, trade, auth endpoints
+│   ├── _public/       # Landing page, encyclopedia, leaderboard (no auth)
+│   ├── _app/          # Gacha, collection, trade, profile, admin (auth guarded)
+│   └── api/           # Gacha pull, trade, collection, admin, auth endpoints
 ├── store/             # Zustand store
 └── styles.css         # Warm amber OKLCH theme
-python/                # Data pipeline for creature seeding
+
+python/                # Data pipeline for creature scraping, enrichment, image generation, R2 upload
+tools/pipeline-dashboard/  # Creature editor dashboard (React + Hono)
 
 bot/                   # Discord bot (Cloudflare Worker)
 ├── src/
-│   ├── commands/      # Slash command handlers (pull, daily, balance, pity, level, help)
+│   ├── commands/      # Slash command handlers (pull, daily, balance, pity, level, leaderboard, help)
 │   ├── lib/           # Discord types, auth, embeds, XP logic
 │   └── index.ts       # Worker entry: signature verification + routing
 ├── register.ts        # Script to register slash commands with Discord API
@@ -143,27 +147,28 @@ gateway/               # Discord Gateway listener (Node.js, runs on homelab)
 │   └── xp.ts          # Eligibility checks, cooldowns, XP API calls
 └── Dockerfile         # Pushed to GHCR, deployed via repository dispatch
 
-docs/                  # Detailed reference docs
+docs/                  # Design docs and reference
+tests/                 # Production integration tests (Vitest)
 ```
 
 ## Scripts
 
 | Command                  | Description                          |
 | ------------------------ | ------------------------------------ |
-| `pnpm dev`               | Dev server on http://localhost:3000  |
+| `pnpm dev`               | Dev server + editor on localhost:3000 |
 | `pnpm build`             | Production build                     |
 | `pnpm deploy`            | Build + deploy to Cloudflare Workers |
 | `pnpm db:generate`       | Generate Drizzle migration files     |
 | `pnpm db:migrate:local`  | Apply migrations to local D1         |
 | `pnpm db:migrate:prod`   | Apply migrations to production D1    |
-| `pnpm db:seed:local`     | Seed local D1 with creature data     |
 | `pnpm lint`              | ESLint                               |
 | `pnpm format`            | Prettier                             |
 | `pnpm check`             | Prettier --write + ESLint --fix      |
+| `pnpm typecheck`         | TypeScript type checking             |
+| `pnpm test`              | Run production integration tests     |
+| `pnpm editor`            | Creature editor UI                   |
 | `pnpm bot:dev`           | Local bot worker dev server          |
 | `pnpm bot:deploy`        | Deploy bot to Cloudflare Workers     |
 | `pnpm bot:register`      | Register slash commands (dev guild)  |
 | `pnpm bot:register:prod` | Register slash commands (global)     |
 | `pnpm bot:typecheck`     | Typecheck bot                        |
-| `pnpm test`              | Run production integration tests     |
-| `pnpm editor`            | Creature editor UI                   |

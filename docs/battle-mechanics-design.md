@@ -196,6 +196,7 @@ Synergies reward thoughtful team building over just picking your 3 highest-rarit
 |-------------|-------|
 | All Carnivore | +15% ATK to all |
 | All Herbivore | +20% DEF to all |
+| All Autotrophic | +20% HP to all |
 | Mixed (1+ carnivore + 1+ herbivore) | +10% SPD to all |
 
 ### Diet Matchup (attack modifier)
@@ -206,7 +207,11 @@ Synergies reward thoughtful team building over just picking your 3 highest-rarit
 | Herbivore → Carnivore | -10% |
 | All other combinations | neutral |
 
-Kept simple — only one meaningful advantage axis. Piscivorous and omnivorous are treated as neutral.
+Kept simple — only one meaningful advantage axis. Piscivorous, omnivorous, and autotrophic are treated as neutral in matchups.
+
+### Diet Categories
+
+Carnivorous, Herbivorous, Piscivorous, Omnivorous, Autotrophic (plants).
 
 ---
 

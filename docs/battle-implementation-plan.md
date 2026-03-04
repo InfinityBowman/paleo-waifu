@@ -88,13 +88,13 @@ The `creature_battle_stats` table only has rows for battle-ready creatures. If a
 Hybrid approach: deterministic rules for stats, LLM for ability selection.
 
 ```
-creatures_enriched.json
+Production D1 (creature table)
   → Rules engine: assign role from type/diet
   → Rules engine: calculate stats from role + rarity + ID hash
   → LLM (batch): pick 2 actives + 1 passive from template pools, generate flavor name variants
   → Validator: ensure all picks exist in template pool, stats in expected range
   → Human review: epic + legendary creatures only (~55)
-  → Output: creatures_battle.json → seed to D1
+  → Write back to D1 (creature_battle_stats + creature_ability tables)
 ```
 
 ### Type-to-Role Mapping
@@ -187,7 +187,7 @@ Respond as JSON:
 }
 ```
 
-Run with structured output / JSON mode, temperature 0. Validate that `templateId` values exist in the template pool. Batch with Haiku for cost efficiency (~615 calls).
+Run with structured output / JSON mode, temperature 0. Validate that `templateId` values exist in the template pool. Batch with Sonnet for cost efficiency (~615 calls).
 
 ### Ability Data Shape
 
