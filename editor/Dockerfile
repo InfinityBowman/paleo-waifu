@@ -35,8 +35,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-COPY editor/package.json ./
-RUN npm install --omit=dev
+# Only sharp and @aws-sdk are external — everything else is bundled by esbuild
+RUN npm init -y && npm install sharp @aws-sdk/client-s3
 
 COPY --from=build /app/editor/dist ./dist
 

@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.26.2",
   "scripts": {
-    "dev": "concurrently -n app,editor -c blue,green \"vite dev --port 3000\" \"cd editor && pnpm dev\"",
+    "dev": "concurrently -n app,editor -c blue,green \"vite dev --port 3000\" \"pnpm editor\"",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "CLOUDFLARE_ENV=production vite build && wrangler deploy",

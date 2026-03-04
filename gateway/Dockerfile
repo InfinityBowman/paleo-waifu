@@ -33,10 +33,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-RUN corepack enable pnpm
-
-COPY gateway/package.json ./
-RUN corepack enable pnpm && npm install --omit=dev discord.js
+# Only discord.js is external — everything else is bundled by esbuild
+RUN npm init -y && npm install discord.js --ignore-scripts
 
 COPY --from=build /app/gateway/dist ./dist
 
