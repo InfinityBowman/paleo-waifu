@@ -12,6 +12,19 @@ type View =
   | { kind: 'edit'; slug: string }
   | { kind: 'create' }
 
+function viewFromHash(): View {
+  const hash = window.location.hash.slice(1)
+  if (hash === 'new') return { kind: 'create' }
+  if (hash) return { kind: 'edit', slug: hash }
+  return { kind: 'list' }
+}
+
+function viewToHash(view: View): string {
+  if (view.kind === 'create') return '#new'
+  if (view.kind === 'edit') return `#${view.slug}`
+  return ''
+}
+
 interface User {
   id: string
   name: string
@@ -23,10 +36,27 @@ export function App() {
   const [authState, setAuthState] = useState<
     'loading' | 'unauthenticated' | User
   >('loading')
-  const [view, setView] = useState<View>({ kind: 'list' })
+  const [view, setView] = useState<View>(viewFromHash)
   const [creatures, setCreatures] = useState<Array<Creature>>([])
   const [stats, setStats] = useState<Stats | null>(null)
   const [showR2, setShowR2] = useState(false)
+
+  // Sync view → URL hash
+  useEffect(() => {
+    const hash = viewToHash(view)
+    if (window.location.hash !== hash) {
+      window.history.pushState(null, '', hash || window.location.pathname)
+    }
+  }, [view])
+
+  // Listen for browser back/forward
+  useEffect(() => {
+    function onPopState() {
+      setView(viewFromHash())
+    }
+    window.addEventListener('popstate', onPopState)
+    return () => window.removeEventListener('popstate', onPopState)
+  }, [])
 
   useEffect(() => {
     fetchMe()
