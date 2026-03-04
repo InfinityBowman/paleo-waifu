@@ -139,10 +139,10 @@ function PrivacyPolicy() {
             We retain your account and game data for as long as your account is
             active. If you wish to have your data deleted, please contact us at{' '}
             <a
-              href="mailto:privacy@jacobmaynard.dev"
+              href="mailto:privacy@paleowaifu.com"
               className="text-primary/60 hover:text-primary/80"
             >
-              privacy@jacobmaynard.dev
+              privacy@paleowaifu.com
             </a>{' '}
             and we will remove your personal data within 30 days.
           </p>
@@ -200,10 +200,10 @@ function PrivacyPolicy() {
             If you have questions about this privacy policy or your data, please
             contact us at{' '}
             <a
-              href="mailto:privacy@jacobmaynard.dev"
+              href="mailto:privacy@paleowaifu.com"
               className="text-primary/60 hover:text-primary/80"
             >
-              privacy@jacobmaynard.dev
+              privacy@paleowaifu.com
             </a>
             .
           </p>

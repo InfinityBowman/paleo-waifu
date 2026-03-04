@@ -207,10 +207,10 @@ function TermsOfService() {
           <p>
             If you have questions about these terms, please contact us at{' '}
             <a
-              href="mailto:privacy@jacobmaynard.dev"
+              href="mailto:privacy@paleowaifu.com"
               className="text-primary/60 hover:text-primary/80"
             >
-              privacy@jacobmaynard.dev
+              privacy@paleowaifu.com
             </a>
             .
           </p>
