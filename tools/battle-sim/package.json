@@ -1,0 +1,31 @@
+{
+  "name": "@paleo-waifu/battle-sim",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sim": "tsx src/index.ts all",
+    "sim:matchup": "tsx src/index.ts matchup",
+    "sim:team": "tsx src/index.ts team",
+    "sim:role": "tsx src/index.ts role",
+    "sim:creature": "tsx src/index.ts creature",
+    "sim:ability": "tsx src/index.ts ability",
+    "sim:csv": "mkdir -p dist && tsx src/index.ts matchup --csv > dist/matchup.csv && tsx src/index.ts role --csv > dist/role.csv && tsx src/index.ts team --csv > dist/team.csv && tsx src/index.ts ability --csv > dist/ability.csv",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:better-sqlite3",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@paleo-waifu/shared": "workspace:*",
+    "better-sqlite3": "^11.9.1",
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "cli-progress": "^3.12.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/cli-progress": "^3.11.6",
+    "@types/node": "^25.3.3",
+    "esbuild": "^0.27.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}

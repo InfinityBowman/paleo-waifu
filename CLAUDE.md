@@ -58,6 +58,7 @@ pnpm workspace with 5 packages:
 - **`bot/`** — Discord bot (Cloudflare Worker)
 - **`gateway/`** — Discord gateway listener (Node.js, Docker)
 - **`editor/`** — Creature editor dashboard (React + Hono)
+- Python - data analysis and database tools, use `uv` for python.
 
 ### Shared Package (`@paleo-waifu/shared`)
 

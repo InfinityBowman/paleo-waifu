@@ -28,6 +28,14 @@
     "gateway:build": "cd gateway && pnpm build",
     "gateway:typecheck": "cd gateway && pnpm typecheck",
     "editor": "cd editor && pnpm dev",
+    "sim": "cd tools/battle-sim && pnpm sim",
+    "sim:matchup": "cd tools/battle-sim && pnpm sim:matchup",
+    "sim:team": "cd tools/battle-sim && pnpm sim:team",
+    "sim:role": "cd tools/battle-sim && pnpm sim:role",
+    "sim:creature": "cd tools/battle-sim && pnpm sim:creature",
+    "sim:ability": "cd tools/battle-sim && pnpm sim:ability",
+    "sim:csv": "cd tools/battle-sim && pnpm sim:csv",
+    "sim:typecheck": "cd tools/battle-sim && pnpm typecheck",
     "test": "vitest run",
     "test:unit": "vitest run --exclude 'tests/production/**'",
     "test:watch": "vitest",
@@ -78,6 +86,7 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@prisma/engines",
+      "better-sqlite3",
       "esbuild",
       "msw",
       "prisma",

@@ -6,6 +6,12 @@ dependencies = [
     "pillow>=12.1.1",
     "requests>=2.32.5",
     "tqdm>=4.67.3",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "seaborn>=0.13",
+    "numpy>=1.26",
+    "scipy>=1.14",
+    "ipykernel>=6.29",
 ]
 
 [tool.uv]
