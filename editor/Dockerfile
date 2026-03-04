@@ -35,8 +35,8 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# Only sharp and @aws-sdk are external — everything else is bundled by esbuild
-RUN npm init -y && npm install sharp @aws-sdk/client-s3
+# Only sharp, @aws-sdk, and dotenv are external — everything else is bundled by esbuild
+RUN npm init -y && npm install sharp @aws-sdk/client-s3 dotenv
 
 COPY --from=build /app/editor/dist ./dist
 
@@ -44,7 +44,6 @@ COPY --from=build /app/editor/dist ./dist
 RUN mkdir -p /app/data/images && chown node:node /app/data/images
 
 USER node
-
 ENV NODE_ENV=production
 ENV IMAGES_DIR=/app/data/images
 
