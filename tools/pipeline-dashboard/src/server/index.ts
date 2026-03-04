@@ -21,9 +21,10 @@ import {
   deleteCreatureBySlug,
 } from './creature-repo'
 import {
-  cleanOrphanedR2Objects,
   deleteImage,
+  deleteR2Object,
   getLocalImage,
+  listOrphanedR2Objects,
   processAndUploadImage,
   pushExistingImageToR2,
   syncAllToR2,
@@ -183,10 +184,29 @@ app.post('/api/creatures/:slug/image', async (c) => {
     return c.json({ error: 'Creature not found' }, 404)
   }
 
+  const MAX_FILE_SIZE = 20 * 1024 * 1024 // 20 MB
+  const ALLOWED_TYPES = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+  ])
+
   const body = await c.req.parseBody()
   const file = body['image']
   if (!file || !(file instanceof File)) {
     return c.json({ error: 'No image file provided' }, 400)
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return c.json({ error: 'File too large (max 20 MB)' }, 413)
+  }
+
+  if (!ALLOWED_TYPES.has(file.type)) {
+    return c.json(
+      { error: 'Invalid file type. Allowed: JPEG, PNG, WebP, GIF' },
+      415,
+    )
   }
 
   const buffer = Buffer.from(await file.arrayBuffer())
@@ -265,9 +285,23 @@ app.post('/api/r2/sync', (c) => {
   })
 })
 
-app.post('/api/r2/clean', async (c) => {
-  const result = await cleanOrphanedR2Objects(c.get('db'))
-  return c.json(result)
+app.get('/api/r2/orphans', async (c) => {
+  const orphans = await listOrphanedR2Objects(c.get('db'))
+  return c.json({ orphans })
+})
+
+app.delete('/api/r2/orphans/:key{.+}', async (c) => {
+  const key = c.req.param('key')
+  if (!key.startsWith('creatures/') || !key.endsWith('.webp')) {
+    return c.json({ error: 'Invalid key' }, 400)
+  }
+  try {
+    await deleteR2Object(key)
+    return c.json({ ok: true })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return c.json({ error: msg }, 500)
+  }
 })
 
 // ─── Static files (production) ───────────────────────────────────────

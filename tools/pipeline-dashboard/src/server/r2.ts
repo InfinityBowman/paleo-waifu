@@ -50,6 +50,7 @@ export async function listR2Keys(): Promise<Array<string>> {
     const res = await s3.send(
       new ListObjectsV2Command({
         Bucket: bucketName,
+        Prefix: 'creatures/',
         ContinuationToken: continuationToken,
       }),
     )

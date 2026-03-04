@@ -140,16 +140,22 @@ export async function syncR2(
   }
 }
 
-export async function cleanR2(): Promise<{
-  deleted: number
-  errors: Array<string>
-}> {
-  const res = await fetch(`${BASE}/r2/clean`, {
-    method: 'POST',
-    credentials: 'include',
-  })
-  if (!res.ok) throw new Error('Failed to clean R2')
-  return res.json()
+export async function listOrphans(): Promise<Array<string>> {
+  const res = await fetch(`${BASE}/r2/orphans`, { credentials: 'include' })
+  if (!res.ok) throw new Error('Failed to list orphans')
+  const data = (await res.json()) as { orphans: Array<string> }
+  return data.orphans
+}
+
+export async function deleteOrphan(key: string): Promise<void> {
+  const res = await fetch(
+    `${BASE}/r2/orphans/${encodeURIComponent(key)}`,
+    { method: 'DELETE', credentials: 'include' },
+  )
+  if (!res.ok) {
+    const body = (await res.json()) as { error?: string }
+    throw new Error(body.error || 'Failed to delete orphan')
+  }
 }
 
 export async function pushImageToR2(slug: string): Promise<{ ok: boolean }> {

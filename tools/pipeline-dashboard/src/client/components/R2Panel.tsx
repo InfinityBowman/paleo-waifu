@@ -3,19 +3,21 @@ import {
   Check,
   Cloud,
   Loader2,
+  Search,
   Trash2,
   X,
 } from 'lucide-react'
-import { cleanR2, syncR2 } from '../lib/api'
+import { deleteOrphan, listOrphans, syncR2 } from '../lib/api'
 import type { SyncProgress } from '../lib/api'
 
 export function R2Panel({ onClose }: { onClose: () => void }) {
   const [busy, setBusy] = useState(false)
   const [syncProgress, setSyncProgress] = useState<SyncProgress | null>(null)
-  const [cleanResult, setCleanResult] = useState<{
-    deleted: number
-    errors: Array<string>
-  } | null>(null)
+  const [orphans, setOrphans] = useState<Array<string> | null>(null)
+  const [scanning, setScanning] = useState(false)
+  const [deleting, setDeleting] = useState<Set<string>>(new Set())
+  const [deleted, setDeleted] = useState<Set<string>>(new Set())
+  const [errors, setErrors] = useState<Map<string, string>>(new Map())
 
   async function handleSync() {
     setBusy(true)
@@ -38,22 +40,56 @@ export function R2Panel({ onClose }: { onClose: () => void }) {
     }
   }
 
-  async function handleClean() {
-    setBusy(true)
-    setCleanResult(null)
+  async function handleScan() {
+    setScanning(true)
+    setOrphans(null)
+    setDeleted(new Set())
+    setErrors(new Map())
 
     try {
-      const res = await cleanR2()
-      setCleanResult(res)
+      const result = await listOrphans()
+      setOrphans(result)
     } catch (err) {
-      setCleanResult({
-        deleted: 0,
-        errors: [err instanceof Error ? err.message : 'Clean failed'],
-      })
+      setOrphans([])
+      setErrors(
+        new Map([
+          ['_scan', err instanceof Error ? err.message : 'Scan failed'],
+        ]),
+      )
     } finally {
-      setBusy(false)
+      setScanning(false)
     }
   }
+
+  async function handleDelete(key: string) {
+    setDeleting((prev) => new Set(prev).add(key))
+    setErrors((prev) => {
+      const next = new Map(prev)
+      next.delete(key)
+      return next
+    })
+
+    try {
+      await deleteOrphan(key)
+      setDeleted((prev) => new Set(prev).add(key))
+    } catch (err) {
+      setErrors((prev) =>
+        new Map(prev).set(
+          key,
+          err instanceof Error ? err.message : 'Delete failed',
+        ),
+      )
+    } finally {
+      setDeleting((prev) => {
+        const next = new Set(prev)
+        next.delete(key)
+        return next
+      })
+    }
+  }
+
+  const activeOrphans = orphans?.filter((k) => !deleted.has(k)) ?? []
+  const isBusy = busy || scanning || deleting.size > 0
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
@@ -67,7 +103,7 @@ export function R2Panel({ onClose }: { onClose: () => void }) {
           </div>
           <button
             onClick={onClose}
-            disabled={busy}
+            disabled={isBusy}
             className="rounded-lg p-1 text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             <X className="h-4 w-4" />
@@ -77,13 +113,13 @@ export function R2Panel({ onClose }: { onClose: () => void }) {
         <div className="space-y-4 p-6">
           <p className="text-sm text-muted-foreground">
             Upload all local images to production R2 with proper cache headers,
-            or clean up orphaned objects.
+            or scan for orphaned objects and delete them individually.
           </p>
 
           <div className="flex gap-3">
             <button
               onClick={handleSync}
-              disabled={busy}
+              disabled={isBusy}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-border px-4 py-3 text-sm font-medium transition-colors hover:border-primary hover:bg-primary/5 disabled:opacity-50"
             >
               <Cloud className="h-4 w-4" />
@@ -95,15 +131,19 @@ export function R2Panel({ onClose }: { onClose: () => void }) {
               </div>
             </button>
             <button
-              onClick={handleClean}
-              disabled={busy}
+              onClick={handleScan}
+              disabled={isBusy}
               className="flex flex-1 items-center justify-center gap-2 rounded-lg border-2 border-border px-4 py-3 text-sm font-medium transition-colors hover:border-warning hover:bg-warning/5 disabled:opacity-50"
             >
-              <Trash2 className="h-4 w-4" />
+              {scanning ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
               <div>
-                <div className="font-medium">Clean Orphaned</div>
+                <div className="font-medium">Scan Orphaned</div>
                 <div className="mt-0.5 text-xs opacity-70">
-                  Remove stale objects
+                  Find stale objects
                 </div>
               </div>
             </button>
@@ -111,27 +151,64 @@ export function R2Panel({ onClose }: { onClose: () => void }) {
 
           {syncProgress && <SyncProgressBar progress={syncProgress} />}
 
-          {cleanResult && (
-            <ResultBanner
-              ok={cleanResult.errors.length === 0}
-              message={
-                cleanResult.deleted > 0
-                  ? `Deleted ${cleanResult.deleted} orphaned objects`
-                  : 'No orphaned objects found'
-              }
-              detail={
-                cleanResult.errors.length > 0
-                  ? cleanResult.errors.join('\n')
-                  : undefined
-              }
-            />
+          {errors.has('_scan') && (
+            <ResultBanner ok={false} message={errors.get('_scan')!} />
+          )}
+
+          {orphans !== null && !errors.has('_scan') && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-foreground">
+                  {activeOrphans.length === 0
+                    ? 'No orphaned objects found'
+                    : `${activeOrphans.length} orphaned object${activeOrphans.length === 1 ? '' : 's'}`}
+                </span>
+                {deleted.size > 0 && (
+                  <span className="text-xs text-success">
+                    {deleted.size} deleted
+                  </span>
+                )}
+              </div>
+
+              {activeOrphans.length > 0 && (
+                <div className="max-h-60 space-y-1 overflow-auto rounded-lg bg-muted/50 p-2">
+                  {activeOrphans.map((key) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-md px-3 py-2 text-sm hover:bg-background/50"
+                    >
+                      <span className="truncate font-mono text-xs text-muted-foreground">
+                        {key}
+                      </span>
+                      <button
+                        onClick={() => handleDelete(key)}
+                        disabled={deleting.has(key)}
+                        className="ml-3 shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
+                        title={`Delete ${key}`}
+                      >
+                        {deleting.has(key) ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-3.5 w-3.5" />
+                        )}
+                      </button>
+                      {errors.has(key) && (
+                        <span className="ml-2 text-xs text-destructive">
+                          {errors.get(key)}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         <div className="flex justify-end border-t border-border px-6 py-4">
           <button
             onClick={onClose}
-            disabled={busy}
+            disabled={isBusy}
             className="rounded-lg px-4 py-2 text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
           >
             Close

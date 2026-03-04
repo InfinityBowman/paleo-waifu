@@ -164,31 +164,20 @@ export async function syncAllToR2(
   emit('Done', true)
 }
 
-export async function cleanOrphanedR2Objects(
+export async function listOrphanedR2Objects(
   db: EditorDatabase,
-): Promise<{
-  deleted: number
-  errors: Array<string>
-}> {
+): Promise<Array<string>> {
   const creatures = await listCreatures(db)
   const validKeys = new Set(
-    creatures.map((c: Creature) => `creatures/${slugify(c.scientificName)}.webp`),
+    creatures.map(
+      (c: Creature) => `creatures/${slugify(c.scientificName)}.webp`,
+    ),
   )
 
   const allKeys = await listR2Keys()
-  const orphaned = allKeys.filter((key: string) => !validKeys.has(key))
-  let deleted = 0
-  const errors: Array<string> = []
+  return allKeys.filter((key: string) => !validKeys.has(key))
+}
 
-  for (const key of orphaned) {
-    try {
-      await deleteFromR2(key)
-      deleted++
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err)
-      errors.push(`Failed to delete ${key}: ${msg}`)
-    }
-  }
-
-  return { deleted, errors }
+export async function deleteR2Object(key: string): Promise<void> {
+  await deleteFromR2(key)
 }
