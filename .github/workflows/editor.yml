@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - 'tools/pipeline-dashboard/**'
-      - 'src/lib/db/schema.ts'
+      - 'editor/**'
+      - 'packages/shared/**'
       - '.github/workflows/editor.yml'
 
 env:
@@ -31,7 +31,7 @@ jobs:
       - uses: docker/build-push-action@v6
         with:
           context: .
-          file: tools/pipeline-dashboard/Dockerfile
+          file: editor/Dockerfile
           push: true
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest

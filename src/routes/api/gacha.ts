@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
 import {
   claimDaily,
@@ -11,12 +11,12 @@ import {
   getFossils,
   refundFossils,
 } from '@/lib/gacha'
-import { banner } from '@/lib/db/schema'
+import { banner } from '@paleo-waifu/shared/db/schema'
 import {
   MULTI_PULL_COUNT,
   PULL_COST_MULTI,
   PULL_COST_SINGLE,
-} from '@/lib/types'
+} from '@paleo-waifu/shared/types'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
 const GachaBody = z.discriminatedUnion('action', [

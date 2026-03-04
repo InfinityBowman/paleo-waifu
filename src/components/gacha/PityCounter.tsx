@@ -1,4 +1,4 @@
-import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@/lib/types'
+import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@paleo-waifu/shared/types'
 
 export function PityCounter() {
   return (

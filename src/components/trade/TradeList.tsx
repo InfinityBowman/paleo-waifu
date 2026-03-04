@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Loader2, Plus, X } from 'lucide-react'
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
 import type { PickerCreature } from '@/components/shared/CreaturePickerModal'
 import {
   IconCardExchange,
@@ -10,7 +10,7 @@ import {
   IconHourglass,
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
+import { RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'

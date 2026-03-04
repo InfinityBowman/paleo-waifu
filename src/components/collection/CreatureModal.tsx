@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/types'
+import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/rarity-styles'
 import {
   Dialog,
   DialogContent,

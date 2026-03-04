@@ -6,7 +6,7 @@ import {
   currency,
   pityCounter,
   userCreature,
-} from './db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import {
   BASE_RATES,
   DAILY_FOSSILS,
@@ -14,10 +14,10 @@ import {
   NEW_USER_BONUS,
   RATE_UP_SHARE,
   SOFT_PITY_THRESHOLD,
-} from './types'
+} from '@paleo-waifu/shared/types'
 import { toCdnUrl } from './utils'
-import type { Rarity } from './types'
-import type { Database } from './db/client'
+import type { Rarity } from '@paleo-waifu/shared/types'
+import type { Database } from '@paleo-waifu/shared/db/client'
 
 function secureRandom(): number {
   const array = new Uint32Array(1)

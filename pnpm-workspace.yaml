@@ -1,0 +1,5 @@
+packages:
+  - 'bot'
+  - 'gateway'
+  - 'editor'
+  - 'packages/*'

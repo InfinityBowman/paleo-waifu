@@ -3,9 +3,9 @@ import { sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
-import { currency } from '@/lib/db/schema'
+import { currency } from '@paleo-waifu/shared/db/schema'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
 const AdminBody = z.discriminatedUnion('action', [

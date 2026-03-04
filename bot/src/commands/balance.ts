@@ -1,5 +1,5 @@
 import { ephemeralResponse } from '../lib/discord'
-import type { Database } from '@/lib/db/client'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
 

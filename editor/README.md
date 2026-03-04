@@ -42,7 +42,7 @@ src/
     r2.ts                 # S3-compatible R2 client (upload, delete, list)
     images.ts             # sharp WebP conversion, R2 upload, orphan detection
     env.ts                # Environment variable loading + validation
-    vendor/schema.ts      # Copied from main app's schema (via predev script)
+    # Schema imported from @paleo-waifu/shared/db/schema
   client/
     App.tsx               # Auth state machine + view routing
     components/           # CreatureList, CreatureForm, ImageUploader, R2Panel, etc.
@@ -83,7 +83,7 @@ Slugs are derived from scientific names: `"Tyrannosaurus rex"` → `tyrannosauru
 
 ## Deployment
 
-Deployed on the homelab as a Docker container via GHCR. Pushes to `tools/pipeline-dashboard/` on main trigger the GitHub Actions workflow which builds and pushes `ghcr.io/infinitybowman/paleo-waifu-editor:latest`, then dispatches to the homelab repo for pull + restart.
+Deployed on the homelab as a Docker container via GHCR. Pushes to `editor/` on main trigger the GitHub Actions workflow which builds and pushes `ghcr.io/infinitybowman/paleo-waifu-editor:latest`, then dispatches to the homelab repo for pull + restart.
 
 Runs behind Traefik reverse proxy with Cloudflare Tunnel at `https://editor.jacobmaynard.dev`.
 

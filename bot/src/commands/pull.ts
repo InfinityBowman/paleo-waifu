@@ -2,14 +2,14 @@ import { eq } from 'drizzle-orm'
 import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import { creatureEmbed, multiPullEmbed } from '../lib/embeds'
 import type { Interaction } from '../lib/discord'
-import type { Database } from '@/lib/db/client'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
 import {
   MULTI_PULL_COUNT,
   PULL_COST_MULTI,
   PULL_COST_SINGLE,
-} from '@/lib/types'
-import { banner } from '@/lib/db/schema'
+} from '@paleo-waifu/shared/types'
+import { banner } from '@paleo-waifu/shared/db/schema'
 import {
   deductFossils,
   ensureUserCurrency,

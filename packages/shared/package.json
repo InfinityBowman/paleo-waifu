@@ -1,0 +1,20 @@
+{
+  "name": "@paleo-waifu/shared",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./xp": "./src/xp.ts",
+    "./db/schema": "./src/db/schema.ts",
+    "./db/client": "./src/db/client.ts",
+    "./battle/types": "./src/battle/types.ts",
+    "./battle/constants": "./src/battle/constants.ts"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260301.1",
+    "typescript": "^5.9.3"
+  }
+}

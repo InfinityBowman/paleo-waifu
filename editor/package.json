@@ -4,10 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently -n server,client -c blue,green \"pnpm dev:server\" \"pnpm dev:client\"",
-    "predev": "mkdir -p src/server/vendor && cp ../../src/lib/db/schema.ts src/server/vendor/schema.ts",
     "dev:server": "tsx watch src/server/index.ts",
     "dev:client": "vite dev",
-    "prebuild": "mkdir -p src/server/vendor && cp ../../src/lib/db/schema.ts src/server/vendor/schema.ts",
     "build": "pnpm build:client && pnpm build:server",
     "build:client": "vite build",
     "build:server": "tsc -p tsconfig.server.json --noEmit && esbuild src/server/index.ts --bundle --platform=node --format=esm --outfile=dist/server/index.js --packages=external",
@@ -16,6 +14,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1001.0",
     "@hono/node-server": "^1.19.9",
+    "@paleo-waifu/shared": "workspace:*",
     "clsx": "^2.1.1",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
@@ -26,12 +25,6 @@
     "react-dom": "^19.2.4",
     "sharp": "^0.34.5",
     "tailwind-merge": "^3.5.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild",
-      "sharp"
-    ]
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260301.1",

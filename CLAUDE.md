@@ -29,6 +29,11 @@ pnpm bot:deploy       # Deploy bot to Cloudflare Workers
 pnpm bot:register     # Register slash commands (dev guild)
 pnpm bot:register:prod # Register slash commands (global)
 pnpm bot:typecheck    # Typecheck bot
+
+# Gateway commands
+pnpm gateway:dev      # Local gateway dev server
+pnpm gateway:build    # Build gateway with esbuild
+pnpm gateway:typecheck # Typecheck gateway
 ```
 
 ## Environment
@@ -43,6 +48,31 @@ Requires a `.env` file. Copy `.env.example` and fill in values:
 ## Architecture
 
 Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanStack Router** (file-based routing), React 19, Tailwind CSS v4, deployed to **Cloudflare Workers** with D1 database.
+
+### Monorepo Structure
+
+pnpm workspace with 5 packages:
+
+- **Root** (`/`) — Main TanStack Start web app
+- **`packages/shared`** (`@paleo-waifu/shared`) — Runtime-agnostic shared code (DB schema, types, constants)
+- **`bot/`** — Discord bot (Cloudflare Worker)
+- **`gateway/`** — Discord gateway listener (Node.js, Docker)
+- **`editor/`** — Creature editor dashboard (React + Hono)
+
+### Shared Package (`@paleo-waifu/shared`)
+
+Buildless package — exports `.ts` files directly, consumers' bundlers compile them.
+
+```
+@paleo-waifu/shared/types         # Rarity, TradeStatus, RARITY_ORDER, gacha constants
+@paleo-waifu/shared/xp            # xpForLevel(), XP constants
+@paleo-waifu/shared/db/schema     # All Drizzle table definitions
+@paleo-waifu/shared/db/client     # createDb(), Database type
+@paleo-waifu/shared/battle/types  # Role, AbilityTemplateData, etc.
+@paleo-waifu/shared/battle/constants # RARITY_BASE_TOTALS, ability templates, etc.
+```
+
+When adding code used by 2+ workspaces, add it to `packages/shared/`. When adding code used only by the main app, keep it in `src/lib/`.
 
 ### Routing
 
@@ -71,6 +101,7 @@ Routes:
 
 ### Code Organization
 
+- `packages/shared/src/` — Shared types, DB schema, XP config, battle constants
 - `src/routes/` — File-based route definitions
 - `src/components/gacha/` — Banner select, pull button, animation, card reveal
 - `src/components/collection/` — Grid, creature card, detail modal
@@ -81,11 +112,10 @@ Routes:
 - `src/components/admin/` — Admin dashboard components
 - `src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
 - `src/components/ui/` — shadcn/ui primitives
-- `src/lib/` — Auth, gacha logic, types, utilities
-- `src/lib/db/` — Drizzle schema and D1 client factory
+- `src/lib/` — Auth, gacha logic, rarity styles, utilities
 - `src/store/` — Zustand store (fossils, pull results)
 - `python/` — Data pipeline for creature scraping, enrichment, image generation, and R2 upload
-- `tools/pipeline-dashboard/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
+- `editor/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
 
 ### Auth
 
@@ -101,11 +131,11 @@ Uses better-auth with Discord OAuth only. Server-side session validation via `ge
 
 ### Database Schema
 
-Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_proposal, trade_history, wishlist, user_xp.
+Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_proposal, trade_history, wishlist, user_xp. Schema defined in `packages/shared/src/db/schema.ts`.
 
 ### Discord Bot (`bot/`)
 
-Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports game logic from `src/lib/` via `@/` path alias (no code duplication).
+Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports shared code from `@paleo-waifu/shared` and game logic from `src/lib/` via `@/` path alias.
 
 Slash commands: `/pull`, `/pull10`, `/daily`, `/balance`, `/pity`, `/level`, `/leaderboard-xp`, `/leaderboard-collection`, `/help`
 
@@ -115,15 +145,16 @@ Uses Discord Interactions API (webhook-based). Ed25519 signature verification vi
 
 Standalone Node.js process (discord.js) that runs on a homelab server. Connects to Discord Gateway via WebSocket, listens for `MESSAGE_CREATE` events, and calls the bot Worker's `POST /api/xp` endpoint for eligible messages. Handles XP cooldowns (60s per user, in-memory), message length filtering, and sends level-up embeds to the channel.
 
-Deployed as a Docker container via GHCR. Push to `gateway/` on main triggers: Docker build → push to `ghcr.io/infinitybowman/paleo-waifu-gateway` → repository dispatch to homelab repo → pull and restart.
+Built with esbuild. Imports XP constants from `@paleo-waifu/shared/xp`. Deployed as a Docker container via GHCR.
 
 ### CI/CD
 
-Three GitHub Actions workflows, triggered by path-filtered pushes to `main`:
+Four GitHub Actions workflows, triggered by path-filtered pushes to `main`:
 
-- **Deploy Website** (`src/`, `drizzle/`, etc.) — D1 migrations + `wrangler deploy`
-- **Deploy Bot** (`bot/`, `src/lib/`, `drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
-- **Gateway Docker** (`gateway/`) — Docker build + GHCR push + repository dispatch to homelab
+- **Deploy Website** (`src/`, `packages/shared/`, `drizzle/`, etc.) — D1 migrations + `wrangler deploy`
+- **Deploy Bot** (`bot/`, `packages/shared/`, `src/lib/`, `drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
+- **Gateway Docker** (`gateway/`, `packages/shared/`) — Docker build + GHCR push + repository dispatch to homelab
+- **Editor Docker** (`editor/`, `packages/shared/`) — Docker build + GHCR push + repository dispatch to homelab
 
 ### Testing
 
@@ -138,10 +169,10 @@ Production integration tests in `tests/production/` using Vitest. Tests hit the 
 
 ## Conventions
 
-- **Imports**: Use `@/` path alias (maps to `src/`)
+- **Imports**: Use `@paleo-waifu/shared/*` for shared code (DB schema, types, XP config, battle constants). Use `@/` path alias (maps to `src/`) for main app code. Use `@/lib/rarity-styles` for Tailwind rarity CSS maps.
 - **Components**: PascalCase filenames, shadcn/ui with Lucide icons
 - **Styling**: Tailwind classes only, dark mode with warm amber theme via OKLCH in `src/styles.css`
 - **Formatting**: No semicolons, single quotes, trailing commas (Prettier)
-- **Database**: Drizzle ORM with SQLite (D1). Timestamps use `integer('field', { mode: 'timestamp' }).default(sql\`(unixepoch())\`)`
+- **Database**: Drizzle ORM with SQLite (D1). Schema in `packages/shared/src/db/schema.ts`. Timestamps use `integer('field', { mode: 'timestamp' }).default(sql\`(unixepoch())\`)`
 - **IDs**: Use `nanoid()` for all primary keys
 - **Cloudflare bindings**: Access D1 and env vars via `import { env } from 'cloudflare:workers'` in server-side code. Do NOT use `.server.ts` file suffix — TanStack Start import protection blocks it. Use `createServerFn` for server functions callable from client code.

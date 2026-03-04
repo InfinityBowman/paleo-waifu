@@ -5,7 +5,7 @@ import { count, sql } from 'drizzle-orm'
 import { BarChart3, Coins, Pickaxe, Users } from 'lucide-react'
 import { IconTrade } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
 import {
   creature,
@@ -13,7 +13,7 @@ import {
   tradeOffer,
   user,
   userCreature,
-} from '@/lib/db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import { Card, CardContent } from '@/components/ui/card'
 
 const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(

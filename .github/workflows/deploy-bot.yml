@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'bot/**'
+      - 'packages/shared/**'
       - 'src/lib/**'
       - 'drizzle/**'
       - '.github/workflows/deploy-bot.yml'
@@ -53,12 +54,8 @@ jobs:
           node-version: '22'
           cache: 'pnpm'
 
-      # Root deps needed - bot imports shared code from src/lib/ (drizzle-orm, nanoid, etc.)
+      # Workspace install resolves bot + shared deps
       - run: pnpm install --frozen-lockfile
-
-      - name: Install bot dependencies
-        run: pnpm install --frozen-lockfile
-        working-directory: bot
 
       - name: Deploy bot
         run: npx wrangler deploy -c wrangler.jsonc --env production

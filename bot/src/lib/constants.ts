@@ -1,4 +1,4 @@
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
 
 /** Rarity hex colors for Discord embeds (OKLCH → hex approximations) */
 export const RARITY_HEX: Record<Rarity, number> = {

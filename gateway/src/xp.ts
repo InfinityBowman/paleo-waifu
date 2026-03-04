@@ -1,11 +1,7 @@
 import { EmbedBuilder } from 'discord.js'
+import { XP_COOLDOWN_MS, XP_MIN_MESSAGE_LENGTH } from '@paleo-waifu/shared/xp'
 import { logger } from './logger.js'
 import type { Message } from 'discord.js'
-
-// These mirror src/lib/xp-config.ts — kept local since the gateway
-// is a standalone Node.js process without the @/ path alias
-const COOLDOWN_MS = 60_000
-const MIN_MESSAGE_LENGTH = 4
 
 // Validated at startup in index.ts
 const API_URL = process.env.XP_API_URL!
@@ -24,10 +20,10 @@ const cooldowns = new Map<string, number>()
 export function isEligible(message: Message): boolean {
   if (message.author.bot) return false
   if (!message.guild) return false
-  if (message.content.length < MIN_MESSAGE_LENGTH) return false
+  if (message.content.length < XP_MIN_MESSAGE_LENGTH) return false
 
   const lastEarned = cooldowns.get(message.author.id)
-  if (lastEarned !== undefined && Date.now() - lastEarned < COOLDOWN_MS) {
+  if (lastEarned !== undefined && Date.now() - lastEarned < XP_COOLDOWN_MS) {
     return false
   }
 

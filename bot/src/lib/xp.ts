@@ -1,13 +1,13 @@
 import { eq, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import type { Database } from '@/lib/db/client'
-import { userXp } from '@/lib/db/schema'
+import type { Database } from '@paleo-waifu/shared/db/client'
+import { userXp } from '@paleo-waifu/shared/db/schema'
 import {
   XP_MAX_PER_MESSAGE,
   XP_MIN_PER_MESSAGE,
   fossilsForLevel,
   levelFromXp,
-} from '@/lib/xp-config'
+} from '@paleo-waifu/shared/xp'
 import { ensureUserCurrency, grantFossils } from '@/lib/gacha'
 
 export interface XpAwardResult {

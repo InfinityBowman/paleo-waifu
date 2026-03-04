@@ -20,9 +20,9 @@ import { handleLevel } from './commands/level'
 import { handlePull } from './commands/pull'
 import { awardXp } from './lib/xp'
 import type { Interaction } from './lib/discord'
-import type { Database } from '@/lib/db/client'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from './lib/auth'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 
 interface Env {
   DB: D1Database

@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/d1'
-import * as schema from './vendor/schema'
+import * as schema from '@paleo-waifu/shared/db/schema'
 import { D1DatabaseShim } from './d1-http-shim'
 import type { EditorEnv } from './env'
 

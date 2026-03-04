@@ -3,8 +3,8 @@ import { getRequest } from '@tanstack/react-start/server'
 import { and, count, eq } from 'drizzle-orm'
 import { createAuth } from './auth'
 import { getCfEnv } from './env'
-import { createDb } from './db/client'
-import { currency, tradeOffer, tradeProposal } from './db/schema'
+import { createDb } from '@paleo-waifu/shared/db/client'
+import { currency, tradeOffer, tradeProposal } from '@paleo-waifu/shared/db/schema'
 
 export interface BadgeData {
   canClaimDaily: boolean

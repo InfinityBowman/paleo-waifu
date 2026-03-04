@@ -8,10 +8,10 @@ import {
   IconTreasureChest,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
-import { banner, currency } from '@/lib/db/schema'
+import { createDb } from '@paleo-waifu/shared/db/client'
+import { banner, currency } from '@paleo-waifu/shared/db/schema'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
-import { DAILY_FOSSILS } from '@/lib/types'
+import { DAILY_FOSSILS } from '@paleo-waifu/shared/types'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'

@@ -1,7 +1,7 @@
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
-import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
+import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 import { Badge } from '@/components/ui/badge'
 
 export interface CreatureCardData {

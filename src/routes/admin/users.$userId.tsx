@@ -3,10 +3,10 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { count, eq, sql } from 'drizzle-orm'
 import { ArrowLeft, Coins, Dices } from 'lucide-react'
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconArchiveResearch, IconTrade } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
 import {
   banner,
@@ -16,14 +16,14 @@ import {
   tradeHistory,
   user,
   userCreature,
-} from '@/lib/db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toCdnUrl } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS } from '@/lib/types'
+import { RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 
 const getAdminUserDetail = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)

@@ -3,9 +3,9 @@ import { ephemeralResponse, getOption } from '../lib/discord'
 import { levelEmbed } from '../lib/embeds'
 import { resolveDiscordUser } from '../lib/auth'
 import type { Interaction } from '../lib/discord'
-import type { Database } from '@/lib/db/client'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
-import { userXp } from '@/lib/db/schema'
+import { userXp } from '@paleo-waifu/shared/db/schema'
 
 /** /level [@user?] — Show XP and level (immediate, ephemeral) */
 export async function handleLevel(

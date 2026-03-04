@@ -9,15 +9,15 @@ import {
   IconTrade,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   creature,
   currency,
   tradeHistory,
   userCreature,
   userXp,
-} from '@/lib/db/schema'
-import { xpForLevel } from '@/lib/xp-config'
+} from '@paleo-waifu/shared/db/schema'
+import { xpForLevel } from '@paleo-waifu/shared/xp'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 

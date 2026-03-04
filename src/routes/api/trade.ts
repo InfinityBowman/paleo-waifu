@@ -3,14 +3,14 @@ import { and, count, eq, inArray, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
 import {
   tradeHistory,
   tradeOffer,
   tradeProposal,
   userCreature,
-} from '@/lib/db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
 const idField = z.string().min(1).max(50)

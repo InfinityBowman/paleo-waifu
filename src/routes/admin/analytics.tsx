@@ -2,9 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { count, eq, sql } from 'drizzle-orm'
-import type { Rarity } from '@/lib/types'
+import type { Rarity } from '@paleo-waifu/shared/types'
+import { RARITY_ORDER } from '@paleo-waifu/shared/types'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import { createAuth } from '@/lib/auth'
 import {
   creature,
@@ -12,9 +13,8 @@ import {
   tradeOffer,
   user,
   userCreature,
-} from '@/lib/db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import { Card, CardContent } from '@/components/ui/card'
-import { RARITY_ORDER } from '@/lib/types'
 
 const RARITY_BAR_COLORS: Record<Rarity, string> = {
   common: 'bg-rarity-common',

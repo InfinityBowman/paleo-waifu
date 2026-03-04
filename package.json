@@ -4,7 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@10.26.2",
   "scripts": {
-    "dev": "concurrently -n app,editor -c blue,green \"vite dev --port 3000\" \"cd tools/pipeline-dashboard && pnpm dev\"",
+    "dev": "concurrently -n app,editor -c blue,green \"vite dev --port 3000\" \"cd editor && pnpm dev\"",
     "build": "vite build",
     "preview": "vite preview",
     "deploy": "CLOUDFLARE_ENV=production vite build && wrangler deploy",
@@ -13,6 +13,8 @@
     "db:migrate:prod": "wrangler d1 migrations apply paleo-waifu-db-prod --remote --env production",
     "clear:data:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
     "db:seed:dev-users": "wrangler d1 execute paleo-waifu-db --local --file=./seed-dev-users.sql",
+    "db:seed:battle:local": "wrangler d1 execute paleo-waifu-db --local --file=./battle_seed.sql",
+    "db:seed:battle:prod": "wrangler d1 execute paleo-waifu-db-prod --remote --env production --file=./battle_seed.sql",
     "lint": "eslint",
     "format": "prettier",
     "check": "prettier --write . && eslint --fix",
@@ -25,12 +27,13 @@
     "gateway:dev": "cd gateway && pnpm dev",
     "gateway:build": "cd gateway && pnpm build",
     "gateway:typecheck": "cd gateway && pnpm typecheck",
-    "editor": "cd tools/pipeline-dashboard && pnpm dev",
+    "editor": "cd editor && pnpm dev",
     "test": "vitest run",
     "test:watch": "vitest",
-    "deps:up": "pnpm update --latest && cd bot && pnpm update --latest && cd ../gateway && pnpm update --latest && cd ../tools/pipeline-dashboard && pnpm update --latest"
+    "deps:up": "pnpm update --latest --recursive"
   },
   "dependencies": {
+    "@paleo-waifu/shared": "workspace:*",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-router": "^1.163.3",
     "@tanstack/react-start": "^1.166.1",
@@ -73,7 +76,10 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@prisma/engines",
       "esbuild",
+      "msw",
+      "prisma",
       "sharp",
       "workerd"
     ]

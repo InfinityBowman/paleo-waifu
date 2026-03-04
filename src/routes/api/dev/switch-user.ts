@@ -21,9 +21,11 @@ export const Route = createFileRoute('/api/dev/switch-user')({
 
             const { eq } = await import('drizzle-orm')
             const { nanoid } = await import('nanoid')
-            const { createDb } = await import('@/lib/db/client')
+            const { createDb } = await import('@paleo-waifu/shared/db/client')
             const { getCfEnv } = await import('@/lib/env')
-            const { session, user } = await import('@/lib/db/schema')
+            const { session, user } = await import(
+              '@paleo-waifu/shared/db/schema'
+            )
             const { ensureUserCurrency } = await import('@/lib/gacha')
 
             const body: { userId?: string } = await request.json()

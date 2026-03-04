@@ -10,6 +10,9 @@
     "register:prod": "node --env-file=.env --import=tsx/esm register.ts --prod",
     "typecheck": "tsc --noEmit"
   },
+  "dependencies": {
+    "@paleo-waifu/shared": "workspace:*"
+  },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260301.1",
     "@types/node": "^25.3.3",

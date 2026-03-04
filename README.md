@@ -11,7 +11,8 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
 - **Database**: Cloudflare D1 + Drizzle ORM
 - **Deploy**: Cloudflare Workers
 - **Discord Bot**: Cloudflare Worker (slash commands) + Node.js Gateway listener (XP system)
-- **CI/CD**: GitHub Actions (auto-deploy website, bot, and gateway on push)
+- **Monorepo**: pnpm workspace with shared package (`@paleo-waifu/shared`)
+- **CI/CD**: GitHub Actions (auto-deploy website, bot, gateway, and editor on push)
 
 ## Features
 
@@ -69,11 +70,12 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
 
 Deployments are automated via GitHub Actions. Pushing to `main` triggers the relevant workflow based on which files changed:
 
-| Workflow       | Trigger paths                              | What it does                                                 |
-| -------------- | ------------------------------------------ | ------------------------------------------------------------ |
-| Deploy Website | `src/`, `drizzle/`, `wrangler.jsonc`, etc. | D1 migrations + `wrangler deploy`                            |
-| Deploy Bot     | `bot/`, `src/lib/`, `drizzle/`             | D1 migrations + `wrangler deploy` (bot worker)               |
-| Gateway Docker | `gateway/`                                 | Docker build + push to GHCR + repository dispatch to homelab |
+| Workflow       | Trigger paths                                          | What it does                                                 |
+| -------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
+| Deploy Website | `src/`, `packages/shared/`, `drizzle/`, etc.           | D1 migrations + `wrangler deploy`                            |
+| Deploy Bot     | `bot/`, `packages/shared/`, `src/lib/`, `drizzle/`     | D1 migrations + `wrangler deploy` (bot worker)               |
+| Gateway Docker | `gateway/`, `packages/shared/`                         | Docker build + push to GHCR + repository dispatch to homelab |
+| Editor Docker  | `editor/`, `packages/shared/`                          | Docker build + push to GHCR + repository dispatch to homelab |
 
 ### Manual deploy (first time or secrets)
 
@@ -104,7 +106,18 @@ pnpm db:migrate:prod
 ## Project Structure
 
 ```
-src/
+packages/shared/       # @paleo-waifu/shared — runtime-agnostic shared code
+├── src/
+│   ├── types.ts       # Rarity, TradeStatus, gacha constants
+│   ├── xp.ts          # XP functions and constants
+│   ├── db/
+│   │   ├── schema.ts  # All Drizzle table definitions
+│   │   └── client.ts  # createDb(), Database type
+│   └── battle/
+│       ├── types.ts   # Battle types (Role, AbilityTemplateData, etc.)
+│       └── constants.ts # Battle constants (stat distributions, ability templates)
+
+src/                   # Main TanStack Start web app
 ├── components/
 │   ├── admin/         # Admin dashboard components
 │   ├── collection/    # Collection grid, creature card, detail modal
@@ -116,12 +129,11 @@ src/
 │   ├── trade/         # Trade list, offer, accept flow
 │   └── ui/            # shadcn/ui primitives
 ├── lib/
-│   ├── db/            # Drizzle schema + D1 client
 │   ├── auth.ts        # better-auth server config
 │   ├── auth-client.ts # Client-side auth helpers
 │   ├── auth-server.ts # Server-side session helpers
 │   ├── gacha.ts       # Pull logic, pity, currency management
-│   ├── types.ts       # Rarity types, rates, constants
+│   ├── rarity-styles.ts # Tailwind rarity CSS class maps
 │   └── utils.ts       # cn() utility
 ├── routes/
 │   ├── _public/       # Landing page, encyclopedia, leaderboard (no auth)
@@ -129,9 +141,6 @@ src/
 │   └── api/           # Gacha pull, trade, collection, admin, auth endpoints
 ├── store/             # Zustand store
 └── styles.css         # Warm amber OKLCH theme
-
-python/                # Data pipeline for creature scraping, enrichment, image generation, R2 upload
-tools/pipeline-dashboard/  # Creature editor dashboard (React + Hono)
 
 bot/                   # Discord bot (Cloudflare Worker)
 ├── src/
@@ -147,6 +156,8 @@ gateway/               # Discord Gateway listener (Node.js, runs on homelab)
 │   └── xp.ts          # Eligibility checks, cooldowns, XP API calls
 └── Dockerfile         # Pushed to GHCR, deployed via repository dispatch
 
+editor/                # Creature editor dashboard (React + Hono)
+python/                # Data pipeline for creature scraping, enrichment, image generation, R2 upload
 docs/                  # Design docs and reference
 tests/                 # Production integration tests (Vitest)
 ```
@@ -172,3 +183,6 @@ tests/                 # Production integration tests (Vitest)
 | `pnpm bot:register`      | Register slash commands (dev guild)  |
 | `pnpm bot:register:prod` | Register slash commands (global)     |
 | `pnpm bot:typecheck`     | Typecheck bot                        |
+| `pnpm gateway:dev`       | Local gateway dev server             |
+| `pnpm gateway:build`     | Build gateway with esbuild           |
+| `pnpm gateway:typecheck` | Typecheck gateway                    |

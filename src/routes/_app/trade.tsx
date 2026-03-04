@@ -3,14 +3,14 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, inArray, lt } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@/lib/db/client'
+import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   creature,
   tradeOffer,
   tradeProposal,
   user,
   userCreature,
-} from '@/lib/db/schema'
+} from '@paleo-waifu/shared/db/schema'
 import { toCdnUrl } from '@/lib/utils'
 import { TradeList } from '@/components/trade/TradeList'
 

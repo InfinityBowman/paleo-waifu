@@ -1,8 +1,8 @@
 import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import type { Interaction } from '../lib/discord'
-import type { Database } from '@/lib/db/client'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
-import { DAILY_FOSSILS } from '@/lib/types'
+import { DAILY_FOSSILS } from '@paleo-waifu/shared/types'
 import { claimDaily, ensureUserCurrency } from '@/lib/gacha'
 
 /** /daily — Claim daily fossils (deferred) */

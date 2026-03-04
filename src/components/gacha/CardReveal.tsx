@@ -9,7 +9,7 @@ import {
   RARITY_GLOW,
   RARITY_GLOW_ANIM,
   RARITY_SHIMMER,
-} from '@/lib/types'
+} from '@/lib/rarity-styles'
 import { Badge } from '@/components/ui/badge'
 
 export function CardReveal({
