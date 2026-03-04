@@ -27,7 +27,7 @@ const AdminBody = z.discriminatedUnion('action', [
   z.object({
     action: z.literal('set_role'),
     userId: z.string().min(1).max(100),
-    role: z.enum(['user', 'admin']),
+    role: z.enum(['user', 'editor', 'admin']),
   }),
 ])
 

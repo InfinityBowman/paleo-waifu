@@ -24,3 +24,5 @@ seed.sql
 
 # Localflare generated files
 .localflare/
+.DS_Store
+*.pdf

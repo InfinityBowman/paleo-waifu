@@ -195,6 +195,9 @@ function UserDetailPage() {
             {(u.role as string) === 'admin' && (
               <Badge variant="default">admin</Badge>
             )}
+            {(u.role as string) === 'editor' && (
+              <Badge variant="secondary">editor</Badge>
+            )}
             {u.banned && <Badge variant="destructive">banned</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">{u.email}</p>

@@ -55,7 +55,7 @@ export function ImageUploader({
     [handleFile],
   )
 
-  const imgSrc = preview || (slug && currentImageUrl ? `/api/creatures/${slug}/image` : null)
+  const imgSrc = preview || (slug && currentImageUrl ? currentImageUrl : null)
   const disabled = !slug
 
   return (

@@ -101,6 +101,12 @@ export const creature = sqliteTable(
     funFacts: text('fun_facts'), // JSON array of strings
     imageUrl: text('image_url'),
     imageAspectRatio: real('image_aspect_ratio'),
+    source: text('source'),
+    type: text('type'),
+    foundIn: text('found_in'),
+    nameMeaning: text('name_meaning'),
+    pronunciation: text('pronunciation'),
+    wikipediaImageUrl: text('wikipedia_image_url'),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(
       sql`(unixepoch())`,
     ),

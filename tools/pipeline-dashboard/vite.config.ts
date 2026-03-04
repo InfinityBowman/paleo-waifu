@@ -10,10 +10,20 @@ export default defineConfig({
       '@': resolve(__dirname, 'src'),
     },
   },
+  build: {
+    outDir: 'dist/client',
+  },
   server: {
     port: 4200,
     proxy: {
-      '/api': 'http://localhost:4100',
+      '/api': {
+        target: 'http://localhost:4100',
+        changeOrigin: true,
+      },
+      '/auth': {
+        target: 'http://localhost:4100',
+        changeOrigin: true,
+      },
     },
   },
 })

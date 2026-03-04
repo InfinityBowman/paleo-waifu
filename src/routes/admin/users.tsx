@@ -137,6 +137,7 @@ function UsersPage() {
           <SelectContent>
             <SelectItem value="all">All Roles</SelectItem>
             <SelectItem value="user">User</SelectItem>
+            <SelectItem value="editor">Editor</SelectItem>
             <SelectItem value="admin">Admin</SelectItem>
           </SelectContent>
         </Select>
@@ -181,6 +182,11 @@ function UsersPage() {
                       {u.role === 'admin' && (
                         <Badge variant="default" className="text-xs">
                           admin
+                        </Badge>
+                      )}
+                      {u.role === 'editor' && (
+                        <Badge variant="secondary" className="text-xs">
+                          editor
                         </Badge>
                       )}
                       {u.banned && (

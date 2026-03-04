@@ -1,14 +1,25 @@
-import { Plus, Settings } from 'lucide-react'
+import { Cloud, LogOut, Plus } from 'lucide-react'
 import type { Stats } from '../lib/types'
+
+interface User {
+  id: string
+  name: string
+  image: string | null
+  role: string
+}
 
 export function Header({
   stats,
+  user,
   onAddCreature,
-  onSeed,
+  onR2,
+  onLogout,
 }: {
   stats: Stats | null
+  user: User
   onAddCreature: () => void
-  onSeed: () => void
+  onR2: () => void
+  onLogout: () => void
 }) {
   return (
     <header className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -34,12 +45,29 @@ export function Header({
           Add Creature
         </button>
         <button
-          onClick={onSeed}
+          onClick={onR2}
           className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
-          <Settings className="h-4 w-4" />
-          Seed & Sync
+          <Cloud className="h-4 w-4" />
+          R2 Images
         </button>
+        <div className="ml-2 flex items-center gap-2 border-l border-border pl-4">
+          {user.image && (
+            <img
+              src={user.image}
+              alt=""
+              className="h-7 w-7 rounded-full"
+            />
+          )}
+          <span className="text-sm text-muted-foreground">{user.name}</span>
+          <button
+            onClick={onLogout}
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+            title="Logout"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
     </header>
   )

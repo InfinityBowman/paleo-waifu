@@ -1,15 +1,13 @@
 # Remediation Plan
 
 **Created:** 2026-02-27
-**Last updated:** 2026-02-28
+**Last updated:** 2026-03-03
 **Source:** `audit-security.md`, `audit-performance.md`, `audit-architecture.md`
 **Prioritized by:** severity x ease of implementation
 
 ---
 
 ## Completed
-
-All Tier 1 items and several Tier 2/3 items have been resolved.
 
 | #   | Issue                                                      | Audits                  | Status |
 | --- | ---------------------------------------------------------- | ----------------------- | ------ |
@@ -40,6 +38,13 @@ All Tier 1 items and several Tier 2/3 items have been resolved.
 | 25  | Trade pending query — use joins                            | Perf 1-D                | Done   |
 | 26  | Fix silent catch blocks — add toast/error feedback         | Arch 8.2                | Done   |
 | 27  | Add `prettier.config.js`                                   | Arch 9.1                | Done   |
+| 29  | Add `loading="lazy"` to CollectionGrid images              | Perf 4-C                | Done   |
+| 30  | Preload gacha card reveal images                           | Perf 4-D                | Done   |
+| 32  | Batch trade confirm cleanup path                           | Arch 8.3                | Done   |
+| 33  | Add HTTP caching headers to encyclopedia/API responses     | Perf 6-A                | Done   |
+| 50  | Extract shared `CreatureCard` component                    | Arch 6.2                | Done   |
+| 56  | Extract gacha helpers from route file                      | Arch 9.3                | Done   |
+| 61  | Confirm font `font-display: swap`                          | Perf 3-B                | Done   |
 
 ---
 
@@ -48,11 +53,7 @@ All Tier 1 items and several Tier 2/3 items have been resolved.
 | #   | Issue                                                    | Audits   | Effort    |
 | --- | -------------------------------------------------------- | -------- | --------- |
 | 28  | Add `width`/`height` + `decoding="async"` to grid images | Perf 4-B | ~5 lines  |
-| 29  | Add `loading="lazy"` to CollectionGrid images            | Perf 4-C | 2 attrs   |
-| 30  | Preload gacha card reveal images                         | Perf 4-D | ~10 lines |
 | 31  | Rarity enum constraint in schema                         | Arch 4.1 | Migration |
-| 32  | Batch trade confirm cleanup path                         | Arch 8.3 | ~10 lines |
-| 33  | Add HTTP caching headers to encyclopedia/API responses   | Perf 6-A | ~15 lines |
 
 ---
 
@@ -83,15 +84,12 @@ All Tier 1 items and several Tier 2/3 items have been resolved.
 | 47  | `bannerPool` composite unique index           | Arch 4.5   | Seed-time concern only           |
 | 48  | `currency` missing `createdAt`                | Arch 4.6   | Minor data gap                   |
 | 49  | Deduplicate DiscordIcon SVG                   | Arch 6.1   | Extract component                |
-| 50  | Extract shared `CreatureCard` component       | Arch 6.2   | Code quality                     |
 | 51  | Derive CollectionGrid types from query result | Arch 6.4   | Type safety                      |
 | 52  | Trade interfaces use `string` not `Rarity`    | Arch 6.5   | Type safety                      |
 | 53  | Runtime rarity validation helper              | Arch 7.2   | Defensive                        |
 | 54  | Use `countDistinct()` in profile              | Arch 7.3   | Code quality                     |
 | 55  | `funFacts` use `mode: 'json'` in schema       | Arch 7.4   | Code quality                     |
-| 56  | Extract gacha helpers from route file         | Arch 9.3   | Code organization                |
 | 57  | Extract `NAV_LINKS` constant in Nav           | Arch 9.4   | Code quality                     |
 | 58  | HTTP 402 → 409 for insufficient fossils       | Arch 5.5   | Cosmetic                         |
 | 59  | Cache banner data with `caches.default`       | Perf 6-C   | Low impact                       |
 | 60  | `tradeHistory` ownership semantics comment    | Arch 4.4   | Documentation                    |
-| 61  | Confirm font `font-display: swap`             | Perf 3-B   | Verify only                      |

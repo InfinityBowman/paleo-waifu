@@ -123,7 +123,7 @@ export function CreatureList({
                   <td className="px-4 py-2">
                     {c.imageUrl ? (
                       <img
-                        src={`/api/creatures/${slug}/image`}
+                        src={c.imageUrl}
                         alt=""
                         className="h-8 w-8 rounded object-cover"
                         loading="lazy"

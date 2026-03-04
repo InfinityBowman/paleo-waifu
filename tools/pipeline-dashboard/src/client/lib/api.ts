@@ -2,11 +2,26 @@ import type { Creature, Stats } from './types'
 
 const BASE = '/api'
 
+export async function fetchMe(): Promise<{
+  user: { id: string; name: string; image: string | null; role: string }
+} | null> {
+  const res = await fetch(`${BASE}/me`, { credentials: 'include' })
+  if (!res.ok) return null
+  return res.json()
+}
+
+export async function logout(): Promise<void> {
+  await fetch('/auth/logout', {
+    method: 'POST',
+    credentials: 'include',
+  })
+}
+
 export async function fetchCreatures(): Promise<{
   creatures: Array<Creature>
   stats: Stats
 }> {
-  const res = await fetch(`${BASE}/creatures`)
+  const res = await fetch(`${BASE}/creatures`, { credentials: 'include' })
   if (!res.ok) throw new Error('Failed to fetch creatures')
   return res.json()
 }
@@ -14,7 +29,9 @@ export async function fetchCreatures(): Promise<{
 export async function fetchCreature(
   slug: string,
 ): Promise<{ creature: Creature }> {
-  const res = await fetch(`${BASE}/creatures/${slug}`)
+  const res = await fetch(`${BASE}/creatures/${slug}`, {
+    credentials: 'include',
+  })
   if (!res.ok) throw new Error('Failed to fetch creature')
   return res.json()
 }
@@ -26,6 +43,7 @@ export async function createCreature(
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = (await res.json()) as { error?: string }
@@ -42,6 +60,7 @@ export async function updateCreature(
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = (await res.json()) as { error?: string }
@@ -57,7 +76,7 @@ export async function deleteCreature(
   const url = deleteImage
     ? `${BASE}/creatures/${slug}?deleteImage=true`
     : `${BASE}/creatures/${slug}`
-  const res = await fetch(url, { method: 'DELETE' })
+  const res = await fetch(url, { method: 'DELETE', credentials: 'include' })
   if (!res.ok) throw new Error('Failed to delete creature')
 }
 
@@ -70,6 +89,7 @@ export async function uploadImage(
   const res = await fetch(`${BASE}/creatures/${slug}/image`, {
     method: 'POST',
     body: form,
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = (await res.json()) as { error?: string }
@@ -91,7 +111,10 @@ export interface SyncProgress {
 export async function syncR2(
   onProgress: (progress: SyncProgress) => void,
 ): Promise<void> {
-  const res = await fetch(`${BASE}/r2/sync`, { method: 'POST' })
+  const res = await fetch(`${BASE}/r2/sync`, {
+    method: 'POST',
+    credentials: 'include',
+  })
   if (!res.ok) throw new Error('Failed to sync R2')
   if (!res.body) throw new Error('No response body')
 
@@ -121,7 +144,10 @@ export async function cleanR2(): Promise<{
   deleted: number
   errors: Array<string>
 }> {
-  const res = await fetch(`${BASE}/r2/clean`, { method: 'POST' })
+  const res = await fetch(`${BASE}/r2/clean`, {
+    method: 'POST',
+    credentials: 'include',
+  })
   if (!res.ok) throw new Error('Failed to clean R2')
   return res.json()
 }
@@ -129,22 +155,11 @@ export async function cleanR2(): Promise<{
 export async function pushImageToR2(slug: string): Promise<{ ok: boolean }> {
   const res = await fetch(`${BASE}/creatures/${slug}/push-r2`, {
     method: 'POST',
+    credentials: 'include',
   })
   if (!res.ok) {
     const body = (await res.json()) as { error?: string }
     throw new Error(body.error || 'Failed to push to R2')
   }
-  return res.json()
-}
-
-export async function seedDb(
-  target: 'local' | 'prod',
-): Promise<{ ok: boolean; creatureCount: number; output: string }> {
-  const res = await fetch(`${BASE}/seed`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ target }),
-  })
-  if (!res.ok) throw new Error('Failed to seed database')
   return res.json()
 }
