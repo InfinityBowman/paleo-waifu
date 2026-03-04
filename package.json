@@ -29,6 +29,7 @@
     "gateway:typecheck": "cd gateway && pnpm typecheck",
     "editor": "cd editor && pnpm dev",
     "test": "vitest run",
+    "test:unit": "vitest run --exclude 'tests/production/**'",
     "test:watch": "vitest",
     "deps:up": "pnpm update --latest --recursive"
   },

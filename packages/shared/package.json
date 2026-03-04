@@ -8,7 +8,13 @@
     "./db/schema": "./src/db/schema.ts",
     "./db/client": "./src/db/client.ts",
     "./battle/types": "./src/battle/types.ts",
-    "./battle/constants": "./src/battle/constants.ts"
+    "./battle/constants": "./src/battle/constants.ts",
+    "./battle/rng": "./src/battle/rng.ts",
+    "./battle/damage": "./src/battle/damage.ts",
+    "./battle/synergies": "./src/battle/synergies.ts",
+    "./battle/abilities": "./src/battle/abilities.ts",
+    "./battle/ai": "./src/battle/ai.ts",
+    "./battle/engine": "./src/battle/engine.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1"
