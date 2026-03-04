@@ -222,18 +222,9 @@ export function Hero() {
       />
 
       {/* ═══ HERO ═══ */}
-      <section className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5">
-        {/* Poetic whisper badge */}
-        <div className="animate-drift-in drift-d1 paleo-badge mb-6 border border-primary/15 bg-primary/8 text-lavender/70">
-          <span style={{ fontSize: 12 }}>&#10022;</span>
-          <span className="font-hand text-xs tracking-wider">
-            where ancient things dream again
-          </span>
-          <span style={{ fontSize: 12 }}>&#10022;</span>
-        </div>
-
+      <section className="relative z-20 flex min-h-screen flex-col items-center justify-center px-5 pb-16 pt-0 sm:-mt-12">
         {/* Animated title */}
-        <div className="animate-drift-in drift-d2 text-center">
+        <div className="animate-drift-in drift-d1 text-center">
           <div className="animate-sway">
             <h1 className="paleo-title-grad font-display text-6xl leading-[1.08] font-medium sm:text-8xl md:text-[9rem]">
               Paleo
@@ -244,7 +235,7 @@ export function Hero() {
         </div>
 
         {/* Description */}
-        <p className="animate-drift-in drift-d3 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/50 sm:text-base">
+        <p className="animate-drift-in drift-d2 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/65 sm:text-base">
           Collect{' '}
           <span className="text-primary/80">600+ prehistoric companions</span>{' '}
           from across the ages. Pull, discover, and trade. Each fossil holds a
@@ -252,7 +243,7 @@ export function Hero() {
         </p>
 
         {/* CTA buttons */}
-        <div className="animate-drift-in drift-d4 mt-10 flex flex-col items-center gap-3">
+        <div className="animate-drift-in drift-d3 mt-10 flex flex-col items-center gap-3">
           {session ? (
             <Link
               to="/gacha"
@@ -282,22 +273,35 @@ export function Hero() {
               Summon Now
             </button>
           )}
-          <span className="font-hand text-[11px] text-lavender/30">
+          <span className="font-hand text-[11px] text-lavender/45">
             &#10022; 1 Fossil = Single Pull &middot; 10 Fossils = Multi Pull
             &#10022;
           </span>
         </div>
 
-        {/* Secondary CTA */}
-        <Link
-          to="/encyclopedia"
-          className="paleo-outline-btn animate-drift-in drift-d5 mt-4 px-8 py-2.5 text-xs font-medium tracking-wider"
-        >
-          Browse Encyclopedia &rarr;
-        </Link>
+        {/* Secondary CTAs */}
+        <div className="animate-drift-in drift-d4 mt-4 flex items-center gap-3">
+          <Link
+            to="/encyclopedia"
+            className="paleo-outline-btn px-8 py-2.5 text-xs font-medium tracking-wider"
+          >
+            Browse Encyclopedia &rarr;
+          </Link>
+          <a
+            href="https://discord.com/oauth2/authorize?client_id=1476736375771365539&permissions=19456&integration_type=0&scope=bot+applications.commands"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="paleo-outline-btn flex items-center gap-1.5 px-6 py-2.5 text-xs font-medium tracking-wider"
+          >
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z" />
+            </svg>
+            Add to Discord
+          </a>
+        </div>
 
         {/* Scroll indicator */}
-        <div className="animate-drift-in drift-d6 absolute bottom-10 flex flex-col items-center gap-2">
+        <div className="animate-drift-in drift-d5 absolute bottom-10 flex flex-col items-center gap-2">
           <div className="animate-float h-6 w-4 rounded-full border border-lavender/12">
             <div className="mx-auto mt-1 h-1.5 w-1 rounded-full bg-lavender/25" />
           </div>
@@ -309,7 +313,7 @@ export function Hero() {
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <p className="mb-4 font-hand text-xs tracking-widest text-rarity-uncommon/40">
+              <p className="mb-4 font-hand text-xs tracking-widest text-rarity-uncommon/55">
                 ~ about this world ~
               </p>
               <h2 className="mb-6 font-display text-3xl leading-relaxed font-light text-heading sm:text-4xl">
@@ -317,11 +321,11 @@ export function Hero() {
                 <br />
                 <span className="italic text-lavender/75">forgotten time</span>
               </h2>
-              <p className="text-sm leading-[1.9] font-light text-lavender-light/40">
+              <p className="text-sm leading-[1.9] font-light text-lavender-light/55">
                 Deep beneath stone and sediment, they slept for millions of
                 years. Now they stir, reimagined as fun companions, ready to
-                walk beside you. Over one hundred species across three ancient
-                eras, each one waiting to be found.
+                walk beside you. Over six hundred species across fourteen
+                periods, each one waiting to be found.
               </p>
             </div>
 
@@ -364,11 +368,11 @@ export function Hero() {
                     >
                       {era.era}
                     </h3>
-                    <span className="font-hand text-[10px] text-lavender-light/20">
+                    <span className="font-hand text-[10px] text-lavender-light/40">
                       {era.period}
                     </span>
                   </div>
-                  <p className="mt-1.5 text-xs font-light text-lavender-light/35">
+                  <p className="mt-1.5 text-xs font-light text-lavender-light/50">
                     {era.desc}
                   </p>
                 </div>
@@ -382,7 +386,7 @@ export function Hero() {
       <section className="relative z-20 px-5 py-20 sm:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="mb-12 text-center">
-            <p className="mb-3 font-hand text-xs text-lavender/35">
+            <p className="mb-3 font-hand text-xs text-lavender/50">
               ~ five kinds of wonder ~
             </p>
             <h2 className="font-display text-3xl font-light text-heading sm:text-4xl">
@@ -483,7 +487,7 @@ export function Hero() {
                       background: `color-mix(in oklch, var(${r.cssVar}) 8%, transparent)`,
                     }}
                   />
-                  <span className="text-xs font-light text-lavender-light/25">
+                  <span className="text-xs font-light text-lavender-light/45">
                     {r.rate}
                   </span>
                 </div>
@@ -491,7 +495,7 @@ export function Hero() {
             })}
           </div>
 
-          <p className="mt-8 text-center font-hand text-xs italic text-lavender/25">
+          <p className="mt-8 text-center font-hand text-xs italic text-lavender/45">
             A legendary spirit is guaranteed to appear within 90 encounters...
           </p>
         </div>
@@ -542,7 +546,7 @@ export function Hero() {
                   >
                     {feature.title}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed font-light text-lavender-light/35">
+                  <p className="mt-2 text-xs leading-relaxed font-light text-lavender-light/50">
                     {feature.desc}
                   </p>
                 </div>
@@ -558,8 +562,8 @@ export function Hero() {
           <div className="flex flex-wrap items-center justify-around gap-8">
             {[
               {
-                val: '100+',
-                label: 'spirits',
+                val: '600+',
+                label: 'creatures',
                 cssVar: '--color-primary',
                 opacity: 0.6,
               },
@@ -570,8 +574,8 @@ export function Hero() {
                 opacity: 0.6,
               },
               {
-                val: '3',
-                label: 'eras',
+                val: '14',
+                label: 'periods',
                 cssVar: '--color-rarity-uncommon',
                 opacity: 0.6,
               },
@@ -591,7 +595,7 @@ export function Hero() {
                   >
                     {s.val}
                   </div>
-                  <p className="mt-1 font-hand text-[10px] text-lavender-light/20">
+                  <p className="mt-1 font-hand text-[10px] text-lavender-light/40">
                     {s.label}
                   </p>
                 </div>
@@ -612,35 +616,48 @@ export function Hero() {
             </span>
           </h2>
 
-          {session ? (
-            <Link
-              to="/gacha"
-              className="mt-10 paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+          <div className="mt-10 flex flex-col items-center gap-5">
+            {session ? (
+              <Link
+                to="/gacha"
+                className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M10 1L12.5 7.5L19 10L12.5 12.5L10 19L7.5 12.5L1 10L7.5 7.5Z"
+                    fill="white"
+                    opacity="0.85"
+                  />
+                </svg>
+                Start Summoning
+              </Link>
+            ) : (
+              <button
+                onClick={() => signIn.social({ provider: 'discord' })}
+                className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
+              >
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
+                  <path
+                    d="M10 1L12.5 7.5L19 10L12.5 12.5L10 19L7.5 12.5L1 10L7.5 7.5Z"
+                    fill="white"
+                    opacity="0.85"
+                  />
+                </svg>
+                Start Summoning
+              </button>
+            )}
+            <a
+              href="https://discord.com/oauth2/authorize?client_id=1476736375771365539&permissions=19456&integration_type=0&scope=bot+applications.commands"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="paleo-outline-btn inline-flex items-center gap-1.5 px-6 py-2.5 text-xs font-medium tracking-wider"
             >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M10 1L12.5 7.5L19 10L12.5 12.5L10 19L7.5 12.5L1 10L7.5 7.5Z"
-                  fill="white"
-                  opacity="0.85"
-                />
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.947 2.418-2.157 2.418z" />
               </svg>
-              Start Summoning
-            </Link>
-          ) : (
-            <button
-              onClick={() => signIn.social({ provider: 'discord' })}
-              className="paleo-pull-btn inline-flex items-center gap-3 px-14 py-5 text-lg font-bold tracking-wide text-white"
-            >
-              <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
-                <path
-                  d="M10 1L12.5 7.5L19 10L12.5 12.5L10 19L7.5 12.5L1 10L7.5 7.5Z"
-                  fill="white"
-                  opacity="0.85"
-                />
-              </svg>
-              Start Summoning
-            </button>
-          )}
+              Add to Discord
+            </a>
+          </div>
         </div>
       </section>
     </div>

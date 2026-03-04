@@ -1,0 +1,1485 @@
+[
+  {
+    "id": "829909b7c46b1bf4a1dea",
+    "name": "Achelousaurus",
+    "scientific_name": "Achelousaurus horneri",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3000
+    }
+  },
+  {
+    "id": "562c2967d043c0cf11aef",
+    "name": "Achillobator",
+    "scientific_name": "Achillobator giganteus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 350
+    }
+  },
+  {
+    "id": "f030a7db2982603b02f75",
+    "name": "Acutiramus",
+    "scientific_name": "Acutiramus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.2
+    }
+  },
+  {
+    "id": "5ba572a4046367a2aa54c",
+    "name": "Adelophthalmus",
+    "scientific_name": "Adelophthalmus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.04
+    }
+  },
+  {
+    "id": "2ed0a2a127b9daaeae62d",
+    "name": "Agilisaurus",
+    "scientific_name": "Agilisaurus louderbacki",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 40
+    }
+  },
+  {
+    "id": "7e9d3072faa34a482239a",
+    "name": "Alamosaurus",
+    "scientific_name": "Alamosaurus sanjuanensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 35000
+    }
+  },
+  {
+    "id": "917dfc4fc81d355b67811",
+    "name": "Alvarezsaurus",
+    "scientific_name": "Alvarezsaurus calvoi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3
+    }
+  },
+  {
+    "id": "ce1d85ee80b98b44a6e29",
+    "name": "Amblonyx",
+    "scientific_name": "Amblonyx",
+    "source": "pbdb",
+    "changes": {
+      "weight_kg": 4
+    }
+  },
+  {
+    "id": "2f9fec34cbed0602efaa6",
+    "name": "Anatosaurus",
+    "scientific_name": "Anatosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 11.9,
+      "weight_kg": 5600
+    }
+  },
+  {
+    "id": "c56c92b5a67f35013c763",
+    "name": "Anatotitan",
+    "scientific_name": "Anatotitan",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 11.9,
+      "weight_kg": 5600
+    }
+  },
+  {
+    "id": "4f17c08268e7f9c578af6",
+    "name": "Andrewsarchus",
+    "scientific_name": "Andrewsarchus mongoliensis",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.83
+    }
+  },
+  {
+    "id": "c51e42a8e78fb6a554ecd",
+    "name": "Anomalocaris",
+    "scientific_name": "Anomalocaris canadensis",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.38
+    }
+  },
+  {
+    "id": "fb9e50c717a8c8c28abd2",
+    "name": "Anthraconectes",
+    "scientific_name": "Anthraconectes",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.04
+    }
+  },
+  {
+    "id": "0684e1534e690de5eef1e",
+    "name": "Apatorhamphus",
+    "scientific_name": "Apatorhamphus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 7.0
+    }
+  },
+  {
+    "id": "e296fc855c7c5eb18d525",
+    "name": "Apatosaurus",
+    "scientific_name": "Apatosaurus ajax",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 22400
+    }
+  },
+  {
+    "id": "202ec56f3a042e785d497",
+    "name": "Aragosaurus",
+    "scientific_name": "Aragosaurus ischiadicus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 25000
+    }
+  },
+  {
+    "id": "8c9070083c7e894d01bda",
+    "name": "Archaeoceratops",
+    "scientific_name": "Archaeoceratops oshimai",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 10
+    }
+  },
+  {
+    "id": "5697439e4da35a244e2d6",
+    "name": "Aristonectes",
+    "scientific_name": "Aristonectes",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 10.1
+    }
+  },
+  {
+    "id": "24dd45cae68a195925624",
+    "name": "Azhdarcho",
+    "scientific_name": "Azhdarcho",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0
+    }
+  },
+  {
+    "id": "8387b3637b85c9d4b2043",
+    "name": "Bagaceratops",
+    "scientific_name": "Bagaceratops rozhdestvenskyi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 45
+    }
+  },
+  {
+    "id": "d216c1dea564831373eaf",
+    "name": "Baltoeurypterus",
+    "scientific_name": "Baltoeurypterus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.18
+    }
+  },
+  {
+    "id": "c39241b36a0dd63e9baee",
+    "name": "Beipiaosaurus",
+    "scientific_name": "Beipiaosaurus inexpectus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 27
+    }
+  },
+  {
+    "id": "0234935b1ec1c876a9f43",
+    "name": "Borealosuchus",
+    "scientific_name": "Borealosuchus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.6
+    }
+  },
+  {
+    "id": "e66f6a046edc6c9349e25",
+    "name": "Bothriolepis",
+    "scientific_name": "Bothriolepis",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.3
+    }
+  },
+  {
+    "id": "25c91d27cd2c735eb6e6c",
+    "name": "Bugenasaura",
+    "scientific_name": "Bugenasaura",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0,
+      "weight_kg": 250
+    }
+  },
+  {
+    "id": "bf340513e4a97c722ef3e",
+    "name": "Bunodella",
+    "scientific_name": "Bunodella",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.2
+    }
+  },
+  {
+    "id": "02bdbe87ff756065e625e",
+    "name": "Calymene",
+    "scientific_name": "Calymene",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.02
+    }
+  },
+  {
+    "id": "32ceb3d43b2d6dfb1d280",
+    "name": "Cantius",
+    "scientific_name": "Cantius",
+    "source": "pbdb",
+    "changes": {
+      "weight_kg": 1
+    }
+  },
+  {
+    "id": "1b6d19271ac6144bfe342",
+    "name": "Carcharodontosaurus",
+    "scientific_name": "Carcharodontosaurus saharicus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 7000
+    }
+  },
+  {
+    "id": "0127b8ed0e740b8d7329e",
+    "name": "Carcinosoma",
+    "scientific_name": "Carcinosoma",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.7
+    }
+  },
+  {
+    "id": "cd08a4eaabb034d94ecc3",
+    "name": "Carnotaurus",
+    "scientific_name": "Carnotaurus sastrei",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2100
+    }
+  },
+  {
+    "id": "3ae4073137e7e51d5439c",
+    "name": "Caulodon",
+    "scientific_name": "Caulodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 22.9,
+      "weight_kg": 42300
+    }
+  },
+  {
+    "id": "6a8630fcc3421fa788aa1",
+    "name": "Cedarpelta",
+    "scientific_name": "Cedarpelta bilbeyhallorum",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5000
+    }
+  },
+  {
+    "id": "9ef1db6d18b6878fdfd41",
+    "name": "Cetiosauriscus",
+    "scientific_name": "Cetiosauriscus stewarti",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 10000
+    }
+  },
+  {
+    "id": "d0ac565c362cd5e1e8028",
+    "name": "Cetiosaurus",
+    "scientific_name": "Cetiosaurus oxoniensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 11000
+    }
+  },
+  {
+    "id": "81c70cc024f00fde2c0e6",
+    "name": "Chonespondylus",
+    "scientific_name": "Chonespondylus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.4
+    }
+  },
+  {
+    "id": "8c18c70109215fa2a321d",
+    "name": "Chubutisaurus",
+    "scientific_name": "Chubutisaurus insignis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 12000
+    }
+  },
+  {
+    "id": "2042fd3ea03e25074f120",
+    "name": "Cimoliornis",
+    "scientific_name": "Cimoliornis",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 2.4
+    }
+  },
+  {
+    "id": "02405db8d9629ea20c3aa",
+    "name": "Citipati",
+    "scientific_name": "Citipati osmolskae",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 110
+    }
+  },
+  {
+    "id": "6b1b5c9662d90cab4bf76",
+    "name": "Coccosteus",
+    "scientific_name": "Coccosteus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.39
+    }
+  },
+  {
+    "id": "664c2744312fbac3d5470",
+    "name": "Cymbospondylus",
+    "scientific_name": "Cymbospondylus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.4
+    }
+  },
+  {
+    "id": "07ea45db3fa1c379e1661",
+    "name": "Dacentrurus",
+    "scientific_name": "Dacentrurus armatus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 7400
+    }
+  },
+  {
+    "id": "a10116b1412731485e6b6",
+    "name": "Daspletosaurus",
+    "scientific_name": "Daspletosaurus torosus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3000
+    }
+  },
+  {
+    "id": "6751cd6b66eba3a068068",
+    "name": "Deinocheirus",
+    "scientific_name": "Deinocheirus mirificus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 6500
+    }
+  },
+  {
+    "id": "7b3577bbf1eeaaa9561e0",
+    "name": "Deltadromeus",
+    "scientific_name": "Deltadromeus agilis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1050
+    }
+  },
+  {
+    "id": "22f5a7750a93c2bf3060b",
+    "name": "Diplocynodon",
+    "scientific_name": "Diplocynodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 3.0
+    }
+  },
+  {
+    "id": "1844b6500280f5b2af6e1",
+    "name": "Diracodon",
+    "scientific_name": "Diracodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 7.6,
+      "weight_kg": 5000
+    }
+  },
+  {
+    "id": "b87899702db5ea14eab39",
+    "name": "Dolichorhynchops",
+    "scientific_name": "Dolichorhynchops",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 3.0
+    }
+  },
+  {
+    "id": "d46569e49303ac850c24d",
+    "name": "Dorygnathus",
+    "scientific_name": "Dorygnathus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 1.5
+    }
+  },
+  {
+    "id": "c2eb2de698d79d0098880",
+    "name": "Dracorex",
+    "scientific_name": "Dracorex",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.22,
+      "weight_kg": 450
+    }
+  },
+  {
+    "id": "60314c0e5b0d9fdd9389b",
+    "name": "Dryptosaurus",
+    "scientific_name": "Dryptosaurus aquilunguis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1500
+    }
+  },
+  {
+    "id": "fbcb96faf622c0e5bddcd",
+    "name": "Ectocion",
+    "scientific_name": "Ectocion",
+    "source": "pbdb",
+    "changes": {
+      "weight_kg": 9
+    }
+  },
+  {
+    "id": "e9d8ae03bfa4a87ca64df",
+    "name": "Eolambia",
+    "scientific_name": "Eolambia caroljonesa",
+    "source": "nhm",
+    "changes": {
+      "size_meters": 6.1
+    }
+  },
+  {
+    "id": "a7271c14cae3ff75d171d",
+    "name": "Erettopterus",
+    "scientific_name": "Erettopterus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.9
+    }
+  },
+  {
+    "id": "db17e0dfb57a2adf9c63a",
+    "name": "Erlikosaurus",
+    "scientific_name": "Erlikosaurus andrewsi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 200
+    }
+  },
+  {
+    "id": "e7e5a6ef610c8ca6a404f",
+    "name": "Eudimorphodon",
+    "scientific_name": "Eudimorphodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 1.0
+    }
+  },
+  {
+    "id": "d76de33688ae0075a7310",
+    "name": "Euronychodon",
+    "scientific_name": "Euronychodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 2.0
+    }
+  },
+  {
+    "id": "3be414611ffde1303b85b",
+    "name": "Eurypterus",
+    "scientific_name": "Eurypterus remipes",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.18
+    }
+  },
+  {
+    "id": "31b7f8e166d948debeac1",
+    "name": "Garudimimus",
+    "scientific_name": "Garudimimus brevipes",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 98
+    }
+  },
+  {
+    "id": "fdb4ebaf621d4bebc3dd0",
+    "name": "Giraffatitan",
+    "scientific_name": "Giraffatitan brancai",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 48000
+    }
+  },
+  {
+    "id": "42cce0988f8dea7cf7766",
+    "name": "Gorgosaurus",
+    "scientific_name": "Gorgosaurus libratus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3000
+    }
+  },
+  {
+    "id": "d3a755d814c227df11f79",
+    "name": "Guaibasaurus",
+    "scientific_name": "Guaibasaurus candelariensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 10
+    }
+  },
+  {
+    "id": "b659b5ae71054da4bc249",
+    "name": "Hadrosaurus",
+    "scientific_name": "Hadrosaurus foulkii",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3000
+    }
+  },
+  {
+    "id": "eba12040045edb705aefe",
+    "name": "Hagryphus",
+    "scientific_name": "Hagryphus giganteus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 50
+    }
+  },
+  {
+    "id": "eb95e0432346bf0f0a86f",
+    "name": "Hatzegopteryx",
+    "scientific_name": "Hatzegopteryx",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 11.0
+    }
+  },
+  {
+    "id": "1ad5c66381f1e8d07f920",
+    "name": "Herrerasaurus",
+    "scientific_name": "Herrerasaurus ischigualastensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 350
+    }
+  },
+  {
+    "id": "81f4059f5900d0057f01b",
+    "name": "Heterodontosaurus",
+    "scientific_name": "Heterodontosaurus tucki",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 10
+    }
+  },
+  {
+    "id": "0e1114c90dad1ae4ccb8e",
+    "name": "Hughmilleria",
+    "scientific_name": "Hughmilleria",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.2
+    }
+  },
+  {
+    "id": "64bc91853c49e7295f7a4",
+    "name": "Hyopsodus",
+    "scientific_name": "Hyopsodus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.06
+    }
+  },
+  {
+    "id": "f6075fed8f22911432475",
+    "name": "Hypolagus",
+    "scientific_name": "Hypolagus",
+    "source": "pbdb",
+    "changes": {
+      "weight_kg": 3
+    }
+  },
+  {
+    "id": "c256e8a3bad39112c8469",
+    "name": "Indosuchus",
+    "scientific_name": "Indosuchus raptorius",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1200
+    }
+  },
+  {
+    "id": "1df77d88614e1bfef9a28",
+    "name": "Irritator",
+    "scientific_name": "Irritator challengeri",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1000
+    }
+  },
+  {
+    "id": "46125cc7c8263636a1d80",
+    "name": "Istiodactylus",
+    "scientific_name": "Istiodactylus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.45
+    }
+  },
+  {
+    "id": "a86b90fbae052bf01f2bf",
+    "name": "Jingshanosaurus",
+    "scientific_name": "Jingshanosaurus xinwaensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 4300
+    }
+  },
+  {
+    "id": "88fabf0c764b82844bfad",
+    "name": "Kentrosaurus",
+    "scientific_name": "Kentrosaurus aethiopicus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1600
+    }
+  },
+  {
+    "id": "9bb397ea5a2309d97f6fc",
+    "name": "Khudiakovia",
+    "scientific_name": "Khudiakovia",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0,
+      "weight_kg": 940
+    }
+  },
+  {
+    "id": "b6576d7fe9ef666887970",
+    "name": "Kronosaurus",
+    "scientific_name": "Kronosaurus queenslandicus",
+    "source": "wikipedia",
+    "changes": {
+      "weight_kg": 2141
+    }
+  },
+  {
+    "id": "083d915680bcfdd77d437",
+    "name": "Lambeosaurus",
+    "scientific_name": "Lambeosaurus lambei",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3400
+    }
+  },
+  {
+    "id": "6a375d6d59e944e278fd8",
+    "name": "Leidyosuchus",
+    "scientific_name": "Leidyosuchus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.4
+    }
+  },
+  {
+    "id": "d9f97373df41d205f80be",
+    "name": "Leptonectes",
+    "scientific_name": "Leptonectes",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0
+    }
+  },
+  {
+    "id": "56228f4b5a59ce033c2f9",
+    "name": "Lurdusaurus",
+    "scientific_name": "Lurdusaurus arenatus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5500
+    }
+  },
+  {
+    "id": "3f9a2591b3c3753565eb3",
+    "name": "Machimosaurus",
+    "scientific_name": "Machimosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 1.55
+    }
+  },
+  {
+    "id": "1cb7ba0a1fc1f111515fc",
+    "name": "Macrosaurus",
+    "scientific_name": "Macrosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0
+    }
+  },
+  {
+    "id": "1fbd0fcaa49175c6d9c5c",
+    "name": "Magyarosaurus",
+    "scientific_name": "Magyarosaurus dacus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1000
+    }
+  },
+  {
+    "id": "69fad982e562adcb9ea24",
+    "name": "Majungasaurus",
+    "scientific_name": "Majungasaurus atopus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1000
+    }
+  },
+  {
+    "id": "4f4f36f3e9f50d1578a8d",
+    "name": "Mammut",
+    "scientific_name": "Mammut",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 3.05,
+      "weight_kg": 8000
+    }
+  },
+  {
+    "id": "9faec0f96a4a346429098",
+    "name": "Mapusaurus",
+    "scientific_name": "Mapusaurus roseae",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3000
+    }
+  },
+  {
+    "id": "4589256e51be77c679930",
+    "name": "Masiakasaurus",
+    "scientific_name": "Masiakasaurus knopfleri",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 20
+    }
+  },
+  {
+    "id": "a53bdbbb43f05f757c20c",
+    "name": "Mastodon",
+    "scientific_name": "Mastodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 3.05,
+      "weight_kg": 8000
+    }
+  },
+  {
+    "id": "9d4d48ee5520774af3515",
+    "name": "Megalodon",
+    "scientific_name": "Otodus megalodon",
+    "source": "wikipedia",
+    "changes": {
+      "weight_kg": 14821
+    }
+  },
+  {
+    "id": "c0a35a15db939e3630720",
+    "name": "Megalosaurus",
+    "scientific_name": "Megalosaurus bucklandii",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 700
+    }
+  },
+  {
+    "id": "255eda55daf6cc9ec52c7",
+    "name": "Megatherium",
+    "scientific_name": "Megatherium americanum",
+    "source": "wikipedia",
+    "changes": {
+      "weight_kg": 4000
+    }
+  },
+  {
+    "id": "ba0e0aa49609daecc3254",
+    "name": "Millerosteus",
+    "scientific_name": "Millerosteus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.14
+    }
+  },
+  {
+    "id": "bf56102d7de6774a6d9f5",
+    "name": "Monolophosaurus",
+    "scientific_name": "Monolophosaurus jiangi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 475
+    }
+  },
+  {
+    "id": "0a1758e22c4f7f001a5d1",
+    "name": "Mononykus",
+    "scientific_name": "Mononykus olecranus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 4
+    }
+  },
+  {
+    "id": "0692a0b8f3d71202a81e2",
+    "name": "Morosaurus",
+    "scientific_name": "Morosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 22.9,
+      "weight_kg": 42300
+    }
+  },
+  {
+    "id": "342fe8bbff268e8b65853",
+    "name": "Mussaurus",
+    "scientific_name": "Mussaurus patagonicus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1600
+    }
+  },
+  {
+    "id": "ac69aae90181c5914e074",
+    "name": "Nanotyrannus",
+    "scientific_name": "Nanotyrannus",
+    "source": "pbdb",
+    "changes": {
+      "weight_kg": 704
+    }
+  },
+  {
+    "id": "4fb5e4cea23e0f4c446e6",
+    "name": "Nanshiungosaurus",
+    "scientific_name": "Nanshiungosaurus brevispinus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 907
+    }
+  },
+  {
+    "id": "9fa89186fd094a88ce4f7",
+    "name": "Nectoportheus",
+    "scientific_name": "Nectoportheus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 11.9
+    }
+  },
+  {
+    "id": "9465fa8e3b59c100ced46",
+    "name": "Nemegtosaurus",
+    "scientific_name": "Nemegtosaurus mongoliensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 20000
+    }
+  },
+  {
+    "id": "22e7bad77f0bcb46a5833",
+    "name": "Neovenator",
+    "scientific_name": "Neovenator salerii",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1000
+    }
+  },
+  {
+    "id": "1a925229e7c49a9f3c36d",
+    "name": "Nigersaurus",
+    "scientific_name": "Nigersaurus taqueti",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 4000
+    }
+  },
+  {
+    "id": "29555553e8e04cf0d3665",
+    "name": "Olenellus",
+    "scientific_name": "Olenellus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.05
+    }
+  },
+  {
+    "id": "0a02a8a756e0cf76123ed",
+    "name": "Omeisaurus",
+    "scientific_name": "Omeisaurus junghsiensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 9800
+    }
+  },
+  {
+    "id": "67a94f428341aca1176c4",
+    "name": "Opabinia",
+    "scientific_name": "Opabinia regalis",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.07
+    }
+  },
+  {
+    "id": "ba60d00aec717e8cbacfb",
+    "name": "Ornatotholus",
+    "scientific_name": "Ornatotholus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 2.3,
+      "weight_kg": 25
+    }
+  },
+  {
+    "id": "0f8853cd529862aee76d6",
+    "name": "Ouranosaurus",
+    "scientific_name": "Ouranosaurus nigeriensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2200
+    }
+  },
+  {
+    "id": "aceb09bb7e2319cf12e8e",
+    "name": "Palaeeudyptes",
+    "scientific_name": "Palaeeudyptes",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 2.0,
+      "weight_kg": 116
+    }
+  },
+  {
+    "id": "35c06b0dbc198bea416b3",
+    "name": "Palaeoloxodon",
+    "scientific_name": "Palaeoloxodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0,
+      "weight_kg": 13000
+    }
+  },
+  {
+    "id": "2cb36a8f8207ebf48d445",
+    "name": "Panoplosaurus",
+    "scientific_name": "Panoplosaurus mirus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1600
+    }
+  },
+  {
+    "id": "367f8cb91af8b2e2fe3c6",
+    "name": "Paralititan",
+    "scientific_name": "Paralititan stromeri",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 30000
+    }
+  },
+  {
+    "id": "351c25e6b1dc60b4e1ff3",
+    "name": "Peloneustes",
+    "scientific_name": "Peloneustes",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0
+    }
+  },
+  {
+    "id": "21ef47caf403ff01dd804",
+    "name": "Pentaceratops",
+    "scientific_name": "Pentaceratops sternbergi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2500
+    }
+  },
+  {
+    "id": "25230991d2f020d993432",
+    "name": "Pinguinus",
+    "scientific_name": "Pinguinus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.75,
+      "weight_kg": 5
+    }
+  },
+  {
+    "id": "cc49c1963525ea7e0ebac",
+    "name": "Pliomastodon",
+    "scientific_name": "Pliomastodon",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 3.05,
+      "weight_kg": 8000
+    }
+  },
+  {
+    "id": "5e81ece8cf6dba12aa020",
+    "name": "Pliosaurus",
+    "scientific_name": "Pliosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 10.1,
+      "weight_kg": 2937
+    }
+  },
+  {
+    "id": "f1c8c5ab3f67d9c24db01",
+    "name": "Plourdosteus",
+    "scientific_name": "Plourdosteus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.38
+    }
+  },
+  {
+    "id": "b82ee879e59b434eddcba",
+    "name": "Podokesaurus",
+    "scientific_name": "Podokesaurus holyokensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 40
+    }
+  },
+  {
+    "id": "714ae77a5055561399833",
+    "name": "Rhabdodon",
+    "scientific_name": "Rhabdodon priscus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 250
+    }
+  },
+  {
+    "id": "f29a98b5e5f55789723c3",
+    "name": "Rhoetosaurus",
+    "scientific_name": "Rhoetosaurus brownei",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 9000
+    }
+  },
+  {
+    "id": "8ea529b4a6440799aab15",
+    "name": "Rhomaleosaurus",
+    "scientific_name": "Rhomaleosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 7.0
+    }
+  },
+  {
+    "id": "d212b3eeda3ff93463a37",
+    "name": "Rugops",
+    "scientific_name": "Rugops primus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 410
+    }
+  },
+  {
+    "id": "519aecd65d119d48e7140",
+    "name": "Saichania",
+    "scientific_name": "Saichania chulsanensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2000
+    }
+  },
+  {
+    "id": "490e2e5eef23dd904082e",
+    "name": "Sauropelta",
+    "scientific_name": "Sauropelta edwardsorum",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2000
+    }
+  },
+  {
+    "id": "0f8a4bcabc2228afb0752",
+    "name": "Segnosaurus",
+    "scientific_name": "Segnosaurus galbinensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1300
+    }
+  },
+  {
+    "id": "0668847904eddd5d46953",
+    "name": "Sellosaurus",
+    "scientific_name": "Sellosaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 10.1,
+      "weight_kg": 4000
+    }
+  },
+  {
+    "id": "17414182a9f7c047c8d2f",
+    "name": "Shantungosaurus",
+    "scientific_name": "Shantungosaurus giganteus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 16000
+    }
+  },
+  {
+    "id": "eaa3eb2ac5b8d391648fd",
+    "name": "Sinornithosaurus",
+    "scientific_name": "Sinornithosaurus millenii",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5
+    }
+  },
+  {
+    "id": "353f4a288008e596391da",
+    "name": "Sinosauropteryx",
+    "scientific_name": "Sinosauropteryx prima",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 1
+    }
+  },
+  {
+    "id": "8d91db4c0a2f2add638b2",
+    "name": "Smilodon",
+    "scientific_name": "Smilodon fatalis",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 1.0
+    }
+  },
+  {
+    "id": "8d2d6a354f29a724a74f4",
+    "name": "Spinosaurus",
+    "scientific_name": "Spinosaurus aegyptiacus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 7400
+    }
+  },
+  {
+    "id": "5cd1514fc0589b71c4785",
+    "name": "Stegoceras",
+    "scientific_name": "Stegoceras validum",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 25
+    }
+  },
+  {
+    "id": "5da306ca1959a51f1c551",
+    "name": "Stegosaurus",
+    "scientific_name": "Stegosaurus armatus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5000
+    }
+  },
+  {
+    "id": "c4c6b28935e7c21f5e922",
+    "name": "Stenotholus",
+    "scientific_name": "Stenotholus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.22,
+      "weight_kg": 450
+    }
+  },
+  {
+    "id": "0d7208ecfd7f99f19157c",
+    "name": "Sterrholophus",
+    "scientific_name": "Sterrholophus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 9.1,
+      "weight_kg": 10000
+    }
+  },
+  {
+    "id": "e6b4add6344968bdd2bee",
+    "name": "Struthiosaurus",
+    "scientific_name": "Struthiosaurus austriacus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 400
+    }
+  },
+  {
+    "id": "9ba21211f11fdff1ef245",
+    "name": "Stygimoloch",
+    "scientific_name": "Stygimoloch",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.22,
+      "weight_kg": 450
+    }
+  },
+  {
+    "id": "2d99894077c527fb052eb",
+    "name": "Styracosaurus",
+    "scientific_name": "Styracosaurus albertensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2700
+    }
+  },
+  {
+    "id": "9c4a6b0a2a7ca4e37ef3e",
+    "name": "Suchomimus",
+    "scientific_name": "Suchomimus tenerensis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 3800
+    }
+  },
+  {
+    "id": "036b717556b15f687b2ee",
+    "name": "Supersaurus",
+    "scientific_name": "Supersaurus vivianae",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 44000
+    }
+  },
+  {
+    "id": "37d36853e52491b9bca5d",
+    "name": "Talarurus",
+    "scientific_name": "Talarurus plicatospineus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 680
+    }
+  },
+  {
+    "id": "38dbb53d0e26132188d41",
+    "name": "Tanius",
+    "scientific_name": "Tanius sinensis",
+    "source": "nhm",
+    "changes": {
+      "size_meters": 7.0,
+      "weight_kg": 2000
+    }
+  },
+  {
+    "id": "7a960fe2b3e98d46a5ec0",
+    "name": "Tarbosaurus",
+    "scientific_name": "Tarbosaurus bataar",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5000
+    }
+  },
+  {
+    "id": "db10f04b70fa8af57e0f4",
+    "name": "Telmatosaurus",
+    "scientific_name": "Telmatosaurus transsylvanicus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 600
+    }
+  },
+  {
+    "id": "553b44e80e9a0168bbe7d",
+    "name": "Therizinosaurus",
+    "scientific_name": "Therizinosaurus cheloniformis",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 5000
+    }
+  },
+  {
+    "id": "85333a6a4f3edaa4ef79c",
+    "name": "Thescelosaurus",
+    "scientific_name": "Thescelosaurus neglectus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 250
+    }
+  },
+  {
+    "id": "88e8d0c0af47af15f0547",
+    "name": "Torosaurus",
+    "scientific_name": "Torosaurus latus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 8000
+    }
+  },
+  {
+    "id": "ae8819dce88a19e423056",
+    "name": "Torvosaurus",
+    "scientific_name": "Torvosaurus tanneri",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2400
+    }
+  },
+  {
+    "id": "5c526097fcdc46eb4c220",
+    "name": "Trilobite",
+    "scientific_name": "Paradoxides davidis",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.37
+    }
+  },
+  {
+    "id": "1392d9dca39e52bc3278b",
+    "name": "Truncatiramus",
+    "scientific_name": "Truncatiramus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.9
+    }
+  },
+  {
+    "id": "994bd732dac2a074cd83e",
+    "name": "Tsintaosaurus",
+    "scientific_name": "Tsintaosaurus spinorhinus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2500
+    }
+  },
+  {
+    "id": "3386853f32accc58fba4f",
+    "name": "Tupandactylus",
+    "scientific_name": "Tupandactylus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.0
+    }
+  },
+  {
+    "id": "f270bf4ed9c614792a0e4",
+    "name": "Tupuxuara",
+    "scientific_name": "Tupuxuara",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 4.6,
+      "weight_kg": 25
+    }
+  },
+  {
+    "id": "ebba6200582dd9b08db15",
+    "name": "Tylocephale",
+    "scientific_name": "Tylocephale gilmorei",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 40
+    }
+  },
+  {
+    "id": "b875b9c6fe1ab6b1a10bc",
+    "name": "Tylosteus",
+    "scientific_name": "Tylosteus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 0.22,
+      "weight_kg": 450
+    }
+  },
+  {
+    "id": "9609bae7b3f24beff7d62",
+    "name": "Udanoceratops",
+    "scientific_name": "Udanoceratops tschizhovi",
+    "source": "nhm",
+    "changes": {
+      "size_meters": 0.7,
+      "weight_kg": 700
+    }
+  },
+  {
+    "id": "e3ff2802faf1059637f1d",
+    "name": "Uintasaurus",
+    "scientific_name": "Uintasaurus",
+    "source": "pbdb",
+    "changes": {
+      "size_meters": 22.9,
+      "weight_kg": 42300
+    }
+  },
+  {
+    "id": "0eab89ee2e04750d68f1c",
+    "name": "Valdosaurus",
+    "scientific_name": "Valdosaurus canaliculatus",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 10
+    }
+  },
+  {
+    "id": "d9875d74f19d0146ba240",
+    "name": "Wiwaxia",
+    "scientific_name": "Wiwaxia corrugata",
+    "source": "wikipedia",
+    "changes": {
+      "size_meters": 0.05
+    }
+  },
+  {
+    "id": "6bdda4a5b4f5f5f45f794",
+    "name": "Yimenosaurus",
+    "scientific_name": "Yimenosaurus youngi",
+    "source": "nhm",
+    "changes": {
+      "weight_kg": 2000
+    }
+  },
+  {
+    "id": "5e5da8147c1fcd0396cdd",
+    "name": "Yingshanosaurus",
+    "scientific_name": "Yingshanosaurus jichuanensis",
+    "source": "nhm",
+    "changes": {
+      "size_meters": 4.9
+    }
+  }
+]

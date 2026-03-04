@@ -3,12 +3,13 @@
 Queries prod D1 for creatures missing size_meters or weight_kg, fetches
 their Wikipedia articles, and parses measurements from the text.
 
-Dry run by default — prints what would change. Use --commit to apply.
+Dry run saves results to a JSON file. Use --commit to apply from that file
+without re-fetching Wikipedia.
 
 Usage:
-    uv run python scripts/enrich_wikipedia.py                  # dry run (all sources)
+    uv run python scripts/enrich_wikipedia.py                  # dry run → saves results to file
     uv run python scripts/enrich_wikipedia.py --source pbdb    # only PBDB creatures
-    uv run python scripts/enrich_wikipedia.py --commit          # apply changes
+    uv run python scripts/enrich_wikipedia.py --commit          # apply saved results to prod D1
 """
 
 import argparse
@@ -26,6 +27,7 @@ from d1_client import D1Client
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 CACHE_DIR = DATA_DIR / "cache" / "wiki-enrich"
+RESULTS_FILE = DATA_DIR / "wiki-enrich-results.json"
 
 WIKI_API = "https://en.wikipedia.org/w/api.php"
 USER_AGENT = "PaleoWaifuBot/1.0 (https://github.com/infinitybowman/paleo-waifu; jacobamaynard@proton.me)"
@@ -205,15 +207,50 @@ def parse_measurements(text: str) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Enrich creatures with Wikipedia size/weight data")
-    parser.add_argument("--commit", action="store_true", help="Apply changes to prod D1 (default: dry run)")
+    parser.add_argument("--commit", action="store_true",
+                        help="Apply saved results to prod D1 (reads from results file, no Wikipedia fetching)")
     parser.add_argument("--source", choices=["pbdb", "wikipedia", "nhm", "all"], default="all",
                         help="Filter by creature source (default: all)")
     parser.add_argument("--limit", type=int, default=0, help="Max creatures to process (0 = all)")
     args = parser.parse_args()
 
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
     db = D1Client()
+
+    # ─── Commit mode: read from saved results file ─────────────────────
+
+    if args.commit:
+        if not RESULTS_FILE.exists():
+            print(f"No results file found at {RESULTS_FILE}")
+            print("Run without --commit first to fetch Wikipedia data and generate results.")
+            return
+
+        updates = json.loads(RESULTS_FILE.read_text())
+        print(f"Loaded {len(updates)} pending updates from {RESULTS_FILE.name}")
+
+        if not updates:
+            print("Nothing to apply.")
+            return
+
+        print("\nApplying updates to prod D1...")
+        applied = 0
+        for u in tqdm(updates, desc="Updating D1"):
+            set_clauses = []
+            values = []
+            for field, value in u["changes"].items():
+                set_clauses.append(f"{field} = ?")
+                values.append(value)
+            values.append(u["id"])
+
+            sql = f"UPDATE creature SET {', '.join(set_clauses)} WHERE id = ?"
+            db.execute(sql, values)
+            applied += 1
+
+        print(f"\nDone! Updated {applied} creatures.")
+        return
+
+    # ─── Dry run mode: fetch Wikipedia and save results ────────────────
+
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
     # Find creatures missing size or weight
     where_clauses = ["(size_meters IS NULL OR weight_kg IS NULL)"]
@@ -262,6 +299,10 @@ def main() -> None:
                 "changes": changes,
             })
 
+    # ─── Save results ──────────────────────────────────────────────────
+
+    RESULTS_FILE.write_text(json.dumps(updates, indent=2))
+
     # ─── Report ────────────────────────────────────────────────────────
 
     if not updates:
@@ -269,7 +310,7 @@ def main() -> None:
         return
 
     print(f"\n{'=' * 80}")
-    print(f"{'DRY RUN — ' if not args.commit else ''}Found {len(updates)} creatures to update:")
+    print(f"DRY RUN — Found {len(updates)} creatures to update:")
     print(f"{'=' * 80}")
     print(f"{'Name':<35} {'Field':<14} {'New Value':<12} {'Source'}")
     print(f"{'-' * 35} {'-' * 14} {'-' * 12} {'-' * 10}")
@@ -286,28 +327,8 @@ def main() -> None:
             print(f"{u['name']:<35} {label:<14} {value:<12} {u['source']}")
 
     print(f"\nSummary: {size_count} size_meters, {weight_count} weight_kg updates")
-
-    if not args.commit:
-        print("\nDry run complete. Use --commit to apply these changes.")
-        return
-
-    # ─── Apply ─────────────────────────────────────────────────────────
-
-    print("\nApplying updates to prod D1...")
-    applied = 0
-    for u in tqdm(updates, desc="Updating D1"):
-        set_clauses = []
-        values = []
-        for field, value in u["changes"].items():
-            set_clauses.append(f"{field} = ?")
-            values.append(value)
-        values.append(u["id"])
-
-        sql = f"UPDATE creature SET {', '.join(set_clauses)} WHERE id = ?"
-        db.execute(sql, values)
-        applied += 1
-
-    print(f"\nDone! Updated {applied} creatures.")
+    print(f"Results saved to {RESULTS_FILE}")
+    print(f"\nReview the output above, then run with --commit to apply.")
 
 
 if __name__ == "__main__":
