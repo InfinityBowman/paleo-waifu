@@ -5,8 +5,8 @@ This file provides guidance to Claude Code when working with this repository.
 ## Commands
 
 ```bash
-pnpm dev              # Dev server on http://localhost:3000
-pnpm build            # Production build
+pnpm dev              # Dev server on http://localhost:3000 (web + editor)
+pnpm build            # Production build (web)
 pnpm deploy           # Build + deploy to Cloudflare Workers (production env)
 pnpm db:generate      # Generate Drizzle migration files
 pnpm db:migrate:local # Apply migrations to local D1
@@ -14,7 +14,7 @@ pnpm db:migrate:prod  # Apply migrations to production D1
 pnpm lint             # ESLint
 pnpm format           # Prettier
 pnpm check            # Prettier --write + ESLint --fix
-pnpm typecheck        # Typecheck -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
+pnpm typecheck        # Typecheck web app -- IMPORTANT TO USE THIS FOR ALL TYPE CHECKS BECAUSE USING tsc DIRECTLY WILL IGNORE PROJECT CONFIG
 
 # Testing
 pnpm test             # Run production integration tests (hits live site)
@@ -38,7 +38,7 @@ pnpm gateway:typecheck # Typecheck gateway
 
 ## Environment
 
-Requires a `.env` file. Copy `.env.example` and fill in values:
+Requires a `.env` file in `web/`. Copy `web/.env.example` and fill in values:
 
 - `AUTH_SECRET` — Random string for session signing
 - `AUTH_BASE_URL` — App URL (http://localhost:3000 for dev)
@@ -47,13 +47,13 @@ Requires a `.env` file. Copy `.env.example` and fill in values:
 
 ## Architecture
 
-Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanStack Router** (file-based routing), React 19, Tailwind CSS v4, deployed to **Cloudflare Workers** with D1 database. wrangler.jsonc is the config file.
+Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanStack Router** (file-based routing), React 19, Tailwind CSS v4, deployed to **Cloudflare Workers** with D1 database.
 
 ### Monorepo Structure
 
-pnpm workspace with 5 packages:
+pnpm workspace with 6 packages:
 
-- **Root** (`/`) — Main TanStack Start web app
+- **`web/`** (`@paleo-waifu/web`) — Main TanStack Start web app (wrangler.jsonc is the config file)
 - **`packages/shared`** (`@paleo-waifu/shared`) — Runtime-agnostic shared code (DB schema, types, constants)
 - **`bot/`** — Discord bot (Cloudflare Worker)
 - **`gateway/`** — Discord gateway listener (Node.js, Docker)
@@ -73,11 +73,11 @@ Buildless package — exports `.ts` files directly, consumers' bundlers compile 
 @paleo-waifu/shared/battle/constants # RARITY_BASE_TOTALS, ability templates, etc.
 ```
 
-When adding code used by 2+ workspaces, add it to `packages/shared/`. When adding code used only by the main app, keep it in `src/lib/`.
+When adding code used by 2+ workspaces, add it to `packages/shared/`. When adding code used only by the web app, keep it in `web/src/lib/`.
 
 ### Routing
 
-File-based routing via TanStack Router. Route tree auto-generated in `src/routeTree.gen.ts` — do not edit manually. Two layout groups:
+File-based routing via TanStack Router. Route tree auto-generated in `web/src/routeTree.gen.ts` — do not edit manually. Two layout groups:
 
 - `_public` — Public layout with nav (landing, encyclopedia, leaderboard)
 - `_app` — Auth-guarded layout (gacha, collection, trade, profile)
@@ -103,18 +103,18 @@ Routes:
 ### Code Organization
 
 - `packages/shared/src/` — Shared types, DB schema, XP config, battle constants
-- `src/routes/` — File-based route definitions
-- `src/components/gacha/` — Banner select, pull button, animation, card reveal
-- `src/components/collection/` — Grid, creature card, detail modal
-- `src/components/encyclopedia/` — Browse and filter all creatures
-- `src/components/trade/` — Trade list, offer, card
-- `src/components/layout/` — Nav with auth state
-- `src/components/landing/` — Hero section
-- `src/components/admin/` — Admin dashboard components
-- `src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
-- `src/components/ui/` — shadcn/ui primitives
-- `src/lib/` — Auth, gacha logic, rarity styles, utilities
-- `src/store/` — Zustand store (fossils, pull results)
+- `web/src/routes/` — File-based route definitions
+- `web/src/components/gacha/` — Banner select, pull button, animation, card reveal
+- `web/src/components/collection/` — Grid, creature card, detail modal
+- `web/src/components/encyclopedia/` — Browse and filter all creatures
+- `web/src/components/trade/` — Trade list, offer, card
+- `web/src/components/layout/` — Nav with auth state
+- `web/src/components/landing/` — Hero section
+- `web/src/components/admin/` — Admin dashboard components
+- `web/src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
+- `web/src/components/ui/` — shadcn/ui primitives
+- `web/src/lib/` — Auth, gacha logic, rarity styles, utilities
+- `web/src/store/` — Zustand store (fossils, pull results)
 - `python/` — Data pipeline for creature scraping, enrichment, image generation, and R2 upload
 - `editor/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
 
@@ -136,7 +136,7 @@ Auth tables (user, session, account, verification) managed by better-auth. Game 
 
 ### Discord Bot (`bot/`)
 
-Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports shared code from `@paleo-waifu/shared` and game logic from `src/lib/` via `@/` path alias.
+Cloudflare Worker that handles Discord slash commands. Shares the same D1 database as the main app — imports shared code from `@paleo-waifu/shared` and game logic from `web/src/lib/` via `@/` path alias.
 
 Slash commands: `/pull`, `/pull10`, `/daily`, `/balance`, `/pity`, `/level`, `/leaderboard-xp`, `/leaderboard-collection`, `/help`
 
@@ -152,27 +152,27 @@ Built with esbuild. Imports XP constants from `@paleo-waifu/shared/xp`. Deployed
 
 Four GitHub Actions workflows, triggered by path-filtered pushes to `main`:
 
-- **Deploy Website** (`src/`, `packages/shared/`, `drizzle/`, etc.) — D1 migrations + `wrangler deploy`
-- **Deploy Bot** (`bot/`, `packages/shared/`, `src/lib/`, `drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
+- **Deploy Website** (`web/src/`, `packages/shared/`, `web/drizzle/`, etc.) — D1 migrations + `wrangler deploy`
+- **Deploy Bot** (`bot/`, `packages/shared/`, `web/src/lib/`, `web/drizzle/`) — D1 migrations + `wrangler deploy` (bot worker)
 - **Gateway Docker** (`gateway/`, `packages/shared/`) — Docker build + GHCR push + repository dispatch to homelab
 - **Editor Docker** (`editor/`, `packages/shared/`) — Docker build + GHCR push + repository dispatch to homelab
 
 ### Testing
 
-Production integration tests in `tests/production/` using Vitest. Tests hit the live site (or `TEST_BASE_URL` env var) and verify HTTP headers, security headers, SEO meta tags, SSR content, auth redirects, and API behavior. Run with `pnpm test`.
+Production integration tests in `web/tests/production/` using Vitest. Tests hit the live site (or `TEST_BASE_URL` env var) and verify HTTP headers, security headers, SEO meta tags, SSR content, auth redirects, and API behavior. Run with `pnpm test`.
 
 ### Static Assets & Caching
 
-- `public/_headers` — Cloudflare Workers Assets header rules (immutable cache for hashed `/assets/*`)
-- `public/og-image.png` — Open Graph social preview image
+- `web/public/_headers` — Cloudflare Workers Assets header rules (immutable cache for hashed `/assets/*`)
+- `web/public/og-image.png` — Open Graph social preview image
 - Creature images stored in R2, served via `cdn.jacobmaynard.dev` custom domain
 - Security headers (CSP, X-Frame-Options, etc.) applied globally via root route `headers()`
 
 ## Conventions
 
-- **Imports**: Use `@paleo-waifu/shared/*` for shared code (DB schema, types, XP config, battle constants). Use `@/` path alias (maps to `src/`) for main app code. Use `@/lib/rarity-styles` for Tailwind rarity CSS maps.
+- **Imports**: Use `@paleo-waifu/shared/*` for shared code (DB schema, types, XP config, battle constants). Use `@/` path alias (maps to `web/src/`) for web app code. Use `@/lib/rarity-styles` for Tailwind rarity CSS maps.
 - **Components**: PascalCase filenames, shadcn/ui with Lucide icons
-- **Styling**: Tailwind classes only, dark mode with warm amber theme via OKLCH in `src/styles.css`
+- **Styling**: Tailwind classes only, dark mode with warm amber theme via OKLCH in `web/src/styles.css`
 - **Formatting**: No semicolons, single quotes, trailing commas (Prettier)
 - **Database**: Drizzle ORM with SQLite (D1). Schema in `packages/shared/src/db/schema.ts`. Timestamps use `integer('field', { mode: 'timestamp' }).default(sql\`(unixepoch())\`)`
 - **IDs**: Use `nanoid()` for all primary keys

@@ -3,6 +3,6 @@
 import { tanstackConfig } from '@tanstack/eslint-config'
 
 export default [
-  { ignores: ['.output/**', '.wrangler/**', 'python/**', '*.js'] },
+  { ignores: ['web/.output/**', 'web/.wrangler/**', 'python/**', '*.js'] },
   ...tanstackConfig,
 ]

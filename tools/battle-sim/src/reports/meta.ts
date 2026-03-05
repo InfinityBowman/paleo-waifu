@@ -47,7 +47,7 @@ interface Individual {
   generationBorn: number
 }
 
-interface GenerationSnapshot {
+export interface GenerationSnapshot {
   generation: number
   topFitness: number
   avgFitness: number
@@ -70,9 +70,10 @@ export interface MetaOptions {
   eliteRate: number
   mutationRate: number
   csv: boolean
+  onGeneration?: (gen: number, snapshot: GenerationSnapshot) => void
 }
 
-interface MetaResult {
+export interface MetaResult {
   hallOfFame: Individual[]
   creatureLeaderboard: Array<{
     creature: CreatureRecord
@@ -1175,17 +1176,21 @@ function renderActionAnalysis(profiles: RoleActionProfile[]): void {
 
 // ─── Main Export ──────────────────────────────────────────────────
 
+export interface MetaRunResult {
+  result: MetaResult
+  snapshots: GenerationSnapshot[]
+}
+
 export function runMetaReport(
   creatures: CreatureRecord[],
   options: MetaOptions,
-): void {
+): MetaRunResult {
   const log = options.csv
     ? (...a: unknown[]) => console.error(...a)
     : console.log.bind(console)
 
   if (creatures.length < 3) {
-    console.error('Meta report requires at least 3 creatures')
-    process.exit(1)
+    throw new Error('Meta report requires at least 3 creatures')
   }
 
   // Build creature index for O(1) lookup
@@ -1233,6 +1238,7 @@ export function runMetaReport(
 
     // Snapshot
     snapshots.push(snapshotGeneration(population, gen, avgTurns))
+    options.onGeneration?.(gen, snapshots[snapshots.length - 1]!)
 
     // Reproduce (skip on last generation)
     if (gen < options.generations) {
@@ -1264,4 +1270,6 @@ export function runMetaReport(
     const actionProfiles = analyzeBattleActions(population)
     renderActionAnalysis(actionProfiles)
   }
+
+  return { result, snapshots }
 }

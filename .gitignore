@@ -8,7 +8,7 @@ dist
 routeTree.gen.ts
 .vinxi
 .tanstack
-drizzle/meta
+**/drizzle/meta
 *.db
 *.db-journal
 terraform/.terraform/

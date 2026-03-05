@@ -6,8 +6,8 @@ on:
     paths:
       - 'bot/**'
       - 'packages/shared/**'
-      - 'src/lib/**'
-      - 'drizzle/**'
+      - 'web/src/lib/**'
+      - 'web/drizzle/**'
       - '.github/workflows/deploy-bot.yml'
 
 concurrency:

@@ -15,7 +15,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["../src/*"]
+      "@/*": ["../web/src/*"]
     }
   },
   "include": ["src/**/*.ts", "register.ts"]
