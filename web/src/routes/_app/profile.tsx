@@ -107,10 +107,7 @@ function ProfilePage() {
         </div>
       </div>
 
-      <Card
-        size="sm"
-        className="group mb-6 transition-shadow hover:shadow-md"
-      >
+      <Card size="sm" className="group mb-6 transition-shadow hover:shadow-md">
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
@@ -173,4 +170,3 @@ function ProfilePage() {
     </div>
   )
 }
-

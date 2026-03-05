@@ -3,7 +3,11 @@ import { describe, expect, test } from 'vitest'
 const BASE = process.env.TEST_BASE_URL ?? 'https://paleo-waifu.jacobmaynard.dev'
 
 async function head(path: string, opts?: RequestInit) {
-  const res = await fetch(`${BASE}${path}`, { method: 'HEAD', redirect: 'manual', ...opts })
+  const res = await fetch(`${BASE}${path}`, {
+    method: 'HEAD',
+    redirect: 'manual',
+    ...opts,
+  })
   return res
 }
 

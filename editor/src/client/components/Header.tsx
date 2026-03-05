@@ -53,11 +53,7 @@ export function Header({
         </button>
         <div className="ml-2 flex items-center gap-2 border-l border-border pl-4">
           {user.image && (
-            <img
-              src={user.image}
-              alt=""
-              className="h-7 w-7 rounded-full"
-            />
+            <img src={user.image} alt="" className="h-7 w-7 rounded-full" />
           )}
           <span className="text-sm text-muted-foreground">{user.name}</span>
           <button

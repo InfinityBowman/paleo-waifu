@@ -114,11 +114,10 @@ export function evaluateCondition(
 
     case 'target_hp_below': {
       const primary =
-        ctx.triggerAttackTarget ?? (ctx.targets[0] as BattleCreature | undefined)
+        ctx.triggerAttackTarget ??
+        (ctx.targets[0] as BattleCreature | undefined)
       if (!primary) return false
-      return (
-        primary.currentHp < primary.maxHp * (condition.percent / 100)
-      )
+      return primary.currentHp < primary.maxHp * (condition.percent / 100)
     }
 
     case 'per_ally_alive':
@@ -137,14 +136,10 @@ export function computeStackMultiplier(
 
   switch (condition.type) {
     case 'per_ally_alive':
-      return ctx.allAllies.filter(
-        (a) => a.id !== owner.id && a.isAlive,
-      ).length
+      return ctx.allAllies.filter((a) => a.id !== owner.id && a.isAlive).length
 
     case 'per_dead_ally':
-      return ctx.allAllies.filter(
-        (a) => a.id !== owner.id && !a.isAlive,
-      ).length
+      return ctx.allAllies.filter((a) => a.id !== owner.id && !a.isAlive).length
 
     default:
       return 1
@@ -196,9 +191,7 @@ export function resolveEffect(
       const resolutions: Array<EffectResolution> = []
 
       // Shield absorption
-      const shieldEffect = target.statusEffects.find(
-        (e) => e.kind === 'shield',
-      )
+      const shieldEffect = target.statusEffects.find((e) => e.kind === 'shield')
       if (shieldEffect && finalDamage > 0) {
         const absorbed = Math.min(finalDamage, shieldEffect.value)
         shieldEffect.value -= absorbed
@@ -215,14 +208,9 @@ export function resolveEffect(
         (e) => e.kind === 'reflect',
       )
       if (reflectEffect && finalDamage > 0) {
-        const reflectDmg = Math.floor(
-          finalDamage * (reflectEffect.value / 100),
-        )
+        const reflectDmg = Math.floor(finalDamage * (reflectEffect.value / 100))
         if (reflectDmg > 0) {
-          caster.currentHp = Math.max(
-            0,
-            caster.currentHp - reflectDmg,
-          )
+          caster.currentHp = Math.max(0, caster.currentHp - reflectDmg)
           if (caster.currentHp <= 0) caster.isAlive = false
           resolutions.push({
             kind: 'reflect_damage',
@@ -255,10 +243,7 @@ export function resolveEffect(
         1,
         Math.floor(target.maxHp * (effect.percent / 100)),
       )
-      target.currentHp = Math.min(
-        target.maxHp,
-        target.currentHp + amount,
-      )
+      target.currentHp = Math.min(target.maxHp, target.currentHp + amount)
       return [
         {
           kind: 'heal',
@@ -278,9 +263,7 @@ export function resolveEffect(
         turnsRemaining: effect.duration,
       }
       target.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: target.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: target.id, effect: se }]
     }
 
     case 'buff': {
@@ -296,9 +279,7 @@ export function resolveEffect(
         stat: effect.stat,
       }
       target.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: target.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: target.id, effect: se }]
     }
 
     case 'debuff': {
@@ -314,9 +295,7 @@ export function resolveEffect(
         stat: effect.stat,
       }
       target.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: target.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: target.id, effect: se }]
     }
 
     case 'shield': {
@@ -348,9 +327,7 @@ export function resolveEffect(
         turnsRemaining: effect.duration,
       }
       target.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: target.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: target.id, effect: se }]
     }
 
     case 'taunt': {
@@ -367,22 +344,14 @@ export function resolveEffect(
         turnsRemaining: effect.duration,
       }
       caster.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: caster.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: caster.id, effect: se }]
     }
 
     case 'lifesteal': {
       const dealt = ctx.lastDamageDealt ?? 0
       if (dealt <= 0) return []
-      const amount = Math.max(
-        1,
-        Math.floor(dealt * (effect.percent / 100)),
-      )
-      caster.currentHp = Math.min(
-        caster.maxHp,
-        caster.currentHp + amount,
-      )
+      const amount = Math.max(1, Math.floor(dealt * (effect.percent / 100)))
+      caster.currentHp = Math.min(caster.maxHp, caster.currentHp + amount)
       return [
         {
           kind: 'heal',
@@ -405,9 +374,7 @@ export function resolveEffect(
         turnsRemaining: effect.duration,
       }
       target.statusEffects.push(se)
-      return [
-        { kind: 'status_applied', targetId: target.id, effect: se },
-      ]
+      return [{ kind: 'status_applied', targetId: target.id, effect: se }]
     }
 
     // 'damage_reduction', 'crit_reduction', 'flat_reduction', 'dodge'
@@ -435,12 +402,7 @@ export function resolveAbilityEffects(
       if (targetKilled && effect.type !== 'lifesteal') continue
 
       const effectCtx: EffectContext = { ...ctx, lastDamageDealt }
-      const resolutions = resolveEffect(
-        effect,
-        ctx.caster,
-        target,
-        effectCtx,
-      )
+      const resolutions = resolveEffect(effect, ctx.caster, target, effectCtx)
       allResolutions.push(...resolutions)
 
       for (const res of resolutions) {
@@ -469,42 +431,22 @@ export function fireTrigger(
   if (passive.trigger.type !== eventType) return []
 
   // For onBattleStart, check the trigger's own condition
-  if (
-    passive.trigger.type === 'onBattleStart' &&
-    passive.trigger.condition
-  ) {
-    if (
-      !evaluateCondition(passive.trigger.condition, owner, ctx)
-    )
-      return []
+  if (passive.trigger.type === 'onBattleStart' && passive.trigger.condition) {
+    if (!evaluateCondition(passive.trigger.condition, owner, ctx)) return []
   }
 
   // Check the ability-level condition
   if (!evaluateCondition(passive.condition, owner, ctx)) return []
 
-  const stackMultiplier = computeStackMultiplier(
-    passive.condition,
-    owner,
-    ctx,
-  )
+  const stackMultiplier = computeStackMultiplier(passive.condition, owner, ctx)
 
-  const resolvedTargets = resolveTarget(
-    passive.target,
-    owner,
-    ctx,
-    ctx.rng,
-  )
+  const resolvedTargets = resolveTarget(passive.target, owner, ctx, ctx.rng)
   const allResolutions: Array<EffectResolution> = []
 
   for (const target of resolvedTargets) {
     for (const effect of passive.effects) {
       const scaledEffect = scaleEffect(effect, stackMultiplier)
-      const resolutions = resolveEffect(
-        scaledEffect,
-        owner,
-        target,
-        ctx,
-      )
+      const resolutions = resolveEffect(scaledEffect, owner, target, ctx)
       allResolutions.push(...resolutions)
     }
   }
@@ -552,28 +494,21 @@ export function materializeAlwaysPassive(
       (a) => a.id !== creature.id && a.isAlive,
     ).length
     // Use a tracking key to compute deltas
-    const prevCount =
-      (creature as any).__passiveAllyCount ?? 0
+    const prevCount = (creature as any).__passiveAllyCount ?? 0
     if (liveAllyCount !== prevCount) {
       for (const effect of passive.effects) {
         if (effect.type === 'buff') {
           const prevBonus = Math.floor(
-            creature.baseStats[
-              effect.stat as keyof typeof creature.baseStats
-            ] *
+            creature.baseStats[effect.stat as keyof typeof creature.baseStats] *
               ((effect.percent * prevCount) / 100),
           )
           const newBonus = Math.floor(
-            creature.baseStats[
-              effect.stat as keyof typeof creature.baseStats
-            ] *
+            creature.baseStats[effect.stat as keyof typeof creature.baseStats] *
               ((effect.percent * liveAllyCount) / 100),
           )
           const stat = effect.stat
-          if (stat === 'atk')
-            creature.atk += newBonus - prevBonus
-          else if (stat === 'def')
-            creature.def += newBonus - prevBonus
+          if (stat === 'atk') creature.atk += newBonus - prevBonus
+          else if (stat === 'def') creature.def += newBonus - prevBonus
           else creature.spd += newBonus - prevBonus
         }
       }
@@ -591,22 +526,16 @@ export function materializeAlwaysPassive(
       for (const effect of passive.effects) {
         if (effect.type === 'buff') {
           const prevBonus = Math.floor(
-            creature.baseStats[
-              effect.stat as keyof typeof creature.baseStats
-            ] *
+            creature.baseStats[effect.stat as keyof typeof creature.baseStats] *
               ((effect.percent * prevCount) / 100),
           )
           const newBonus = Math.floor(
-            creature.baseStats[
-              effect.stat as keyof typeof creature.baseStats
-            ] *
+            creature.baseStats[effect.stat as keyof typeof creature.baseStats] *
               ((effect.percent * deadCount) / 100),
           )
           const stat = effect.stat
-          if (stat === 'atk')
-            creature.atk += newBonus - prevBonus
-          else if (stat === 'def')
-            creature.def += newBonus - prevBonus
+          if (stat === 'atk') creature.atk += newBonus - prevBonus
+          else if (stat === 'def') creature.def += newBonus - prevBonus
           else creature.spd += newBonus - prevBonus
         }
       }
@@ -631,10 +560,7 @@ export function tickStatusEffects(
           1,
           Math.floor(creature.maxHp * (effect.value / 100)),
         )
-        creature.currentHp = Math.max(
-          0,
-          creature.currentHp - tickDmg,
-        )
+        creature.currentHp = Math.max(0, creature.currentHp - tickDmg)
         if (creature.currentHp <= 0) creature.isAlive = false
         effect.turnsRemaining--
         const expired = effect.turnsRemaining <= 0
@@ -668,11 +594,7 @@ export function tickStatusEffects(
               removeStatModifier(creature, effect.stat, effect.value)
             } else {
               // Debuff: undo the negative modifier
-              removeStatModifier(
-                creature,
-                effect.stat,
-                -effect.value,
-              )
+              removeStatModifier(creature, effect.stat, -effect.value)
             }
           }
           toRemove.push(effect)
@@ -732,8 +654,7 @@ function applyStatModifier(
   stat: Stat,
   percentValue: number,
 ): void {
-  const base =
-    creature.baseStats[stat as keyof typeof creature.baseStats]
+  const base = creature.baseStats[stat as keyof typeof creature.baseStats]
   const amount = Math.floor(base * (percentValue / 100))
   switch (stat) {
     case 'atk':

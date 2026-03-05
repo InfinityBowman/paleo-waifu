@@ -272,12 +272,32 @@ function NotFound() {
           />
 
           {/* Back spines */}
-          <circle cx="88" cy="122" r="5" fill="currentColor" className="text-primary" />
-          <circle cx="98" cy="116" r="6" fill="currentColor" className="text-primary" />
-          <circle cx="109" cy="114" r="5" fill="currentColor" className="text-primary" />
+          <circle
+            cx="88"
+            cy="122"
+            r="5"
+            fill="currentColor"
+            className="text-primary"
+          />
+          <circle
+            cx="98"
+            cy="116"
+            r="6"
+            fill="currentColor"
+            className="text-primary"
+          />
+          <circle
+            cx="109"
+            cy="114"
+            r="5"
+            fill="currentColor"
+            className="text-primary"
+          />
 
           {/* Question mark floating above head */}
-          <g style={{ animation: 'notfound-question 2.5s ease-in-out infinite' }}>
+          <g
+            style={{ animation: 'notfound-question 2.5s ease-in-out infinite' }}
+          >
             <text
               x="140"
               y="42"

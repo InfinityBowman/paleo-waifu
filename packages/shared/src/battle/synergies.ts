@@ -86,8 +86,7 @@ export function calculateSynergies(
   } else if (hasCarni && hasHerbi) {
     bonuses.push({
       kind: 'diet',
-      description:
-        'Mixed (Carnivore + Herbivore): +12% SPD, +7% ATK',
+      description: 'Mixed (Carnivore + Herbivore): +12% SPD, +7% ATK',
       affectedCreatureIds: team.map((c) => c.id),
       statBonuses: { spd: 12, atk: 7 },
     })
@@ -102,36 +101,25 @@ export function applySynergies(
 ): void {
   for (const bonus of bonuses) {
     for (const creature of team) {
-      if (!bonus.affectedCreatureIds.includes(creature.id))
-        continue
+      if (!bonus.affectedCreatureIds.includes(creature.id)) continue
 
-      for (const [stat, percent] of Object.entries(
-        bonus.statBonuses,
-      )) {
+      for (const [stat, percent] of Object.entries(bonus.statBonuses)) {
         const pct = percent
         switch (stat) {
           case 'hp': {
-            const hpBonus = Math.floor(
-              creature.maxHp * (pct / 100),
-            )
+            const hpBonus = Math.floor(creature.maxHp * (pct / 100))
             creature.maxHp += hpBonus
             creature.currentHp += hpBonus
             break
           }
           case 'atk':
-            creature.atk += Math.floor(
-              creature.baseStats.atk * (pct / 100),
-            )
+            creature.atk += Math.floor(creature.baseStats.atk * (pct / 100))
             break
           case 'def':
-            creature.def += Math.floor(
-              creature.baseStats.def * (pct / 100),
-            )
+            creature.def += Math.floor(creature.baseStats.def * (pct / 100))
             break
           case 'spd':
-            creature.spd += Math.floor(
-              creature.baseStats.spd * (pct / 100),
-            )
+            creature.spd += Math.floor(creature.baseStats.spd * (pct / 100))
             break
         }
       }

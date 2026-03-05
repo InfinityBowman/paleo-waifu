@@ -73,7 +73,9 @@ describe('meta descriptions', () => {
   for (const path of pages) {
     test(`${path} has a meta description`, async () => {
       const html = await getHtml(path)
-      const match = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/)
+      const match = html.match(
+        /<meta[^>]+name="description"[^>]+content="([^"]+)"/,
+      )
       expect(match, `${path} should have a meta description`).toBeTruthy()
       expect(match![1].length).toBeGreaterThan(20)
     })
@@ -83,7 +85,9 @@ describe('meta descriptions', () => {
     const descriptions = new Map<string, string>()
     for (const path of pages) {
       const html = await getHtml(path)
-      const match = html.match(/<meta[^>]+name="description"[^>]+content="([^"]+)"/)
+      const match = html.match(
+        /<meta[^>]+name="description"[^>]+content="([^"]+)"/,
+      )
       if (match) descriptions.set(path, match[1])
     }
 
@@ -105,7 +109,9 @@ describe('Open Graph meta tags', () => {
     for (const tag of requiredOgTags) {
       test(`${path} has ${tag}`, async () => {
         const html = await getHtml(path)
-        const regex = new RegExp(`<meta[^>]+property="${tag}"[^>]+content="([^"]+)"`)
+        const regex = new RegExp(
+          `<meta[^>]+property="${tag}"[^>]+content="([^"]+)"`,
+        )
         const match = html.match(regex)
         expect(match, `${path} should have ${tag}`).toBeTruthy()
         expect(match![1].length).toBeGreaterThan(0)

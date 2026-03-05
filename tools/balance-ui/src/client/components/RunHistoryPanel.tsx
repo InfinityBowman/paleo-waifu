@@ -115,7 +115,9 @@ export function RunHistoryPanel({
               onClick={() => setSortBy('date')}
               className={cn(
                 'px-2 py-1 transition-colors',
-                sortBy === 'date' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+                sortBy === 'date'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
               Date
@@ -124,7 +126,9 @@ export function RunHistoryPanel({
               onClick={() => setSortBy('fitness')}
               className={cn(
                 'px-2 py-1 transition-colors',
-                sortBy === 'fitness' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground',
+                sortBy === 'fitness'
+                  ? 'bg-muted text-foreground'
+                  : 'text-muted-foreground hover:text-foreground',
               )}
             >
               Fitness
@@ -228,17 +232,26 @@ export function RunHistoryPanel({
                     gen {run.generations}
                   </Badge>
                   {run.normalizeStats && (
-                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
+                    <Badge
+                      variant="secondary"
+                      className="text-[9px] px-1.5 py-0"
+                    >
                       normalized
                     </Badge>
                   )}
                   {run.noActives && (
-                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
+                    <Badge
+                      variant="secondary"
+                      className="text-[9px] px-1.5 py-0"
+                    >
                       no actives
                     </Badge>
                   )}
                   {run.noPassives && (
-                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
+                    <Badge
+                      variant="secondary"
+                      className="text-[9px] px-1.5 py-0"
+                    >
                       no passives
                     </Badge>
                   )}
@@ -266,10 +279,16 @@ export function RunHistoryPanel({
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                     <span>
-                      Top <span className="font-mono text-foreground">{(run.topFitness * 100).toFixed(1)}%</span>
+                      Top{' '}
+                      <span className="font-mono text-foreground">
+                        {(run.topFitness * 100).toFixed(1)}%
+                      </span>
                     </span>
                     <span>
-                      Turns <span className="font-mono text-foreground">{run.avgTurns.toFixed(1)}</span>
+                      Turns{' '}
+                      <span className="font-mono text-foreground">
+                        {run.avgTurns.toFixed(1)}
+                      </span>
                     </span>
                   </div>
 
@@ -297,7 +316,9 @@ export function RunHistoryPanel({
                       />
                     </Button>
                   </TooltipTrigger>
-                  <TooltipContent>{run.starred ? 'Unstar' : 'Star'}</TooltipContent>
+                  <TooltipContent>
+                    {run.starred ? 'Unstar' : 'Star'}
+                  </TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
@@ -354,7 +375,10 @@ export function RunHistoryPanel({
                         size="icon-xs"
                         onClick={() => setConfirmDeleteId(run.id)}
                       >
-                        <Trash2 size={12} className="text-muted-foreground hover:text-destructive" />
+                        <Trash2
+                          size={12}
+                          className="text-muted-foreground hover:text-destructive"
+                        />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>Delete</TooltipContent>
@@ -391,7 +415,8 @@ function MiniRoleBar({ roleShares }: { roleShares: Record<string, number> }) {
       <TooltipContent>
         {ROLE_ORDER.map((role) => (
           <div key={role} className="text-[10px]">
-            <span className="capitalize">{role}</span>: {((roleShares[role] ?? 0) * 100).toFixed(1)}%
+            <span className="capitalize">{role}</span>:{' '}
+            {((roleShares[role] ?? 0) * 100).toFixed(1)}%
           </div>
         ))}
       </TooltipContent>

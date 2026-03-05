@@ -103,7 +103,6 @@ export const Route = createFileRoute('/admin/users/$userId')({
   component: UserDetailPage,
 })
 
-
 function UserDetailPage() {
   const data = Route.useLoaderData()
 

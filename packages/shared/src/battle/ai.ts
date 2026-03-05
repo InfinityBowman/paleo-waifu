@@ -114,10 +114,7 @@ function getGameStateModifiers(
 
 function avgHpPercent(creatures: Array<BattleCreature>): number {
   if (creatures.length === 0) return 0
-  const total = creatures.reduce(
-    (sum, c) => sum + c.currentHp / c.maxHp,
-    0,
-  )
+  const total = creatures.reduce((sum, c) => sum + c.currentHp / c.maxHp, 0)
   return (total / creatures.length) * 100
 }
 
@@ -205,9 +202,7 @@ export function selectAction({
   })
 
   // Pick highest score; deterministic tiebreak by slot order
-  candidates.sort(
-    (a, b) => b.score - a.score || a.slotOrder - b.slotOrder,
-  )
+  candidates.sort((a, b) => b.score - a.score || a.slotOrder - b.slotOrder)
 
   const chosen = candidates[0]
 
@@ -238,22 +233,13 @@ function applyGameStateToScore(
     case 'aoe_damage':
     case 'dot':
     case 'stun':
-      return (
-        score *
-        modifiers.aggression *
-        modifiers.urgency *
-        modifiers.focus
-      )
+      return score * modifiers.aggression * modifiers.urgency * modifiers.focus
     case 'heal':
     case 'shield':
     case 'taunt':
       return score * modifiers.defensive
     case 'buff':
-      return (
-        score *
-        modifiers.defensive *
-        (modifiers.urgency > 1.0 ? 0.9 : 1.0)
-      )
+      return score * modifiers.defensive * (modifiers.urgency > 1.0 ? 0.9 : 1.0)
     case 'debuff':
       return score * modifiers.aggression
   }
@@ -314,16 +300,9 @@ function scoreDamage(
     if (wouldKill) score += 30
 
     // Overkill penalty: don't waste cooldowns on targets a basic could kill
-    const cd =
-      ability.trigger.type === 'onUse'
-        ? ability.trigger.cooldown
-        : 0
+    const cd = ability.trigger.type === 'onUse' ? ability.trigger.cooldown : 0
     if (wouldKill && cd >= 2) {
-      const basicEstimate = estimateDamage(
-        actor,
-        enemy,
-        BASIC_ATTACK,
-      )
+      const basicEstimate = estimateDamage(actor, enemy, BASIC_ATTACK)
       if (basicEstimate >= enemy.currentHp) {
         score -= 30 * cd
       }
@@ -337,9 +316,7 @@ function scoreDamage(
       ability.id === 'basic_attack' &&
       actor.passive.trigger.type === 'onBasicAttack'
     ) {
-      const hasPoison = enemy.statusEffects.some(
-        (e) => e.kind === 'poison',
-      )
+      const hasPoison = enemy.statusEffects.some((e) => e.kind === 'poison')
       if (!hasPoison) score += 20
     }
 
@@ -436,9 +413,7 @@ function scoreHeal(
   else if (worstAllyHpPct < 0.45) score += 50
   else if (worstAllyHpPct < 0.6) score += 30
 
-  const healthyAllies = allies.filter(
-    (a) => a.currentHp / a.maxHp > 0.8,
-  )
+  const healthyAllies = allies.filter((a) => a.currentHp / a.maxHp > 0.8)
   score -= healthyAllies.length * 10
 
   return { score, targets: allies }
@@ -452,23 +427,17 @@ function scoreBuff(
   let score = 30
 
   const buffStats = ability.effects
-    .filter(
-      (e): e is Effect & { type: 'buff' } => e.type === 'buff',
-    )
+    .filter((e): e is Effect & { type: 'buff' } => e.type === 'buff')
     .map((e) => e.stat)
 
   const allBuffed = buffStats.every((stat) =>
     allies.every((a) =>
-      a.statusEffects.some(
-        (e) => e.kind === 'buff' && e.stat === stat,
-      ),
+      a.statusEffects.some((e) => e.kind === 'buff' && e.stat === stat),
     ),
   )
   const someBuffed = buffStats.some((stat) =>
     allies.some((a) =>
-      a.statusEffects.some(
-        (e) => e.kind === 'buff' && e.stat === stat,
-      ),
+      a.statusEffects.some((e) => e.kind === 'buff' && e.stat === stat),
     ),
   )
 
@@ -476,11 +445,9 @@ function scoreBuff(
   else if (!someBuffed) score += 40
   else score += 15
 
-  if (ability.target === 'all_allies' && allies.length >= 3)
-    score += 15
+  if (ability.target === 'all_allies' && allies.length >= 3) score += 15
 
-  if (ability.target === 'all_allies')
-    return { score, targets: allies }
+  if (ability.target === 'all_allies') return { score, targets: allies }
   return { score, targets: [actor] }
 }
 
@@ -492,9 +459,7 @@ function scoreDebuff(
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const debuffStats = ability.effects
-    .filter(
-      (e): e is Effect & { type: 'debuff' } => e.type === 'debuff',
-    )
+    .filter((e): e is Effect & { type: 'debuff' } => e.type === 'debuff')
     .map((e) => e.stat)
 
   let bestScore = -Infinity
@@ -507,16 +472,12 @@ function scoreDebuff(
     if (hasHealAbility(enemy)) score += 25
 
     // Higher priority on high-DPS enemies
-    const highestAtk = enemies.reduce((a, b) =>
-      a.atk >= b.atk ? a : b,
-    )
+    const highestAtk = enemies.reduce((a, b) => (a.atk >= b.atk ? a : b))
     if (enemy.id === highestAtk.id) score += 15
 
     // Penalty if already debuffed in that stat
     const alreadyDebuffed = debuffStats.some((stat) =>
-      enemy.statusEffects.some(
-        (e) => e.kind === 'debuff' && e.stat === stat,
-      ),
+      enemy.statusEffects.some((e) => e.kind === 'debuff' && e.stat === stat),
     )
     if (alreadyDebuffed) score -= 40
 
@@ -526,8 +487,7 @@ function scoreDebuff(
     }
   }
 
-  const targets =
-    ability.target === 'all_enemies' ? enemies : [bestTarget]
+  const targets = ability.target === 'all_enemies' ? enemies : [bestTarget]
   return { score: bestScore, targets }
 }
 
@@ -543,8 +503,7 @@ function scoreShield(
       a.currentHp / a.maxHp < b.currentHp / b.maxHp ? a : b,
     )
     let score = 25
-    const allyHpPct =
-      lowestHpAlly.currentHp / lowestHpAlly.maxHp
+    const allyHpPct = lowestHpAlly.currentHp / lowestHpAlly.maxHp
 
     if (allyHpPct < 0.4) score += 50
     else if (allyHpPct < 0.6) score += 30
@@ -559,9 +518,7 @@ function scoreShield(
   }
 
   let score = 20
-  const hasShield = actor.statusEffects.some(
-    (e) => e.kind === 'shield',
-  )
+  const hasShield = actor.statusEffects.some((e) => e.kind === 'shield')
   if (hasShield) {
     score -= 40
   } else {
@@ -637,8 +594,7 @@ function getDotParams(
   ability: Ability,
 ): { percent: number; duration: number } | null {
   for (const e of ability.effects) {
-    if (e.type === 'dot')
-      return { percent: e.percent, duration: e.duration }
+    if (e.type === 'dot') return { percent: e.percent, duration: e.duration }
   }
   return null
 }

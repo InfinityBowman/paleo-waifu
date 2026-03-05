@@ -1,12 +1,12 @@
 import chalk from 'chalk'
-import {  loadCreatures } from './db.ts'
+import { loadCreatures } from './db.ts'
 import { runMatchupReport } from './reports/matchup.ts'
 import { runTeamReport } from './reports/team.ts'
 import { runRoleReport } from './reports/role.ts'
 import { runCreatureReport } from './reports/creature.ts'
 import { runAbilityReport } from './reports/ability.ts'
 import { runMetaReport } from './reports/meta.ts'
-import type {CreatureRecord} from './db.ts';
+import type { CreatureRecord } from './db.ts'
 
 // ─── CLI Argument Parsing ─────────────────────────────────────────
 
@@ -105,13 +105,26 @@ function parseArgs(argv: Array<string>): SimArgs {
     process.exit(1)
   }
 
-  return { command, creatureName, trials, population, generations, matchesPerTeam, normalizeStats, noActives, noPassives, csv }
+  return {
+    command,
+    creatureName,
+    trials,
+    population,
+    generations,
+    matchesPerTeam,
+    normalizeStats,
+    noActives,
+    noPassives,
+    csv,
+  }
 }
 
 // ─── Stat Normalization ──────────────────────────────────────────
 
 /** Scale all creatures to the same total stat budget, removing rarity advantage. */
-function normalizeCreatures(creatures: Array<CreatureRecord>): Array<CreatureRecord> {
+function normalizeCreatures(
+  creatures: Array<CreatureRecord>,
+): Array<CreatureRecord> {
   const TARGET_TOTAL = 170 // rare-tier baseline — value doesn't matter, just needs to be equal
 
   return creatures.map((c) => {
@@ -159,7 +172,11 @@ function main(): void {
 
   if (args.normalizeStats) {
     creatures = normalizeCreatures(creatures)
-    log(chalk.yellow('  ⚗ Stats normalized — all stats scaled to 170 total (rarity-neutral)'))
+    log(
+      chalk.yellow(
+        '  ⚗ Stats normalized — all stats scaled to 170 total (rarity-neutral)',
+      ),
+    )
   }
 
   if (args.noActives) {

@@ -118,7 +118,8 @@ export function leaderboardCollectionEmbed(
   const MEDALS = ['\uD83E\uDD47', '\uD83E\uDD48', '\uD83E\uDD49']
   const lines = rows.map((r, i) => {
     const prefix = MEDALS[i] ?? `${i + 1}.`
-    const pct = totalSpecies > 0 ? Math.round((r.uniqueSpecies / totalSpecies) * 100) : 0
+    const pct =
+      totalSpecies > 0 ? Math.round((r.uniqueSpecies / totalSpecies) * 100) : 0
     return `${prefix} **${r.name}** — ${r.uniqueSpecies}/${totalSpecies} species (${pct}%)`
   })
 

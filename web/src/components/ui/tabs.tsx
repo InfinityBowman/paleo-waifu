@@ -55,9 +55,7 @@ function GlassPill({ listRef }: { listRef: React.RefObject<HTMLDivElement> }) {
     const list = listRef.current
 
     const update = () => {
-      const active = list.querySelector<HTMLElement>(
-        '[data-state="active"]',
-      )
+      const active = list.querySelector<HTMLElement>('[data-state="active"]')
       if (active) {
         setStyle({
           left: active.offsetLeft,

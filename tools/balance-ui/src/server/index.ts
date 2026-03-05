@@ -9,9 +9,9 @@ import {
   RARITY_BASE_TOTALS,
   ROLE_DISTRIBUTIONS,
 } from '@paleo-waifu/shared/battle/constants'
-import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import { loadCreatures } from '../../../battle-sim/src/db.ts'
 import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import type {
   AbilityOverride,
   ConstantsSnapshot,
@@ -124,10 +124,16 @@ function applyOverrides(
         def: Math.max(1, def),
         spd: Math.max(1, spd),
         active: patch?.activeTemplateId
-          ? { templateId: patch.activeTemplateId, displayName: patch.activeTemplateId }
+          ? {
+              templateId: patch.activeTemplateId,
+              displayName: patch.activeTemplateId,
+            }
           : c.active,
         passive: patch?.passiveTemplateId
-          ? { templateId: patch.passiveTemplateId, displayName: patch.passiveTemplateId }
+          ? {
+              templateId: patch.passiveTemplateId,
+              displayName: patch.passiveTemplateId,
+            }
           : c.passive,
       }
     })
@@ -162,10 +168,15 @@ function buildTemplateMap(
 
     // Apply per-effect parameter overrides
     if (override.effectOverrides) {
-      for (const [indexStr, params] of Object.entries(override.effectOverrides)) {
+      for (const [indexStr, params] of Object.entries(
+        override.effectOverrides,
+      )) {
         const idx = parseInt(indexStr, 10)
         if (idx < 0 || idx >= patched.effects.length) continue
-        patched.effects[idx] = { ...patched.effects[idx], ...params } as typeof patched.effects[number]
+        patched.effects[idx] = {
+          ...patched.effects[idx],
+          ...params,
+        } as (typeof patched.effects)[number]
       }
     }
 
@@ -223,9 +234,7 @@ app.post('/api/sim', async (c) => {
   const stream = new ReadableStream({
     start(controller) {
       const send = (event: SimProgressEvent) =>
-        controller.enqueue(
-          encoder.encode(`data: ${JSON.stringify(event)}\n\n`),
-        )
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
 
       try {
         const { result, snapshots } = runMetaReport(creatures, {

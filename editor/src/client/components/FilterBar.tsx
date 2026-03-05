@@ -1,7 +1,13 @@
 import { Search, X } from 'lucide-react'
-import type {Rarity} from '../lib/types';
+import type { Rarity } from '../lib/types'
 
-const RARITIES: Array<Rarity> = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+const RARITIES: Array<Rarity> = [
+  'common',
+  'uncommon',
+  'rare',
+  'epic',
+  'legendary',
+]
 
 export interface Filters {
   search: string

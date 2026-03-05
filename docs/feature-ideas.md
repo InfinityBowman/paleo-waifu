@@ -12,7 +12,7 @@ High effort, high impact. Any one of these could define the game.
 
 **What**: Replace the "click button, get card" pull mechanic with an interactive excavation mini-game. Players explore a procedurally generated dig grid — pick a cell, brush away sediment, reveal bone fragments. Piece together enough fragments and the creature materializes.
 
-**Why unforgettable**: Every other gacha game is a slot machine with anime. This makes pulling feel like *actual discovery*. The tension of brushing away dirt and seeing a golden bone fragment peek through is incomparably better than watching a sparkle animation.
+**Why unforgettable**: Every other gacha game is a slot machine with anime. This makes pulling feel like _actual discovery_. The tension of brushing away dirt and seeing a golden bone fragment peek through is incomparably better than watching a sparkle animation.
 
 **Technical challenge**: Procedural grid generation seeded by the predetermined pull result (rarity decides depth/complexity). Bone fragment SVGs per creature body type. Touch-friendly brushing interaction with canvas or WebGL.
 
@@ -28,7 +28,7 @@ High effort, high impact. Any one of these could define the game.
 
 **Technical challenge**: Mapping ~393 creatures to a real phylogenetic tree with proper clade groupings. Interactive tree visualization (D3.js force-directed or custom SVG). Reward calculation for partial and complete branches.
 
-**Wow moment**: You pull an Archaeopteryx and suddenly the bridge between dinosaurs and birds lights up on your tree — a connection you can *see* and understand.
+**Wow moment**: You pull an Archaeopteryx and suddenly the bridge between dinosaurs and birds lights up on your tree — a connection you can _see_ and understand.
 
 ---
 
@@ -36,7 +36,7 @@ High effort, high impact. Any one of these could define the game.
 
 **What**: Players build biome scenes by placing collected creatures into themed environments (Jurassic forest, Cambrian ocean floor, Cretaceous plains). Creatures interact based on real ecological data — predators hunt prey, herbivores graze, filter-feeders cluster near currents. Correct era + diet + size placements earn passive Fossil income.
 
-**Why unforgettable**: Your collection stops being a gallery and becomes a living world. Watching your Anomalocaris patrol past trilobites in a Cambrian reef you built is *chef's kiss*. Era mismatches create funny anachronisms (T-Rex confused next to a Dimetrodon) instead of just being "wrong."
+**Why unforgettable**: Your collection stops being a gallery and becomes a living world. Watching your Anomalocaris patrol past trilobites in a Cambrian reef you built is _chef's kiss_. Era mismatches create funny anachronisms (T-Rex confused next to a Dimetrodon) instead of just being "wrong."
 
 **Technical challenge**: Creature behavior state machines based on diet/size/era metadata. Biome templates with placement zones. Passive income calculation balancing. Simple sprite animations or CSS-driven movement.
 
@@ -52,7 +52,7 @@ High effort, high impact. Any one of these could define the game.
 
 **Technical challenge**: Scheduled event system with era selection weighting (recently targeted eras less likely). Community goal tracking with real-time progress. Creature availability toggling without breaking existing pull logic. "Survivor" cosmetic system.
 
-**Wow moment**: You check Discord and see "PERMIAN EXTINCTION EVENT ACTIVE" — you frantically check your collection and realize you have the only Dimetrodon in your friend group. You are *important*.
+**Wow moment**: You check Discord and see "PERMIAN EXTINCTION EVENT ACTIVE" — you frantically check your collection and realize you have the only Dimetrodon in your friend group. You are _important_.
 
 ---
 
@@ -60,7 +60,7 @@ High effort, high impact. Any one of these could define the game.
 
 **What**: Combine two creatures to generate a hypothetical evolutionary hybrid. The game uses real trait data (body plan, diet, size, era gap) to produce a plausible chimera with a generated name, speculative description, and blended stats. Hybrids are unique, tradeable, and displayed in a special "What-If" collection wing.
 
-**Why unforgettable**: Speculative evolution (r/SpeculativeEvolution has 200k+ members) is a massive niche that no game serves. "What if Anomalocaris evolved to be terrestrial?" is genuinely fascinating. Players create creatures that don't exist — and debate whether they *could*.
+**Why unforgettable**: Speculative evolution (r/SpeculativeEvolution has 200k+ members) is a massive niche that no game serves. "What if Anomalocaris evolved to be terrestrial?" is genuinely fascinating. Players create creatures that don't exist — and debate whether they _could_.
 
 **Technical challenge**: Trait blending algorithm (diet dominance, size interpolation, temporal plausibility scoring). AI-generated descriptions using creature metadata as context. Uniqueness tracking to prevent duplicates. Community voting on "most plausible" hybrids.
 
@@ -100,7 +100,7 @@ Ambitious but achievable. These add personality fast.
 
 **What**: Auto-generated personal journal that narrates your collecting journey in the style of a 19th-century naturalist's expedition log. Each pull becomes a "field entry" with the date, location (era-themed), and a procedurally written observation. Over time, your journal becomes a unique story of your paleontological career.
 
-**Why unforgettable**: Transforms a pull history from a boring list into something you actually want to read. "Day 47: After weeks of fruitless excavation in the Triassic strata, I have at last uncovered a magnificent specimen of Coelophysis..." The game writes your story *for you*.
+**Why unforgettable**: Transforms a pull history from a boring list into something you actually want to read. "Day 47: After weeks of fruitless excavation in the Triassic strata, I have at last uncovered a magnificent specimen of Coelophysis..." The game writes your story _for you_.
 
 **Technical challenge**: Template-based text generation with creature metadata (era, diet, size, rarity). Narrative continuity tracking (reference previous finds, build running themes). Journal UI with aging paper aesthetic.
 
@@ -134,13 +134,13 @@ Ambitious but achievable. These add personality fast.
 
 ## Wild Cards
 
-Controversial, experimental, or genre-breaking. Might not work but would be *interesting*.
+Controversial, experimental, or genre-breaking. Might not work but would be _interesting_.
 
 ### 11. Paleontology Quiz Battles
 
 **What**: PvP trivia using the fun facts and scientific data from creatures both players own. Five rounds — each round surfaces a fact about a random creature from one player's collection and the other has to guess which creature it describes. Winner takes a Fossil pot.
 
-**Why unforgettable**: Weaponizes the game's educational content. Players who actually *read* the creature descriptions have an advantage. "I won because I knew Deinocheirus had 2.4m arms" is peak nerd flex. The game rewards curiosity.
+**Why unforgettable**: Weaponizes the game's educational content. Players who actually _read_ the creature descriptions have an advantage. "I won because I knew Deinocheirus had 2.4m arms" is peak nerd flex. The game rewards curiosity.
 
 **Technical challenge**: Question generation from existing creature metadata (fun facts, diet, era, size). Matchmaking. Real-time or async turn system. Anti-cheat (can't just search your collection during the quiz).
 
@@ -164,7 +164,7 @@ Controversial, experimental, or genre-breaking. Might not work but would be *int
 
 **What**: Send creatures on era-appropriate expeditions that take real time (1-8 hours). A Mosasaurus explores the Western Interior Seaway; a pack of Velociraptors scouts the Gobi Desert. They return with Fossils, rare items, or even other creatures they "discovered." Higher rarity = better expedition rewards. Correct era matching = bonus loot.
 
-**Why unforgettable**: Gives every creature in your collection a *purpose* beyond sitting in a grid. "My Dunkleosteus is out exploring the Devonian reef right now" makes your collection feel alive. The idle loop keeps players coming back to check on their expeditions.
+**Why unforgettable**: Gives every creature in your collection a _purpose_ beyond sitting in a grid. "My Dunkleosteus is out exploring the Devonian reef right now" makes your collection feel alive. The idle loop keeps players coming back to check on their expeditions.
 
 **Technical challenge**: Expedition templates per era with loot tables. Time-based reward calculation. Era-matching bonus logic. UI for expedition management (send, track, collect).
 
@@ -180,4 +180,4 @@ Sometimes the best feature is subtraction.
 
 - **Separate single/10 pull could merge** — instead of two buttons, let players choose how many Fossils to spend on a dig site (more fossils = larger dig area = more potential finds). Smoother UX, same economics.
 
-- **The static encyclopedia could become the phylogenetic tree** — maintaining both a flat grid view and a tree view of all creatures is redundant. The tree *is* the encyclopedia, just better. The grid becomes a search/filter fallback, not the primary view.
+- **The static encyclopedia could become the phylogenetic tree** — maintaining both a flat grid view and a tree view of all creatures is redundant. The tree _is_ the encyclopedia, just better. The grid becomes a search/filter fallback, not the primary view.

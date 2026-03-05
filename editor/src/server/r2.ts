@@ -23,10 +23,7 @@ export function initR2(env: EditorEnv) {
   })
 }
 
-export async function uploadToR2(
-  slug: string,
-  buffer: Buffer,
-): Promise<void> {
+export async function uploadToR2(slug: string, buffer: Buffer): Promise<void> {
   await s3.send(
     new PutObjectCommand({
       Bucket: bucketName,

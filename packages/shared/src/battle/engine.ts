@@ -57,15 +57,7 @@ export function simulateBattle(
 
   // 3. Fire onBattleStart triggers (e.g., territorial)
   for (const c of [...creaturesA, ...creaturesB]) {
-    fireAndLog(
-      'onBattleStart',
-      c,
-      creaturesA,
-      creaturesB,
-      rng,
-      0,
-      log,
-    )
+    fireAndLog('onBattleStart', c, creaturesA, creaturesB, rng, 0, log)
   }
 
   // 4. Synergies
@@ -93,8 +85,7 @@ export function simulateBattle(
       .filter((c) => c.isAlive)
       .sort(
         (a, b) =>
-          b.spd * rng.nextFloat(0.5, 1.5) -
-          a.spd * rng.nextFloat(0.5, 1.5),
+          b.spd * rng.nextFloat(0.5, 1.5) - a.spd * rng.nextFloat(0.5, 1.5),
       )
 
     for (const creature of turnOrder) {
@@ -118,10 +109,8 @@ export function simulateBattle(
         continue
       }
 
-      const allies =
-        creature.teamSide === 'A' ? creaturesA : creaturesB
-      const enemies =
-        creature.teamSide === 'A' ? creaturesB : creaturesA
+      const allies = creature.teamSide === 'A' ? creaturesA : creaturesB
+      const enemies = creature.teamSide === 'A' ? creaturesB : creaturesA
 
       // Re-materialize dynamic passives (pack_hunter ally count changes)
       materializeAlwaysPassive(creature, allies)
@@ -160,10 +149,7 @@ export function simulateBattle(
       })
 
       // Set cooldown for active ability (not basic attack)
-      if (
-        ability.id !== 'basic_attack' &&
-        ability.trigger.type === 'onUse'
-      ) {
+      if (ability.id !== 'basic_attack' && ability.trigger.type === 'onUse') {
         creature.cooldown = ability.trigger.cooldown
       }
 
@@ -175,19 +161,9 @@ export function simulateBattle(
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
       if (ability.id === 'basic_attack' && targets.length > 0) {
-        const attackCtx = makeCtx(
-          creature,
-          allies,
-          enemies,
-          rng,
-          turn,
-        )
+        const attackCtx = makeCtx(creature, allies, enemies, rng, turn)
         attackCtx.triggerAttackTarget = targets[0]
-        const attackRes = fireTrigger(
-          'onBasicAttack',
-          creature,
-          attackCtx,
-        )
+        const attackRes = fireTrigger('onBasicAttack', creature, attackCtx)
         if (attackRes.length > 0) {
           log.push({
             type: 'passive_trigger',
@@ -202,15 +178,7 @@ export function simulateBattle(
       }
 
       // Handle KOs from damage
-      processNewKOs(
-        creature,
-        creaturesA,
-        creaturesB,
-        koLogged,
-        turn,
-        log,
-        rng,
-      )
+      processNewKOs(creature, creaturesA, creaturesB, koLogged, turn, log, rng)
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
@@ -219,29 +187,13 @@ export function simulateBattle(
       tickAndLog(creature, turn, log)
 
       // Handle KOs from DoT
-      processNewKOs(
-        creature,
-        creaturesA,
-        creaturesB,
-        koLogged,
-        turn,
-        log,
-        rng,
-      )
+      processNewKOs(creature, creaturesA, creaturesB, koLogged, turn, log, rng)
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
 
       // Fire onTurnEnd passives (regenerative)
-      fireAndLog(
-        'onTurnEnd',
-        creature,
-        creaturesA,
-        creaturesB,
-        rng,
-        turn,
-        log,
-      )
+      fireAndLog('onTurnEnd', creature, creaturesA, creaturesB, rng, turn, log)
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
@@ -259,8 +211,7 @@ export function simulateBattle(
   }
 
   const reason =
-    turnCount >= MAX_TURNS &&
-    !checkWinner(creaturesA, creaturesB)
+    turnCount >= MAX_TURNS && !checkWinner(creaturesA, creaturesB)
       ? 'timeout'
       : 'ko'
 
@@ -303,9 +254,7 @@ function hydrateBattleCreature(
     def: member.stats.def,
     spd: member.stats.spd,
     role:
-      TYPE_TO_ROLE[member.type] ??
-      DIET_TO_ROLE[member.diet] ??
-      DEFAULT_ROLE,
+      TYPE_TO_ROLE[member.type] ?? DIET_TO_ROLE[member.diet] ?? DEFAULT_ROLE,
     diet: member.diet,
     type: member.type,
     era: member.era,
@@ -351,10 +300,8 @@ function fireAndLog(
   turn: number,
   log: Array<BattleLogEvent>,
 ): void {
-  const allies =
-    creature.teamSide === 'A' ? creaturesA : creaturesB
-  const enemies =
-    creature.teamSide === 'A' ? creaturesB : creaturesA
+  const allies = creature.teamSide === 'A' ? creaturesA : creaturesB
+  const enemies = creature.teamSide === 'A' ? creaturesB : creaturesA
   const ctx = makeCtx(creature, allies, enemies, rng, turn)
   const resolutions = fireTrigger(triggerKind, creature, ctx)
   if (resolutions.length > 0) {
@@ -393,47 +340,21 @@ function processNewKOs(
 
       // onKill for the attacker
       if (attacker.isAlive && attacker.id !== c.id) {
-        fireAndLog(
-          'onKill',
-          attacker,
-          creaturesA,
-          creaturesB,
-          rng,
-          turn,
-          log,
-        )
+        fireAndLog('onKill', attacker, creaturesA, creaturesB, rng, turn, log)
       }
 
       // onEnemyKO for opponents of the dead creature
-      const opponents =
-        c.teamSide === 'A' ? creaturesB : creaturesA
+      const opponents = c.teamSide === 'A' ? creaturesB : creaturesA
       for (const opp of opponents) {
         if (!opp.isAlive) continue
-        fireAndLog(
-          'onEnemyKO',
-          opp,
-          creaturesA,
-          creaturesB,
-          rng,
-          turn,
-          log,
-        )
+        fireAndLog('onEnemyKO', opp, creaturesA, creaturesB, rng, turn, log)
       }
 
       // onAllyKO for allies of the dead creature
-      const deadAllies =
-        c.teamSide === 'A' ? creaturesA : creaturesB
+      const deadAllies = c.teamSide === 'A' ? creaturesA : creaturesB
       for (const ally of deadAllies) {
         if (!ally.isAlive || ally.id === c.id) continue
-        fireAndLog(
-          'onAllyKO',
-          ally,
-          creaturesA,
-          creaturesB,
-          rng,
-          turn,
-          log,
-        )
+        fireAndLog('onAllyKO', ally, creaturesA, creaturesB, rng, turn, log)
       }
     }
   }

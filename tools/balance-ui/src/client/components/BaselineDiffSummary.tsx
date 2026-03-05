@@ -35,7 +35,9 @@ export function BaselineDiffSummary({
   if (lines.length === 0) {
     if (compact) return null
     return (
-      <div className={cn('text-[11px] text-muted-foreground/60 italic', className)}>
+      <div
+        className={cn('text-[11px] text-muted-foreground/60 italic', className)}
+      >
         Baseline (no changes)
       </div>
     )
@@ -112,12 +114,15 @@ function buildDiffLines(
   if (constants.roleModifiers) {
     for (const [role, mods] of Object.entries(constants.roleModifiers)) {
       const parts = Object.entries(mods)
-        .filter(([, v]) => v !== undefined && v !== 0)
-        .map(([stat, v]) => `${stat.toUpperCase()} ${v! > 0 ? '+' : ''}${Math.round(v! * 100)}%`)
+        .filter(([, v]) => v !== 0)
+        .map(
+          ([stat, v]) =>
+            `${stat.toUpperCase()} ${v > 0 ? '+' : ''}${Math.round(v * 100)}%`,
+        )
 
       if (parts.length > 0) {
-        const isPositive = Object.values(mods).every((v) => v === undefined || v >= 0)
-        const isNegative = Object.values(mods).every((v) => v === undefined || v <= 0)
+        const isPositive = Object.values(mods).every((v) => v >= 0)
+        const isNegative = Object.values(mods).every((v) => v <= 0)
         lines.push({
           text: `${capitalize(role)}: ${parts.join(', ')}`,
           type: isPositive ? 'buff' : isNegative ? 'nerf' : 'neutral',
@@ -139,22 +144,29 @@ function buildDiffLines(
 
   // Ability overrides
   if (constants.abilityOverrides) {
-    for (const [templateId, override] of Object.entries(constants.abilityOverrides)) {
+    for (const [templateId, override] of Object.entries(
+      constants.abilityOverrides,
+    )) {
       const template = templateNameMap.get(templateId)
       const name = template?.name ?? templateId
       const parts: Array<string> = []
 
       if (override.cooldown !== undefined) {
-        const baseCd = template?.trigger.type === 'onUse' ? template.trigger.cooldown : '?'
+        const baseCd =
+          template?.trigger.type === 'onUse' ? template.trigger.cooldown : '?'
         parts.push(`cd ${baseCd}\u2192${override.cooldown}`)
       }
 
       if (override.effectOverrides) {
-        for (const [idxStr, params] of Object.entries(override.effectOverrides)) {
+        for (const [idxStr, params] of Object.entries(
+          override.effectOverrides,
+        )) {
           const idx = parseInt(idxStr, 10)
           const baseEffect = template?.effects[idx]
           for (const [key, val] of Object.entries(params)) {
-            const baseVal = baseEffect ? (baseEffect as Record<string, unknown>)[key] : '?'
+            const baseVal = baseEffect
+              ? (baseEffect as Record<string, unknown>)[key]
+              : '?'
             parts.push(`${key} ${baseVal}\u2192${val}`)
           }
         }
@@ -174,7 +186,10 @@ function buildDiffLines(
   const statOverrides = creaturePatches.filter(
     (p) =>
       !p.disabled &&
-      (p.hp !== undefined || p.atk !== undefined || p.def !== undefined || p.spd !== undefined),
+      (p.hp !== undefined ||
+        p.atk !== undefined ||
+        p.def !== undefined ||
+        p.spd !== undefined),
   )
   const abilitySwaps = creaturePatches.filter(
     (p) =>

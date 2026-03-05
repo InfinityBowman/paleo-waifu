@@ -3,7 +3,11 @@ import { useRouter } from '@tanstack/react-router'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
-import { RARITY_BORDER, RARITY_COLORS, RARITY_SHIMMER } from '@/lib/rarity-styles'
+import {
+  RARITY_BORDER,
+  RARITY_COLORS,
+  RARITY_SHIMMER,
+} from '@/lib/rarity-styles'
 import {
   Dialog,
   DialogContent,
@@ -55,8 +59,7 @@ export function CreatureModal({
     setOptimisticFavorite(null)
   }, [creature?.id])
 
-  const isFavorite =
-    optimisticFavorite ?? creature?.isFavorite ?? false
+  const isFavorite = optimisticFavorite ?? creature?.isFavorite ?? false
 
   if (!creature) return null
 

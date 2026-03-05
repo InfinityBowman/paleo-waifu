@@ -213,9 +213,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'intimidate',
     name: 'Intimidate',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [
-      { type: 'debuff', stat: 'atk', percent: 25, duration: 3 },
-    ],
+    effects: [{ type: 'debuff', stat: 'atk', percent: 25, duration: 3 }],
     target: 'single_enemy',
     description:
       "An intimidating display that reduces an enemy's attack by 25%.",
@@ -225,12 +223,9 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'armor_break',
     name: 'Armor Break',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [
-      { type: 'debuff', stat: 'def', percent: 25, duration: 3 },
-    ],
+    effects: [{ type: 'debuff', stat: 'def', percent: 25, duration: 3 }],
     target: 'single_enemy',
-    description:
-      "Shatters an enemy's armor, reducing defense by 25%.",
+    description: "Shatters an enemy's armor, reducing defense by 25%.",
     roleAffinity: ['support', 'bruiser'],
   },
   // ── Heal ──
@@ -249,8 +244,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     trigger: { type: 'onUse', cooldown: 1 },
     effects: [{ type: 'heal', percent: 25 }],
     target: 'lowest_hp_ally',
-    description:
-      'Mends the wounds of the lowest-HP ally, healing 25% max HP.',
+    description: 'Mends the wounds of the lowest-HP ally, healing 25% max HP.',
     roleAffinity: ['support'],
   },
   // ── Utility ──
@@ -333,18 +327,18 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'venomous',
     name: 'Venomous',
     trigger: { type: 'onBasicAttack' },
-    effects: [
-      { type: 'dot', dotKind: 'poison', percent: 3, duration: 2 },
-    ],
+    effects: [{ type: 'dot', dotKind: 'poison', percent: 3, duration: 2 }],
     target: 'attack_target',
-    description:
-      'Basic attacks apply poison dealing 3% HP/turn for 2 turns.',
+    description: 'Basic attacks apply poison dealing 3% HP/turn for 2 turns.',
     roleAffinity: ['striker'],
   },
   {
     id: 'territorial',
     name: 'Territorial',
-    trigger: { type: 'onBattleStart', condition: { type: 'in_row', row: 'front' } },
+    trigger: {
+      type: 'onBattleStart',
+      condition: { type: 'in_row', row: 'front' },
+    },
     effects: [
       { type: 'buff', stat: 'atk', percent: 10, duration: 999 },
       { type: 'buff', stat: 'def', percent: 10, duration: 999 },

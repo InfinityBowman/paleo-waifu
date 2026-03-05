@@ -19,9 +19,7 @@ function TermsOfService() {
       <h1 className="font-display text-3xl font-light text-heading sm:text-4xl">
         Terms of Service
       </h1>
-      <p className="mt-2 text-xs text-lavender/40">
-        Effective March 3, 2026
-      </p>
+      <p className="mt-2 text-xs text-lavender/40">Effective March 3, 2026</p>
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-lavender-light/70">
         <section>
@@ -84,9 +82,7 @@ function TermsOfService() {
         </section>
 
         <section>
-          <h2 className="mb-3 text-base font-medium text-heading">
-            Donations
-          </h2>
+          <h2 className="mb-3 text-base font-medium text-heading">Donations</h2>
           <p>
             PaleoWaifu is free to play. Voluntary donations via Ko-fi are
             appreciated but do not grant any in-game advantages, items, or
@@ -103,18 +99,10 @@ function TermsOfService() {
             <li>
               Use bots, scripts, or automated tools to interact with the Service
             </li>
-            <li>
-              Exploit bugs or vulnerabilities instead of reporting them
-            </li>
-            <li>
-              Attempt to access other users&apos; accounts or data
-            </li>
-            <li>
-              Interfere with or disrupt the Service or its infrastructure
-            </li>
-            <li>
-              Use the Service for any unlawful purpose
-            </li>
+            <li>Exploit bugs or vulnerabilities instead of reporting them</li>
+            <li>Attempt to access other users&apos; accounts or data</li>
+            <li>Interfere with or disrupt the Service or its infrastructure</li>
+            <li>Use the Service for any unlawful purpose</li>
             <li>
               Harass, abuse, or harm other users through the trading system or
               any other feature

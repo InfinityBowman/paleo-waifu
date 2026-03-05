@@ -1,23 +1,38 @@
-import { useState } from 'react'
-import { ChevronDown, ChevronRight, Info } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { BarChart3, ChevronDown, ChevronRight, Info } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { Input } from './ui/input'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import type {
   ConstantsOverride,
   ConstantsSnapshot,
+  CreatureRecord,
   StatKey,
 } from '../../shared/types.ts'
 
 const STAT_KEYS: Array<StatKey> = ['hp', 'atk', 'def', 'spd']
 
+const STAT_COLORS: Record<StatKey, string> = {
+  hp: 'oklch(0.65 0.17 145)',
+  atk: 'oklch(0.65 0.2 25)',
+  def: 'oklch(0.65 0.15 245)',
+  spd: 'oklch(0.75 0.15 75)',
+}
+
 interface Props {
   constants: ConstantsSnapshot
+  creatures: Array<CreatureRecord>
   overrides: ConstantsOverride
   onChange: (overrides: ConstantsOverride) => void
 }
 
-export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
+export function GlobalKnobsPanel({
+  constants,
+  creatures,
+  overrides,
+  onChange,
+}: Props) {
   const [expanded, setExpanded] = useState({
     roles: true,
     rarity: false,
@@ -56,6 +71,34 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
   const effectiveScale =
     overrides.combatDamageScale ?? constants.combatDamageScale
 
+  // Compute actual stat distributions per role from creature data
+  const roleStats = useMemo(() => {
+    const byRole: Record<string, Array<CreatureRecord>> = {}
+    for (const c of creatures) {
+      ;(byRole[c.role] ??= []).push(c)
+    }
+    const result: Record<
+      string,
+      Record<StatKey, { min: number; avg: number; max: number }>
+    > = {}
+    for (const [role, group] of Object.entries(byRole)) {
+      const stats = {} as Record<
+        StatKey,
+        { min: number; avg: number; max: number }
+      >
+      for (const stat of STAT_KEYS) {
+        const vals = group.map((c) => c[stat])
+        stats[stat] = {
+          min: Math.min(...vals),
+          avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length),
+          max: Math.max(...vals),
+        }
+      }
+      result[role] = stats
+    }
+    return result
+  }, [creatures])
+
   return (
     <div className="flex flex-col text-xs">
       {/* Role Stat Adjustments */}
@@ -67,7 +110,6 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
       >
         <div className="flex flex-col gap-3 px-3 pb-3">
           {Object.entries(constants.roleDistributions).map(([role, dist]) => {
-            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
             if (!dist) return null
 
             return (
@@ -81,12 +123,69 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
                   >
                     {role}
                   </span>
-                  {/* Show base distribution as reference */}
-                  <span className="text-[9px] font-mono text-muted-foreground/75">
-                    base: {STAT_KEYS.map(
-                      (s) => `${s} ${Math.round(dist[s] * 100)}%`,
-                    ).join(' ')}
-                  </span>
+                  {role in roleStats && (
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="text-muted-foreground/90 hover:text-muted-foreground transition-colors">
+                          <BarChart3 size={12} />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent side="right" className="w-56 p-3">
+                        <p className="mb-2 text-[11px] font-medium capitalize text-foreground">
+                          {role} stat ranges
+                          <span className="ml-1 font-normal text-muted-foreground">
+                            ({creatures.filter((c) => c.role === role).length}{' '}
+                            creatures)
+                          </span>
+                        </p>
+                        <div className="flex flex-col gap-2">
+                          {STAT_KEYS.map((stat) => {
+                            const s = roleStats[role][stat]
+                            // Global max across all roles for consistent scale
+                            const globalMax = Math.max(
+                              ...Object.values(roleStats).map(
+                                (r) => r[stat].max,
+                              ),
+                            )
+                            return (
+                              <div key={stat}>
+                                <div className="mb-0.5 flex items-center justify-between text-[10px]">
+                                  <span className="uppercase text-muted-foreground">
+                                    {stat}
+                                  </span>
+                                  <span className="font-mono text-muted-foreground">
+                                    {s.min}–{s.max}{' '}
+                                    <span className="text-foreground">
+                                      avg {s.avg}
+                                    </span>
+                                  </span>
+                                </div>
+                                <div className="relative h-2 w-full rounded-full bg-muted">
+                                  {/* Range bar */}
+                                  <div
+                                    className="absolute top-0 h-full rounded-full opacity-60"
+                                    style={{
+                                      left: `${(s.min / globalMax) * 100}%`,
+                                      width: `${((s.max - s.min) / globalMax) * 100}%`,
+                                      backgroundColor: STAT_COLORS[stat],
+                                    }}
+                                  />
+                                  {/* Avg marker */}
+                                  <div
+                                    className="absolute top-0 h-full w-1 rounded-full"
+                                    style={{
+                                      left: `${(s.avg / globalMax) * 100}%`,
+                                      backgroundColor: STAT_COLORS[stat],
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  )}
                 </div>
                 <div className="grid grid-cols-4 gap-1">
                   {STAT_KEYS.map((stat) => {
@@ -139,9 +238,7 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
             min={0.1}
             max={2}
             value={effectiveScale}
-            onChange={(e) =>
-              setCombatScale(parseFloat(e.target.value) || 0.6)
-            }
+            onChange={(e) => setCombatScale(parseFloat(e.target.value) || 0.6)}
             className={cn(
               'w-20 text-center text-xs px-2',
               overrides.combatDamageScale !== undefined &&
@@ -198,7 +295,6 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
     </div>
   )
 }
-
 
 function Section({
   title,

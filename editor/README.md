@@ -54,20 +54,20 @@ src/
 
 All `/api/*` routes require authentication.
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/api/me` | Current user info |
-| GET | `/api/creatures` | List all creatures + stats |
-| GET | `/api/creatures/:slug` | Get single creature |
-| POST | `/api/creatures` | Create creature |
-| PUT | `/api/creatures/:slug` | Update creature |
-| DELETE | `/api/creatures/:slug` | Delete creature (`?deleteImage=true` to remove from R2) |
-| POST | `/api/creatures/:slug/image` | Upload image (multipart, max 20 MB, JPEG/PNG/WebP/GIF) |
-| GET | `/api/creatures/:slug/image` | Serve local image preview |
-| POST | `/api/creatures/:slug/push-r2` | Push existing local image to R2 |
-| POST | `/api/r2/sync` | Sync all local images to R2 (SSE progress stream) |
-| GET | `/api/r2/orphans` | List orphaned R2 objects |
-| DELETE | `/api/r2/orphans/:key` | Delete a single orphaned R2 object |
+| Method | Path                           | Description                                             |
+| ------ | ------------------------------ | ------------------------------------------------------- |
+| GET    | `/api/me`                      | Current user info                                       |
+| GET    | `/api/creatures`               | List all creatures + stats                              |
+| GET    | `/api/creatures/:slug`         | Get single creature                                     |
+| POST   | `/api/creatures`               | Create creature                                         |
+| PUT    | `/api/creatures/:slug`         | Update creature                                         |
+| DELETE | `/api/creatures/:slug`         | Delete creature (`?deleteImage=true` to remove from R2) |
+| POST   | `/api/creatures/:slug/image`   | Upload image (multipart, max 20 MB, JPEG/PNG/WebP/GIF)  |
+| GET    | `/api/creatures/:slug/image`   | Serve local image preview                               |
+| POST   | `/api/creatures/:slug/push-r2` | Push existing local image to R2                         |
+| POST   | `/api/r2/sync`                 | Sync all local images to R2 (SSE progress stream)       |
+| GET    | `/api/r2/orphans`              | List orphaned R2 objects                                |
+| DELETE | `/api/r2/orphans/:key`         | Delete a single orphaned R2 object                      |
 
 Slugs are derived from scientific names: `"Tyrannosaurus rex"` → `tyrannosaurus-rex`.
 
@@ -91,14 +91,14 @@ Runs behind Traefik reverse proxy with Cloudflare Tunnel at `https://editor.jaco
 
 Copy `.env.example` and fill in values. Required:
 
-| Variable | Description |
-|----------|-------------|
-| `CF_ACCOUNT_ID` | Cloudflare account ID |
-| `CF_D1_DATABASE_ID` | Production D1 database ID |
-| `CF_API_TOKEN` | Cloudflare API token (D1 edit scope) |
-| `R2_ACCESS_KEY_ID` | R2 S3-compatible access key |
-| `R2_SECRET_ACCESS_KEY` | R2 S3-compatible secret key |
-| `DISCORD_CLIENT_ID` | Discord OAuth app client ID |
-| `DISCORD_CLIENT_SECRET` | Discord OAuth app client secret |
-| `AUTH_SECRET` | Random string for JWT signing |
-| `EDITOR_URL` | Public URL (`http://localhost:4200` for dev) |
+| Variable                | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| `CF_ACCOUNT_ID`         | Cloudflare account ID                        |
+| `CF_D1_DATABASE_ID`     | Production D1 database ID                    |
+| `CF_API_TOKEN`          | Cloudflare API token (D1 edit scope)         |
+| `R2_ACCESS_KEY_ID`      | R2 S3-compatible access key                  |
+| `R2_SECRET_ACCESS_KEY`  | R2 S3-compatible secret key                  |
+| `DISCORD_CLIENT_ID`     | Discord OAuth app client ID                  |
+| `DISCORD_CLIENT_SECRET` | Discord OAuth app client secret              |
+| `AUTH_SECRET`           | Random string for JWT signing                |
+| `EDITOR_URL`            | Public URL (`http://localhost:4200` for dev) |

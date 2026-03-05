@@ -159,13 +159,13 @@ Terminal states: `accepted`, `withdrawn`, `cancelled`
 
 ### Actions
 
-| Action   | Actor    | From   | To                | Description                                                                        |
-| -------- | -------- | ------ | ----------------- | ---------------------------------------------------------------------------------- |
-| Create   | Offerer  | —      | trade `open`      | Offer a creature; optionally specify a wanted species. Locks the offerer's creature |
-| Cancel   | Offerer  | `open` | trade `cancelled` | Withdraw the listing; cancels all pending proposals and unlocks all creatures       |
-| Propose  | Proposer | `open` | proposal `pending` | Propose a creature to swap; locks the proposer's creature. One proposal per user per trade |
-| Confirm  | Offerer  | `open` | trade `accepted`  | Accept a specific proposal; executes the swap atomically, cancels all other proposals |
-| Withdraw | Proposer | —      | proposal `withdrawn` | Retract own proposal; unlocks the proposer's creature                            |
+| Action   | Actor    | From   | To                   | Description                                                                                |
+| -------- | -------- | ------ | -------------------- | ------------------------------------------------------------------------------------------ |
+| Create   | Offerer  | —      | trade `open`         | Offer a creature; optionally specify a wanted species. Locks the offerer's creature        |
+| Cancel   | Offerer  | `open` | trade `cancelled`    | Withdraw the listing; cancels all pending proposals and unlocks all creatures              |
+| Propose  | Proposer | `open` | proposal `pending`   | Propose a creature to swap; locks the proposer's creature. One proposal per user per trade |
+| Confirm  | Offerer  | `open` | trade `accepted`     | Accept a specific proposal; executes the swap atomically, cancels all other proposals      |
+| Withdraw | Proposer | —      | proposal `withdrawn` | Retract own proposal; unlocks the proposer's creature                                      |
 
 ### Creature Locking
 
@@ -352,17 +352,17 @@ A Cloudflare Worker-based Discord bot provides access to core gameplay via slash
 
 ### Available Commands
 
-| Command                  | Type                 | Description                                       |
-| ------------------------ | -------------------- | ------------------------------------------------- |
-| `/pull`                  | Deferred + embed     | Single pull (1 Fossil), shows creature card       |
-| `/pull10`                | Deferred + embed     | 10-pull (10 Fossils), shows list with best image  |
-| `/daily`                 | Deferred + embed     | Claim daily 3 Fossils                             |
-| `/balance`               | Immediate, ephemeral | Show fossil count                                 |
-| `/pity`                  | Immediate, ephemeral | Show pity counters for active banner              |
-| `/level`                 | Immediate, ephemeral | Show XP, level, and progress bar (optional @user) |
-| `/leaderboard-xp`       | Immediate + embed    | Top 10 players by XP level                        |
-| `/leaderboard-collection`| Immediate + embed   | Top 10 players by species collected               |
-| `/help`                  | Immediate, ephemeral | List available commands                           |
+| Command                   | Type                 | Description                                       |
+| ------------------------- | -------------------- | ------------------------------------------------- |
+| `/pull`                   | Deferred + embed     | Single pull (1 Fossil), shows creature card       |
+| `/pull10`                 | Deferred + embed     | 10-pull (10 Fossils), shows list with best image  |
+| `/daily`                  | Deferred + embed     | Claim daily 3 Fossils                             |
+| `/balance`                | Immediate, ephemeral | Show fossil count                                 |
+| `/pity`                   | Immediate, ephemeral | Show pity counters for active banner              |
+| `/level`                  | Immediate, ephemeral | Show XP, level, and progress bar (optional @user) |
+| `/leaderboard-xp`         | Immediate + embed    | Top 10 players by XP level                        |
+| `/leaderboard-collection` | Immediate + embed    | Top 10 players by species collected               |
+| `/help`                   | Immediate, ephemeral | List available commands                           |
 
 ### Interaction Model
 

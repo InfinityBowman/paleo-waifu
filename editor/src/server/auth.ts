@@ -95,7 +95,11 @@ async function fetchDiscordUser(
     headers: { Authorization: `Bearer ${accessToken}` },
   })
   if (!res.ok) throw new Error('Failed to fetch Discord user')
-  return (await res.json()) as { id: string; username: string; avatar: string | null }
+  return (await res.json()) as {
+    id: string
+    username: string
+    avatar: string | null
+  }
 }
 
 // ─── Auth routes ────────────────────────────────────────────────────

@@ -29,7 +29,8 @@ Before anything else — the platform shapes the design. Discord slash commands 
 - **Deferred responses** let you do server work, but you still need to respond within 15 minutes.
 
 **What this means for battles:**
-- Real-time turn-by-turn combat (like Pokemon's "choose your move") is *technically possible* but awkward. Each turn would be a button click → edit message → wait for opponent button click. Doable, but the UX is mediocre and timeout-prone.
+
+- Real-time turn-by-turn combat (like Pokemon's "choose your move") is _technically possible_ but awkward. Each turn would be a button click → edit message → wait for opponent button click. Doable, but the UX is mediocre and timeout-prone.
 - **Async auto-resolve is the natural fit.** Pick your team, opponent picks theirs, battle resolves instantly. This is exactly what AFK Arena does, and it works beautifully for a bot.
 - The web app can do fancier presentation (animations, battle replays with visual flair), but the core mechanic should work great in a text embed.
 
@@ -58,6 +59,7 @@ Turn 2: T-Rex uses Apex Roar — ATK +30% to all allies
 ```
 
 **Pros:**
+
 - Deep and interesting. Abilities create real strategic variety.
 - Still async — no real-time interaction needed. You pick your team, it simulates.
 - Produces compelling battle logs that are fun to read and share.
@@ -65,6 +67,7 @@ Turn 2: T-Rex uses Apex Roar — ATK +30% to all allies
 - Team composition and ordering matters (front line, back line, support).
 
 **Cons:**
+
 - Significantly more complex to build. Need a full combat simulator.
 - Need abilities for 600+ creatures (but see generation section below).
 - Balance is harder — abilities can create degenerate combos.
@@ -99,6 +102,7 @@ Quick Battles (Option A) could exist as a lightweight alternative for casual Fos
 ### The Data Problem
 
 Current creature data is **sparse**:
+
 - Only **330/615** (54%) have `sizeMeters`
 - Only **68/615** (11%) have `weightKg`
 - **84/615** have no `type` classification
@@ -112,23 +116,23 @@ Instead of deriving stats from physical measurements, assign each creature a **r
 
 #### Core Stats (5 stats, simple)
 
-| Stat | What It Does |
-|------|-------------|
-| **HP** | Total health pool. Creature is KO'd at 0. |
-| **ATK** | Damage dealt by basic attacks and most offensive abilities. |
-| **DEF** | Flat damage reduction on incoming attacks. |
-| **SPD** | Determines turn order. Higher SPD acts first. Ties broken randomly. |
+| Stat        | What It Does                                                          |
+| ----------- | --------------------------------------------------------------------- |
+| **HP**      | Total health pool. Creature is KO'd at 0.                             |
+| **ATK**     | Damage dealt by basic attacks and most offensive abilities.           |
+| **DEF**     | Flat damage reduction on incoming attacks.                            |
+| **SPD**     | Determines turn order. Higher SPD acts first. Ties broken randomly.   |
 | **ABILITY** | Amplifies ability damage/healing/effect strength (like a magic stat). |
 
 **Why 5 stats?** Enough for meaningful differentiation, few enough to be instantly readable. AFK Arena has ~20 stats but many are hidden — the player-facing ones are essentially ATK/DEF/HP with speed and crit under the hood. We want something in between — visible enough to reason about, simple enough for a Discord embed.
 
 **Alternative: 3-stat system (simpler)**
 
-| Stat | What It Does |
-|------|-------------|
-| **HP** | Health pool |
+| Stat    | What It Does                             |
+| ------- | ---------------------------------------- |
+| **HP**  | Health pool                              |
 | **PWR** | Attack power (both physical and ability) |
-| **SPD** | Turn order + dodge chance |
+| **SPD** | Turn order + dodge chance                |
 
 Fewer stats = easier balance, faster to read, less to generate. DEF could be folded into HP (tanky creatures just have more HP). The tradeoff is less build diversity.
 
@@ -136,16 +140,17 @@ Fewer stats = easier balance, faster to read, less to generate. DEF could be fol
 
 Each creature gets one role that determines its stat distribution. Roles map naturally to creature types:
 
-| Role | Stat Priority | Creature Types |
-|------|--------------|----------------|
-| **Striker** | ATK > SPD > HP > ABILITY > DEF | Large theropods, Eurypterida |
-| **Tank** | HP > DEF > ATK > ABILITY > SPD | Sauropods, armoured dinosaurs, ceratopsians |
-| **Scout** | SPD > ATK > ABILITY > HP > DEF | Small theropods, Pterosauria |
-| **Support** | ABILITY > HP > DEF > SPD > ATK | Euornithopods, herbivore mammals |
-| **Bruiser** | ATK > HP > DEF > SPD > ABILITY | Saurischia, Ornithischia, Crocodylia |
-| **Specialist** | ABILITY > SPD > ATK > HP > DEF | Ichthyosauria, Plesiosauria, Temnospondyli |
+| Role           | Stat Priority                  | Creature Types                              |
+| -------------- | ------------------------------ | ------------------------------------------- |
+| **Striker**    | ATK > SPD > HP > ABILITY > DEF | Large theropods, Eurypterida                |
+| **Tank**       | HP > DEF > ATK > ABILITY > SPD | Sauropods, armoured dinosaurs, ceratopsians |
+| **Scout**      | SPD > ATK > ABILITY > HP > DEF | Small theropods, Pterosauria                |
+| **Support**    | ABILITY > HP > DEF > SPD > ATK | Euornithopods, herbivore mammals            |
+| **Bruiser**    | ATK > HP > DEF > SPD > ABILITY | Saurischia, Ornithischia, Crocodylia        |
+| **Specialist** | ABILITY > SPD > ATK > HP > DEF | Ichthyosauria, Plesiosauria, Temnospondyli  |
 
 The role → type mapping can be a lookup table with fallbacks:
+
 1. If creature has a known `type`, map it to a role
 2. If `type` is null, infer from `diet` (carnivore → Striker/Scout, herbivore → Tank/Support)
 3. If diet is also unknown, default to Bruiser (the most "average" distribution)
@@ -169,7 +174,7 @@ atk = baseStatTotal * statDistribution.atk * individualVariance
 
 Size/weight data is **displayed** in battle narration and creature cards but does NOT drive stats. This avoids the sparse data problem entirely. A 35-meter Argentinosaurus and a 2-meter Velociraptor can both be competitive in their roles — the Argentinosaurus isn't 17x stronger just because it's bigger.
 
-If we want size to have *some* influence, it could be a minor modifier (±5%) within a role, not the primary stat driver.
+If we want size to have _some_ influence, it could be a minor modifier (±5%) within a role, not the primary stat driver.
 
 ---
 
@@ -181,44 +186,44 @@ This is where creatures get interesting. Each creature should have **2-3 abiliti
 
 ```typescript
 interface Ability {
-  name: string              // "Tail Whip", "Apex Roar", "Pack Hunt"
+  name: string // "Tail Whip", "Apex Roar", "Pack Hunt"
   type: 'active' | 'passive'
   target: 'single' | 'all_enemies' | 'self' | 'all_allies' | 'random_enemy'
-  effect: AbilityEffect     // damage, heal, buff, debuff, etc.
-  cooldown: number          // turns between uses (0 = every turn)
-  description: string       // flavor text for display
+  effect: AbilityEffect // damage, heal, buff, debuff, etc.
+  cooldown: number // turns between uses (0 = every turn)
+  description: string // flavor text for display
 }
 ```
 
 ### Ability Categories
 
-| Category | Example | Effect |
-|----------|---------|--------|
-| **Direct Damage** | Claw Strike, Bite, Horn Charge | Deal ATK-scaled damage to target |
-| **AoE Damage** | Tail Sweep, Stomp, Screech | Deal reduced damage to all enemies |
-| **Buff** | Apex Roar, Herd Rally, Camouflage | Increase ally stat(s) for N turns |
-| **Debuff** | Intimidate, Venom Bite, Mudslide | Decrease enemy stat(s) for N turns |
-| **Heal** | Graze, Symbiosis, Regenerate | Restore HP to self or ally |
-| **Shield** | Shell Guard, Armored Stance | Absorb next N damage before HP |
-| **Lifesteal** | Feeding Frenzy, Blood Fang | Deal damage and heal for % of damage dealt |
-| **Stun** | Headbutt, Thunderclap | Skip target's next turn |
-| **Retaliate** | Spike Defense, Countercharge | Deal damage back when hit |
-| **Summon/Pack** | Call the Pack, Swarm | Summon a temporary weak ally |
+| Category          | Example                           | Effect                                     |
+| ----------------- | --------------------------------- | ------------------------------------------ |
+| **Direct Damage** | Claw Strike, Bite, Horn Charge    | Deal ATK-scaled damage to target           |
+| **AoE Damage**    | Tail Sweep, Stomp, Screech        | Deal reduced damage to all enemies         |
+| **Buff**          | Apex Roar, Herd Rally, Camouflage | Increase ally stat(s) for N turns          |
+| **Debuff**        | Intimidate, Venom Bite, Mudslide  | Decrease enemy stat(s) for N turns         |
+| **Heal**          | Graze, Symbiosis, Regenerate      | Restore HP to self or ally                 |
+| **Shield**        | Shell Guard, Armored Stance       | Absorb next N damage before HP             |
+| **Lifesteal**     | Feeding Frenzy, Blood Fang        | Deal damage and heal for % of damage dealt |
+| **Stun**          | Headbutt, Thunderclap             | Skip target's next turn                    |
+| **Retaliate**     | Spike Defense, Countercharge      | Deal damage back when hit                  |
+| **Summon/Pack**   | Call the Pack, Swarm              | Summon a temporary weak ally               |
 
 ### Passive Abilities
 
 Each creature also gets **1 passive** that's always active:
 
-| Passive | Effect | Fits |
-|---------|--------|------|
-| **Thick Hide** | -15% incoming damage | Tanks, armored creatures |
-| **Predator Instinct** | +20% ATK vs targets below 50% HP | Carnivores |
-| **Herd Mentality** | +10% all stats per ally of same type | Herbivore herd animals |
-| **Aquatic** | +25% SPD, but -15% DEF | Marine creatures |
-| **Venomous** | Basic attacks apply poison (3% HP/turn for 3 turns) | Small reptiles, amphibians |
-| **Evasive** | 15% chance to dodge attacks entirely | Small, fast creatures |
-| **Apex Predator** | Cannot be stunned, +10% ATK | Legendary carnivores |
-| **Ancient** | +10% all stats in rounds after turn 5 (late-game scaling) | Paleozoic creatures |
+| Passive               | Effect                                                    | Fits                       |
+| --------------------- | --------------------------------------------------------- | -------------------------- |
+| **Thick Hide**        | -15% incoming damage                                      | Tanks, armored creatures   |
+| **Predator Instinct** | +20% ATK vs targets below 50% HP                          | Carnivores                 |
+| **Herd Mentality**    | +10% all stats per ally of same type                      | Herbivore herd animals     |
+| **Aquatic**           | +25% SPD, but -15% DEF                                    | Marine creatures           |
+| **Venomous**          | Basic attacks apply poison (3% HP/turn for 3 turns)       | Small reptiles, amphibians |
+| **Evasive**           | 15% chance to dodge attacks entirely                      | Small, fast creatures      |
+| **Apex Predator**     | Cannot be stunned, +10% ATK                               | Legendary carnivores       |
+| **Ancient**           | +10% all stats in rounds after turn 5 (late-game scaling) | Paleozoic creatures        |
 
 ### How Many Unique Abilities?
 
@@ -230,7 +235,7 @@ We don't need 600 unique abilities — that would be unbalanceable. Instead:
 - The combination is what makes each creature feel unique, not every ability being bespoke
 - **A few "signature abilities"** (maybe 10-15) reserved for legendary/epic creatures that are truly unique
 
-This is how most gacha games work — ability *pools* per class, with special characters getting unique twists.
+This is how most gacha games work — ability _pools_ per class, with special characters getting unique twists.
 
 ---
 
@@ -288,12 +293,14 @@ def assign_abilities(creature, role):
 ```
 
 **Pros:**
+
 - Reproducible. Same creature always gets same stats.
 - Fast to run. No API calls.
 - Easy to audit and adjust — change the mapping table, re-run.
 - No hallucination risk.
 
 **Cons:**
+
 - Creatures within the same type/diet feel samey. 60 small theropods all get Scout role with similar ability picks.
 - No creature-specific flavor. Velociraptor and Compsognathus get the same treatment despite being very different animals.
 - The 84 untyped creatures get generic fallbacks.
@@ -326,12 +333,14 @@ Respond in JSON format.
 ```
 
 **Pros:**
+
 - Creature-specific flavor. The LLM knows Velociraptor was fast and hunted in packs — it'll pick Scout role, give it "Pack Hunt" and something speed-related.
 - Handles unknowns gracefully. Even without type/diet, the LLM can use the creature's name, description, and real-world knowledge to make reasonable assignments.
 - The 84 untyped creatures get thoughtful assignments instead of generic fallbacks.
 - Ability name variants add flavor cheaply ("Tail Whip" → "Thagomizer Strike" for Stegosaurus).
 
 **Cons:**
+
 - Non-deterministic without careful prompting and temperature=0.
 - Risk of inconsistency across the batch (creature A gets abilities that are strictly better than creature B's for no good reason).
 - Need to validate output against the actual ability template list (LLM might invent abilities not in the pool).
@@ -388,6 +397,7 @@ In Pokemon, your creatures level up through battle. In AFK Arena, heroes level u
 ### Option A: No Creature XP (Collection Power Only)
 
 Creature power comes entirely from:
+
 - Base stats (rarity + role)
 - Ascension tier (future multiplier)
 - Team synergies
@@ -407,18 +417,21 @@ Level 30: base stats * 1.50 (+50%)  // max level
 ```
 
 XP sources:
+
 - Winning a battle: 50 XP per participating creature
 - Losing a battle: 20 XP per participating creature
 - Expedition completion: variable XP
 - "Training" (spending Fossils to give XP): 10 Fossils = 100 XP
 
 **Pros:**
+
 - Strong progression hook. "My Velociraptor is level 27" creates attachment.
 - Incentivizes using diverse creatures (level multiple creatures, not just the same 3).
 - Creates another resource sink (Fossils for training).
 - Leveling could unlock ability upgrades at milestones (e.g., level 10: ability cooldown -1, level 20: ability damage +20%, level 30: unlock a third active ability).
 
 **Cons:**
+
 - Advantage snowball. Players who battle more have higher-level creatures, making them harder to beat. New players face a steeper hill.
 - More database state (XP per user_creature).
 - Balance complexity — level 30 legendary vs level 1 common is an even wider gap.
@@ -449,13 +462,13 @@ Creature leveling adds a ton of engagement, and the snowball problem can be miti
 
 ### Team Size: 3 vs 5
 
-| | 3-Creature Teams | 5-Creature Teams |
-|--|-----------------|-----------------|
-| **Discord UX** | Fits in one embed. Easy to pick with a select menu. | Harder to pick, needs multiple select menus. Embed gets long. |
-| **Strategic Depth** | Limited but sufficient. Roles matter — you want a mix. | More room for synergies and counter-play. |
-| **Collection Pressure** | Need a few good creatures to compete. | Need a deeper roster — more pulling incentive. |
-| **Battle Log Length** | Short, readable. | Can get very long. |
-| **New Player Accessibility** | Easy to field a team quickly. | Might not have 5 good creatures early on. |
+|                              | 3-Creature Teams                                       | 5-Creature Teams                                              |
+| ---------------------------- | ------------------------------------------------------ | ------------------------------------------------------------- |
+| **Discord UX**               | Fits in one embed. Easy to pick with a select menu.    | Harder to pick, needs multiple select menus. Embed gets long. |
+| **Strategic Depth**          | Limited but sufficient. Roles matter — you want a mix. | More room for synergies and counter-play.                     |
+| **Collection Pressure**      | Need a few good creatures to compete.                  | Need a deeper roster — more pulling incentive.                |
+| **Battle Log Length**        | Short, readable.                                       | Can get very long.                                            |
+| **New Player Accessibility** | Easy to field a team quickly.                          | Might not have 5 good creatures early on.                     |
 
 **Recommendation: Start with 3, expand to 5 later.** Three is snappy for Discord, easier to balance, and accessible. Can always add a "Grand Arena" mode with 5-creature teams as endgame content.
 
@@ -464,11 +477,13 @@ Creature leveling adds a ton of engagement, and the snowball problem can be miti
 AFK Arena has a 2-row formation (front/back). For simplicity:
 
 **Option: Front / Back Row**
+
 - **Front row** (1-2 creatures): Takes hits first. Tanks and bruisers go here.
 - **Back row** (1-2 creatures): Protected until front row is KO'd. Scouts, strikers, specialists go here.
 - Single-target attacks hit front row first. AoE hits everyone.
 
 This adds meaningful positioning strategy without complex spatial mechanics. In Discord, it's just:
+
 ```
 Your team:
   Front: Triceratops, Ankylosaurus
@@ -483,40 +498,40 @@ Synergies reward thoughtful team building over just picking your 3 highest-rarit
 
 If 2+ creatures share a type, they get a bonus:
 
-| Same Type Count | Bonus |
-|----------------|-------|
-| 2 of same type | +10% HP to both |
-| 3 of same type | +15% HP, +10% ATK to all |
+| Same Type Count | Bonus                    |
+| --------------- | ------------------------ |
+| 2 of same type  | +10% HP to both          |
+| 3 of same type  | +15% HP, +10% ATK to all |
 
 This replaces the "pack bonus" from the old design (which required literal duplicate creatures). Now you can run 2 different ceratopsians for a bonus, which is more interesting than running 2 copies of the same creature.
 
 #### Era Synergies (Same-Era Bonus)
 
-| Same Era Count | Bonus |
-|---------------|-------|
-| 2 of same era | +5% all stats |
-| 3 of same era | +10% all stats |
+| Same Era Count | Bonus          |
+| -------------- | -------------- |
+| 2 of same era  | +5% all stats  |
+| 3 of same era  | +10% all stats |
 
 Thematic — a full Cretaceous team fought together in the same world. Since Cretaceous has 300 creatures, this isn't hard to achieve, but mixing eras for better role coverage is a valid tradeoff.
 
 #### Diet Synergies
 
-| Combo | Bonus |
-|-------|-------|
-| All Carnivore | +15% ATK (aggressive) |
-| All Herbivore | +20% DEF (defensive) |
+| Combo                                      | Bonus                         |
+| ------------------------------------------ | ----------------------------- |
+| All Carnivore                              | +15% ATK (aggressive)         |
+| All Herbivore                              | +20% DEF (defensive)          |
 | Mixed (at least 1 carnivore + 1 herbivore) | +10% SPD (balanced ecosystem) |
 
 #### Anti-Synergy / Counter System
 
 Certain type matchups could have advantages/disadvantages:
 
-| Attacker | Defender | Effect |
-|----------|----------|--------|
-| Carnivore | Herbivore | +15% damage |
-| Marine creature | Land creature | -10% damage |
-| Flying creature | Grounded creature | +10% evasion |
-| Armored creature | Non-armored | -10% incoming damage (stacks with DEF) |
+| Attacker         | Defender          | Effect                                 |
+| ---------------- | ----------------- | -------------------------------------- |
+| Carnivore        | Herbivore         | +15% damage                            |
+| Marine creature  | Land creature     | -10% damage                            |
+| Flying creature  | Grounded creature | +10% evasion                           |
+| Armored creature | Non-armored       | -10% incoming damage (stacks with DEF) |
 
 This gives players something to think about when they see their opponent's team composition (if we reveal team composition before battle, or in a draft mode).
 
@@ -536,12 +551,12 @@ Apex     (2500+)           — Best of the best
 
 ### Battle Modes
 
-| Mode | Description | Rewards | Rating Impact |
-|------|-------------|---------|---------------|
-| **Quick Battle** | Old-style instant resolve. No abilities. Just power comparison with randomness. | Small Fossil payout | None |
-| **Arena Battle** | Full simulated auto-battle. Abilities, turn order, the works. | Fossil pot + creature XP + rating | Yes |
-| **Ranked Season** | Monthly seasons with rank rewards. Uses Arena Battle rules. Resets rating partially each season. | Season-end rewards (Fossils, exclusive cosmetics) | Separate ranked rating |
-| **Expedition** (PvE) | Send a team on a timed mission against procedural encounters. Idle rewards. | Fossils, XP, rare items | None |
+| Mode                 | Description                                                                                      | Rewards                                           | Rating Impact          |
+| -------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------- | ---------------------- |
+| **Quick Battle**     | Old-style instant resolve. No abilities. Just power comparison with randomness.                  | Small Fossil payout                               | None                   |
+| **Arena Battle**     | Full simulated auto-battle. Abilities, turn order, the works.                                    | Fossil pot + creature XP + rating                 | Yes                    |
+| **Ranked Season**    | Monthly seasons with rank rewards. Uses Arena Battle rules. Resets rating partially each season. | Season-end rewards (Fossils, exclusive cosmetics) | Separate ranked rating |
+| **Expedition** (PvE) | Send a team on a timed mission against procedural encounters. Idle rewards.                      | Fossils, XP, rare items                           | None                   |
 
 ### Discord Commands
 
@@ -688,6 +703,7 @@ These are design decisions that need input before implementation:
 ## Implementation Phases
 
 ### Phase 1: Foundation
+
 - Define ability templates (~30-40 actives, ~15-20 passives)
 - Build stat generation pipeline (rules engine + LLM for abilities)
 - Generate battle data for all 615 creatures
@@ -695,6 +711,7 @@ These are design decisions that need input before implementation:
 - Build the battle simulation engine (pure function: teams in → result out)
 
 ### Phase 2: Arena Battles
+
 - Challenge lifecycle (create, accept, decline, expire)
 - Battle resolution + replay storage
 - Discord commands (`/battle`, `/accept`, `/decline`, `/battles`)
@@ -702,12 +719,14 @@ These are design decisions that need input before implementation:
 - ELO rating system
 
 ### Phase 3: Creature Leveling
+
 - XP system + level-up logic
 - Level-based stat scaling
 - Ability unlock progression at level milestones
 - Training system (spend Fossils for XP)
 
 ### Phase 4: Polish & Expansion
+
 - Ranked seasons with rewards
 - Expedition system (PvE)
 - 5-creature Grand Arena mode

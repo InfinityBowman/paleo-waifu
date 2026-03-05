@@ -1,6 +1,6 @@
 # Feature Ideas for PaleoWaifu — Round 2
 
-**Direction**: Your collection isn't a gallery — it's a **living museum that other players can visit, raid, and judge**. Steal from tycoon games, roguelikes, social deduction, and virtual pets. Make every creature feel like it *matters* beyond its rarity color.
+**Direction**: Your collection isn't a gallery — it's a **living museum that other players can visit, raid, and judge**. Steal from tycoon games, roguelikes, social deduction, and virtual pets. Make every creature feel like it _matters_ beyond its rarity color.
 
 ---
 
@@ -10,11 +10,11 @@
 
 **What**: Every player's collection becomes a walkable museum. Drag creatures into exhibit halls, arrange them by era or theme, write placard descriptions, choose lighting and backdrops. Other players can visit your museum, leave ratings, and tip Fossils. Top-rated museums appear on a "Featured Museums" page. Visiting a museum lets you inspect creatures you don't own up close.
 
-**Why unforgettable**: Gacha collections are invisible — nobody sees your stuff unless you screenshot it. This makes your collection a *place* people go. Decorating scratches the Animal Crossing itch. Getting a 5-star review from a stranger on your Cambrian ocean exhibit is serotonin no pull can match.
+**Why unforgettable**: Gacha collections are invisible — nobody sees your stuff unless you screenshot it. This makes your collection a _place_ people go. Decorating scratches the Animal Crossing itch. Getting a 5-star review from a stranger on your Cambrian ocean exhibit is serotonin no pull can match.
 
 **Technical challenge**: Grid-based room editor with creature placement. Visitor routing/instancing. Rating and tipping system. Featured museum algorithm (recency + rating + diversity of exhibits).
 
-**Wow moment**: You spend an hour arranging your Cretaceous hall just right. Someone visits, tips 5 Fossils, and leaves a comment: "The Spinosaurus by the river backdrop is *perfect*." You've never felt more validated by a prehistoric fish-eating theropod.
+**Wow moment**: You spend an hour arranging your Cretaceous hall just right. Someone visits, tips 5 Fossils, and leaves a comment: "The Spinosaurus by the river backdrop is _perfect_." You've never felt more validated by a prehistoric fish-eating theropod.
 
 ---
 
@@ -22,29 +22,29 @@
 
 **What**: 10% of pulls come out as unidentified fossils — a silhouetted card with only a geological era and a vague outline. Over the next 24 hours, the game drip-feeds you clues: "This creature was bipedal," "It lived near coastlines," "Its closest living relative is a bird." You can guess at any time — guess correctly before all clues drop and earn bonus Fossils. After 24 hours, it auto-reveals.
 
-**Why unforgettable**: Turns the *post-pull* experience into a game. Instead of "oh, another common" and moving on, you're staring at a silhouette for hours trying to figure out what you got. Discord servers will have channels dedicated to helping people solve their mystery fossils. The guessing mechanic rewards players who actually know their paleontology.
+**Why unforgettable**: Turns the _post-pull_ experience into a game. Instead of "oh, another common" and moving on, you're staring at a silhouette for hours trying to figure out what you got. Discord servers will have channels dedicated to helping people solve their mystery fossils. The guessing mechanic rewards players who actually know their paleontology.
 
 **Technical challenge**: Clue generation from creature metadata (diet, size, era, body type). Timed reveal system with progressive hints. Guess validation. Bonus Fossil calculation based on how early you guess correctly.
 
-**Wow moment**: You get a mystery fossil from the Cretaceous. First clue: "Bipedal carnivore." Could be anything. Second clue: "Over 12 meters." Your heart rate spikes. You type "Tyrannosaurus Rex" and slam submit. *Correct — 4 clues early. +8 bonus Fossils.* The dopamine is obscene.
+**Wow moment**: You get a mystery fossil from the Cretaceous. First clue: "Bipedal carnivore." Could be anything. Second clue: "Over 12 meters." Your heart rate spikes. You type "Tyrannosaurus Rex" and slam submit. _Correct — 4 clues early. +8 bonus Fossils._ The dopamine is obscene.
 
 ---
 
 ### 3. Fossil Heists
 
-**What**: Once a week, you can attempt to "excavate" a creature from another player's museum. You pick a target museum, choose a creature you want, and play a timed puzzle (decode a rock layer sequence, solve an excavation grid). Success doesn't *steal* the creature — it adds a "replica" to your collection with a special "Excavated from [player]'s Museum" tag. The target gets notified and earns Fossils as a "research grant." Failing the puzzle costs you Fossils.
+**What**: Once a week, you can attempt to "excavate" a creature from another player's museum. You pick a target museum, choose a creature you want, and play a timed puzzle (decode a rock layer sequence, solve an excavation grid). Success doesn't _steal_ the creature — it adds a "replica" to your collection with a special "Excavated from [player]'s Museum" tag. The target gets notified and earns Fossils as a "research grant." Failing the puzzle costs you Fossils.
 
 **Why unforgettable**: Adds a layer of social tension and playfulness that pure trading can't. Checking your notifications and seeing "someone excavated a replica of your legendary Mosasaurus" is flattering, not threatening. The puzzle element means skill matters, not just currency. The replica tag creates provenance — every creature has a story.
 
 **Technical challenge**: Timed puzzle generation (era-themed, difficulty scales with target creature rarity). Replica system (separate from originals in collection). Notification + "research grant" reward pipeline. Weekly cooldown tracking.
 
-**Wow moment**: You visit the #1 museum on the leaderboard. They have a legendary Dunkleosteus front and center. You attempt the heist — a brutal 60-second excavation puzzle. You nail it with 3 seconds left. Your replica Dunkleosteus now says "Excavated from [top player]'s Museum." *Flexing someone else's flex.*
+**Wow moment**: You visit the #1 museum on the leaderboard. They have a legendary Dunkleosteus front and center. You attempt the heist — a brutal 60-second excavation puzzle. You nail it with 3 seconds left. Your replica Dunkleosteus now says "Excavated from [top player]'s Museum." _Flexing someone else's flex._
 
 ---
 
 ### 4. Creature Expeditions with Real Stakes
 
-**What**: Send creatures on expeditions, but they can *fail*. Expeditions are roguelike runs — your creature traverses a procedural map of their native era, encountering events (river crossing, predator encounter, volcanic eruption). You make choices for them: "Fight or flee?" "Cross the river or go around?" Wrong choices mean your creature returns empty-handed and needs 12 hours to "recover." Perfect runs yield rare loot: variant skins, Fossil caches, or even a *new creature* they discovered.
+**What**: Send creatures on expeditions, but they can _fail_. Expeditions are roguelike runs — your creature traverses a procedural map of their native era, encountering events (river crossing, predator encounter, volcanic eruption). You make choices for them: "Fight or flee?" "Cross the river or go around?" Wrong choices mean your creature returns empty-handed and needs 12 hours to "recover." Perfect runs yield rare loot: variant skins, Fossil caches, or even a _new creature_ they discovered.
 
 **Why unforgettable**: Idle expeditions are boring because nothing can go wrong. This has genuine tension — you're sending your favorite Velociraptor into danger and sweating the choices. The roguelike event system means every run is different. "My Pachycephalosaurus headbutted a volcanic boulder and found a hidden cave with 50 Fossils in it" is a story, not a loot drop.
 
@@ -70,19 +70,19 @@
 
 ### 6. Creature Voice Lines (via Discord Bot)
 
-**What**: Each creature gets 3-5 personality-driven text "voice lines" that play when you inspect them, pull them, or trade them. A T-Rex might say *"You think YOU'RE having a bad day? An asteroid literally ended my entire civilization."* A tiny Compsognathus: *"I may be small, but I have the heart of a... slightly larger Compsognathus."* These also appear as flavor text in Discord bot pull responses.
+**What**: Each creature gets 3-5 personality-driven text "voice lines" that play when you inspect them, pull them, or trade them. A T-Rex might say _"You think YOU'RE having a bad day? An asteroid literally ended my entire civilization."_ A tiny Compsognathus: _"I may be small, but I have the heart of a... slightly larger Compsognathus."_ These also appear as flavor text in Discord bot pull responses.
 
-**Why unforgettable**: Gives every creature a personality. Players will pull a new creature and immediately check its voice lines. Legendaries get the best writing. People will quote their favorites in Discord. This is where the "waifu" in PaleoWaifu actually kicks in — you develop attachments to creatures because they're *funny*.
+**Why unforgettable**: Gives every creature a personality. Players will pull a new creature and immediately check its voice lines. Legendaries get the best writing. People will quote their favorites in Discord. This is where the "waifu" in PaleoWaifu actually kicks in — you develop attachments to creatures because they're _funny_.
 
 **Technical challenge**: Writing 3-5 lines per creature (could batch this, start with rares+ and backfill). JSON field on creature schema. Random line selection on pull/inspect. Discord embed integration.
 
-**Wow moment**: You pull a Pachycephalosaurus and its voice line is: *"Yes, I headbutt things. No, I don't have a headache. Okay, maybe a little."* You're emotionally attached now.
+**Wow moment**: You pull a Pachycephalosaurus and its voice line is: _"Yes, I headbutt things. No, I don't have a headache. Okay, maybe a little."_ You're emotionally attached now.
 
 ---
 
 ### 7. Live Auction House
 
-**What**: Replace (or supplement) the trade marketplace with a real-time auction system. Sellers list creatures with a starting bid and a countdown timer (1hr, 4hr, 12hr). Buyers bid Fossils. Last 5 minutes, any new bid extends the timer by 2 minutes (anti-sniping). Auction history is public — you can see what creatures have sold for over time, creating a real *economy*.
+**What**: Replace (or supplement) the trade marketplace with a real-time auction system. Sellers list creatures with a starting bid and a countdown timer (1hr, 4hr, 12hr). Buyers bid Fossils. Last 5 minutes, any new bid extends the timer by 2 minutes (anti-sniping). Auction history is public — you can see what creatures have sold for over time, creating a real _economy_.
 
 **Why unforgettable**: Static trades are boring — you post, someone accepts, done. Auctions create DRAMA. Watching someone bid 50 Fossils on your legendary with 30 seconds left, then getting outbid at the buzzer, is peak gaming. Price history turns Fossils into a real economy people analyze and strategize around.
 
@@ -106,13 +106,13 @@
 
 ### 9. Seasonal Excavation Sites
 
-**What**: Every 2 weeks, a new real-world fossil site opens as a themed event: Hell Creek Formation (Montana), Burgess Shale (Canada), Solnhofen Limestone (Germany), La Brea Tar Pits (California). Each site has a unique creature pool based on what was *actually found there*. Site-exclusive creatures get a location tag ("Found at: Burgess Shale") and a map pin on your profile.
+**What**: Every 2 weeks, a new real-world fossil site opens as a themed event: Hell Creek Formation (Montana), Burgess Shale (Canada), Solnhofen Limestone (Germany), La Brea Tar Pits (California). Each site has a unique creature pool based on what was _actually found there_. Site-exclusive creatures get a location tag ("Found at: Burgess Shale") and a map pin on your profile.
 
 **Why unforgettable**: Grounds the fantasy in real paleontology. Players learn that Archaeopteryx was found in Solnhofen without trying. The location tags on creatures create prestige — "I was playing during the Burgess Shale event" becomes a badge of honor. Rotating sites keep the game perpetually fresh.
 
 **Technical challenge**: Curated site-creature mappings based on real fossil record data. Event rotation scheduler. Location tag system on user_creature. Profile map pin visualization.
 
-**Wow moment**: The Burgess Shale site opens. You pull a site-exclusive Hallucigenia with the tag "Found at: Burgess Shale, British Columbia." You check the real Wikipedia article and discover Hallucigenia was *actually* first described from Burgess Shale. The game just taught you something real without trying.
+**Wow moment**: The Burgess Shale site opens. You pull a site-exclusive Hallucigenia with the tag "Found at: Burgess Shale, British Columbia." You check the real Wikipedia article and discover Hallucigenia was _actually_ first described from Burgess Shale. The game just taught you something real without trying.
 
 ---
 
@@ -158,7 +158,7 @@
 
 **What**: "Introduce" two creatures from different players' collections. They exchange AI-generated letters written in-character based on their species traits. A Mosasaurus writes to a Quetzalcoatlus about life underwater; the Quetzalcoatlus responds about the view from above. New letters arrive every few days. After 5 exchanges, both players get a "Friendship Fossil" bonus and a combined art card of the two creatures together.
 
-**Why unforgettable**: This is weird and no game has ever done it and that's exactly why it would work. People will *care* about their creature pen pal relationships. Reading a letter from someone else's Stegosaurus to your Ankylosaurus about "the shared burden of carrying heavy armor" is absurd and charming. The combined friendship card is a genuinely unique collectible.
+**Why unforgettable**: This is weird and no game has ever done it and that's exactly why it would work. People will _care_ about their creature pen pal relationships. Reading a letter from someone else's Stegosaurus to your Ankylosaurus about "the shared burden of carrying heavy armor" is absurd and charming. The combined friendship card is a genuinely unique collectible.
 
 **Technical challenge**: AI letter generation with creature personality + trait context. Async letter exchange system. Combined art card generation (compositing two creature images). Friendship completion tracking.
 

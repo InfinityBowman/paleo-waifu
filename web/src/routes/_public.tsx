@@ -40,11 +40,17 @@ function PublicLayout() {
             </a>
           </div>
           <div className="mt-2 flex items-center justify-center gap-3 text-[10px] text-lavender/40">
-            <Link to="/privacy" className="transition-colors hover:text-lavender/50">
+            <Link
+              to="/privacy"
+              className="transition-colors hover:text-lavender/50"
+            >
               Privacy
             </Link>
             <span>·</span>
-            <Link to="/terms" className="transition-colors hover:text-lavender/50">
+            <Link
+              to="/terms"
+              className="transition-colors hover:text-lavender/50"
+            >
               Terms
             </Link>
           </div>

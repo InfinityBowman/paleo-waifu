@@ -52,7 +52,9 @@ async function queryD1(
     errors: Array<{ message: string }>
   }
   if (!body.success) {
-    throw new Error(`D1 query failed: ${body.errors.map((e) => e.message).join(', ')}`)
+    throw new Error(
+      `D1 query failed: ${body.errors.map((e) => e.message).join(', ')}`,
+    )
   }
 
   return body.result[0]
@@ -128,7 +130,9 @@ export class D1DatabaseShim {
       errors: Array<{ message: string }>
     }
     if (!body.success) {
-      throw new Error(`D1 batch failed: ${body.errors.map((e) => e.message).join(', ')}`)
+      throw new Error(
+        `D1 batch failed: ${body.errors.map((e) => e.message).join(', ')}`,
+      )
     }
 
     return body.result

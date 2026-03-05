@@ -40,8 +40,7 @@ export function calculateDamage({
   effect: Effect & { type: 'damage' }
   rng: SeededRng
 }): DamageCalcResult {
-  const stat =
-    effect.scaling === 'def' ? attacker.def : attacker.atk
+  const stat = effect.scaling === 'def' ? attacker.def : attacker.atk
 
   let rawDamage = stat * effect.multiplier
 
@@ -89,12 +88,8 @@ export function calculateDamage({
   let isDodged = false
   if (defender.dodgeBasePercent > 0) {
     const baseDodge = defender.dodgeBasePercent / 100
-    const spdRatio =
-      attacker.spd > 0 ? defender.spd / attacker.spd : 1
-    const dodgeChance = Math.min(
-      0.4,
-      Math.max(0.03, baseDodge * spdRatio),
-    )
+    const spdRatio = attacker.spd > 0 ? defender.spd / attacker.spd : 1
+    const dodgeChance = Math.min(0.4, Math.max(0.03, baseDodge * spdRatio))
     if (rng.next() < dodgeChance) {
       isDodged = true
       finalDamage = 0

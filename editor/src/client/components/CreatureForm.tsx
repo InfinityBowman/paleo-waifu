@@ -6,12 +6,18 @@ import {
   fetchCreature,
   updateCreature,
 } from '../lib/api'
-import {   slugify } from '../lib/types'
+import { slugify } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
 import { ImageUploader } from './ImageUploader'
-import type {Creature, Rarity} from '../lib/types';
+import type { Creature, Rarity } from '../lib/types'
 
-const RARITIES: Array<Rarity> = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+const RARITIES: Array<Rarity> = [
+  'common',
+  'uncommon',
+  'rare',
+  'epic',
+  'legendary',
+]
 const ERAS = [
   'Cambrian',
   'Ordovician',

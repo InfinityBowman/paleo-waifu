@@ -19,9 +19,7 @@ export function runCreatureReport(
 ): void {
   // Find creature by partial case-insensitive match
   const query = options.name.toLowerCase()
-  const matches = creatures.filter((c) =>
-    c.name.toLowerCase().includes(query),
-  )
+  const matches = creatures.filter((c) => c.name.toLowerCase().includes(query))
 
   if (matches.length === 0) {
     console.error(`No creature found matching "${options.name}"`)
@@ -34,9 +32,7 @@ export function runCreatureReport(
 
   if (matches.length > 1) {
     // Check for exact match first
-    const exact = matches.find(
-      (c) => c.name.toLowerCase() === query,
-    )
+    const exact = matches.find((c) => c.name.toLowerCase() === query)
     if (!exact) {
       console.error(`Ambiguous match for "${options.name}":`)
       for (const c of matches.slice(0, 10)) {
@@ -52,7 +48,9 @@ export function runCreatureReport(
 
   // Run vs all other creatures
   const opponents = creatures.filter((c) => c.id !== target.id)
-  const bar = options.csv ? null : createProgressBar(opponents.length, 'Matchups')
+  const bar = options.csv
+    ? null
+    : createProgressBar(opponents.length, 'Matchups')
 
   if (!options.csv) {
     printHeader(`${target.name.toUpperCase()} — Deep Dive`)
@@ -166,13 +164,15 @@ export function runCreatureReport(
       { header: 'Win Rate' },
       { header: 'Avg Turns' },
     ],
-    matchups.slice(0, 10).map((m) => [
-      m.opponent.name,
-      rarityColor(m.opponent.rarity),
-      roleColor(m.opponent.role),
-      winRateColor(m.winRate),
-      m.avgTurns.toFixed(1),
-    ]),
+    matchups
+      .slice(0, 10)
+      .map((m) => [
+        m.opponent.name,
+        rarityColor(m.opponent.rarity),
+        roleColor(m.opponent.role),
+        winRateColor(m.winRate),
+        m.avgTurns.toFixed(1),
+      ]),
   )
 
   // Worst matchups (bottom 10)

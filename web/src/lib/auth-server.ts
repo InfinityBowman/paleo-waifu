@@ -4,9 +4,7 @@ import { createAuth } from './auth'
 import { getCfEnv } from './env'
 
 /** Extract user role from session (works around better-auth's missing role type) */
-export function getUserRole(
-  user: Record<string, unknown>,
-): string | undefined {
+export function getUserRole(user: Record<string, unknown>): string | undefined {
   return (user as { role?: string }).role
 }
 

@@ -5,14 +5,20 @@ import {
   Legend,
   Line,
   LineChart,
-  ReferenceArea,
   Tooltip as RechartsTooltip,
+  ReferenceArea,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from 'recharts'
 import { cn } from '../lib/utils'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from './ui/card'
 import { Badge } from './ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import type { SavedRun } from '../../shared/types.ts'
@@ -98,7 +104,10 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
             className="flex items-center gap-2 rounded-lg border border-border/50 bg-muted/20 px-3 py-1.5"
           >
             <div
-              className={cn('h-2.5 w-2.5 rounded-full', RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length])}
+              className={cn(
+                'h-2.5 w-2.5 rounded-full',
+                RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
+              )}
             />
             <span className="text-xs font-medium">{run.label}</span>
             <span className="text-[10px] text-muted-foreground">
@@ -119,10 +128,13 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
           <div className="flex items-center gap-2">
             <CardTitle>Fitness Progression</CardTitle>
             <SectionTooltip>
-              Overlaid fitness curves from all selected runs. Solid lines are top fitness, dashed lines are average.
+              Overlaid fitness curves from all selected runs. Solid lines are
+              top fitness, dashed lines are average.
             </SectionTooltip>
           </div>
-          <CardDescription>Top (solid) and average (dashed) fitness</CardDescription>
+          <CardDescription>
+            Top (solid) and average (dashed) fitness
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <FitnessOverlay runs={runs} />
@@ -135,10 +147,14 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
           <div className="flex items-center gap-2">
             <CardTitle>Battle Health</CardTitle>
             <SectionTooltip>
-              Average turns per battle (solid) and population diversity (dashed) overlaid across runs. Green band shows the healthy 7-10 turns target.
+              Average turns per battle (solid) and population diversity (dashed)
+              overlaid across runs. Green band shows the healthy 7-10 turns
+              target.
             </SectionTooltip>
           </div>
-          <CardDescription>Avg turns (solid) and diversity (dashed)</CardDescription>
+          <CardDescription>
+            Avg turns (solid) and diversity (dashed)
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <TurnsDiversityOverlay runs={runs} />
@@ -151,7 +167,8 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
           <div className="flex items-center gap-2">
             <CardTitle>Role Meta Share</CardTitle>
             <SectionTooltip>
-              Final role distribution for each run. Delta columns show change relative to the first selected run.
+              Final role distribution for each run. Delta columns show change
+              relative to the first selected run.
             </SectionTooltip>
           </div>
         </CardHeader>
@@ -166,7 +183,8 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
           <div className="flex items-center gap-2">
             <CardTitle>Creature Leaderboard</CardTitle>
             <SectionTooltip>
-              Top 15 creatures by appearances across runs. Rank changes shown relative to the first run.
+              Top 15 creatures by appearances across runs. Rank changes shown
+              relative to the first run.
             </SectionTooltip>
           </div>
         </CardHeader>
@@ -181,7 +199,11 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
           onClick={() => setConfigDiffOpen((v) => !v)}
           className="flex w-full items-center gap-1.5 px-4 py-3 text-left text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
-          {configDiffOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+          {configDiffOpen ? (
+            <ChevronDown size={14} />
+          ) : (
+            <ChevronRight size={14} />
+          )}
           Config Differences
         </button>
         {configDiffOpen && (
@@ -198,7 +220,10 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info size={13} className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors" />
+        <Info
+          size={13}
+          className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors"
+        />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>
     </Tooltip>
@@ -216,24 +241,40 @@ function FitnessOverlay({ runs }: { runs: Array<SavedRun> }) {
     }
   }
 
-  const data = [...allGens].sort((a, b) => a - b).map((gen) => {
-    const row: Record<string, number> = { gen }
-    for (const [i, run] of runs.entries()) {
-      const snap = run.result.snapshots.find((s) => s.generation === gen)
-      if (snap) {
-        row[`top_${i}`] = Math.round(snap.topFitness * 1000) / 10
-        row[`avg_${i}`] = Math.round(snap.avgFitness * 1000) / 10
+  const data = [...allGens]
+    .sort((a, b) => a - b)
+    .map((gen) => {
+      const row: Record<string, number> = { gen }
+      for (const [i, run] of runs.entries()) {
+        const snap = run.result.snapshots.find((s) => s.generation === gen)
+        if (snap) {
+          row[`top_${i}`] = Math.round(snap.topFitness * 1000) / 10
+          row[`avg_${i}`] = Math.round(snap.avgFitness * 1000) / 10
+        }
       }
-    }
-    return row
-  })
+      return row
+    })
 
   return (
     <ResponsiveContainer width="100%" height={250}>
       <LineChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
-        <XAxis dataKey="gen" tick={TICK_STYLE} label={{ value: 'Generation', position: 'insideBottom', offset: -2, ...TICK_STYLE }} />
-        <YAxis tick={TICK_STYLE} tickFormatter={(v: number) => `${v}%`} domain={['dataMin - 2', 'dataMax + 2']} width={40} />
+        <XAxis
+          dataKey="gen"
+          tick={TICK_STYLE}
+          label={{
+            value: 'Generation',
+            position: 'insideBottom',
+            offset: -2,
+            ...TICK_STYLE,
+          }}
+        />
+        <YAxis
+          tick={TICK_STYLE}
+          tickFormatter={(v: number) => `${v}%`}
+          domain={['dataMin - 2', 'dataMax + 2']}
+          width={40}
+        />
         <RechartsTooltip
           {...TOOLTIP_STYLE}
           labelFormatter={(label) => `Gen ${label}`}
@@ -291,31 +332,49 @@ function TurnsDiversityOverlay({ runs }: { runs: Array<SavedRun> }) {
     }
   }
 
-  const data = [...allGens].sort((a, b) => a - b).map((gen) => {
-    const row: Record<string, number> = { gen }
-    for (const [i, run] of runs.entries()) {
-      const snap = run.result.snapshots.find((s) => s.generation === gen)
-      if (snap) {
-        row[`turns_${i}`] = Math.round(snap.avgTurns * 10) / 10
-        row[`div_${i}`] = Math.min(
-          100,
-          Math.round((snap.uniqueGenomes / run.config.options.population) * 1000) / 10,
-        )
+  const data = [...allGens]
+    .sort((a, b) => a - b)
+    .map((gen) => {
+      const row: Record<string, number> = { gen }
+      for (const [i, run] of runs.entries()) {
+        const snap = run.result.snapshots.find((s) => s.generation === gen)
+        if (snap) {
+          row[`turns_${i}`] = Math.round(snap.avgTurns * 10) / 10
+          row[`div_${i}`] = Math.min(
+            100,
+            Math.round(
+              (snap.uniqueGenomes / run.config.options.population) * 1000,
+            ) / 10,
+          )
+        }
       }
-    }
-    return row
-  })
+      return row
+    })
 
   return (
     <ResponsiveContainer width="100%" height={250}>
       <LineChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
-        <XAxis dataKey="gen" tick={TICK_STYLE} label={{ value: 'Generation', position: 'insideBottom', offset: -2, ...TICK_STYLE }} />
+        <XAxis
+          dataKey="gen"
+          tick={TICK_STYLE}
+          label={{
+            value: 'Generation',
+            position: 'insideBottom',
+            offset: -2,
+            ...TICK_STYLE,
+          }}
+        />
         <YAxis
           yAxisId="turns"
           tick={TICK_STYLE}
           width={40}
-          label={{ value: 'Turns', angle: -90, position: 'insideLeft', ...TICK_STYLE }}
+          label={{
+            value: 'Turns',
+            angle: -90,
+            position: 'insideLeft',
+            ...TICK_STYLE,
+          }}
         />
         <YAxis
           yAxisId="diversity"
@@ -396,16 +455,27 @@ function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
         <tr className="border-b border-border">
           <th className="px-3 py-1.5 text-left text-muted-foreground">Role</th>
           {runs.map((run, i) => (
-            <th key={run.id} className="px-2 py-1.5 text-right text-muted-foreground">
+            <th
+              key={run.id}
+              className="px-2 py-1.5 text-right text-muted-foreground"
+            >
               <div className="flex items-center justify-end gap-1.5">
-                <div className={cn('h-2 w-2 rounded-full', RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length])} />
+                <div
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
+                  )}
+                />
                 <span className="max-w-[80px] truncate">{run.label}</span>
               </div>
             </th>
           ))}
           {runs.length > 1 &&
             runs.slice(1).map((run) => (
-              <th key={`delta-${run.id}`} className="px-2 py-1.5 text-right text-muted-foreground">
+              <th
+                key={`delta-${run.id}`}
+                className="px-2 py-1.5 text-right text-muted-foreground"
+              >
                 Delta
               </th>
             ))}
@@ -417,7 +487,10 @@ function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
             <td className="px-3 py-1.5 capitalize font-medium">{role}</td>
             {runs.map((run) => (
               <td key={run.id} className="px-2 py-1.5 text-right font-mono">
-                {((run.result.result.roleMetaShare[role] ?? 0) * 100).toFixed(1)}%
+                {((run.result.result.roleMetaShare[role] ?? 0) * 100).toFixed(
+                  1,
+                )}
+                %
               </td>
             ))}
             {runs.slice(1).map((run) => {
@@ -448,7 +521,10 @@ function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
 function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
   // Build rank maps from each run's creature leaderboard
   const rankMaps = runs.map((run) => {
-    const map = new Map<string, { rank: number; appearances: number; avgFitness: number }>()
+    const map = new Map<
+      string,
+      { rank: number; appearances: number; avgFitness: number }
+    >()
     run.result.result.creatureLeaderboard.forEach((entry, i) => {
       map.set(entry.creature.name, {
         rank: i + 1,
@@ -481,17 +557,29 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
     <table className="w-full text-xs">
       <thead>
         <tr className="border-b border-border">
-          <th className="px-4 py-1.5 text-left text-muted-foreground">Creature</th>
+          <th className="px-4 py-1.5 text-left text-muted-foreground">
+            Creature
+          </th>
           {runs.map((run, i) => (
-            <th key={run.id} className="px-2 py-1.5 text-right text-muted-foreground">
+            <th
+              key={run.id}
+              className="px-2 py-1.5 text-right text-muted-foreground"
+            >
               <div className="flex items-center justify-end gap-1.5">
-                <div className={cn('h-2 w-2 rounded-full', RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length])} />
+                <div
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
+                  )}
+                />
                 Rank
               </div>
             </th>
           ))}
           {runs.length > 1 && (
-            <th className="px-2 py-1.5 text-right text-muted-foreground">Change</th>
+            <th className="px-2 py-1.5 text-right text-muted-foreground">
+              Change
+            </th>
           )}
         </tr>
       </thead>
@@ -501,7 +589,10 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
           const lastRank = rankMaps[rankMaps.length - 1].get(name)?.rank
 
           return (
-            <tr key={name} className="border-b border-border/20 hover:bg-muted/30 transition-colors">
+            <tr
+              key={name}
+              className="border-b border-border/20 hover:bg-muted/30 transition-colors"
+            >
               <td className="px-4 py-1.5 font-medium">{name}</td>
               {rankMaps.map((map, i) => {
                 const entry = map.get(name)
@@ -513,7 +604,8 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
                           <span>#{entry.rank}</span>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {entry.appearances} appearances, {(entry.avgFitness * 100).toFixed(1)}% avg fitness
+                          {entry.appearances} appearances,{' '}
+                          {(entry.avgFitness * 100).toFixed(1)}% avg fitness
                         </TooltipContent>
                       </Tooltip>
                     ) : (
@@ -527,9 +619,19 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
                   {baseRank && lastRank ? (
                     <RankChange from={baseRank} to={lastRank} />
                   ) : !baseRank && lastRank ? (
-                    <Badge variant="outline" className="text-[9px] text-success">NEW</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] text-success"
+                    >
+                      NEW
+                    </Badge>
                   ) : baseRank && !lastRank ? (
-                    <Badge variant="outline" className="text-[9px] text-destructive">GONE</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-[9px] text-destructive"
+                    >
+                      GONE
+                    </Badge>
                   ) : null}
                 </td>
               )}
@@ -561,26 +663,62 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
     label: string
     getValue: (run: SavedRun) => string
   }> = [
-    { label: 'Population', getValue: (r) => String(r.config.options.population) },
-    { label: 'Generations', getValue: (r) => String(r.config.options.generations) },
-    { label: 'Matches/Team', getValue: (r) => String(r.config.options.matchesPerTeam) },
-    { label: 'Elite Rate', getValue: (r) => String(r.config.options.eliteRate) },
-    { label: 'Mutation Rate', getValue: (r) => String(r.config.options.mutationRate) },
-    { label: 'Normalize Stats', getValue: (r) => r.config.options.normalizeStats ? 'Yes' : 'No' },
-    { label: 'No Actives', getValue: (r) => r.config.options.noActives ? 'Yes' : 'No' },
-    { label: 'No Passives', getValue: (r) => r.config.options.noPassives ? 'Yes' : 'No' },
-    { label: 'Creature Patches', getValue: (r) => String(r.config.creaturePatches.filter((p) => Object.keys(p).length > 1).length) },
+    {
+      label: 'Population',
+      getValue: (r) => String(r.config.options.population),
+    },
+    {
+      label: 'Generations',
+      getValue: (r) => String(r.config.options.generations),
+    },
+    {
+      label: 'Matches/Team',
+      getValue: (r) => String(r.config.options.matchesPerTeam),
+    },
+    {
+      label: 'Elite Rate',
+      getValue: (r) => String(r.config.options.eliteRate),
+    },
+    {
+      label: 'Mutation Rate',
+      getValue: (r) => String(r.config.options.mutationRate),
+    },
+    {
+      label: 'Normalize Stats',
+      getValue: (r) => (r.config.options.normalizeStats ? 'Yes' : 'No'),
+    },
+    {
+      label: 'No Actives',
+      getValue: (r) => (r.config.options.noActives ? 'Yes' : 'No'),
+    },
+    {
+      label: 'No Passives',
+      getValue: (r) => (r.config.options.noPassives ? 'Yes' : 'No'),
+    },
+    {
+      label: 'Creature Patches',
+      getValue: (r) =>
+        String(
+          r.config.creaturePatches.filter((p) => Object.keys(p).length > 1)
+            .length,
+        ),
+    },
     {
       label: 'Role Modifiers',
       getValue: (r) => {
         const mods = r.config.constants.roleModifiers
         if (!mods) return 'none'
-        const entries = Object.entries(mods).filter(([, m]) => Object.keys(m).length > 0)
+        const entries = Object.entries(mods).filter(
+          ([, m]) => Object.keys(m).length > 0,
+        )
         if (entries.length === 0) return 'none'
         return entries
           .map(([role, m]) =>
             Object.entries(m)
-              .map(([stat, v]) => `${role} ${stat} ${v! > 0 ? '+' : ''}${Math.round(v! * 100)}%`)
+              .map(
+                ([stat, v]) =>
+                  `${role} ${stat} ${v > 0 ? '+' : ''}${Math.round(v * 100)}%`,
+              )
               .join(', '),
           )
           .join(', ')
@@ -592,11 +730,20 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
         const mods = r.config.constants.rarityModifiers
         if (!mods || Object.keys(mods).length === 0) return 'none'
         return Object.entries(mods)
-          .map(([rarity, v]) => `${rarity} ${v > 0 ? '+' : ''}${Math.round(v * 100)}%`)
+          .map(
+            ([rarity, v]) =>
+              `${rarity} ${v > 0 ? '+' : ''}${Math.round(v * 100)}%`,
+          )
           .join(', ')
       },
     },
-    { label: 'Damage Scale', getValue: (r) => r.config.constants.combatDamageScale !== undefined ? String(r.config.constants.combatDamageScale) : 'default' },
+    {
+      label: 'Damage Scale',
+      getValue: (r) =>
+        r.config.constants.combatDamageScale !== undefined
+          ? String(r.config.constants.combatDamageScale)
+          : 'default',
+    },
     {
       label: 'Ability Overrides',
       getValue: (r) => {
@@ -613,9 +760,17 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
         <tr className="border-b border-border">
           <th className="px-3 py-1 text-left text-muted-foreground">Setting</th>
           {runs.map((run, i) => (
-            <th key={run.id} className="px-2 py-1 text-right text-muted-foreground">
+            <th
+              key={run.id}
+              className="px-2 py-1 text-right text-muted-foreground"
+            >
               <div className="flex items-center justify-end gap-1.5">
-                <div className={cn('h-2 w-2 rounded-full', RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length])} />
+                <div
+                  className={cn(
+                    'h-2 w-2 rounded-full',
+                    RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
+                  )}
+                />
                 <span className="max-w-[80px] truncate">{run.label}</span>
               </div>
             </th>

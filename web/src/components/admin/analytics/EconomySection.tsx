@@ -155,9 +155,7 @@ export function EconomySection({
 
       {levelDistribution.length > 0 && (
         <section className="mt-8">
-          <h2 className="font-display text-xl font-bold">
-            Player Progression
-          </h2>
+          <h2 className="font-display text-xl font-bold">Player Progression</h2>
           <Card className="mt-4">
             <CardContent className="py-6">
               <div className="mb-4 text-sm font-medium text-muted-foreground">

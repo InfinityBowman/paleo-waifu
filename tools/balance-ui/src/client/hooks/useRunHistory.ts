@@ -22,8 +22,8 @@ function toSummary(run: SavedRun): RunSummary {
     (run.config.constants.combatDamageScale !== undefined ? 1 : 0) +
     Object.keys(run.config.constants.abilityOverrides ?? {}).length
   const patchCount =
-    run.config.creaturePatches.filter((p) => Object.keys(p).length > 1)
-      .length + constantsCount
+    run.config.creaturePatches.filter((p) => Object.keys(p).length > 1).length +
+    constantsCount
 
   return {
     id: run.id,
@@ -71,6 +71,7 @@ export function useRunHistory(): UseRunHistory {
     ;(async () => {
       const db = await getDb()
       const all = await db.getAllFromIndex('runs', 'by-created')
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- race condition guard for async cleanup
       if (cancelled) return
       // Reverse so newest is first
       const summaries = all.reverse().map(toSummary)
@@ -155,9 +156,7 @@ export function useRunHistory(): UseRunHistory {
     if (!run) return
     run.label = label
     await db.put('runs', run)
-    setRuns((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, label } : r)),
-    )
+    setRuns((prev) => prev.map((r) => (r.id === id ? { ...r, label } : r)))
   }, [])
 
   const toggleStar = useCallback(async (id: string) => {
@@ -167,9 +166,7 @@ export function useRunHistory(): UseRunHistory {
     run.starred = !run.starred
     await db.put('runs', run)
     setRuns((prev) =>
-      prev.map((r) =>
-        r.id === id ? { ...r, starred: !r.starred } : r,
-      ),
+      prev.map((r) => (r.id === id ? { ...r, starred: !r.starred } : r)),
     )
   }, [])
 
@@ -179,5 +176,15 @@ export function useRunHistory(): UseRunHistory {
     setRuns([])
   }, [])
 
-  return { runs, loading, saveRun, getRun, getLatestRun, deleteRun, updateLabel, toggleStar, clearAll }
+  return {
+    runs,
+    loading,
+    saveRun,
+    getRun,
+    getLatestRun,
+    deleteRun,
+    updateLabel,
+    toggleStar,
+    clearAll,
+  }
 }

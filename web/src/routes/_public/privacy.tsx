@@ -19,9 +19,7 @@ function PrivacyPolicy() {
       <h1 className="font-display text-3xl font-light text-heading sm:text-4xl">
         Privacy Policy
       </h1>
-      <p className="mt-2 text-xs text-lavender/40">
-        Effective March 3, 2026
-      </p>
+      <p className="mt-2 text-xs text-lavender/40">Effective March 3, 2026</p>
 
       <div className="mt-10 space-y-8 text-sm leading-relaxed text-lavender-light/70">
         <section>
@@ -68,16 +66,16 @@ function PrivacyPolicy() {
           </h2>
           <ul className="list-inside list-disc space-y-1 text-lavender-light/60">
             <li>To authenticate your account and maintain your session</li>
-            <li>To provide game functionality (gacha pulls, trading, leaderboards)</li>
+            <li>
+              To provide game functionality (gacha pulls, trading, leaderboards)
+            </li>
             <li>To display your profile on public leaderboards</li>
             <li>To improve and maintain the service</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="mb-3 text-base font-medium text-heading">
-            Analytics
-          </h2>
+          <h2 className="mb-3 text-base font-medium text-heading">Analytics</h2>
           <p>
             We use self-hosted Plausible Analytics, a privacy-friendly analytics
             tool that does not use cookies and does not collect personal data.

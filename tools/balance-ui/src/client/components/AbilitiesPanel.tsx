@@ -19,8 +19,13 @@ interface Props {
 
 // ─── Tunable parameter definitions per effect type ──────────────
 
-const TUNABLE_PARAMS: Record<string, Array<{ key: string; label: string; step: number; min: number; max: number }>> = {
-  damage: [{ key: 'multiplier', label: 'Multiplier', step: 0.1, min: 0.1, max: 5 }],
+const TUNABLE_PARAMS: Record<
+  string,
+  Array<{ key: string; label: string; step: number; min: number; max: number }>
+> = {
+  damage: [
+    { key: 'multiplier', label: 'Multiplier', step: 0.1, min: 0.1, max: 5 },
+  ],
   heal: [{ key: 'percent', label: 'Heal %', step: 1, min: 1, max: 100 }],
   dot: [
     { key: 'percent', label: 'Tick %', step: 1, min: 1, max: 50 },
@@ -40,38 +45,61 @@ const TUNABLE_PARAMS: Record<string, Array<{ key: string; label: string; step: n
   ],
   stun: [{ key: 'duration', label: 'Duration', step: 1, min: 1, max: 5 }],
   taunt: [{ key: 'duration', label: 'Duration', step: 1, min: 1, max: 5 }],
-  lifesteal: [{ key: 'percent', label: 'Lifesteal %', step: 1, min: 1, max: 100 }],
+  lifesteal: [
+    { key: 'percent', label: 'Lifesteal %', step: 1, min: 1, max: 100 },
+  ],
   reflect: [
     { key: 'percent', label: 'Reflect %', step: 1, min: 1, max: 100 },
     { key: 'duration', label: 'Duration', step: 1, min: 1, max: 10 },
   ],
-  damage_reduction: [{ key: 'percent', label: 'DR %', step: 1, min: 1, max: 100 }],
-  crit_reduction: [{ key: 'percent', label: 'Crit DR %', step: 1, min: 1, max: 100 }],
-  flat_reduction: [{ key: 'scalingPercent', label: 'DEF Scale %', step: 1, min: 1, max: 100 }],
+  damage_reduction: [
+    { key: 'percent', label: 'DR %', step: 1, min: 1, max: 100 },
+  ],
+  crit_reduction: [
+    { key: 'percent', label: 'Crit DR %', step: 1, min: 1, max: 100 },
+  ],
+  flat_reduction: [
+    { key: 'scalingPercent', label: 'DEF Scale %', step: 1, min: 1, max: 100 },
+  ],
   dodge: [{ key: 'basePercent', label: 'Dodge %', step: 1, min: 1, max: 100 }],
 }
 
 function getEffectValue(effect: Effect, key: string): number {
-  return (effect as Record<string, unknown>)[key] as number ?? 0
+  return ((effect as Record<string, unknown>)[key] as number | undefined) ?? 0
 }
 
 function effectSummary(effect: Effect): string {
   switch (effect.type) {
-    case 'damage': return `${effect.multiplier}x ${effect.scaling} dmg`
-    case 'heal': return `${effect.percent}% heal`
-    case 'dot': return `${effect.percent}%/t ${effect.dotKind} (${effect.duration}t)`
-    case 'buff': return `+${effect.percent}% ${effect.stat} (${effect.duration}t)`
-    case 'debuff': return `-${effect.percent}% ${effect.stat} (${effect.duration}t)`
-    case 'shield': return `${effect.percent}% shield (${effect.duration}t)`
-    case 'stun': return `stun ${effect.duration}t`
-    case 'taunt': return `taunt ${effect.duration}t`
-    case 'lifesteal': return `${effect.percent}% lifesteal`
-    case 'reflect': return `${effect.percent}% reflect (${effect.duration}t)`
-    case 'damage_reduction': return `${effect.percent}% DR`
-    case 'crit_reduction': return `${effect.percent}% crit DR`
-    case 'flat_reduction': return `${effect.scalingPercent}% DEF flat DR`
-    case 'dodge': return `${effect.basePercent}% dodge`
-    default: return (effect as { type: string }).type
+    case 'damage':
+      return `${effect.multiplier}x ${effect.scaling} dmg`
+    case 'heal':
+      return `${effect.percent}% heal`
+    case 'dot':
+      return `${effect.percent}%/t ${effect.dotKind} (${effect.duration}t)`
+    case 'buff':
+      return `+${effect.percent}% ${effect.stat} (${effect.duration}t)`
+    case 'debuff':
+      return `-${effect.percent}% ${effect.stat} (${effect.duration}t)`
+    case 'shield':
+      return `${effect.percent}% shield (${effect.duration}t)`
+    case 'stun':
+      return `stun ${effect.duration}t`
+    case 'taunt':
+      return `taunt ${effect.duration}t`
+    case 'lifesteal':
+      return `${effect.percent}% lifesteal`
+    case 'reflect':
+      return `${effect.percent}% reflect (${effect.duration}t)`
+    case 'damage_reduction':
+      return `${effect.percent}% DR`
+    case 'crit_reduction':
+      return `${effect.percent}% crit DR`
+    case 'flat_reduction':
+      return `${effect.scalingPercent}% DEF flat DR`
+    case 'dodge':
+      return `${effect.basePercent}% dodge`
+    default:
+      return (effect as { type: string }).type
   }
 }
 
@@ -79,7 +107,9 @@ function effectSummary(effect: Effect): string {
 
 export function AbilitiesPanel({ constants, overrides, onChange }: Props) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
-  const [filter, setFilter] = useState<'all' | 'active' | 'passive' | 'modified'>('all')
+  const [filter, setFilter] = useState<
+    'all' | 'active' | 'passive' | 'modified'
+  >('all')
 
   const abilityOverrides = overrides.abilityOverrides ?? {}
   const modifiedCount = Object.keys(abilityOverrides).length
@@ -98,7 +128,8 @@ export function AbilitiesPanel({ constants, overrides, onChange }: Props) {
     // Remove empty overrides
     if (
       override.cooldown === undefined &&
-      (!override.effectOverrides || Object.keys(override.effectOverrides).length === 0)
+      (!override.effectOverrides ||
+        Object.keys(override.effectOverrides).length === 0)
     ) {
       delete updated[templateId]
     }
@@ -116,8 +147,14 @@ export function AbilitiesPanel({ constants, overrides, onChange }: Props) {
   }
 
   const allTemplates = [
-    ...constants.activeTemplates.map((t) => ({ ...t, abilityType: 'active' as const })),
-    ...constants.passiveTemplates.map((t) => ({ ...t, abilityType: 'passive' as const })),
+    ...constants.activeTemplates.map((t) => ({
+      ...t,
+      abilityType: 'active' as const,
+    })),
+    ...constants.passiveTemplates.map((t) => ({
+      ...t,
+      abilityType: 'passive' as const,
+    })),
   ]
 
   const filtered = allTemplates.filter((t) => {
@@ -141,7 +178,12 @@ export function AbilitiesPanel({ constants, overrides, onChange }: Props) {
           )}
         </div>
         {modifiedCount > 0 && (
-          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={resetAll}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={resetAll}
+          >
             <RotateCcw size={12} />
             Reset All
           </Button>
@@ -208,7 +250,8 @@ function AbilityRow({
   onReset: () => void
 }) {
   const isModified = !!override
-  const cooldown = template.trigger.type === 'onUse' ? template.trigger.cooldown : null
+  const cooldown =
+    template.trigger.type === 'onUse' ? template.trigger.cooldown : null
   const effectiveCooldown = override?.cooldown ?? cooldown
 
   return (
@@ -223,9 +266,15 @@ function AbilityRow({
         onClick={onToggle}
         className="flex w-full items-center gap-2 px-3 py-2 text-left"
       >
-        {expanded ? <ChevronDown size={12} className="shrink-0 text-muted-foreground" /> : <ChevronRight size={12} className="shrink-0 text-muted-foreground" />}
+        {expanded ? (
+          <ChevronDown size={12} className="shrink-0 text-muted-foreground" />
+        ) : (
+          <ChevronRight size={12} className="shrink-0 text-muted-foreground" />
+        )}
 
-        <span className={cn('text-xs font-medium', isModified && 'text-primary')}>
+        <span
+          className={cn('text-xs font-medium', isModified && 'text-primary')}
+        >
           {template.name}
         </span>
 
@@ -234,10 +283,14 @@ function AbilityRow({
         </Badge>
 
         {cooldown !== null && (
-          <span className={cn(
-            'text-[10px] font-mono',
-            override?.cooldown !== undefined ? 'text-primary' : 'text-muted-foreground',
-          )}>
+          <span
+            className={cn(
+              'text-[10px] font-mono',
+              override?.cooldown !== undefined
+                ? 'text-primary'
+                : 'text-muted-foreground',
+            )}
+          >
             cd:{effectiveCooldown}
           </span>
         )}
@@ -261,13 +314,17 @@ function AbilityRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="border-t border-border/50 px-3 py-2.5">
-          <p className="mb-3 text-[11px] text-muted-foreground/90">{template.description}</p>
+          <p className="mb-3 text-[11px] text-muted-foreground/90">
+            {template.description}
+          </p>
 
           <div className="flex flex-col gap-3">
             {/* Cooldown (actives only) */}
             {cooldown !== null && (
               <div className="flex items-center gap-2">
-                <label className="w-20 text-[11px] text-muted-foreground">Cooldown</label>
+                <label className="w-20 text-[11px] text-muted-foreground">
+                  Cooldown
+                </label>
                 <Input
                   type="number"
                   step={1}
@@ -277,13 +334,17 @@ function AbilityRow({
                   onChange={(e) => {
                     const val = parseInt(e.target.value, 10)
                     if (isNaN(val)) return
-                    const next = { ...override, cooldown: val === cooldown ? undefined : val }
+                    const next = {
+                      ...override,
+                      cooldown: val === cooldown ? undefined : val,
+                    }
                     if (next.cooldown === undefined) delete next.cooldown
                     onOverride(next)
                   }}
                   className={cn(
                     'w-16 text-center text-xs px-2',
-                    override?.cooldown !== undefined && 'border-primary/50 text-primary',
+                    override?.cooldown !== undefined &&
+                      'border-primary/50 text-primary',
                   )}
                 />
                 <span className="text-[10px] text-muted-foreground/75">
@@ -294,24 +355,30 @@ function AbilityRow({
 
             {/* Effects */}
             {template.effects.map((effect, effectIdx) => {
-              const params = TUNABLE_PARAMS[effect.type]
+              const params = TUNABLE_PARAMS[effect.type] as Array<{ key: string; label: string; step: number; min: number; max: number }> | undefined
               if (!params || params.length === 0) return null
 
               return (
                 <div key={effectIdx} className="flex flex-col gap-1.5">
                   <div className="text-[10px] font-medium uppercase text-muted-foreground/80">
                     Effect {effectIdx + 1}: {effect.type}
-                    {'stat' in effect && ` (${(effect as { stat: string }).stat})`}
-                    {'dotKind' in effect && ` (${(effect as { dotKind: string }).dotKind})`}
+                    {'stat' in effect &&
+                      ` (${(effect as { stat: string }).stat})`}
+                    {'dotKind' in effect &&
+                      ` (${(effect as { dotKind: string }).dotKind})`}
                   </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1.5">
                     {params.map((param) => {
                       const baseVal = getEffectValue(effect, param.key)
-                      const overrideVal = override?.effectOverrides?.[effectIdx]?.[param.key]
+                      const overrideVal =
+                        override?.effectOverrides?.[effectIdx]?.[param.key]
                       const currentVal = overrideVal ?? baseVal
 
                       return (
-                        <div key={param.key} className="flex items-center gap-1.5">
+                        <div
+                          key={param.key}
+                          className="flex items-center gap-1.5"
+                        >
                           <label className="text-[10px] text-muted-foreground w-16">
                             {param.label}
                           </label>
@@ -325,8 +392,12 @@ function AbilityRow({
                               const val = parseFloat(e.target.value)
                               if (isNaN(val)) return
 
-                              const existingEffects = { ...override?.effectOverrides }
-                              const existingParams = { ...existingEffects[effectIdx] }
+                              const existingEffects = {
+                                ...override?.effectOverrides,
+                              }
+                              const existingParams = {
+                                ...existingEffects[effectIdx],
+                              }
 
                               if (val === baseVal) {
                                 delete existingParams[param.key]
@@ -342,16 +413,19 @@ function AbilityRow({
 
                               const next: AbilityOverride = {
                                 ...override,
-                                effectOverrides: Object.keys(existingEffects).length > 0
-                                  ? existingEffects
-                                  : undefined,
+                                effectOverrides:
+                                  Object.keys(existingEffects).length > 0
+                                    ? existingEffects
+                                    : undefined,
                               }
-                              if (!next.effectOverrides) delete next.effectOverrides
+                              if (!next.effectOverrides)
+                                delete next.effectOverrides
                               onOverride(next)
                             }}
                             className={cn(
                               'w-16 text-center text-xs px-2',
-                              overrideVal !== undefined && 'border-primary/50 text-primary',
+                              overrideVal !== undefined &&
+                                'border-primary/50 text-primary',
                             )}
                           />
                           <span className="text-[10px] font-mono text-muted-foreground/70">
@@ -368,7 +442,12 @@ function AbilityRow({
 
           {isModified && (
             <div className="mt-3 flex justify-end">
-              <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={onReset}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-[10px]"
+                onClick={onReset}
+              >
                 <RotateCcw size={10} />
                 Reset
               </Button>

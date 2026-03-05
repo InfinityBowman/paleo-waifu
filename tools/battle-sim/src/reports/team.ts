@@ -82,10 +82,7 @@ export function runTeamReport(
   const bar = options.csv ? null : createProgressBar(options.trials, 'Matchups')
 
   // Track synergy win rates
-  const synergyStats = new Map<
-    string,
-    { wins: number; appearances: number }
-  >()
+  const synergyStats = new Map<string, { wins: number; appearances: number }>()
 
   const addSynergyResult = (key: string, won: boolean) => {
     if (!synergyStats.has(key)) {
@@ -120,7 +117,8 @@ export function runTeamReport(
 
       // Record synergy stats for both teams
       const recordSynergies = (syn: SynergyInfo, won: boolean) => {
-        if (syn.hasTypeSynergy3) addSynergyResult('Type 3x (+7% HP, +3% ATK)', won)
+        if (syn.hasTypeSynergy3)
+          addSynergyResult('Type 3x (+7% HP, +3% ATK)', won)
         else if (syn.hasTypeSynergy2) addSynergyResult('Type 2x (+5% HP)', won)
         if (syn.hasEraSynergy3) addSynergyResult('Era 3x (+3% all)', won)
         else if (syn.hasEraSynergy2) addSynergyResult('Era 2x (+3% all)', won)
@@ -191,11 +189,7 @@ export function runTeamReport(
     })
 
   printRankedList(
-    [
-      { header: 'Synergy' },
-      { header: 'Win Rate' },
-      { header: 'Sample Size' },
-    ],
+    [{ header: 'Synergy' }, { header: 'Win Rate' }, { header: 'Sample Size' }],
     synergyRows,
   )
 

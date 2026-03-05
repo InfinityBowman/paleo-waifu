@@ -103,52 +103,52 @@ Production D1 (creature table)
 const TYPE_TO_ROLE: Record<string, Role> = {
   'large theropod': 'striker',
   'small theropod': 'scout',
-  'sauropod': 'tank',
+  sauropod: 'tank',
   'armoured dinosaur': 'tank',
-  'ceratopsian': 'bruiser',
-  'euornithopod': 'support',
-  'Pterosauria': 'scout',
-  'Ichthyosauria': 'specialist',
-  'Plesiosauria': 'specialist',
-  'Eurypterida': 'striker',
-  'Saurischia': 'bruiser',
-  'Ornithischia': 'bruiser',
-  'Crocodylia': 'bruiser',
-  'Squamata': 'scout',
-  'Reptilia': 'bruiser',
-  'Proboscidea': 'tank',
-  'Temnospondyli': 'specialist',
-  'Mammalia': 'bruiser',
-  'Perissodactyla': 'bruiser',
-  'Artiodactyla': 'support',
-  'Phlyctaeniiformes': 'specialist',
-  'Actinolepidiformes': 'specialist',
-  'Cimolesta': 'scout',
-  'Ichthyornithes': 'scout',
-  'Hesperornithiformes': 'specialist',
-  'Lagomorpha': 'scout',
-  'Rodentia': 'scout',
-  'Primates': 'support',
-  'Condylarthra': 'bruiser',
-  'Multituberculata': 'scout',
-  'Sirenia': 'support',
-  'Urodela': 'specialist',
-  'Anura': 'scout',
+  ceratopsian: 'bruiser',
+  euornithopod: 'support',
+  Pterosauria: 'scout',
+  Ichthyosauria: 'specialist',
+  Plesiosauria: 'specialist',
+  Eurypterida: 'striker',
+  Saurischia: 'bruiser',
+  Ornithischia: 'bruiser',
+  Crocodylia: 'bruiser',
+  Squamata: 'scout',
+  Reptilia: 'bruiser',
+  Proboscidea: 'tank',
+  Temnospondyli: 'specialist',
+  Mammalia: 'bruiser',
+  Perissodactyla: 'bruiser',
+  Artiodactyla: 'support',
+  Phlyctaeniiformes: 'specialist',
+  Actinolepidiformes: 'specialist',
+  Cimolesta: 'scout',
+  Ichthyornithes: 'scout',
+  Hesperornithiformes: 'specialist',
+  Lagomorpha: 'scout',
+  Rodentia: 'scout',
+  Primates: 'support',
+  Condylarthra: 'bruiser',
+  Multituberculata: 'scout',
+  Sirenia: 'support',
+  Urodela: 'specialist',
+  Anura: 'scout',
   // Trilobites
-  'Asaphida': 'tank',
-  'Phacopida': 'bruiser',
-  'Odontopleurida': 'specialist',
-  'Corynexochida': 'bruiser',
-  'Trinucleida': 'support',
-  'Redlichiida': 'bruiser',
-  'Bothriolepidiformes': 'specialist',
-  'Asterolepidiformes': 'tank',
+  Asaphida: 'tank',
+  Phacopida: 'bruiser',
+  Odontopleurida: 'specialist',
+  Corynexochida: 'bruiser',
+  Trinucleida: 'support',
+  Redlichiida: 'bruiser',
+  Bothriolepidiformes: 'specialist',
+  Asterolepidiformes: 'tank',
   // Birds
-  'Anseriformes': 'support',
-  'Columbiformes': 'scout',
-  'Charadriiformes': 'scout',
-  'Galliformes': 'bruiser',
-  'Sphenisciformes': 'specialist',
+  Anseriformes: 'support',
+  Columbiformes: 'scout',
+  Charadriiformes: 'scout',
+  Galliformes: 'bruiser',
+  Sphenisciformes: 'specialist',
 }
 ```
 
@@ -194,16 +194,28 @@ Run with structured output / JSON mode, temperature 0. Validate that `templateId
 ```typescript
 interface ActiveAbility {
   id: string
-  name: string                // Display name (creature-specific variant)
-  templateId: string          // Links to base template for balance
-  target: 'single_enemy' | 'all_enemies' | 'self' | 'all_allies' | 'random_enemy'
-  category: 'damage' | 'aoe_damage' | 'buff' | 'debuff' | 'heal' | 'shield' | 'stun'
-  multiplier: number          // ATK or ABL scaling factor
-  cooldown: number            // Turns between uses (0 = usable every turn)
-  duration?: number           // For buffs/debuffs: how many turns
-  statAffected?: string       // For buffs/debuffs: which stat
-  effectValue?: number        // For buffs/debuffs: percentage modifier
-  description: string         // Flavor text
+  name: string // Display name (creature-specific variant)
+  templateId: string // Links to base template for balance
+  target:
+    | 'single_enemy'
+    | 'all_enemies'
+    | 'self'
+    | 'all_allies'
+    | 'random_enemy'
+  category:
+    | 'damage'
+    | 'aoe_damage'
+    | 'buff'
+    | 'debuff'
+    | 'heal'
+    | 'shield'
+    | 'stun'
+  multiplier: number // ATK or ABL scaling factor
+  cooldown: number // Turns between uses (0 = usable every turn)
+  duration?: number // For buffs/debuffs: how many turns
+  statAffected?: string // For buffs/debuffs: which stat
+  effectValue?: number // For buffs/debuffs: percentage modifier
+  description: string // Flavor text
 }
 ```
 
@@ -219,7 +231,7 @@ The battle simulation is a **pure function** — teams in, battle log out. No DB
 function simulateBattle(
   teamA: BattleTeam,
   teamB: BattleTeam,
-  options: { seed: number }   // Deterministic RNG seed for reproducibility
+  options: { seed: number }, // Deterministic RNG seed for reproducibility
 ): BattleResult
 ```
 
@@ -286,6 +298,7 @@ tools/battle-sim/
 Run every creature against every creature in a 1v1 (no teams, no synergies) across N trials (e.g., 100 each to account for RNG variance).
 
 **What it catches:**
+
 - **Dominant creatures** — anything with >70% winrate across all matchups is overtuned
 - **Useless creatures** — anything with <30% winrate across all matchups needs a buff
 - **Rarity sanity check** — expected winrate ranges:
@@ -295,6 +308,7 @@ Run every creature against every creature in a 1v1 (no teams, no synergies) acro
   - Legendary vs common: 75-90%
 
 **Output example:**
+
 ```
 === WINRATE OUTLIERS (1v1, 100 trials each) ===
 
@@ -320,6 +334,7 @@ UNDERPOWERED (<30% avg winrate):
 Aggregate winrates by role matchup. Checks that no role dominates or is useless.
 
 **Output example:**
+
 ```
 === ROLE VS ROLE WINRATES (same rarity, 1000 trials each) ===
 
@@ -340,11 +355,13 @@ Specialist      45%    49%    47%     52%      49%       50%
 Generate N random legal teams (3 unique creatures, front/back assigned by role heuristic) and run them against each other.
 
 **What it catches:**
+
 - **Degenerate team comps** — "3 legendary strikers always wins" means synergies don't matter
 - **Synergy imbalance** — one synergy type dominating over others
 - **Formation irrelevance** — if front/back row doesn't affect outcomes
 
 **Output example:**
+
 ```
 === TEAM COMP ANALYSIS (10,000 random matchups) ===
 
@@ -371,11 +388,13 @@ Formation impact:
 Track which abilities contribute most to wins.
 
 **What it catches:**
+
 - Abilities that are too strong or too short cooldown
 - Abilities that never contribute meaningfully (dead templates)
 - Passives that are strictly better than others
 
 **Output example:**
+
 ```
 === ABILITY IMPACT (across 10,000 team battles) ===
 
@@ -401,6 +420,7 @@ pnpm sim:creature "Tyrannosaurus Rex"
 ```
 
 **Output example:**
+
 ```
 === TYRANNOSAURUS REX — Deep Dive ===
 
@@ -438,6 +458,7 @@ Ability usage patterns:
 ## Build Order
 
 ### Phase 1: Data Pipeline
+
 - Define all ability templates and passives
 - Build type-to-role mapping
 - Build stat generation script
@@ -447,32 +468,38 @@ Ability usage patterns:
 - Create DB tables, seed battle data
 
 ### Phase 2: Battle Engine
+
 - Implement `simulateBattle()` as a pure function
 - Unit test with known matchups
 - Damage formula, status effects, ability AI, turn resolution
 
 ### Phase 3: Balance Simulation
+
 - Build simulation CLI (`tools/battle-sim/`)
 - Run all 5 reports against Wave 1 data
 - Tune stats/abilities based on findings
 - Re-seed adjusted data
 
 ### Phase 4: Challenge System + Rating
+
 - Challenge lifecycle (create, accept, decline, expire, cancel)
 - Win/loss rating tracking (cosmetic tiers)
 
 ### Phase 5: Discord Integration
+
 - `/battle`, `/accept`, `/decline`, `/battles`, `/rating` commands
 - Team picker via select menus (filtered to battle-ready creatures)
 - Result embeds with key moments
 
 ### Phase 6: Web UI
+
 - `/battle` route with tabs (Challenge, Incoming, History)
 - Team picker component (filtered to battle-ready creatures)
 - `/battle/:id` replay page
 - Battle leaderboard tab on existing leaderboard page
 
 ### Phase 7: Wave 2 + 3 Rollout
+
 - Run generation pipeline for Good tier creatures
 - Seed Wave 2 data
 - Enrich Partial/Sparse creatures as needed

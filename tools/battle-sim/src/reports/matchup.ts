@@ -46,11 +46,7 @@ export function runMatchupReport(
       const a = creatures[i]
       const b = creatures[j]
 
-      const results = runTrials(
-        [a, a, a],
-        [b, b, b],
-        options.trials,
-      )
+      const results = runTrials([a, a, a], [b, b, b], options.trials)
       const summary = summarizeTrials(results)
 
       const sA = stats.get(a.id)!
@@ -128,13 +124,15 @@ export function runMatchupReport(
       { header: 'Win Rate' },
       { header: 'W/L' },
     ],
-    ranked.slice(0, 10).map((s) => [
-      s.creature.name,
-      rarityColor(s.creature.rarity),
-      roleColor(s.creature.role),
-      winRateColor(s.winRate),
-      `${s.wins}/${s.total - s.wins}`,
-    ]),
+    ranked
+      .slice(0, 10)
+      .map((s) => [
+        s.creature.name,
+        rarityColor(s.creature.rarity),
+        roleColor(s.creature.role),
+        winRateColor(s.winRate),
+        `${s.wins}/${s.total - s.wins}`,
+      ]),
   )
 
   // Bottom 10 underpowered

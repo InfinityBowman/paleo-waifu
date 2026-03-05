@@ -2,7 +2,11 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { and, count, eq } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { currency, tradeOffer, tradeProposal } from '@paleo-waifu/shared/db/schema'
+import {
+  currency,
+  tradeOffer,
+  tradeProposal,
+} from '@paleo-waifu/shared/db/schema'
 import { createAuth } from './auth'
 import { getCfEnv } from './env'
 

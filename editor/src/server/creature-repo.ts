@@ -153,7 +153,8 @@ export async function updateCreatureBySlug(
   if (updates.sizeMeters !== undefined) values.sizeMeters = updates.sizeMeters
   if (updates.weightKg !== undefined) values.weightKg = updates.weightKg
   if (updates.rarity !== undefined) values.rarity = updates.rarity
-  if (updates.description !== undefined) values.description = updates.description
+  if (updates.description !== undefined)
+    values.description = updates.description
   if (updates.funFacts !== undefined)
     values.funFacts = JSON.stringify(updates.funFacts)
   if (updates.source !== undefined) values.source = updates.source
@@ -198,9 +199,7 @@ export async function deleteCreatureBySlug(
   const match = await findRowBySlug(db, slug)
   if (!match) throw new Error(`Creature not found for slug: ${slug}`)
 
-  await db
-    .delete(schema.creature)
-    .where(eq(schema.creature.id, match.id))
+  await db.delete(schema.creature).where(eq(schema.creature.id, match.id))
   invalidateCache()
 }
 

@@ -10,10 +10,7 @@ export function ImageUploader({
 }: {
   slug: string | null
   currentImageUrl: string | null
-  onUploaded: (result: {
-    imageUrl: string
-    imageAspectRatio: number
-  }) => void
+  onUploaded: (result: { imageUrl: string; imageAspectRatio: number }) => void
 }) {
   const [dragging, setDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -56,7 +53,8 @@ export function ImageUploader({
     [handleFile],
   )
 
-  const imgSrc = preview || (slug && currentImageUrl ? toCdnUrl(currentImageUrl) : null)
+  const imgSrc =
+    preview || (slug && currentImageUrl ? toCdnUrl(currentImageUrl) : null)
   const disabled = !slug
 
   return (

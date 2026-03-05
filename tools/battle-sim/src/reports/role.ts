@@ -25,9 +25,7 @@ export function runRoleReport(
     const members = creatures
       .filter((c) => c.role === role)
       .sort(
-        (a, b) =>
-          b.hp + b.atk + b.def + b.spd -
-          (a.hp + a.atk + a.def + a.spd),
+        (a, b) => b.hp + b.atk + b.def + b.spd - (a.hp + a.atk + a.def + a.spd),
       )
       .slice(0, 3)
 

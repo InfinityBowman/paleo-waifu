@@ -70,12 +70,12 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
 
 Deployments are automated via GitHub Actions. Pushing to `main` triggers the relevant workflow based on which files changed:
 
-| Workflow       | Trigger paths                                          | What it does                                                 |
-| -------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
-| Deploy Website | `src/`, `packages/shared/`, `drizzle/`, etc.           | D1 migrations + `wrangler deploy`                            |
-| Deploy Bot     | `bot/`, `packages/shared/`, `src/lib/`, `drizzle/`     | D1 migrations + `wrangler deploy` (bot worker)               |
-| Gateway Docker | `gateway/`, `packages/shared/`                         | Docker build + push to GHCR + repository dispatch to homelab |
-| Editor Docker  | `editor/`, `packages/shared/`                          | Docker build + push to GHCR + repository dispatch to homelab |
+| Workflow       | Trigger paths                                      | What it does                                                 |
+| -------------- | -------------------------------------------------- | ------------------------------------------------------------ |
+| Deploy Website | `src/`, `packages/shared/`, `drizzle/`, etc.       | D1 migrations + `wrangler deploy`                            |
+| Deploy Bot     | `bot/`, `packages/shared/`, `src/lib/`, `drizzle/` | D1 migrations + `wrangler deploy` (bot worker)               |
+| Gateway Docker | `gateway/`, `packages/shared/`                     | Docker build + push to GHCR + repository dispatch to homelab |
+| Editor Docker  | `editor/`, `packages/shared/`                      | Docker build + push to GHCR + repository dispatch to homelab |
 
 ### Manual deploy (first time or secrets)
 
@@ -164,25 +164,25 @@ tests/                 # Production integration tests (Vitest)
 
 ## Scripts
 
-| Command                  | Description                          |
-| ------------------------ | ------------------------------------ |
+| Command                  | Description                           |
+| ------------------------ | ------------------------------------- |
 | `pnpm dev`               | Dev server + editor on localhost:3000 |
-| `pnpm build`             | Production build                     |
-| `pnpm deploy`            | Build + deploy to Cloudflare Workers |
-| `pnpm db:generate`       | Generate Drizzle migration files     |
-| `pnpm db:migrate:local`  | Apply migrations to local D1         |
-| `pnpm db:migrate:prod`   | Apply migrations to production D1    |
-| `pnpm lint`              | ESLint                               |
-| `pnpm format`            | Prettier                             |
-| `pnpm check`             | Prettier --write + ESLint --fix      |
-| `pnpm typecheck`         | TypeScript type checking             |
-| `pnpm test`              | Run production integration tests     |
-| `pnpm editor`            | Creature editor UI                   |
-| `pnpm bot:dev`           | Local bot worker dev server          |
-| `pnpm bot:deploy`        | Deploy bot to Cloudflare Workers     |
-| `pnpm bot:register`      | Register slash commands (dev guild)  |
-| `pnpm bot:register:prod` | Register slash commands (global)     |
-| `pnpm bot:typecheck`     | Typecheck bot                        |
-| `pnpm gateway:dev`       | Local gateway dev server             |
-| `pnpm gateway:build`     | Build gateway with esbuild           |
-| `pnpm gateway:typecheck` | Typecheck gateway                    |
+| `pnpm build`             | Production build                      |
+| `pnpm deploy`            | Build + deploy to Cloudflare Workers  |
+| `pnpm db:generate`       | Generate Drizzle migration files      |
+| `pnpm db:migrate:local`  | Apply migrations to local D1          |
+| `pnpm db:migrate:prod`   | Apply migrations to production D1     |
+| `pnpm lint`              | ESLint                                |
+| `pnpm format`            | Prettier                              |
+| `pnpm check`             | Prettier --write + ESLint --fix       |
+| `pnpm typecheck`         | TypeScript type checking              |
+| `pnpm test`              | Run production integration tests      |
+| `pnpm editor`            | Creature editor UI                    |
+| `pnpm bot:dev`           | Local bot worker dev server           |
+| `pnpm bot:deploy`        | Deploy bot to Cloudflare Workers      |
+| `pnpm bot:register`      | Register slash commands (dev guild)   |
+| `pnpm bot:register:prod` | Register slash commands (global)      |
+| `pnpm bot:typecheck`     | Typecheck bot                         |
+| `pnpm gateway:dev`       | Local gateway dev server              |
+| `pnpm gateway:build`     | Build gateway with esbuild            |
+| `pnpm gateway:typecheck` | Typecheck gateway                     |

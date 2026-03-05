@@ -17,10 +17,7 @@ const ABILITY_NAME_MAP = new Map<string, string>()
 const ABILITY_TYPE_MAP = new Map<string, string>()
 for (const t of ALL_ABILITY_TEMPLATES) {
   ABILITY_NAME_MAP.set(t.id, t.name)
-  ABILITY_TYPE_MAP.set(
-    t.id,
-    t.trigger.type === 'onUse' ? 'active' : 'passive',
-  )
+  ABILITY_TYPE_MAP.set(t.id, t.trigger.type === 'onUse' ? 'active' : 'passive')
 }
 
 function getAbilityIds(
@@ -47,10 +44,7 @@ export function runAbilityReport(
   const bar = options.csv ? null : createProgressBar(options.trials, 'Matchups')
 
   // Track per-ability stats
-  const abilityStats = new Map<
-    string,
-    { wins: number; appearances: number }
-  >()
+  const abilityStats = new Map<string, { wins: number; appearances: number }>()
 
   for (let i = 0; i < options.trials; i++) {
     const membersA = sampleTeam(creatures)
@@ -93,23 +87,16 @@ export function runAbilityReport(
   // Split into active and passive
   const activeAbilities = [...abilityStats.entries()]
     .filter(
-      ([id, s]) =>
-        s.appearances >= 50 && ABILITY_TYPE_MAP.get(id) === 'active',
+      ([id, s]) => s.appearances >= 50 && ABILITY_TYPE_MAP.get(id) === 'active',
     )
-    .sort(
-      (a, b) =>
-        b[1].wins / b[1].appearances - a[1].wins / a[1].appearances,
-    )
+    .sort((a, b) => b[1].wins / b[1].appearances - a[1].wins / a[1].appearances)
 
   const passiveAbilities = [...abilityStats.entries()]
     .filter(
       ([id, s]) =>
         s.appearances >= 50 && ABILITY_TYPE_MAP.get(id) === 'passive',
     )
-    .sort(
-      (a, b) =>
-        b[1].wins / b[1].appearances - a[1].wins / a[1].appearances,
-    )
+    .sort((a, b) => b[1].wins / b[1].appearances - a[1].wins / a[1].appearances)
 
   if (options.csv) {
     writeCsvHeader(['type', 'id', 'name', 'win_rate', 'appearances'])
@@ -137,11 +124,7 @@ export function runAbilityReport(
   // Print active ability rankings
   printSubheader('ACTIVE ABILITIES (ranked by win rate)')
   printRankedList(
-    [
-      { header: 'Ability' },
-      { header: 'Win Rate' },
-      { header: 'Appearances' },
-    ],
+    [{ header: 'Ability' }, { header: 'Win Rate' }, { header: 'Appearances' }],
     activeAbilities.map(([id, s]) => {
       const rate = s.wins / s.appearances
       return [
@@ -155,11 +138,7 @@ export function runAbilityReport(
   // Print passive ability rankings
   printSubheader('PASSIVE ABILITIES (ranked by win rate)')
   printRankedList(
-    [
-      { header: 'Passive' },
-      { header: 'Win Rate' },
-      { header: 'Appearances' },
-    ],
+    [{ header: 'Passive' }, { header: 'Win Rate' }, { header: 'Appearances' }],
     passiveAbilities.map(([id, s]) => {
       const rate = s.wins / s.appearances
       return [

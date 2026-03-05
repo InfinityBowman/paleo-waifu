@@ -12,13 +12,13 @@ Each run gets a record:
 
 ```ts
 interface StoredRun {
-  id: string              // nanoid
+  id: string // nanoid
   timestamp: number
-  label: string           // auto-generated or user-editable
-  options: SimOptions     // population, generations, etc.
+  label: string // auto-generated or user-editable
+  options: SimOptions // population, generations, etc.
   patches: CreatureOverridePatch[]
   constantsOverrides: ConstantsOverride
-  result: MetaRunResult   // full result + snapshots
+  result: MetaRunResult // full result + snapshots
 }
 ```
 
@@ -73,14 +73,18 @@ One-click "Run Diagnostic" that fires the 4 isolation configs (full / no actives
 ## 4. Missing Indicators in Results
 
 ### Avg turns target band
+
 The role share section has a green/red target band indicator. Avg turns should too:
+
 - Target: 7-10 turns.
 - Show a green "All within target" or red "4.4 avg turns — battles too short" banner below the Battle Health chart.
 
 ### Per-generation role evolution
+
 `GenerationSnapshot` already has `roleDistribution` — render it as a stacked area chart showing how role shares shift across generations. Reveals whether a role dominates from gen 1 or emerges late.
 
 ### Per-generation creature frequency
+
 `creatureFrequency` is in snapshots but unused. A small multiples or heatmap view showing which creatures get "discovered" or fall off during evolution.
 
 ## 5. Bulk Creature Editing

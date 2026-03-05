@@ -47,15 +47,16 @@ Per-ability template overrides: cooldowns, effect parameters (multiplier, durati
 
 Genetic algorithm parameters:
 
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| Population | 100 | Teams per generation |
-| Generations | 25 | Evolution cycles |
-| Matches/Team | 20 | Battles per team per generation |
-| Elite Rate | 0.1 | Fraction of top teams kept unchanged |
-| Mutation Rate | 0.8 | Probability of mutation vs crossover |
+| Parameter     | Default | Description                          |
+| ------------- | ------- | ------------------------------------ |
+| Population    | 100     | Teams per generation                 |
+| Generations   | 25      | Evolution cycles                     |
+| Matches/Team  | 20      | Battles per team per generation      |
+| Elite Rate    | 0.1     | Fraction of top teams kept unchanged |
+| Mutation Rate | 0.8     | Probability of mutation vs crossover |
 
 **Isolation modes** strip away variables to test specific balance axes:
+
 - **Normalize Stats** — Scale all creatures to 170 total stats
 - **No Actives** — Replace all actives with Bite (baseline damage)
 - **No Passives** — Disable all passive abilities
@@ -81,6 +82,7 @@ Runs auto-save to IndexedDB (max 50, oldest non-starred pruned). Each entry show
 ### Run Comparison
 
 Select 2-4 runs from History to compare side-by-side:
+
 - Overlaid fitness curves (solid = top, dashed = avg)
 - Overlaid turns and diversity curves
 - Role meta share delta table

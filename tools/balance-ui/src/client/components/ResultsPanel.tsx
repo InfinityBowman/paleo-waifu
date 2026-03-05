@@ -12,14 +12,20 @@ import {
   LineChart,
   Pie,
   PieChart,
-  ReferenceArea,
   Tooltip as RechartsTooltip,
+  ReferenceArea,
   ResponsiveContainer,
   XAxis,
   YAxis,
 } from 'recharts'
 import { cn } from '../lib/utils'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from './ui/card'
 import { Badge } from './ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
@@ -81,7 +87,14 @@ interface Props {
   constants?: ConstantsSnapshot | null
 }
 
-export function ResultsPanel({ result, error, simState, population, config, constants }: Props) {
+export function ResultsPanel({
+  result,
+  error,
+  simState,
+  population,
+  config,
+  constants,
+}: Props) {
   const [baselineOpen, setBaselineOpen] = useState(false)
   if (simState === 'error' && error) {
     return (
@@ -144,10 +157,13 @@ export function ResultsPanel({ result, error, simState, population, config, cons
           <div className="flex items-center gap-2">
             <CardTitle>Role Meta Share</CardTitle>
             <SectionTooltip>
-              Percentage of top teams using each role. A balanced meta has all roles between 15-35%.
+              Percentage of top teams using each role. A balanced meta has all
+              roles between 15-35%.
             </SectionTooltip>
           </div>
-          <CardDescription>Distribution of roles across top-performing teams</CardDescription>
+          <CardDescription>
+            Distribution of roles across top-performing teams
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <RoleMetaChart roleShares={meta.roleMetaShare} />
@@ -162,10 +178,14 @@ export function ResultsPanel({ result, error, simState, population, config, cons
             <div className="flex items-center gap-2">
               <CardTitle>Role Evolution</CardTitle>
               <SectionTooltip>
-                How role distribution in top-quartile teams shifts across generations. Stable bands suggest a settled meta; converging lines indicate a role taking over.
+                How role distribution in top-quartile teams shifts across
+                generations. Stable bands suggest a settled meta; converging
+                lines indicate a role taking over.
               </SectionTooltip>
             </div>
-            <CardDescription>Per-generation role share in top teams</CardDescription>
+            <CardDescription>
+              Per-generation role share in top teams
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <RoleEvolutionChart snapshots={snapshots} />
@@ -180,10 +200,13 @@ export function ResultsPanel({ result, error, simState, population, config, cons
             <div className="flex items-center gap-2">
               <CardTitle>Fitness Progression</CardTitle>
               <SectionTooltip>
-                Shows how the best and average team fitness evolve across generations. Converging lines suggest a stable meta.
+                Shows how the best and average team fitness evolve across
+                generations. Converging lines suggest a stable meta.
               </SectionTooltip>
             </div>
-            <CardDescription>Top and average fitness across generations</CardDescription>
+            <CardDescription>
+              Top and average fitness across generations
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <FitnessCurve snapshots={snapshots} />
@@ -198,14 +221,21 @@ export function ResultsPanel({ result, error, simState, population, config, cons
             <div className="flex items-center gap-2">
               <CardTitle>Battle Health</CardTitle>
               <SectionTooltip>
-                Avg turns per battle and population diversity (unique genomes / population) over generations.
-                Falling diversity signals convergence. Very low or high avg turns suggest damage scaling issues.
+                Avg turns per battle and population diversity (unique genomes /
+                population) over generations. Falling diversity signals
+                convergence. Very low or high avg turns suggest damage scaling
+                issues.
               </SectionTooltip>
             </div>
-            <CardDescription>Average turns and genome diversity across generations</CardDescription>
+            <CardDescription>
+              Average turns and genome diversity across generations
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <MetricsChart snapshots={snapshots} population={population ?? 100} />
+            <MetricsChart
+              snapshots={snapshots}
+              population={population ?? 100}
+            />
             <TurnsTargetIndicator avgTurns={snapshots.at(-1)?.avgTurns ?? 0} />
           </CardContent>
         </Card>
@@ -217,7 +247,8 @@ export function ResultsPanel({ result, error, simState, population, config, cons
           <div className="flex items-center gap-2">
             <CardTitle>Formation Distribution</CardTitle>
             <SectionTooltip>
-              How teams arrange creatures across front/back rows. Dominance of one formation may indicate row mechanics need tuning.
+              How teams arrange creatures across front/back rows. Dominance of
+              one formation may indicate row mechanics need tuning.
             </SectionTooltip>
           </div>
         </CardHeader>
@@ -232,10 +263,13 @@ export function ResultsPanel({ result, error, simState, population, config, cons
           <div className="flex items-center gap-2">
             <CardTitle>Top Creatures</CardTitle>
             <SectionTooltip>
-              Creatures most frequently appearing in top-performing teams, ranked by number of appearances and average team fitness.
+              Creatures most frequently appearing in top-performing teams,
+              ranked by number of appearances and average team fitness.
             </SectionTooltip>
           </div>
-          <CardDescription>Meta presence by appearances in top teams</CardDescription>
+          <CardDescription>
+            Meta presence by appearances in top teams
+          </CardDescription>
         </CardHeader>
         <CardContent className="px-0">
           <CreatureLeaderboard leaderboard={meta.creatureLeaderboard} />
@@ -248,7 +282,8 @@ export function ResultsPanel({ result, error, simState, population, config, cons
           <div className="flex items-center gap-2">
             <CardTitle>Ability Presence</CardTitle>
             <SectionTooltip>
-              Which active and passive abilities appear most in winning teams. High concentration may indicate an ability is overtuned.
+              Which active and passive abilities appear most in winning teams.
+              High concentration may indicate an ability is overtuned.
             </SectionTooltip>
           </div>
         </CardHeader>
@@ -263,10 +298,13 @@ export function ResultsPanel({ result, error, simState, population, config, cons
           <div className="flex items-center gap-2">
             <CardTitle>Hall of Fame</CardTitle>
             <SectionTooltip>
-              The top 10 performing teams from the final generation. Shows team composition and win/loss records.
+              The top 10 performing teams from the final generation. Shows team
+              composition and win/loss records.
             </SectionTooltip>
           </div>
-          <CardDescription>Top 10 teams from the final generation</CardDescription>
+          <CardDescription>
+            Top 10 teams from the final generation
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <HallOfFame hallOfFame={meta.hallOfFame} />
@@ -280,7 +318,8 @@ export function ResultsPanel({ result, error, simState, population, config, cons
             <div className="flex items-center gap-2">
               <CardTitle>Synergy Presence</CardTitle>
               <SectionTooltip>
-                Type-based team synergies triggered by shared creature types. High presence suggests the synergy bonus may be too strong.
+                Type-based team synergies triggered by shared creature types.
+                High presence suggests the synergy bonus may be too strong.
               </SectionTooltip>
             </div>
           </CardHeader>
@@ -308,7 +347,10 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info size={13} className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors" />
+        <Info
+          size={13}
+          className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors"
+        />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>
     </Tooltip>
@@ -326,10 +368,16 @@ function CreatureLeaderboard({
         <tr className="border-b border-border">
           <th className="px-4 py-1.5 text-left text-muted-foreground">#</th>
           <th className="px-2 py-1.5 text-left text-muted-foreground">Name</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">Rarity</th>
+          <th className="px-2 py-1.5 text-left text-muted-foreground">
+            Rarity
+          </th>
           <th className="px-2 py-1.5 text-left text-muted-foreground">Role</th>
-          <th className="px-2 py-1.5 text-right text-muted-foreground">Appearances</th>
-          <th className="px-4 py-1.5 text-right text-muted-foreground">Avg Fitness</th>
+          <th className="px-2 py-1.5 text-right text-muted-foreground">
+            Appearances
+          </th>
+          <th className="px-4 py-1.5 text-right text-muted-foreground">
+            Avg Fitness
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -338,14 +386,26 @@ function CreatureLeaderboard({
             <TooltipTrigger asChild>
               <tr className="border-b border-border/20 hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
-                <td className="px-2 py-1.5 font-medium">{entry.creature.name}</td>
+                <td className="px-2 py-1.5 font-medium">
+                  {entry.creature.name}
+                </td>
                 <td className="px-2 py-1.5">
-                  <span className={cn('capitalize', `text-rarity-${entry.creature.rarity}`)}>
+                  <span
+                    className={cn(
+                      'capitalize',
+                      `text-rarity-${entry.creature.rarity}`,
+                    )}
+                  >
                     {entry.creature.rarity}
                   </span>
                 </td>
                 <td className="px-2 py-1.5">
-                  <span className={cn('capitalize', `text-role-${entry.creature.role}`)}>
+                  <span
+                    className={cn(
+                      'capitalize',
+                      `text-role-${entry.creature.role}`,
+                    )}
+                  >
                     {entry.creature.role}
                   </span>
                 </td>
@@ -356,11 +416,14 @@ function CreatureLeaderboard({
               </tr>
             </TooltipTrigger>
             <TooltipContent>
-              {entry.creature.name} — {entry.creature.role} {entry.creature.rarity}
+              {entry.creature.name} — {entry.creature.role}{' '}
+              {entry.creature.rarity}
               <br />
-              Stats: {entry.creature.hp}/{entry.creature.atk}/{entry.creature.def}/{entry.creature.spd}
+              Stats: {entry.creature.hp}/{entry.creature.atk}/
+              {entry.creature.def}/{entry.creature.spd}
               <br />
-              Active: {entry.creature.active.displayName} | Passive: {entry.creature.passive.displayName}
+              Active: {entry.creature.active.displayName} | Passive:{' '}
+              {entry.creature.passive.displayName}
             </TooltipContent>
           </Tooltip>
         ))}
@@ -384,9 +447,15 @@ function AbilityLeaderboard({
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-border">
-                <th className="px-2 py-1 text-left text-muted-foreground">Ability</th>
-                <th className="px-2 py-1 text-right text-muted-foreground">Count</th>
-                <th className="px-2 py-1 text-right text-muted-foreground">Avg Fitness</th>
+                <th className="px-2 py-1 text-left text-muted-foreground">
+                  Ability
+                </th>
+                <th className="px-2 py-1 text-right text-muted-foreground">
+                  Count
+                </th>
+                <th className="px-2 py-1 text-right text-muted-foreground">
+                  Avg Fitness
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -412,11 +481,7 @@ function AbilityLeaderboard({
   )
 }
 
-function HallOfFame({
-  hallOfFame,
-}: {
-  hallOfFame: MetaResult['hallOfFame']
-}) {
+function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'] }) {
   return (
     <div className="flex flex-col gap-2">
       {hallOfFame.slice(0, 10).map((team, i) => (
@@ -449,7 +514,8 @@ function HallOfFame({
             <div className="space-y-1">
               {team.members.map((m, j) => (
                 <div key={j}>
-                  {m.name} — {m.role} {m.rarity} ({m.hp}/{m.atk}/{m.def}/{m.spd})
+                  {m.name} — {m.role} {m.rarity} ({m.hp}/{m.atk}/{m.def}/{m.spd}
+                  )
                 </div>
               ))}
             </div>
@@ -466,9 +532,7 @@ function TargetBandIndicator({
   roleShares: Record<string, number>
 }) {
   const roles = entries(roleShares)
-  const allInBand = roles.every(
-    ([, share]) => share >= 0.15 && share <= 0.35,
-  )
+  const allInBand = roles.every(([, share]) => share >= 0.15 && share <= 0.35)
 
   return (
     <div
@@ -501,13 +565,36 @@ function RoleMetaChart({ roleShares }: { roleShares: Record<string, number> }) {
 
   return (
     <ResponsiveContainer width="100%" height={160}>
-      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, bottom: 0, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" horizontal={false} />
-        <XAxis type="number" domain={[0, 50]} tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }} />
-        <YAxis type="category" dataKey="role" width={60} tick={{ fontSize: 11, fill: 'oklch(0.65 0.03 290)' }} />
+      <BarChart
+        data={data}
+        layout="vertical"
+        margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="oklch(1 0 0 / 4%)"
+          horizontal={false}
+        />
+        <XAxis
+          type="number"
+          domain={[0, 50]}
+          tickFormatter={(v: number) => `${v}%`}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+        />
+        <YAxis
+          type="category"
+          dataKey="role"
+          width={60}
+          tick={{ fontSize: 11, fill: 'oklch(0.65 0.03 290)' }}
+        />
         <RechartsTooltip
           formatter={(value) => [`${value}%`, 'Meta Share']}
-          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          contentStyle={{
+            background: 'oklch(0.15 0.025 290)',
+            border: '1px solid oklch(1 0 0 / 8%)',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
           itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
         />
@@ -535,7 +622,13 @@ function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
         <XAxis
           dataKey="gen"
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{
+            value: 'Generation',
+            position: 'insideBottom',
+            offset: -2,
+            fontSize: 10,
+            fill: 'oklch(0.65 0.03 290)',
+          }}
         />
         <YAxis
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
@@ -544,8 +637,16 @@ function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
           width={40}
         />
         <RechartsTooltip
-          formatter={(value, name) => [`${value}%`, name === 'top' ? 'Top Fitness' : 'Avg Fitness']}
-          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          formatter={(value, name) => [
+            `${value}%`,
+            name === 'top' ? 'Top Fitness' : 'Avg Fitness',
+          ]}
+          contentStyle={{
+            background: 'oklch(0.15 0.025 290)',
+            border: '1px solid oklch(1 0 0 / 8%)',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
           itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelFormatter={(label) => `Gen ${label}`}
@@ -553,21 +654,43 @@ function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
         <Legend
           verticalAlign="top"
           height={28}
-          formatter={(value: string) => value === 'top' ? 'Top' : 'Avg'}
+          formatter={(value: string) => (value === 'top' ? 'Top' : 'Avg')}
           wrapperStyle={{ fontSize: 11 }}
         />
-        <Line type="monotone" dataKey="top" stroke={ROLE_COLOR_VALUES.striker} strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="avg" stroke={ROLE_COLOR_VALUES.support} strokeWidth={2} dot={false} opacity={0.7} />
+        <Line
+          type="monotone"
+          dataKey="top"
+          stroke={ROLE_COLOR_VALUES.striker}
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          type="monotone"
+          dataKey="avg"
+          stroke={ROLE_COLOR_VALUES.support}
+          strokeWidth={2}
+          dot={false}
+          opacity={0.7}
+        />
       </LineChart>
     </ResponsiveContainer>
   )
 }
 
-function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSnapshot>; population: number }) {
+function MetricsChart({
+  snapshots,
+  population,
+}: {
+  snapshots: Array<GenerationSnapshot>
+  population: number
+}) {
   const data = snapshots.map((s) => ({
     gen: s.generation,
     avgTurns: Math.round(s.avgTurns * 10) / 10,
-    diversity: Math.min(100, Math.round((s.uniqueGenomes / population) * 1000) / 10),
+    diversity: Math.min(
+      100,
+      Math.round((s.uniqueGenomes / population) * 1000) / 10,
+    ),
   }))
 
   return (
@@ -577,13 +700,25 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
         <XAxis
           dataKey="gen"
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{
+            value: 'Generation',
+            position: 'insideBottom',
+            offset: -2,
+            fontSize: 10,
+            fill: 'oklch(0.65 0.03 290)',
+          }}
         />
         <YAxis
           yAxisId="turns"
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           width={40}
-          label={{ value: 'Turns', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{
+            value: 'Turns',
+            angle: -90,
+            position: 'insideLeft',
+            fontSize: 10,
+            fill: 'oklch(0.65 0.03 290)',
+          }}
         />
         <YAxis
           yAxisId="diversity"
@@ -598,7 +733,12 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
             name === 'avgTurns' ? `${value} turns` : `${value}%`,
             name === 'avgTurns' ? 'Avg Turns' : 'Diversity',
           ]}
-          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          contentStyle={{
+            background: 'oklch(0.15 0.025 290)',
+            border: '1px solid oklch(1 0 0 / 8%)',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
           itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelFormatter={(label) => `Gen ${label}`}
@@ -606,7 +746,9 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
         <Legend
           verticalAlign="top"
           height={28}
-          formatter={(value: string) => value === 'avgTurns' ? 'Avg Turns' : 'Diversity'}
+          formatter={(value: string) =>
+            value === 'avgTurns' ? 'Avg Turns' : 'Diversity'
+          }
           wrapperStyle={{ fontSize: 11 }}
         />
         <ReferenceArea
@@ -617,15 +759,31 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
           strokeDasharray="4 4"
           stroke="oklch(0.65 0.15 145 / 25%)"
         />
-        <Line yAxisId="turns" type="monotone" dataKey="avgTurns" stroke={ROLE_COLOR_VALUES.bruiser} strokeWidth={2} dot={false} />
-        <Line yAxisId="diversity" type="monotone" dataKey="diversity" stroke={ROLE_COLOR_VALUES.tank} strokeWidth={2} dot={false} opacity={0.7} />
+        <Line
+          yAxisId="turns"
+          type="monotone"
+          dataKey="avgTurns"
+          stroke={ROLE_COLOR_VALUES.bruiser}
+          strokeWidth={2}
+          dot={false}
+        />
+        <Line
+          yAxisId="diversity"
+          type="monotone"
+          dataKey="diversity"
+          stroke={ROLE_COLOR_VALUES.tank}
+          strokeWidth={2}
+          dot={false}
+          opacity={0.7}
+        />
       </LineChart>
     </ResponsiveContainer>
   )
 }
 
 function TurnsTargetIndicator({ avgTurns }: { avgTurns: number }) {
-  const inBand = avgTurns >= AVG_TURNS_TARGET_MIN && avgTurns <= AVG_TURNS_TARGET_MAX
+  const inBand =
+    avgTurns >= AVG_TURNS_TARGET_MIN && avgTurns <= AVG_TURNS_TARGET_MAX
 
   return (
     <div
@@ -646,14 +804,19 @@ function TurnsTargetIndicator({ avgTurns }: { avgTurns: number }) {
   )
 }
 
-function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
+function RoleEvolutionChart({
+  snapshots,
+}: {
+  snapshots: Array<GenerationSnapshot>
+}) {
   const data = snapshots.map((s) => {
     const total = Object.values(s.roleDistribution).reduce((a, b) => a + b, 0)
     const row: Record<string, number> = { gen: s.generation }
     for (const role of ROLE_ORDER) {
-      row[role] = total > 0
-        ? Math.round(((s.roleDistribution[role] ?? 0) / total) * 1000) / 10
-        : 0
+      row[role] =
+        total > 0
+          ? Math.round(((s.roleDistribution[role] ?? 0) / total) * 1000) / 10
+          : 0
     }
     return row
   })
@@ -665,7 +828,13 @@ function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot
         <XAxis
           dataKey="gen"
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{
+            value: 'Generation',
+            position: 'insideBottom',
+            offset: -2,
+            fontSize: 10,
+            fill: 'oklch(0.65 0.03 290)',
+          }}
         />
         <YAxis
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
@@ -674,8 +843,16 @@ function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot
           width={40}
         />
         <RechartsTooltip
-          formatter={(value, name) => [`${value}%`, String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
-          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          formatter={(value, name) => [
+            `${value}%`,
+            String(name).charAt(0).toUpperCase() + String(name).slice(1),
+          ]}
+          contentStyle={{
+            background: 'oklch(0.15 0.025 290)',
+            border: '1px solid oklch(1 0 0 / 8%)',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
           itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
           labelFormatter={(label) => `Gen ${label}`}
@@ -683,7 +860,9 @@ function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot
         <Legend
           verticalAlign="top"
           height={28}
-          formatter={(value: string) => value.charAt(0).toUpperCase() + value.slice(1)}
+          formatter={(value: string) =>
+            value.charAt(0).toUpperCase() + value.slice(1)
+          }
           wrapperStyle={{ fontSize: 11 }}
         />
         {ROLE_ORDER.map((role) => (
@@ -702,7 +881,11 @@ function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot
   )
 }
 
-function FormationChart({ formationShares }: { formationShares: Record<string, number> }) {
+function FormationChart({
+  formationShares,
+}: {
+  formationShares: Record<string, number>
+}) {
   const data = entries(formationShares)
     .sort(([, a], [, b]) => b - a)
     .map(([name, share]) => ({
@@ -727,12 +910,20 @@ function FormationChart({ formationShares }: { formationShares: Record<string, n
           fontSize={10}
         >
           {data.map((_, i) => (
-            <Cell key={i} fill={FORMATION_COLORS[i % FORMATION_COLORS.length]} />
+            <Cell
+              key={i}
+              fill={FORMATION_COLORS[i % FORMATION_COLORS.length]}
+            />
           ))}
         </Pie>
         <RechartsTooltip
           formatter={(value) => [`${value}%`, 'Usage']}
-          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          contentStyle={{
+            background: 'oklch(0.15 0.025 290)',
+            border: '1px solid oklch(1 0 0 / 8%)',
+            borderRadius: 8,
+            fontSize: 12,
+          }}
           itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
         />
       </PieChart>

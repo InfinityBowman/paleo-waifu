@@ -38,7 +38,10 @@ export function SimControls({
 }: Props) {
   const running = simState === 'running'
 
-  function setOpt<TKey extends keyof SimOptions>(key: TKey, value: SimOptions[TKey]) {
+  function setOpt<TKey extends keyof SimOptions>(
+    key: TKey,
+    value: SimOptions[TKey],
+  ) {
     onOptionsChange({ ...options, [key]: value })
   }
 
@@ -51,7 +54,8 @@ export function SimControls({
             <Info size={12} className="text-muted-foreground/80" />
           </TooltipTrigger>
           <TooltipContent side="right">
-            Configure the genetic algorithm parameters. Higher values = more accurate but slower.
+            Configure the genetic algorithm parameters. Higher values = more
+            accurate but slower.
           </TooltipContent>
         </Tooltip>
       </div>
@@ -67,7 +71,9 @@ export function SimControls({
             max={1000}
             step={1}
             value={options.population}
-            onChange={(e) => setOpt('population', parseInt(e.target.value, 10) || 100)}
+            onChange={(e) =>
+              setOpt('population', parseInt(e.target.value, 10) || 100)
+            }
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -82,7 +88,9 @@ export function SimControls({
             max={200}
             step={1}
             value={options.generations}
-            onChange={(e) => setOpt('generations', parseInt(e.target.value, 10) || 25)}
+            onChange={(e) =>
+              setOpt('generations', parseInt(e.target.value, 10) || 25)
+            }
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -97,7 +105,9 @@ export function SimControls({
             max={100}
             step={1}
             value={options.matchesPerTeam}
-            onChange={(e) => setOpt('matchesPerTeam', parseInt(e.target.value, 10) || 20)}
+            onChange={(e) =>
+              setOpt('matchesPerTeam', parseInt(e.target.value, 10) || 20)
+            }
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -112,7 +122,9 @@ export function SimControls({
             max={0.5}
             step={0.01}
             value={options.eliteRate}
-            onChange={(e) => setOpt('eliteRate', parseFloat(e.target.value) || 0.1)}
+            onChange={(e) =>
+              setOpt('eliteRate', parseFloat(e.target.value) || 0.1)
+            }
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -127,7 +139,9 @@ export function SimControls({
             max={1.0}
             step={0.1}
             value={options.mutationRate}
-            onChange={(e) => setOpt('mutationRate', parseFloat(e.target.value) || 0.8)}
+            onChange={(e) =>
+              setOpt('mutationRate', parseFloat(e.target.value) || 0.8)
+            }
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -143,7 +157,8 @@ export function SimControls({
               <Info size={12} className="text-muted-foreground/80" />
             </TooltipTrigger>
             <TooltipContent side="right">
-              Strip away abilities or rarity advantage to isolate specific balance axes.
+              Strip away abilities or rarity advantage to isolate specific
+              balance axes.
             </TooltipContent>
           </Tooltip>
         </div>
@@ -172,12 +187,7 @@ export function SimControls({
         </div>
       </div>
 
-      <Button
-        onClick={onRun}
-        disabled={running}
-        className="w-full"
-        size="sm"
-      >
+      <Button onClick={onRun} disabled={running} className="w-full" size="sm">
         {running ? (
           <>
             <Loader2 size={14} className="animate-spin" />

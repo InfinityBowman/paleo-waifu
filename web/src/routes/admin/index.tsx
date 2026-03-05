@@ -70,7 +70,6 @@ export const Route = createFileRoute('/admin/')({
   component: DashboardPage,
 })
 
-
 function DashboardPage() {
   const data = Route.useLoaderData()
 

@@ -148,10 +148,10 @@ export async function listOrphans(): Promise<Array<string>> {
 }
 
 export async function deleteOrphan(key: string): Promise<void> {
-  const res = await fetch(
-    `${BASE}/r2/orphans/${encodeURIComponent(key)}`,
-    { method: 'DELETE', credentials: 'include' },
-  )
+  const res = await fetch(`${BASE}/r2/orphans/${encodeURIComponent(key)}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  })
   if (!res.ok) {
     const body = (await res.json()) as { error?: string }
     throw new Error(body.error || 'Failed to delete orphan')

@@ -1,12 +1,5 @@
 import { useState } from 'react'
-import {
-  Check,
-  Cloud,
-  Loader2,
-  Search,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { Check, Cloud, Loader2, Search, Trash2, X } from 'lucide-react'
 import { deleteOrphan, listOrphans, syncR2 } from '../lib/api'
 import type { SyncProgress } from '../lib/api'
 

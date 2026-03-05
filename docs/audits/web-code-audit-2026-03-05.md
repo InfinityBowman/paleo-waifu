@@ -93,17 +93,17 @@ Extracted `countDistinctSpecies(db, userId)` to `web/src/lib/queries.ts`. Both p
 
 ## Summary
 
-| Priority | # | Issue | Status |
-|----------|---|-------|--------|
-| Critical | 6 | `refundFossils` duplicates `grantFossils` | **FIXED** |
-| Critical | 1 | Duplicate encyclopedia server functions | **FIXED** |
-| Critical | 5 | Role cast repeated 7 times | **FIXED** (5/7 server-side; 2 client-side remain) |
-| Critical | 2 | Admin auth boilerplate x4 | **FIXED** |
-| Important | 4 | `StatCard` copy-pasted x3 | **FIXED** |
-| Important | 8 | XP progress calc duplicated | **FIXED** |
-| Important | 11 | `count(distinct)` cast duplicated | **FIXED** |
-| Important | 9 | Trade query shape duplicated | Open |
-| Important | 3 | Business logic in route file | Open |
-| Important | 7 | TradeList.tsx too large (625 lines) | Open |
-| Important | 10 | Component imports from route | Open |
-| Important | 12 | Trade expiry on every page load | Open |
+| Priority  | #   | Issue                                     | Status                                            |
+| --------- | --- | ----------------------------------------- | ------------------------------------------------- |
+| Critical  | 6   | `refundFossils` duplicates `grantFossils` | **FIXED**                                         |
+| Critical  | 1   | Duplicate encyclopedia server functions   | **FIXED**                                         |
+| Critical  | 5   | Role cast repeated 7 times                | **FIXED** (5/7 server-side; 2 client-side remain) |
+| Critical  | 2   | Admin auth boilerplate x4                 | **FIXED**                                         |
+| Important | 4   | `StatCard` copy-pasted x3                 | **FIXED**                                         |
+| Important | 8   | XP progress calc duplicated               | **FIXED**                                         |
+| Important | 11  | `count(distinct)` cast duplicated         | **FIXED**                                         |
+| Important | 9   | Trade query shape duplicated              | Open                                              |
+| Important | 3   | Business logic in route file              | Open                                              |
+| Important | 7   | TradeList.tsx too large (625 lines)       | Open                                              |
+| Important | 10  | Component imports from route              | Open                                              |
+| Important | 12  | Trade expiry on every page load           | Open                                              |

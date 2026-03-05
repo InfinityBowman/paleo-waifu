@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import { ArrowUpDown, ImageOff } from 'lucide-react'
 import { slugify, toCdnUrl } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
-import { FilterBar  } from './FilterBar'
-import type {Creature} from '../lib/types';
-import type {Filters} from './FilterBar';
+import { FilterBar } from './FilterBar'
+import type { Creature } from '../lib/types'
+import type { Filters } from './FilterBar'
 
 type SortKey = 'name' | 'scientificName' | 'era' | 'rarity' | 'diet' | 'type'
 type SortDir = 'asc' | 'desc'
@@ -46,7 +46,8 @@ export function CreatureList({
           c.scientificName.toLowerCase().includes(q),
       )
     }
-    if (filters.rarity) result = result.filter((c) => c.rarity === filters.rarity)
+    if (filters.rarity)
+      result = result.filter((c) => c.rarity === filters.rarity)
     if (filters.era) result = result.filter((c) => c.era === filters.era)
     if (filters.diet) result = result.filter((c) => c.diet === filters.diet)
 

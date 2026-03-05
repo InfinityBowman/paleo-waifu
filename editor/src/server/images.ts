@@ -2,11 +2,7 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import sharp from 'sharp'
 import { deleteFromR2, listR2Keys, uploadToR2 } from './r2'
-import {
-  listCreatures,
-  slugify,
-  updateCreatureImage,
-} from './creature-repo'
+import { listCreatures, slugify, updateCreatureImage } from './creature-repo'
 import type { Creature } from './creature-repo'
 import type { EditorDatabase } from './db'
 

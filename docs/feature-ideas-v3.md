@@ -1,6 +1,6 @@
 # Feature Ideas for PaleoWaifu — Round 3
 
-**Direction**: The Discord bot is currently a pull terminal. Make it the **social heartbeat of the game** — battling, duplicate progression, server-wide drama, and interactions that turn a solo gacha into a multiplayer experience people play *together* in chat.
+**Direction**: The Discord bot is currently a pull terminal. Make it the **social heartbeat of the game** — battling, duplicate progression, server-wide drama, and interactions that turn a solo gacha into a multiplayer experience people play _together_ in chat.
 
 ---
 
@@ -17,7 +17,7 @@
 
 Best-of-3 rounds. Winner takes a Fossil pot (both ante 5). Battle replays are posted as an embed thread in the channel for everyone to see and react to.
 
-**Why unforgettable**: Every creature in your collection suddenly has *tactical value*. That common Velociraptor you pulled 8 times? Field all 8 as a pack and they can take down a solo legendary. Size/diet/era data that was purely cosmetic now drives real gameplay. Discord channels become fight clubs.
+**Why unforgettable**: Every creature in your collection suddenly has _tactical value_. That common Velociraptor you pulled 8 times? Field all 8 as a pack and they can take down a solo legendary. Size/diet/era data that was purely cosmetic now drives real gameplay. Discord channels become fight clubs.
 
 **Technical challenge**: Combat resolution engine using existing creature metadata. Pack multiplier system for duplicates. Embed-based battle replay with round-by-round narration. ELO rating system per player.
 
@@ -29,17 +29,17 @@ Best-of-3 rounds. Winner takes a Fossil pot (both ante 5). Battle replays are po
 
 **What**: Multiple copies of the same creature aren't dead weight — they're fuel. Feed duplicates to "ascend" a creature through 5 tiers:
 
-| Tier | Dupes Needed | Effect |
-|------|-------------|--------|
-| **Bronze** | 2 copies | +10% battle stats, bronze border |
-| **Silver** | 4 total | +25% stats, silver border, unlock creature voice line |
-| **Gold** | 8 total | +50% stats, gold border, unlock creature lore entry |
-| **Prismatic** | 15 total | +100% stats, animated holographic border, unique title |
-| **Apex** | 25 total | Max stats, custom color border, creature appears in your Discord profile embed, globally announced |
+| Tier          | Dupes Needed | Effect                                                                                             |
+| ------------- | ------------ | -------------------------------------------------------------------------------------------------- |
+| **Bronze**    | 2 copies     | +10% battle stats, bronze border                                                                   |
+| **Silver**    | 4 total      | +25% stats, silver border, unlock creature voice line                                              |
+| **Gold**      | 8 total      | +50% stats, gold border, unlock creature lore entry                                                |
+| **Prismatic** | 15 total     | +100% stats, animated holographic border, unique title                                             |
+| **Apex**      | 25 total     | Max stats, custom color border, creature appears in your Discord profile embed, globally announced |
 
-Ascending consumes the extra copies (they're gone). An Apex common is stronger in battle than a base legendary — rewarding dedication over luck. Reaching Apex on *any* creature triggers a server-wide announcement embed.
+Ascending consumes the extra copies (they're gone). An Apex common is stronger in battle than a base legendary — rewarding dedication over luck. Reaching Apex on _any_ creature triggers a server-wide announcement embed.
 
-**Why unforgettable**: Completely transforms duplicates from "ugh, another one" to "YES, two more and I hit Gold." Players will actively *want* commons they already have. The Apex announcement creates server events — "Holy shit, someone just Apex'd a Dimetrodon." The animated prismatic/apex borders are the ultimate visual flex.
+**Why unforgettable**: Completely transforms duplicates from "ugh, another one" to "YES, two more and I hit Gold." Players will actively _want_ commons they already have. The Apex announcement creates server events — "Holy shit, someone just Apex'd a Dimetrodon." The animated prismatic/apex borders are the ultimate visual flex.
 
 **Technical challenge**: Ascension tier tracking per user-creature pair. Stat modifier system for battles. Tiered border rendering (CSS for web, emoji/text indicators for Discord). Announcement webhook for Apex achievements.
 
@@ -65,9 +65,9 @@ If the server kills the boss: everyone who participated gets rare loot (Fossils,
 
 **What**: When anyone in the server pulls an epic or legendary, it's no longer a silent ephemeral message — the bot posts a **public announcement embed** in a designated channel. Legendary pulls get a special animated-style embed with the creature's full art, the player's name, and their pull number (e.g., "Pull #847 — the pity was REAL"). Other players can react to the embed, and the pull gets logged on a server-wide "Hall of Legends" viewable via `/legends`.
 
-For legendary pulls specifically: if the player was at 85+ pity, the embed says "HARD PITY SAVE 😭". If they pulled it under 20 pulls, it says "ABSURD LUCK 🍀". The community context makes every legendary feel like an *event*.
+For legendary pulls specifically: if the player was at 85+ pity, the embed says "HARD PITY SAVE 😭". If they pulled it under 20 pulls, it says "ABSURD LUCK 🍀". The community context makes every legendary feel like an _event_.
 
-**Why unforgettable**: The single biggest gap in the Discord experience is that pulls are invisible. In real gacha communities, rare pulls are *celebrated*. This turns every legendary into a server-wide moment. People will set up notification pings for the pull announcement channel. "Did you see Jake pulled a legendary Quetzalcoatlus at pull 12?!" becomes water cooler talk.
+**Why unforgettable**: The single biggest gap in the Discord experience is that pulls are invisible. In real gacha communities, rare pulls are _celebrated_. This turns every legendary into a server-wide moment. People will set up notification pings for the pull announcement channel. "Did you see Jake pulled a legendary Quetzalcoatlus at pull 12?!" becomes water cooler talk.
 
 **Technical challenge**: Minimal — hook into existing pull logic, add public embed post for epic+. Channel designation per server (stored in D1). Pity context calculation (already tracked). Reaction tracking for "Hall of Legends." One of the highest impact-to-effort features possible.
 
@@ -167,7 +167,7 @@ For legendary pulls specifically: if the player was at 85+ pity, the embed says 
 
 **What**: `/bounty` shows a rotating board of 5 bounties refreshed weekly: "Deliver a Stegosaurus" (reward: 15 Fossils), "Win 3 battles with only herbivores" (reward: rare pull ticket), "Ascend any creature to Silver" (reward: 10 Fossils + XP). Anyone can complete each bounty once. Creates structured goals beyond "pull and hope."
 
-**Why unforgettable**: Gives players *direction*. Right now the game loop is "pull, collect, repeat." Bounties create weekly micro-objectives that make you play differently. "I need to win 3 battles with herbivores" makes you dig through your collection for Triceratops and Parasaurolophus. You engage with creatures you'd normally ignore. The bounty board becomes the first thing players check each week.
+**Why unforgettable**: Gives players _direction_. Right now the game loop is "pull, collect, repeat." Bounties create weekly micro-objectives that make you play differently. "I need to win 3 battles with herbivores" makes you dig through your collection for Triceratops and Parasaurolophus. You engage with creatures you'd normally ignore. The bounty board becomes the first thing players check each week.
 
 **Technical challenge**: Bounty template system with condition types (own creature, win battle with constraint, reach ascension tier). Completion tracking per user per bounty. Weekly rotation logic. Pull ticket reward type (new currency/item).
 
@@ -189,7 +189,7 @@ For legendary pulls specifically: if the player was at 85+ pity, the embed says 
 
 ## Consider Removing
 
-- **Ephemeral pull results** — Making single pulls ephemeral (hidden) kills the social energy. At minimum, give players the *option* to make their pull public. Better yet: make all pulls public by default in a dedicated channel, ephemeral only in general chat.
+- **Ephemeral pull results** — Making single pulls ephemeral (hidden) kills the social energy. At minimum, give players the _option_ to make their pull public. Better yet: make all pulls public by default in a dedicated channel, ephemeral only in general chat.
 
 - **Separate web-only trading** — If Discord trading launches, consider deprecating the web trade marketplace entirely. The friction of "go to the website to trade" kills momentum. Meet players where they are: Discord.
 

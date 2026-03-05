@@ -1,6 +1,5 @@
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
-import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import {
   createProgressBar,
@@ -14,7 +13,7 @@ import {
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
-import type { Row } from '@paleo-waifu/shared/battle/types'
+import type { AbilityTemplate, Row  } from '@paleo-waifu/shared/battle/types'
 import type { CreatureRecord } from '../db.ts'
 
 // ─── Ability Name Lookup ──────────────────────────────────────────
@@ -23,10 +22,7 @@ const ABILITY_NAME_MAP = new Map<string, string>()
 const ABILITY_TYPE_MAP = new Map<string, string>()
 for (const t of ALL_ABILITY_TEMPLATES) {
   ABILITY_NAME_MAP.set(t.id, t.name)
-  ABILITY_TYPE_MAP.set(
-    t.id,
-    t.trigger.type === 'onUse' ? 'active' : 'passive',
-  )
+  ABILITY_TYPE_MAP.set(t.id, t.trigger.type === 'onUse' ? 'active' : 'passive')
 }
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -176,7 +172,11 @@ function initializePopulation(
   const population: Array<Individual> = []
   const seen = new Set<string>()
 
-  for (let attempt = 0; attempt < size * 3 && population.length < size; attempt++) {
+  for (
+    let attempt = 0;
+    attempt < size * 3 && population.length < size;
+    attempt++
+  ) {
     const members = sampleTeam(creatures)
     const slots: Array<CreatureSlot> = members.map((m) => ({
       id: m.id,
@@ -249,10 +249,8 @@ function evaluateGeneration(
         const bInd = population[b]
         const aTotal = aInd.wins + aInd.losses + aInd.draws
         const bTotal = bInd.wins + bInd.losses + bInd.draws
-        const aRate =
-          aTotal > 0 ? (aInd.wins + aInd.draws * 0.5) / aTotal : 0.5
-        const bRate =
-          bTotal > 0 ? (bInd.wins + bInd.draws * 0.5) / bTotal : 0.5
+        const aRate = aTotal > 0 ? (aInd.wins + aInd.draws * 0.5) / aTotal : 0.5
+        const bRate = bTotal > 0 ? (bInd.wins + bInd.draws * 0.5) / bTotal : 0.5
         if (Math.abs(aRate - bRate) < 0.001) return Math.random() - 0.5
         return bRate - aRate
       })
@@ -269,8 +267,16 @@ function evaluateGeneration(
 
       // Game 1: indA as team A, indB as team B
       try {
-        const teamA = buildTeamWithRows(indA.members, getRows(indA.genome), templateMap)
-        const teamB = buildTeamWithRows(indB.members, getRows(indB.genome), templateMap)
+        const teamA = buildTeamWithRows(
+          indA.members,
+          getRows(indA.genome),
+          templateMap,
+        )
+        const teamB = buildTeamWithRows(
+          indB.members,
+          getRows(indB.genome),
+          templateMap,
+        )
         const result = simulateBattle(teamA, teamB, { seed })
         totalTurns += result.turns
         battleCount++
@@ -290,8 +296,16 @@ function evaluateGeneration(
 
       // Game 2: swap sides (indB as team A, indA as team B)
       try {
-        const teamA = buildTeamWithRows(indB.members, getRows(indB.genome), templateMap)
-        const teamB = buildTeamWithRows(indA.members, getRows(indA.genome), templateMap)
+        const teamA = buildTeamWithRows(
+          indB.members,
+          getRows(indB.genome),
+          templateMap,
+        )
+        const teamB = buildTeamWithRows(
+          indA.members,
+          getRows(indA.genome),
+          templateMap,
+        )
         const result = simulateBattle(teamA, teamB, { seed: seed + 1 })
         totalTurns += result.turns
         battleCount++
@@ -341,16 +355,14 @@ function mutate(
   if (Math.random() < 0.3) {
     // Row mutation: flip a random member's row
     const slotIdx = Math.floor(Math.random() * 3)
-    newSlots[slotIdx].row =
-      newSlots[slotIdx].row === 'front' ? 'back' : 'front'
+    newSlots[slotIdx].row = newSlots[slotIdx].row === 'front' ? 'back' : 'front'
   } else {
     // Creature mutation: replace a random member
     const slotIdx = Math.floor(Math.random() * 3)
     const existing = new Set(newSlots.map((s) => s.id))
 
     for (let attempt = 0; attempt < 20; attempt++) {
-      const candidate =
-        creatures[Math.floor(Math.random() * creatures.length)]
+      const candidate = creatures[Math.floor(Math.random() * creatures.length)]
       if (!existing.has(candidate.id)) {
         newSlots[slotIdx] = {
           id: candidate.id,
@@ -399,8 +411,7 @@ function crossover(
 
   // If still not full (parents share creatures), fill from random pool
   for (let attempt = 0; attempt < 50 && childSlots.length < 3; attempt++) {
-    const candidate =
-      creatures[Math.floor(Math.random() * creatures.length)]
+    const candidate = creatures[Math.floor(Math.random() * creatures.length)]
     if (!childSet.has(candidate.id)) {
       childSlots.push({
         id: candidate.id,
@@ -524,20 +535,15 @@ function snapshotGeneration(
     // Track formation (e.g., "2F/1B", "1F/2B")
     const frontCount = ind.genome.filter((s) => s.row === 'front').length
     const formKey = `${frontCount}F/${3 - frontCount}B`
-    formationDistribution[formKey] =
-      (formationDistribution[formKey] ?? 0) + 1
+    formationDistribution[formKey] = (formationDistribution[formKey] ?? 0) + 1
 
     for (const m of ind.members) {
       roleDistribution[m.role] = (roleDistribution[m.role] ?? 0) + 1
-      rarityDistribution[m.rarity] =
-        (rarityDistribution[m.rarity] ?? 0) + 1
+      rarityDistribution[m.rarity] = (rarityDistribution[m.rarity] ?? 0) + 1
       creatureFrequency[m.id] = (creatureFrequency[m.id] ?? 0) + 1
 
       // Track abilities
-      const abilityIds = [
-        m.active.templateId,
-        m.passive.templateId,
-      ]
+      const abilityIds = [m.active.templateId, m.passive.templateId]
       for (const aid of abilityIds) {
         abilityPresence[aid] = (abilityPresence[aid] ?? 0) + 1
       }
@@ -554,20 +560,15 @@ function snapshotGeneration(
   for (const ind of population) totalFitness += ind.fitness
 
   // Track diversity: unique genomes in entire population
-  const uniqueGenomes = new Set(
-    population.map((ind) => genomeKey(ind.genome)),
-  ).size
+  const uniqueGenomes = new Set(population.map((ind) => genomeKey(ind.genome)))
+    .size
 
   return {
     generation,
     topFitness: topInd.fitness,
     avgFitness: totalFitness / population.length,
     avgTurns,
-    topTeamNames: topInd.members.map((m) => m.name) as [
-      string,
-      string,
-      string,
-    ],
+    topTeamNames: topInd.members.map((m) => m.name) as [string, string, string],
     topTeamRows: getRows(topInd.genome),
     roleDistribution,
     rarityDistribution,
@@ -614,7 +615,10 @@ function buildFinalResult(
       appearances: agg.appearances,
       avgFitness: agg.fitnessSum / agg.appearances,
     }))
-    .filter((c): c is typeof c & { creature: NonNullable<typeof c.creature> } => !!c.creature)
+    .filter(
+      (c): c is typeof c & { creature: NonNullable<typeof c.creature> } =>
+        !!c.creature,
+    )
     .sort((a, b) => b.appearances - a.appearances)
     .slice(0, 30)
 
@@ -792,10 +796,7 @@ function renderTerminal(
   printSubheader('META ROLE DISTRIBUTION (top-quartile teams)')
   const roleRows = Object.entries(result.roleMetaShare)
     .sort((a, b) => b[1] - a[1])
-    .map(([role, share]) => [
-      roleColor(role),
-      `${(share * 100).toFixed(1)}%`,
-    ])
+    .map(([role, share]) => [roleColor(role), `${(share * 100).toFixed(1)}%`])
 
   printRankedList([{ header: 'Role' }, { header: 'Share' }], roleRows)
 
@@ -805,10 +806,7 @@ function renderTerminal(
     .sort((a, b) => b[1] - a[1])
     .map(([form, share]) => [form, `${(share * 100).toFixed(1)}%`])
 
-  printRankedList(
-    [{ header: 'Formation' }, { header: 'Share' }],
-    formRows,
-  )
+  printRankedList([{ header: 'Formation' }, { header: 'Share' }], formRows)
 
   // Top creatures
   printSubheader('TOP CREATURES (by meta presence)')
@@ -819,12 +817,14 @@ function renderTerminal(
       { header: 'Role' },
       { header: 'Appearances' },
     ],
-    result.creatureLeaderboard.slice(0, 20).map((c) => [
-      c.creature.name,
-      rarityColor(c.creature.rarity),
-      roleColor(c.creature.role),
-      String(c.appearances),
-    ]),
+    result.creatureLeaderboard
+      .slice(0, 20)
+      .map((c) => [
+        c.creature.name,
+        rarityColor(c.creature.rarity),
+        roleColor(c.creature.role),
+        String(c.appearances),
+      ]),
   )
 
   // Ability leaderboard
@@ -854,10 +854,7 @@ function renderTerminal(
     .sort((a, b) => b[1] - a[1])
     .map(([syn, share]) => [syn, `${(share * 100).toFixed(1)}%`])
 
-  printRankedList(
-    [{ header: 'Synergy' }, { header: 'Presence' }],
-    synergyRows,
-  )
+  printRankedList([{ header: 'Synergy' }, { header: 'Presence' }], synergyRows)
 }
 
 // ─── CSV Output ───────────────────────────────────────────────────
@@ -945,13 +942,7 @@ function renderCsv(
   // Ability leaderboard
   writeCsvHeader(['section', 'template_id', 'name', 'type', 'appearances'])
   for (const a of result.abilityLeaderboard) {
-    writeCsvRow([
-      'ability',
-      a.templateId,
-      a.name,
-      a.abilityType,
-      a.appearances,
-    ])
+    writeCsvRow(['ability', a.templateId, a.name, a.abilityType, a.appearances])
   }
 
   // Creature leaderboard
@@ -1031,11 +1022,27 @@ function analyzeBattleActions(
         try {
           let teamA, teamB
           if (asSide === 'A') {
-            teamA = buildTeamWithRows(team.members, getRows(team.genome), templateMap)
-            teamB = buildTeamWithRows(opp.members, getRows(opp.genome), templateMap)
+            teamA = buildTeamWithRows(
+              team.members,
+              getRows(team.genome),
+              templateMap,
+            )
+            teamB = buildTeamWithRows(
+              opp.members,
+              getRows(opp.genome),
+              templateMap,
+            )
           } else {
-            teamA = buildTeamWithRows(opp.members, getRows(opp.genome), templateMap)
-            teamB = buildTeamWithRows(team.members, getRows(team.genome), templateMap)
+            teamA = buildTeamWithRows(
+              opp.members,
+              getRows(opp.genome),
+              templateMap,
+            )
+            teamB = buildTeamWithRows(
+              team.members,
+              getRows(team.genome),
+              templateMap,
+            )
           }
 
           const result = simulateBattle(teamA, teamB, {
@@ -1076,10 +1083,7 @@ function analyzeBattleActions(
               existing.uses++
               roleMap.set(abilityId, existing)
 
-              roleTotalActions.set(
-                role,
-                (roleTotalActions.get(role) ?? 0) + 1,
-              )
+              roleTotalActions.set(role, (roleTotalActions.get(role) ?? 0) + 1)
             }
 
             if (event.type === 'damage') {
@@ -1104,10 +1108,7 @@ function analyzeBattleActions(
                 roleMap.set(abilityId, existing)
               }
 
-              roleTotalDmg.set(
-                role,
-                (roleTotalDmg.get(role) ?? 0) + dmg,
-              )
+              roleTotalDmg.set(role, (roleTotalDmg.get(role) ?? 0) + dmg)
             }
           }
         } catch {
@@ -1124,9 +1125,7 @@ function analyzeBattleActions(
     const totalActions = roleTotalActions.get(role) ?? 0
     const totalDmg = roleTotalDmg.get(role) ?? 0
     const basicAttack = actionMap.get('basic_attack')
-    const basicPct = basicAttack
-      ? (basicAttack.uses / totalActions) * 100
-      : 0
+    const basicPct = basicAttack ? (basicAttack.uses / totalActions) * 100 : 0
 
     const topAbilities = [...actionMap.entries()]
       .map(([id, stats]) => ({
@@ -1219,8 +1218,7 @@ export function runMetaReport(
     : createProgressBar(options.generations, 'Generations')
 
   for (let gen = 1; gen <= options.generations; gen++) {
-    const seedOffset =
-      gen * options.population * options.matchesPerTeam * 2
+    const seedOffset = gen * options.population * options.matchesPerTeam * 2
 
     // Evaluate
     const { avgTurns } = evaluateGeneration(

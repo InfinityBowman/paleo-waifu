@@ -34,7 +34,15 @@ export function App() {
   const [constantsOverride, setConstantsOverride] = useState<ConstantsOverride>(
     {},
   )
-  const [tab, setTab] = useState('creatures')
+  const [tab, setTab] = useState(() => {
+    const hash = window.location.hash.slice(1)
+    const valid = ['creatures', 'abilities', 'results', 'history', 'compare']
+    return valid.includes(hash) ? hash : 'creatures'
+  })
+
+  useEffect(() => {
+    window.location.hash = tab
+  }, [tab])
   const [simState, setSimState] = useState<SimState>('idle')
   const [simProgress, setSimProgress] = useState<{
     generation: number
@@ -84,7 +92,7 @@ export function App() {
       setSimConfig(run.config)
       setSimState('done')
     })
-  }, [history.loading]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [history.loading])
 
   async function handleReload() {
     const data = await reloadCreatures()
@@ -115,29 +123,26 @@ export function App() {
     }
 
     try {
-      await runSim(
-        config,
-        (event: SimProgressEvent) => {
-          if (event.type === 'generation') {
-            setSimProgress({
-              generation: event.generation,
-              total: event.total,
-              topFitness: event.topFitness,
-              avgFitness: event.avgFitness,
-            })
-          } else if (event.type === 'done') {
-            setSimResult(event.result)
-            setSimConfig(config)
-            setSimState('done')
-            setTab('results')
-            // Auto-save to IndexedDB
-            history.saveRun(config, event.result)
-          } else {
-            setSimError(event.message)
-            setSimState('error')
-          }
-        },
-      )
+      await runSim(config, (event: SimProgressEvent) => {
+        if (event.type === 'generation') {
+          setSimProgress({
+            generation: event.generation,
+            total: event.total,
+            topFitness: event.topFitness,
+            avgFitness: event.avgFitness,
+          })
+        } else if (event.type === 'done') {
+          setSimResult(event.result)
+          setSimConfig(config)
+          setSimState('done')
+          setTab('results')
+          // Auto-save to IndexedDB
+          history.saveRun(config, event.result)
+        } else {
+          setSimError(event.message)
+          setSimState('error')
+        }
+      })
     } catch (err) {
       setSimError(err instanceof Error ? err.message : String(err))
       setSimState('error')
@@ -184,9 +189,8 @@ export function App() {
     Object.keys(constantsOverride.abilityOverrides ?? {}).length
 
   const patchCount =
-    [...patches.values()].filter(
-      (p) => Object.keys(p).length > 1,
-    ).length + constantsOverrideCount
+    [...patches.values()].filter((p) => Object.keys(p).length > 1).length +
+    constantsOverrideCount
 
   if (!constants) {
     return (
@@ -239,24 +243,25 @@ export function App() {
             />
             <GlobalKnobsPanel
               constants={constants}
+              creatures={creatures}
               overrides={constantsOverride}
               onChange={setConstantsOverride}
             />
           </aside>
 
           {/* Main content */}
-          <Tabs
-            value={tab}
-            onValueChange={setTab}
-            className="min-w-0 flex-1"
-          >
+          <Tabs value={tab} onValueChange={setTab} className="min-w-0 flex-1">
             <TabsList className="w-full">
               <TabsTrigger value="creatures">Creatures</TabsTrigger>
               <TabsTrigger value="abilities" className="gap-1.5">
                 Abilities
-                {Object.keys(constantsOverride.abilityOverrides ?? {}).length > 0 && (
+                {Object.keys(constantsOverride.abilityOverrides ?? {}).length >
+                  0 && (
                   <span className="text-[10px] text-muted-foreground">
-                    {Object.keys(constantsOverride.abilityOverrides ?? {}).length}
+                    {
+                      Object.keys(constantsOverride.abilityOverrides ?? {})
+                        .length
+                    }
                   </span>
                 )}
               </TabsTrigger>

@@ -12,26 +12,26 @@ Feed duplicate copies of a creature to "ascend" it through 5 cosmetic tiers. Eac
 
 ### Tiers
 
-| Tier | Dupes Sacrificed (cumulative) | Visual |
-|------|-------------------------------|--------|
-| **Base** | 0 | Standard card |
-| **Bronze** | 2 | Bronze metallic border |
-| **Silver** | 5 | Silver metallic border + subtle shimmer |
-| **Gold** | 10 | Gold border + particle effect |
-| **Prismatic** | 18 | Animated holographic rainbow border |
-| **Apex** | 25 | Animated border + creature-specific color + glow effect |
+| Tier          | Dupes Sacrificed (cumulative) | Visual                                                  |
+| ------------- | ----------------------------- | ------------------------------------------------------- |
+| **Base**      | 0                             | Standard card                                           |
+| **Bronze**    | 2                             | Bronze metallic border                                  |
+| **Silver**    | 5                             | Silver metallic border + subtle shimmer                 |
+| **Gold**      | 10                            | Gold border + particle effect                           |
+| **Prismatic** | 18                            | Animated holographic rainbow border                     |
+| **Apex**      | 25                            | Animated border + creature-specific color + glow effect |
 
 "Dupes sacrificed" is the **total** number of copies consumed across all tiers — not per-tier. Going from Bronze → Silver costs 3 more dupes (5 minus the 2 already consumed). The creature you're ascending is never consumed — it's the one being upgraded.
 
 ### Per-Tier Breakdown
 
-| Upgrade | Additional Dupes Needed | Total Copies You Must Have Owned |
-|---------|------------------------|----------------------------------|
-| Base → Bronze | 2 | 3 (keep 1, feed 2) |
-| Bronze → Silver | 3 | 6 |
-| Silver → Gold | 5 | 11 |
-| Gold → Prismatic | 8 | 19 |
-| Prismatic → Apex | 7 | 26 |
+| Upgrade          | Additional Dupes Needed | Total Copies You Must Have Owned |
+| ---------------- | ----------------------- | -------------------------------- |
+| Base → Bronze    | 2                       | 3 (keep 1, feed 2)               |
+| Bronze → Silver  | 3                       | 6                                |
+| Silver → Gold    | 5                       | 11                               |
+| Gold → Prismatic | 8                       | 19                               |
+| Prismatic → Apex | 7                       | 26                               |
 
 ### Rarity Considerations
 
@@ -50,9 +50,10 @@ Reaching Apex on an epic or legendary should be essentially unprecedented in nor
 When a player initiates ascension, they pick the "primary" copy (the one that gets the border upgrade) and select which dupes to feed. All copies of that species are eligible as fodder, regardless of which banner they came from.
 
 **Restrictions:**
+
 - Cannot sacrifice a locked creature (in an active trade)
 - Cannot sacrifice a favorited creature (safety net against accidental consumption)
-- The primary creature being ascended cannot itself be locked or favorited-locked? Actually — favorited creatures CAN be ascended (upgraded), they just can't be *consumed as fodder*
+- The primary creature being ascended cannot itself be locked or favorited-locked? Actually — favorited creatures CAN be ascended (upgraded), they just can't be _consumed as fodder_
 
 ### Ascension is Per-Instance
 
@@ -84,6 +85,7 @@ Ascension is web-only at launch. Discord can display ascension tiers on creature
 ### Display
 
 Ascension tier is visible everywhere a creature card appears:
+
 - Collection grid (border color/effect)
 - Trade marketplace (ascended creatures show their tier)
 - Encyclopedia detail modal (if you own an ascended copy, it shows your best tier)
@@ -93,6 +95,7 @@ Ascension tier is visible everywhere a creature card appears:
 ### Future Hooks (Not at Launch)
 
 These are deliberately excluded from v1 but the system should be designed to support them:
+
 - **Battle stat boosts**: Each tier could grant +X% combat power
 - **Expedition bonuses**: Ascended creatures could find better loot
 - **Passive Fossil income**: High-tier creatures generate Fossils over time
@@ -136,11 +139,11 @@ No real-time interaction during the battle itself — the strategy is in team se
 
 ### Fossil Stakes
 
-| Type | Ante (per player) | Winner Takes |
-|------|-------------------|--------------|
-| Friendly | 0 | Nothing — just for fun / bragging rights |
-| Standard | 5 | 10 Fossils |
-| High Stakes | 15 | 30 Fossils |
+| Type        | Ante (per player) | Winner Takes                             |
+| ----------- | ----------------- | ---------------------------------------- |
+| Friendly    | 0                 | Nothing — just for fun / bragging rights |
+| Standard    | 5                 | 10 Fossils                               |
+| High Stakes | 15                | 30 Fossils                               |
 
 The challenger picks the stake tier. The challenged player sees the stakes before accepting. Fossils are deducted on challenge creation (challenger) and acceptance (challenged). If the challenge expires or is declined, the challenger's ante is refunded.
 
@@ -156,15 +159,16 @@ Every creature has a **Base Power** derived from its existing data:
 basePower = (sizeMeters * 10) + (weightKg * 0.1) + rarityBonus
 ```
 
-| Rarity | Bonus |
-|--------|-------|
-| Common | 0 |
-| Uncommon | 5 |
-| Rare | 12 |
-| Epic | 25 |
-| Legendary | 50 |
+| Rarity    | Bonus |
+| --------- | ----- |
+| Common    | 0     |
+| Uncommon  | 5     |
+| Rare      | 12    |
+| Epic      | 25    |
+| Legendary | 50    |
 
 This gives a rough range of:
+
 - Small common (0.5m, 5kg): ~5.5 power
 - Mid-size rare (5m, 500kg): ~112 power
 - Large legendary (15m, 8000kg): ~1000 power
@@ -174,12 +178,12 @@ This gives a rough range of:
 Diet creates a rock-paper-scissors-style advantage triangle:
 
 | Attacker Diet | vs Defender Diet | Modifier |
-|---------------|-----------------|----------|
-| Carnivore | Herbivore | x1.25 |
-| Carnivore | Omnivore | x1.10 |
-| Herbivore | Carnivore | x0.85 |
-| Omnivore | Carnivore | x1.00 |
-| Omnivore | Herbivore | x1.05 |
+| ------------- | ---------------- | -------- |
+| Carnivore     | Herbivore        | x1.25    |
+| Carnivore     | Omnivore         | x1.10    |
+| Herbivore     | Carnivore        | x0.85    |
+| Omnivore      | Carnivore        | x1.00    |
+| Omnivore      | Herbivore        | x1.05    |
 
 All other matchups (same diet, piscivore vs filter-feeder, etc.) use x1.0.
 
@@ -193,12 +197,12 @@ Small carnivores (under 100kg) fighting creatures more than 10x their weight get
 
 A slight modifier based on geological recency (more evolved = marginally better adapted):
 
-| Era | Modifier |
-|-----|----------|
-| Cenozoic | x1.10 |
-| Mesozoic | x1.05 |
-| Paleozoic | x1.00 |
-| Precambrian | x0.95 |
+| Era         | Modifier |
+| ----------- | -------- |
+| Cenozoic    | x1.10    |
+| Mesozoic    | x1.05    |
+| Paleozoic   | x1.00    |
+| Precambrian | x0.95    |
 
 This is subtle by design — era shouldn't dominate, just nudge.
 
@@ -215,6 +219,7 @@ The ±15% random swing means upsets are possible but uncommon. A significantly s
 #### Null Stats
 
 Some creatures may have null `sizeMeters` or `weightKg`. For these:
+
 - If `sizeMeters` is null, use the median size for that creature's rarity tier
 - If `weightKg` is null, estimate from `sizeMeters` using a simple scaling formula
 - This ensures every creature is battleable even with incomplete data
@@ -223,16 +228,17 @@ Some creatures may have null `sizeMeters` or `weightKg`. For these:
 
 If a player fields multiple copies of the same creature in their 3 slots, those copies fight as a **pack** with multiplied power:
 
-| Pack Size | Power Multiplier |
-|-----------|-----------------|
-| 2 (pair) | x1.5 |
-| 3 (full pack) | x2.0 |
+| Pack Size     | Power Multiplier |
+| ------------- | ---------------- |
+| 2 (pair)      | x1.5             |
+| 3 (full pack) | x2.0             |
 
 This is where duplicates gain battle value independent of ascension. A player with 3 common Velociraptors can field a full pack and match a solo rare's power. Creates a genuine strategic decision:
 
 > "Do I ascend my dupes for cosmetic borders, or keep them for pack power in battles?"
 
 **Pack rules:**
+
 - Pack copies must be distinct `user_creature` instances of the same `creatureId`
 - Each creature in the pack uses the pack multiplier, not just one of them
 - Pack bonus stacks with all other modifiers
@@ -240,6 +246,7 @@ This is where duplicates gain battle value independent of ascension. A player wi
 ### Creature Locking During Battles
 
 When a player commits creatures to a challenge (as challenger) or accepts one (as challenged), those creatures are **locked** using the existing `isLocked` mechanism. Locked creatures cannot be:
+
 - Traded or proposed in trades
 - Used in another active battle
 - Ascended (consumed as fodder)
@@ -303,6 +310,7 @@ Rating is displayed on the profile page and in a new **Battle Leaderboard** tab 
 ### UX Flow (Web)
 
 **Challenging:**
+
 1. Player visits a new `/battle` route (or challenges from another player's profile)
 2. Selects an opponent (search by name, or click "Challenge" on a profile/leaderboard)
 3. Picks 3 creatures from their collection (drag to order slots 1-2-3)
@@ -310,6 +318,7 @@ Rating is displayed on the profile page and in a new **Battle Leaderboard** tab 
 5. Confirms — fossils are deducted, challenge is sent
 
 **Responding:**
+
 1. Player sees a notification badge on the Battle nav item
 2. Opens `/battle` and sees incoming challenges
 3. Can view the challenger's profile/stats (but NOT their creature picks)
@@ -318,15 +327,18 @@ Rating is displayed on the profile page and in a new **Battle Leaderboard** tab 
 6. Both players see the replay
 
 **Battle History:**
+
 - `/battle` page has tabs: "Challenges" (incoming/outgoing) and "History" (past battles with replays)
 - Each history entry shows opponent, result, rating change, and expandable replay
 
 ### UX Flow (Discord)
 
 **Challenging:**
+
 ```
 /battle @opponent stake:standard
 ```
+
 Bot responds with an ephemeral creature picker (select menu with the player's collection, 3 picks). After picks are locked, a public challenge embed appears in the channel:
 
 ```
@@ -337,12 +349,15 @@ Expires in 24 hours.
 ```
 
 **Accepting:**
+
 ```
 /accept
 ```
+
 Bot sends an ephemeral creature picker to Player B. After picks are locked, the battle resolves and the replay embed posts publicly in the channel.
 
 **Other commands:**
+
 - `/decline` — decline an incoming challenge
 - `/battles` — view your active challenges and recent history (ephemeral)
 - `/rating` — view your battle rating and rank (ephemeral, supports optional @user)
@@ -358,11 +373,13 @@ All resolved Standard/High Stakes battles post a result embed in the channel whe
 At launch, ascension is purely cosmetic and battles use raw creature stats. But the systems are designed to connect later:
 
 **Planned future interaction:**
+
 - Each ascension tier grants a battle power multiplier (e.g., Bronze +10%, Silver +20%, Gold +35%, Prismatic +60%, Apex +100%)
 - This creates the core tension: **sacrifice dupes for permanent power on one creature (ascension) vs. keep dupes for pack power in battles**
 - A Gold Triceratops with +35% power vs. 3 base Triceratops with x2.0 pack bonus — which is better? That's the interesting strategic question.
 
 **Not at launch, but worth noting:**
+
 - Ascended creatures could get unique battle narration lines
 - Apex creatures could have a special visual effect in battle replays
 - Battle wins could reward small amounts of XP
@@ -375,20 +392,26 @@ At launch, ascension is purely cosmetic and battles use raw creature stats. But 
 These features should ship in this order:
 
 ### Phase 1: Ascension
+
 Ship ascension first because:
+
 - It's self-contained (no dependency on battles)
 - Gives immediate value to the existing duplicate problem
 - Simpler scope — cosmetic-only means no balance tuning needed
 - The schema changes (`ascensionTier` column) and UI work are foundation for battles to build on
 
 ### Phase 2: Arena Battles
+
 Ship battles second because:
+
 - Can reference ascension visuals in battle cards from day one
 - The combat engine can be designed with future ascension stat hooks in mind
 - More complex scope — combat math, challenge lifecycle, both platforms, replays, rating system
 
 ### Phase 3: Ascension × Battles Integration
+
 Once both systems are live and iterated on:
+
 - Add battle stat multipliers per ascension tier
 - Tune the multipliers based on real battle data
 - Announce the integration as a game update ("Ascension now powers up your creatures in battle!")

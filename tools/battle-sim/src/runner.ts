@@ -41,9 +41,7 @@ function resolveAbility(
   const map = templateMap ?? DEFAULT_TEMPLATE_MAP
   const template = map.get(assignment.templateId)
   if (!template) {
-    throw new Error(
-      `Unknown ability template: ${assignment.templateId}`,
-    )
+    throw new Error(`Unknown ability template: ${assignment.templateId}`)
   }
   return templateToAbility(template, assignment.displayName)
 }
@@ -165,9 +163,7 @@ export function sampleTeam(
   return [creatures[i], creatures[j], creatures[k]]
 }
 
-export function summarizeTrials(
-  results: Array<TrialResult>,
-): TrialSummary {
+export function summarizeTrials(results: Array<TrialResult>): TrialSummary {
   if (results.length === 0) {
     return { winsA: 0, winsB: 0, winRateA: 0, avgTurns: 0 }
   }

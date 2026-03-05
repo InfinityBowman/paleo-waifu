@@ -2,7 +2,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { asc, count, desc, eq, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { creature, user, userCreature, userXp } from '@paleo-waifu/shared/db/schema'
+import {
+  creature,
+  user,
+  userCreature,
+  userXp,
+} from '@paleo-waifu/shared/db/schema'
 import { calcXpProgress } from '@paleo-waifu/shared/xp'
 import { getCfEnv } from '@/lib/env'
 import { IconCrown } from '@/components/icons'

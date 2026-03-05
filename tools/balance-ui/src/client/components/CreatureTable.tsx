@@ -9,11 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from './ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import type {
   ConstantsSnapshot,
   CreatureOverridePatch,
@@ -61,7 +57,6 @@ const STAT_TOOLTIPS: Record<string, string> = {
   spd: 'Speed - determines turn order; higher speed acts first',
 }
 
-
 function getEffective(
   c: CreatureRecord,
   patches: Map<string, CreatureOverridePatch>,
@@ -75,10 +70,16 @@ function getEffective(
     def: patch.def ?? c.def,
     spd: patch.spd ?? c.spd,
     active: patch.activeTemplateId
-      ? { templateId: patch.activeTemplateId, displayName: patch.activeTemplateId }
+      ? {
+          templateId: patch.activeTemplateId,
+          displayName: patch.activeTemplateId,
+        }
       : c.active,
     passive: patch.passiveTemplateId
-      ? { templateId: patch.passiveTemplateId, displayName: patch.passiveTemplateId }
+      ? {
+          templateId: patch.passiveTemplateId,
+          displayName: patch.passiveTemplateId,
+        }
       : c.passive,
   }
 }
@@ -144,7 +145,12 @@ interface Props {
   onPatch: (patch: CreatureOverridePatch) => void
 }
 
-export function CreatureTable({ creatures, patches, constants, onPatch }: Props) {
+export function CreatureTable({
+  creatures,
+  patches,
+  constants,
+  onPatch,
+}: Props) {
   const [sortKey, setSortKey] = useState<SortKey>('name')
   const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [filter, setFilter] = useState('')
@@ -153,7 +159,9 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
 
   const rarities = useMemo(() => {
     const set = new Set(creatures.map((c) => c.rarity))
-    return [...set].sort((a, b) => (RARITY_ORDER[a] ?? 0) - (RARITY_ORDER[b] ?? 0))
+    return [...set].sort(
+      (a, b) => (RARITY_ORDER[a] ?? 0) - (RARITY_ORDER[b] ?? 0),
+    )
   }, [creatures])
 
   const roles = useMemo(() => {
@@ -192,7 +200,10 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
           break
         case 'total':
           cmp =
-            ea.hp + ea.atk + ea.def + ea.spd -
+            ea.hp +
+            ea.atk +
+            ea.def +
+            ea.spd -
             (eb.hp + eb.atk + eb.def + eb.spd)
           break
       }
@@ -255,14 +266,68 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
               <th className="w-8 px-2 py-2 text-xs font-medium text-muted-foreground">
                 On
               </th>
-              <SortHeader k="name" label="Name" className="min-w-[140px]" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="rarity" label="Rarity" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="role" label="Role" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="hp" label="HP" tooltip={STAT_TOOLTIPS.hp} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="atk" label="ATK" tooltip={STAT_TOOLTIPS.atk} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="def" label="DEF" tooltip={STAT_TOOLTIPS.def} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="spd" label="SPD" tooltip={STAT_TOOLTIPS.spd} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader k="total" label="Total" tooltip="Sum of all four stats" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
+              <SortHeader
+                k="name"
+                label="Name"
+                className="min-w-[140px]"
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="rarity"
+                label="Rarity"
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="role"
+                label="Role"
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="hp"
+                label="HP"
+                tooltip={STAT_TOOLTIPS.hp}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="atk"
+                label="ATK"
+                tooltip={STAT_TOOLTIPS.atk}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="def"
+                label="DEF"
+                tooltip={STAT_TOOLTIPS.def}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="spd"
+                label="SPD"
+                tooltip={STAT_TOOLTIPS.spd}
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
+              <SortHeader
+                k="total"
+                label="Total"
+                tooltip="Sum of all four stats"
+                sortKey={sortKey}
+                sortDir={sortDir}
+                onToggle={toggleSort}
+              />
               <th className="px-2 py-2 text-left text-xs font-medium text-muted-foreground">
                 Active
               </th>
@@ -311,10 +376,9 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
                     </Badge>
                   </td>
                   <td className="px-2 py-1.5">
-                    <span className={cn(
-                      'text-xs capitalize',
-                      ROLE_CLASSES[c.role],
-                    )}>
+                    <span
+                      className={cn('text-xs capitalize', ROLE_CLASSES[c.role])}
+                    >
                       {c.role}
                     </span>
                   </td>
@@ -351,12 +415,17 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
                     onPatch={onPatch}
                   />
                   <td className="px-2 py-1.5">
-                    <span className={cn(
-                      'text-xs font-mono',
-                      (isPatched(patches, c.id, 'hp') || isPatched(patches, c.id, 'atk') || isPatched(patches, c.id, 'def') || isPatched(patches, c.id, 'spd'))
-                        ? 'text-primary'
-                        : 'text-muted-foreground',
-                    )}>
+                    <span
+                      className={cn(
+                        'text-xs font-mono',
+                        isPatched(patches, c.id, 'hp') ||
+                          isPatched(patches, c.id, 'atk') ||
+                          isPatched(patches, c.id, 'def') ||
+                          isPatched(patches, c.id, 'spd')
+                          ? 'text-primary'
+                          : 'text-muted-foreground',
+                      )}
+                    >
                       {eff.hp + eff.atk + eff.def + eff.spd}
                     </span>
                   </td>
@@ -431,7 +500,8 @@ function StatCell({
         </TooltipTrigger>
         {patched && delta !== 0 && (
           <TooltipContent>
-            Original: {original} ({delta > 0 ? '+' : ''}{delta})
+            Original: {original} ({delta > 0 ? '+' : ''}
+            {delta})
           </TooltipContent>
         )}
       </Tooltip>

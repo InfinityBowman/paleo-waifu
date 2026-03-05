@@ -7,14 +7,16 @@ import { loadEnv } from './env'
 import { createEditorDb } from './db'
 import { initR2 } from './r2'
 import { createAuthRoutes, initAuth, requireAuth } from './auth'
-import { deleteImage,
+import {
+  deleteImage,
   deleteR2Object,
   getLocalImage,
   initImages,
   listOrphanedR2Objects,
   processAndUploadImage,
   pushExistingImageToR2,
-  syncAllToR2 } from './images'
+  syncAllToR2,
+} from './images'
 import {
   VALID_RARITIES,
   deleteCreatureBySlug,
@@ -87,7 +89,7 @@ app.get('/api/creatures/:slug', async (c) => {
 })
 
 app.post('/api/creatures', async (c) => {
-  const body = (await c.req.json())
+  const body = await c.req.json()
   if (!body.name || !body.scientificName || !body.era || !body.rarity) {
     return c.json(
       { error: 'Missing required fields: name, scientificName, era, rarity' },
@@ -131,7 +133,7 @@ app.post('/api/creatures', async (c) => {
 
 app.put('/api/creatures/:slug', async (c) => {
   const slug = c.req.param('slug')
-  const body = (await c.req.json())
+  const body = await c.req.json()
 
   if (body.rarity && !VALID_RARITIES.has(body.rarity)) {
     return c.json({ error: `Invalid rarity: ${body.rarity}` }, 400)

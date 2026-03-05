@@ -96,9 +96,7 @@ function makeTeam(
   }
 }
 
-function makeCreature(
-  overrides: Partial<BattleCreature> = {},
-): BattleCreature {
+function makeCreature(overrides: Partial<BattleCreature> = {}): BattleCreature {
   return {
     id: 'test-1',
     creatureId: 'c1',
@@ -412,10 +410,7 @@ describe('Abilities', () => {
     expect(basic.id).toBe('basic_attack')
     expect(basic.target).toBe('single_enemy')
     expect(basic.effects[0].type).toBe('damage')
-    const dmgEffect = basic.effects[0] as Extract<
-      Effect,
-      { type: 'damage' }
-    >
+    const dmgEffect = basic.effects[0] as Extract<Effect, { type: 'damage' }>
     expect(dmgEffect.multiplier).toBe(0.9)
   })
 
@@ -726,9 +721,7 @@ describe('AI', () => {
       rng,
     })
     // Should use a damage ability
-    expect(
-      action.ability.effects.some((e) => e.type === 'damage'),
-    ).toBe(true)
+    expect(action.ability.effects.some((e) => e.type === 'damage')).toBe(true)
     expect(action.targets).toContain(lowEnemy)
   })
 
@@ -1052,9 +1045,7 @@ describe('AI', () => {
       name: 'Rally Cry',
       displayName: 'Rally Cry',
       trigger: { type: 'onUse', cooldown: 2 },
-      effects: [
-        { type: 'buff', stat: 'atk', percent: 20, duration: 3 },
-      ],
+      effects: [{ type: 'buff', stat: 'atk', percent: 20, duration: 3 }],
       target: 'all_allies',
       description: "Boosts all allies' attack.",
     }
@@ -1080,9 +1071,7 @@ describe('AI', () => {
     })
     // Late game urgency multiplier (1.25) boosts damage.
     // Buff gets defensive modifier reduced and urgency penalty (0.9).
-    expect(
-      action.ability.effects.some((e) => e.type === 'damage'),
-    ).toBe(true)
+    expect(action.ability.effects.some((e) => e.type === 'damage')).toBe(true)
   })
 })
 
@@ -1189,12 +1178,8 @@ describe('Battle Engine', () => {
       triggerAttackTarget: target,
     }
     const results = fireTrigger('onBasicAttack', attacker, ctx)
-    expect(
-      results.some((r) => r.kind === 'status_applied'),
-    ).toBe(true)
-    expect(
-      target.statusEffects.some((e) => e.kind === 'poison'),
-    ).toBe(true)
+    expect(results.some((r) => r.kind === 'status_applied')).toBe(true)
+    expect(target.statusEffects.some((e) => e.kind === 'poison')).toBe(true)
   })
 
   it('mend heals the lowest HP ally', () => {
@@ -1236,12 +1221,7 @@ describe('Battle Engine', () => {
     }
 
     // Resolve target
-    const targets = resolveTarget(
-      'lowest_hp_ally',
-      caster,
-      ctx,
-      rng,
-    )
+    const targets = resolveTarget('lowest_hp_ally', caster, ctx, rng)
     expect(targets).toHaveLength(1)
     expect(targets[0].id).toBe('ally2')
 
@@ -1287,9 +1267,7 @@ describe('Battle Engine', () => {
     const teamB = makeTeam()
 
     const result = simulateBattle(teamA, teamB, { seed: 42 })
-    const synergyEvents = result.log.filter(
-      (e) => e.type === 'synergy_applied',
-    )
+    const synergyEvents = result.log.filter((e) => e.type === 'synergy_applied')
     expect(synergyEvents.length).toBeGreaterThan(0)
   })
 

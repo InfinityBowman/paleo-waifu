@@ -6,12 +6,12 @@ Battle system has 415 creatures with auto-assigned roles (via TYPE_TO_ROLE) and 
 
 ## 4 Launch Roles
 
-| Role | Identity | Key Stat |
-|---|---|---|
-| striker | Physical damage dealer | High ATK |
-| tank | Absorbs hits, protects allies | High HP + DEF |
-| support | Heals and buffs allies | High HP + ABL |
-| specialist | Ability-based damage (AoE) | Very high ABL |
+| Role       | Identity                      | Key Stat      |
+| ---------- | ----------------------------- | ------------- |
+| striker    | Physical damage dealer        | High ATK      |
+| tank       | Absorbs hits, protects allies | High HP + DEF |
+| support    | Heals and buffs allies        | High HP + ABL |
+| specialist | Ability-based damage (AoE)    | Very high ABL |
 
 ## Launch Roster Config
 
@@ -23,7 +23,10 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
     "creatureId": "06b921acce773fc9d5879",
     "name": "Tyrannosaurus",
     "role": "striker",
-    "active1": { "templateId": "crushing_jaw", "displayName": "Tyrant's Crushing Bite" },
+    "active1": {
+      "templateId": "crushing_jaw",
+      "displayName": "Tyrant's Crushing Bite"
+    },
     "active2": { "templateId": "apex_roar", "displayName": "Apex Roar" },
     "passive": { "templateId": "apex_predator", "displayName": "Apex Predator" }
   },
@@ -33,15 +36,24 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
     "role": "striker",
     "active1": { "templateId": "horn_charge", "displayName": "Bull Horn Rush" },
     "active2": { "templateId": "primal_surge", "displayName": "Primal Surge" },
-    "passive": { "templateId": "predator_instinct", "displayName": "Blood Frenzy" }
+    "passive": {
+      "templateId": "predator_instinct",
+      "displayName": "Blood Frenzy"
+    }
   },
   {
     "creatureId": "5da306ca1959a51f1c551",
     "name": "Stegosaurus",
     "role": "tank",
-    "active1": { "templateId": "tail_sweep", "displayName": "Thagomizer Sweep" },
+    "active1": {
+      "templateId": "tail_sweep",
+      "displayName": "Thagomizer Sweep"
+    },
     "active2": { "templateId": "taunt", "displayName": "Plated Stance" },
-    "passive": { "templateId": "armored_plates", "displayName": "Armored Plates" }
+    "passive": {
+      "templateId": "armored_plates",
+      "displayName": "Armored Plates"
+    }
   },
   {
     "creatureId": "b93aab5eb3f01fdd74c6f",
@@ -49,15 +61,24 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
     "role": "tank",
     "active1": { "templateId": "provoke", "displayName": "Club Tail Provoke" },
     "active2": { "templateId": "shield_wall", "displayName": "Fortress Shell" },
-    "passive": { "templateId": "retaliate", "displayName": "Spined Retaliation" }
+    "passive": {
+      "templateId": "retaliate",
+      "displayName": "Spined Retaliation"
+    }
   },
   {
     "creatureId": "9f1da2a89c1bf3afafabb",
     "name": "Parasaurolophus",
     "role": "support",
-    "active1": { "templateId": "screech", "displayName": "Resonating Crest Call" },
+    "active1": {
+      "templateId": "screech",
+      "displayName": "Resonating Crest Call"
+    },
     "active2": { "templateId": "rally_cry", "displayName": "Herd Rally" },
-    "passive": { "templateId": "herd_mentality", "displayName": "Herd Mentality" }
+    "passive": {
+      "templateId": "herd_mentality",
+      "displayName": "Herd Mentality"
+    }
   },
   {
     "creatureId": "c60f619101bf1c709a58d",
@@ -65,7 +86,10 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
     "role": "support",
     "active1": { "templateId": "rally_cry", "displayName": "Nurturing Call" },
     "active2": { "templateId": "symbiosis", "displayName": "Maternal Bond" },
-    "passive": { "templateId": "regenerative", "displayName": "Good Mother's Grace" }
+    "passive": {
+      "templateId": "regenerative",
+      "displayName": "Good Mother's Grace"
+    }
   },
   {
     "creatureId": "20c8c6f8d9d68645b928e",
@@ -73,7 +97,10 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
     "role": "specialist",
     "active1": { "templateId": "constrict", "displayName": "Serpentine Coil" },
     "active2": { "templateId": "tidal_wave", "displayName": "Tidal Wave" },
-    "passive": { "templateId": "aquatic_adaptation", "displayName": "Deep Sea Adaptation" }
+    "passive": {
+      "templateId": "aquatic_adaptation",
+      "displayName": "Deep Sea Adaptation"
+    }
   },
   {
     "creatureId": "8a38a0445fb72578e4397",
@@ -90,12 +117,12 @@ New file: `python/data/launch_roster.json` — single source of truth for every 
 
 Update `ROLE_DISTRIBUTIONS` in both `constants.ts` and `generate_battle_seed.py`:
 
-| Role | hp | atk | def | spd | abl | Changes from Current |
-|---|---|---|---|---|---|---|
-| striker | 0.30 | **0.15** | 0.14 | **0.10** | **0.31** | ATK -0.04, SPD +0.02, ABL +0.02 |
-| tank | **0.41** | **0.10** | **0.28** | 0.05 | **0.16** | HP +0.03, ATK -0.03, DEF +0.02, ABL -0.02 |
-| support | 0.38 | 0.04 | 0.24 | 0.12 | 0.22 | (unchanged) |
-| specialist | **0.30** | 0.02 | **0.12** | **0.12** | **0.44** | HP -0.02, DEF -0.02, SPD +0.03, ABL +0.01 |
+| Role       | hp       | atk      | def      | spd      | abl      | Changes from Current                      |
+| ---------- | -------- | -------- | -------- | -------- | -------- | ----------------------------------------- |
+| striker    | 0.30     | **0.15** | 0.14     | **0.10** | **0.31** | ATK -0.04, SPD +0.02, ABL +0.02           |
+| tank       | **0.41** | **0.10** | **0.28** | 0.05     | **0.16** | HP +0.03, ATK -0.03, DEF +0.02, ABL -0.02 |
+| support    | 0.38     | 0.04     | 0.24     | 0.12     | 0.22     | (unchanged)                               |
+| specialist | **0.30** | 0.02     | **0.12** | **0.12** | **0.44** | HP -0.02, DEF -0.02, SPD +0.03, ABL +0.01 |
 
 Also reduce `COMBAT_DAMAGE_SCALE` from `0.60` → `0.50`.
 
@@ -121,6 +148,7 @@ With 8 creatures there are only `C(8,3) = 56` possible teams. Instead of a genet
 **Trigger:** Add `--exhaustive` flag. Auto-enable when `C(n,3) <= 500` (i.e. pool of ~12 or fewer creatures). The GA is still available via `--no-exhaustive` for larger pools.
 
 **How it works:**
+
 1. Generate all `C(n,3)` unique 3-creature teams
 2. For each team, assign rows using existing `assignRow()` logic
 3. Run every team vs every other team, N trials each (default 10-20 for RNG averaging)
