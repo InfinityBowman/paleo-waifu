@@ -1,13 +1,10 @@
 import { Link, createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { and, count, eq, like, sql } from 'drizzle-orm'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import { currency, user, userCreature } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { getUserRole } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-server'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,15 +27,7 @@ const PAGE_SIZE = 20
 const getAdminUsers = createServerFn({ method: 'GET' })
   .inputValidator((d: { search?: string; role?: string; page?: number }) => d)
   .handler(async ({ data }) => {
-    const cfEnv = getCfEnv()
-    const auth = await createAuth(cfEnv)
-    const session = await auth.api.getSession({
-      headers: getRequest().headers,
-    })
-    if (!session || getUserRole(session.user) !== 'admin') {
-      throw new Error('Forbidden')
-    }
-
+    const { cfEnv } = await requireAdminSession()
     const db = await createDb(cfEnv.DB)
     const page = data.page ?? 0
     const offset = page * PAGE_SIZE

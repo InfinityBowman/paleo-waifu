@@ -1,6 +1,5 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { count, eq, sql } from 'drizzle-orm'
 import { ArrowLeft, Coins, Dices } from 'lucide-react'
 import { createDb } from '@paleo-waifu/shared/db/client'
@@ -15,9 +14,9 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconArchiveResearch, IconTrade } from '@/components/icons'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { getUserRole } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-server'
+import { countDistinctSpecies } from '@/lib/queries'
+import { StatCard } from '@/components/shared/StatCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,22 +28,14 @@ import { RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 const getAdminUserDetail = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
   .handler(async ({ data: userId }) => {
-    const cfEnv = getCfEnv()
-    const auth = await createAuth(cfEnv)
-    const session = await auth.api.getSession({
-      headers: getRequest().headers,
-    })
-    if (!session || getUserRole(session.user) !== 'admin') {
-      throw new Error('Forbidden')
-    }
-
+    const { cfEnv } = await requireAdminSession()
     const db = await createDb(cfEnv.DB)
 
     const [
       userRow,
       currencyRow,
       totalPulls,
-      uniqueSpecies,
+      uniqueSpeciesCount,
       totalSpecies,
       tradeCount,
       creatures,
@@ -57,13 +48,7 @@ const getAdminUserDetail = createServerFn({ method: 'GET' })
         .from(userCreature)
         .where(eq(userCreature.userId, userId))
         .get(),
-      db
-        .select({
-          count: sql<number>`count(distinct ${userCreature.creatureId})`,
-        })
-        .from(userCreature)
-        .where(eq(userCreature.userId, userId))
-        .get(),
+      countDistinctSpecies(db, userId),
       db.select({ count: count() }).from(creature).get(),
       db
         .select({ count: count() })
@@ -105,8 +90,7 @@ const getAdminUserDetail = createServerFn({ method: 'GET' })
       user: userRow,
       fossils: currencyRow?.fossils ?? 0,
       totalPulls: totalPulls?.count ?? 0,
-      uniqueSpecies:
-        (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
+      uniqueSpecies: uniqueSpeciesCount,
       totalSpecies: totalSpecies?.count ?? 0,
       tradeCount: tradeCount?.count ?? 0,
       creatures,
@@ -119,37 +103,6 @@ export const Route = createFileRoute('/admin/users/$userId')({
   component: UserDetailPage,
 })
 
-type IconComponent = React.ComponentType<{
-  className?: string
-  style?: React.CSSProperties
-}>
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string
-  value: string | number
-  icon: IconComponent
-}) {
-  return (
-    <Card size="sm" className="group transition-shadow hover:shadow-md">
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon className="h-4 w-4" />
-              {label}
-            </div>
-            <div className="mt-1 font-display text-2xl font-bold">{value}</div>
-          </div>
-          <Icon className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function UserDetailPage() {
   const data = Route.useLoaderData()

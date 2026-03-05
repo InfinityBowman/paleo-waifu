@@ -154,10 +154,17 @@ export function App() {
     }
   }
 
+  const constantsOverrideCount =
+    Object.values(constantsOverride.roleModifiers ?? {}).filter(
+      (m) => Object.keys(m).length > 0,
+    ).length +
+    Object.keys(constantsOverride.rarityModifiers ?? {}).length +
+    (constantsOverride.combatDamageScale !== undefined ? 1 : 0)
+
   const patchCount =
     [...patches.values()].filter(
       (p) => Object.keys(p).length > 1,
-    ).length + Object.keys(constantsOverride).length
+    ).length + constantsOverrideCount
 
   if (!constants) {
     return (

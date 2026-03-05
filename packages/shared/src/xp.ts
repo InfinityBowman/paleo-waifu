@@ -14,6 +14,17 @@ export function xpToNextLevel(xp: number): number {
   return xpForLevel(current + 1) - xp
 }
 
+/** Progress percentage (0–100) through the current level */
+export function calcXpProgress(xp: number, level: number): number {
+  const current = xpForLevel(level)
+  const next = xpForLevel(level + 1)
+  if (next <= current) return 100
+  return Math.min(
+    100,
+    Math.max(0, Math.round(((xp - current) / (next - current)) * 100)),
+  )
+}
+
 export const XP_MIN_PER_MESSAGE = 15
 export const XP_MAX_PER_MESSAGE = 25
 export const XP_COOLDOWN_MS = 60_000

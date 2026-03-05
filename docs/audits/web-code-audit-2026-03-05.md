@@ -13,15 +13,9 @@ Deleted `getEncyclopediaPage`. Loader now calls `loadMoreCreatures` directly.
 
 ---
 
-### 2. Admin auth boilerplate duplicated across 4 server functions (90%)
+### ~~2. Admin auth boilerplate duplicated across 4 server functions (90%)~~ FIXED
 
-**Files:**
-- `web/src/routes/admin/index.tsx:21-28`
-- `web/src/routes/admin/analytics.tsx:31-38`
-- `web/src/routes/admin/users.tsx:32-39`
-- `web/src/routes/admin/users.$userId.tsx:31-38`
-
-Each handler independently calls `getCfEnv()`, `createAuth(cfEnv)`, `auth.api.getSession(...)`, and checks the role. The `getSession` helper in `web/src/lib/auth-server.ts` already encapsulates most of this. A `requireAdminSession()` helper would reduce each to a one-liner.
+Added `requireAdminSession()` to `auth-server.ts`. All 4 admin routes now use `const { cfEnv } = await requireAdminSession()`. Removed unused `createAuth`, `getRequest`, `getUserRole`, `getCfEnv` imports from each file.
 
 ---
 
@@ -35,14 +29,9 @@ This 70-line function performs multi-step reads, batch writes, and creature-unlo
 
 ## Important
 
-### 4. `StatCard` copy-pasted across 3 route files (88%)
+### ~~4. `StatCard` copy-pasted across 3 route files (88%)~~ FIXED
 
-**Files:**
-- `web/src/routes/admin/index.tsx:83-120` (has `subtitle` prop)
-- `web/src/routes/admin/users.$userId.tsx:121-151`
-- `web/src/routes/_app/profile.tsx:195-225`
-
-All three render the same icon-label-value card layout with identical Tailwind classes. A single `StatCard` in `src/components/shared/` with an optional `subtitle` prop would eliminate ~200 lines of duplication.
+Extracted to `web/src/components/shared/StatCard.tsx` with optional `subtitle` prop. Removed local copies and `IconComponent` type from all 3 files.
 
 ---
 
@@ -66,13 +55,9 @@ Mixes trade-card rendering, all three trade action flows (create, propose, confi
 
 ---
 
-### 8. XP progress calculation duplicated (82%)
+### ~~8. XP progress calculation duplicated (82%)~~ FIXED
 
-**Files:**
-- `web/src/routes/_app/profile.tsx:98-111`
-- `web/src/routes/_public/leaderboard.tsx:121-135`
-
-Both compute `progress = clamp(round((xp - currentLevelXp) / (nextLevelXp - currentLevelXp) * 100), 0, 100)` inline. Should be a `calcXpProgress(xp, level)` helper in `@paleo-waifu/shared/xp`.
+Added `calcXpProgress(xp, level)` to `@paleo-waifu/shared/xp`. Both profile and leaderboard now use it. Profile also uses existing `xpToNextLevel()` instead of manual calc.
 
 ---
 
@@ -92,13 +77,9 @@ Imports `loadMoreCreatures` and `getCreatureDetails` from `web/src/routes/_publi
 
 ---
 
-### 11. `count(distinct)` type cast duplicated (83%)
+### ~~11. `count(distinct)` type cast duplicated (83%)~~ FIXED
 
-**Files:**
-- `web/src/routes/_app/profile.tsx:69`
-- `web/src/routes/admin/users.$userId.tsx:108`
-
-Both do `(uniqueSpecies as { count: number } | undefined)?.count ?? 0`. Extract a `countDistinctCreatures(db, userId)` helper.
+Extracted `countDistinctSpecies(db, userId)` to `web/src/lib/queries.ts`. Both profile and admin user detail now use it.
 
 ---
 
@@ -117,12 +98,12 @@ Both do `(uniqueSpecies as { count: number } | undefined)?.count ?? 0`. Extract 
 | Critical | 6 | `refundFossils` duplicates `grantFossils` | **FIXED** |
 | Critical | 1 | Duplicate encyclopedia server functions | **FIXED** |
 | Critical | 5 | Role cast repeated 7 times | **FIXED** (5/7 server-side; 2 client-side remain) |
-| Critical | 2 | Admin auth boilerplate x4 | Open |
+| Critical | 2 | Admin auth boilerplate x4 | **FIXED** |
+| Important | 4 | `StatCard` copy-pasted x3 | **FIXED** |
+| Important | 8 | XP progress calc duplicated | **FIXED** |
+| Important | 11 | `count(distinct)` cast duplicated | **FIXED** |
 | Important | 9 | Trade query shape duplicated | Open |
-| Important | 4 | `StatCard` copy-pasted x3 | Open |
 | Important | 3 | Business logic in route file | Open |
 | Important | 7 | TradeList.tsx too large (625 lines) | Open |
-| Important | 11 | `count(distinct)` cast duplicated | Open |
-| Important | 8 | XP progress calc duplicated | Open |
 | Important | 10 | Component imports from route | Open |
 | Important | 12 | Trade expiry on every page load | Open |

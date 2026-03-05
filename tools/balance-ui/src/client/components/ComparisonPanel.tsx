@@ -570,7 +570,32 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
     { label: 'No Actives', getValue: (r) => r.config.options.noActives ? 'Yes' : 'No' },
     { label: 'No Passives', getValue: (r) => r.config.options.noPassives ? 'Yes' : 'No' },
     { label: 'Creature Patches', getValue: (r) => String(r.config.creaturePatches.filter((p) => Object.keys(p).length > 1).length) },
-    { label: 'Constant Overrides', getValue: (r) => String(Object.keys(r.config.constants).length) },
+    {
+      label: 'Role Modifiers',
+      getValue: (r) => {
+        const mods = r.config.constants.roleModifiers
+        if (!mods) return 'none'
+        const entries = Object.entries(mods).filter(([, m]) => Object.keys(m).length > 0)
+        if (entries.length === 0) return 'none'
+        return entries
+          .map(([role, m]) =>
+            Object.entries(m)
+              .map(([stat, v]) => `${role} ${stat} ${v! > 0 ? '+' : ''}${Math.round(v! * 100)}%`)
+              .join(', '),
+          )
+          .join(', ')
+      },
+    },
+    {
+      label: 'Rarity Modifiers',
+      getValue: (r) => {
+        const mods = r.config.constants.rarityModifiers
+        if (!mods || Object.keys(mods).length === 0) return 'none'
+        return Object.entries(mods)
+          .map(([rarity, v]) => `${rarity} ${v > 0 ? '+' : ''}${Math.round(v * 100)}%`)
+          .join(', ')
+      },
+    },
     { label: 'Damage Scale', getValue: (r) => r.config.constants.combatDamageScale !== undefined ? String(r.config.constants.combatDamageScale) : 'default' },
   ]
 

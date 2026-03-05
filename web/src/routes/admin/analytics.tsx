@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { count, desc, eq, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
@@ -13,9 +12,7 @@ import {
   userXp,
   wishlist,
 } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { getUserRole } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-server'
 import { ActivityCharts } from '@/components/admin/analytics/ActivityCharts'
 import {
   CreatureCharts,
@@ -29,15 +26,7 @@ import {
 } from '@/components/admin/analytics/GameHealthSection'
 
 const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
-  const cfEnv = getCfEnv()
-  const auth = await createAuth(cfEnv)
-  const session = await auth.api.getSession({
-    headers: getRequest().headers,
-  })
-  if (!session || getUserRole(session.user) !== 'admin') {
-    throw new Error('Forbidden')
-  }
-
+  const { cfEnv } = await requireAdminSession()
   const db = await createDb(cfEnv.DB)
   const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60
 

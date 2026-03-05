@@ -70,70 +70,64 @@ function applyOverrides(
   request: SimRequest,
 ): Array<CreatureRecord> {
   const patchMap = new Map(request.creaturePatches.map((p) => [p.id, p]))
+  const { roleModifiers, rarityModifiers } = request.constants
 
-  let creatures = base
+  return base
     .filter((c) => {
       const patch = patchMap.get(c.id)
       return !patch?.disabled
     })
     .map((c) => {
       const patch = patchMap.get(c.id)
-      if (!patch) return c
-      return {
-        ...c,
-        hp: patch.hp ?? c.hp,
-        atk: patch.atk ?? c.atk,
-        def: patch.def ?? c.def,
-        spd: patch.spd ?? c.spd,
-        active: patch.activeTemplateId
-          ? { templateId: patch.activeTemplateId, displayName: patch.activeTemplateId }
-          : c.active,
-        passive: patch.passiveTemplateId
-          ? { templateId: patch.passiveTemplateId, displayName: patch.passiveTemplateId }
-          : c.passive,
-      }
-    })
 
-  // If rarity totals or role distributions changed, recompute stats
-  // for creatures that weren't individually patched
-  if (request.constants.rarityBaseTotals || request.constants.roleDistributions) {
-    const rarityTotals: Partial<Record<string, number>> = {
-      ...RARITY_BASE_TOTALS,
-      ...request.constants.rarityBaseTotals,
-    }
-    const roleDists: Partial<Record<string, { hp: number; atk: number; def: number; spd: number }>> = {
-      ...Object.fromEntries(
-        Object.entries(ROLE_DISTRIBUTIONS).map(([k, v]) => [k, { ...v }]),
-      ),
-      ...request.constants.roleDistributions,
-    }
+      // Start with DB stats (preserves per-creature variance)
+      let hp = patch?.hp ?? c.hp
+      let atk = patch?.atk ?? c.atk
+      let def = patch?.def ?? c.def
+      let spd = patch?.spd ?? c.spd
 
-    creatures = creatures.map((c) => {
-      const patch = patchMap.get(c.id)
-      // Skip creatures with explicit stat overrides
-      if (
+      // Skip multiplier adjustments for creatures with explicit stat overrides
+      const hasStatPatch =
         patch?.hp !== undefined ||
         patch?.atk !== undefined ||
         patch?.def !== undefined ||
         patch?.spd !== undefined
-      ) return c
 
-      const baseTotal = rarityTotals[c.rarity] ?? 170
-      const dist = roleDists[c.role]
-      if (!dist) return c
+      if (!hasStatPatch) {
+        // Apply per-role stat multipliers (e.g. striker ATK +10% → multiply by 1.10)
+        const roleMod = roleModifiers?.[c.role]
+        if (roleMod) {
+          hp = Math.round(hp * (1 + (roleMod.hp ?? 0)))
+          atk = Math.round(atk * (1 + (roleMod.atk ?? 0)))
+          def = Math.round(def * (1 + (roleMod.def ?? 0)))
+          spd = Math.round(spd * (1 + (roleMod.spd ?? 0)))
+        }
 
-      // Recompute stats from role distribution ratios and rarity total
+        // Apply per-rarity uniform scaling (e.g. common -5% → multiply all stats by 0.95)
+        const rarityMod = rarityModifiers?.[c.rarity]
+        if (rarityMod) {
+          const scale = 1 + rarityMod
+          hp = Math.round(hp * scale)
+          atk = Math.round(atk * scale)
+          def = Math.round(def * scale)
+          spd = Math.round(spd * scale)
+        }
+      }
+
       return {
         ...c,
-        hp: Math.round(baseTotal * dist.hp),
-        atk: Math.round(baseTotal * dist.atk),
-        def: Math.round(baseTotal * dist.def),
-        spd: Math.round(baseTotal * dist.spd),
+        hp: Math.max(1, hp),
+        atk: Math.max(1, atk),
+        def: Math.max(1, def),
+        spd: Math.max(1, spd),
+        active: patch?.activeTemplateId
+          ? { templateId: patch.activeTemplateId, displayName: patch.activeTemplateId }
+          : c.active,
+        passive: patch?.passiveTemplateId
+          ? { templateId: patch.passiveTemplateId, displayName: patch.passiveTemplateId }
+          : c.passive,
       }
     })
-  }
-
-  return creatures
 }
 
 // ─── Sim SSE Endpoint ────────────────────────────────────────────

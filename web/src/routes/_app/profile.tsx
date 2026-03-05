@@ -10,8 +10,9 @@ import {
   userCreature,
   userXp,
 } from '@paleo-waifu/shared/db/schema'
-import { xpForLevel } from '@paleo-waifu/shared/xp'
+import { calcXpProgress, xpToNextLevel } from '@paleo-waifu/shared/xp'
 import { getCfEnv } from '@/lib/env'
+import { countDistinctSpecies } from '@/lib/queries'
 import {
   IconArchiveResearch,
   IconCrystalCluster,
@@ -20,6 +21,7 @@ import {
 } from '@/components/icons'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
+import { StatCard } from '@/components/shared/StatCard'
 
 const getProfileData = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
@@ -29,7 +31,7 @@ const getProfileData = createServerFn({ method: 'GET' })
     const [
       currencyRow,
       totalCreatures,
-      uniqueSpecies,
+      uniqueSpeciesCount,
       totalSpeciesCount,
       tradeCount,
       xpRow,
@@ -40,13 +42,7 @@ const getProfileData = createServerFn({ method: 'GET' })
         .from(userCreature)
         .where(eq(userCreature.userId, userId))
         .get(),
-      db
-        .select({
-          count: sql<number>`count(distinct ${userCreature.creatureId})`,
-        })
-        .from(userCreature)
-        .where(eq(userCreature.userId, userId))
-        .get(),
+      countDistinctSpecies(db, userId),
       db.select({ count: count() }).from(creature).get(),
       db
         .select({ count: count() })
@@ -65,8 +61,7 @@ const getProfileData = createServerFn({ method: 'GET' })
     return {
       fossils: currencyRow?.fossils ?? 0,
       totalPulls: totalCreatures?.count ?? 0,
-      uniqueSpecies:
-        (uniqueSpecies as { count: number } | undefined)?.count ?? 0,
+      uniqueSpecies: uniqueSpeciesCount,
       totalSpecies: totalSpeciesCount?.count ?? 0,
       tradeCount: tradeCount?.count ?? 0,
       xp: xpRow?.xp ?? 0,
@@ -95,21 +90,8 @@ function ProfilePage() {
   const completionPct =
     totalSpecies > 0 ? Math.round((uniqueSpecies / totalSpecies) * 100) : 0
 
-  const currentLevelXp = xpForLevel(level)
-  const nextLevelXp = xpForLevel(level + 1)
-  const xpProgress =
-    nextLevelXp > currentLevelXp
-      ? Math.min(
-          100,
-          Math.max(
-            0,
-            Math.round(
-              ((xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100,
-            ),
-          ),
-        )
-      : 100
-  const xpToNext = Math.max(0, nextLevelXp - xp)
+  const xpProgress = calcXpProgress(xp, level)
+  const xpToNext = xpToNextLevel(xp)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 lg:max-w-4xl">
@@ -192,34 +174,3 @@ function ProfilePage() {
   )
 }
 
-type IconComponent = React.ComponentType<{
-  className?: string
-  style?: React.CSSProperties
-}>
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string
-  value: string | number
-  icon: IconComponent
-}) {
-  return (
-    <Card size="sm" className="group transition-shadow hover:shadow-md">
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon className="h-4 w-4" />
-              {label}
-            </div>
-            <div className="mt-1 font-display text-2xl font-bold">{value}</div>
-          </div>
-          <Icon className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}

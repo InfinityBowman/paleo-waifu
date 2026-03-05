@@ -91,12 +91,16 @@ export interface CreatureOverridePatch {
   passiveTemplateId?: string
 }
 
+export type StatKey = 'hp' | 'atk' | 'def' | 'spd'
+
+/** Per-stat percentage modifier (0 = no change, 0.1 = +10%, -0.15 = -15%) */
+export type StatModifiers = Partial<Record<StatKey, number>>
+
 export interface ConstantsOverride {
-  rarityBaseTotals?: Record<string, number>
-  roleDistributions?: Record<
-    string,
-    { hp: number; atk: number; def: number; spd: number }
-  >
+  /** Per-role stat multipliers, e.g. { striker: { atk: 0.1 } } = +10% ATK for all strikers */
+  roleModifiers?: Record<string, StatModifiers>
+  /** Per-rarity uniform scaling, e.g. { common: -0.05 } = -5% all stats for commons */
+  rarityModifiers?: Record<string, number>
   combatDamageScale?: number
 }
 

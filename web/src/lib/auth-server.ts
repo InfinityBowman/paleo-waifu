@@ -10,6 +10,19 @@ export function getUserRole(
   return (user as { role?: string }).role
 }
 
+/** Require an authenticated admin session or throw 'Forbidden'. */
+export async function requireAdminSession() {
+  const cfEnv = getCfEnv()
+  const auth = await createAuth(cfEnv)
+  const session = await auth.api.getSession({
+    headers: getRequest().headers,
+  })
+  if (!session || getUserRole(session.user) !== 'admin') {
+    throw new Error('Forbidden')
+  }
+  return { session, cfEnv }
+}
+
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async () => {
     const request = getRequest()

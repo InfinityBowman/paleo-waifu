@@ -3,7 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { asc, count, desc, eq, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import { creature, user, userCreature, userXp } from '@paleo-waifu/shared/db/schema'
-import { xpForLevel } from '@paleo-waifu/shared/xp'
+import { calcXpProgress } from '@paleo-waifu/shared/xp'
 import { getCfEnv } from '@/lib/env'
 import { IconCrown } from '@/components/icons'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -117,22 +117,7 @@ function LeaderboardPage() {
             <div className="mt-4 space-y-2">
               {xp.map((entry, i) => {
                 const rank = i + 1
-                const currentLevelXp = xpForLevel(entry.level)
-                const nextLevelXp = xpForLevel(entry.level + 1)
-                const progress =
-                  nextLevelXp > currentLevelXp
-                    ? Math.min(
-                        100,
-                        Math.max(
-                          0,
-                          Math.round(
-                            ((entry.xp - currentLevelXp) /
-                              (nextLevelXp - currentLevelXp)) *
-                              100,
-                          ),
-                        ),
-                      )
-                    : 100
+                const progress = calcXpProgress(entry.xp, entry.level)
 
                 return (
                   <div

@@ -14,9 +14,15 @@ const MAX_RUNS = 50
 
 function toSummary(run: SavedRun): RunSummary {
   const lastSnap = run.result.snapshots.at(-1)
+  const constantsCount =
+    Object.values(run.config.constants.roleModifiers ?? {}).filter(
+      (m) => Object.keys(m).length > 0,
+    ).length +
+    Object.keys(run.config.constants.rarityModifiers ?? {}).length +
+    (run.config.constants.combatDamageScale !== undefined ? 1 : 0)
   const patchCount =
     run.config.creaturePatches.filter((p) => Object.keys(p).length > 1)
-      .length + Object.keys(run.config.constants).length
+      .length + constantsCount
 
   return {
     id: run.id,

@@ -1,6 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/react-start/server'
 import { count, sql } from 'drizzle-orm'
 import { BarChart3, Coins, Pickaxe, Users } from 'lucide-react'
 import { createDb } from '@paleo-waifu/shared/db/client'
@@ -12,22 +11,12 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import { IconTrade } from '@/components/icons'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { getUserRole } from '@/lib/auth-server'
-import { Card, CardContent } from '@/components/ui/card'
+import { requireAdminSession } from '@/lib/auth-server'
+import { StatCard } from '@/components/shared/StatCard'
 
 const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
   async () => {
-    const cfEnv = getCfEnv()
-    const auth = await createAuth(cfEnv)
-    const session = await auth.api.getSession({
-      headers: getRequest().headers,
-    })
-    if (!session || getUserRole(session.user) !== 'admin') {
-      throw new Error('Forbidden')
-    }
-
+    const { cfEnv } = await requireAdminSession()
     const db = await createDb(cfEnv.DB)
 
     const now = new Date()
@@ -81,44 +70,6 @@ export const Route = createFileRoute('/admin/')({
   component: DashboardPage,
 })
 
-type IconComponent = React.ComponentType<{
-  className?: string
-  style?: React.CSSProperties
-}>
-
-function StatCard({
-  label,
-  value,
-  subtitle,
-  icon: Icon,
-}: {
-  label: string
-  value: string | number
-  subtitle?: string
-  icon: IconComponent
-}) {
-  return (
-    <Card size="sm" className="group transition-shadow hover:shadow-md">
-      <CardContent>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Icon className="h-4 w-4" />
-              {label}
-            </div>
-            <div className="mt-1 font-display text-2xl font-bold">{value}</div>
-            {subtitle && (
-              <div className="mt-0.5 text-xs text-muted-foreground">
-                {subtitle}
-              </div>
-            )}
-          </div>
-          <Icon className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
 
 function DashboardPage() {
   const data = Route.useLoaderData()
