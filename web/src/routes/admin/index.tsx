@@ -14,6 +14,7 @@ import {
 import { IconTrade } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
+import { getUserRole } from '@/lib/auth-server'
 import { Card, CardContent } from '@/components/ui/card'
 
 const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
@@ -23,7 +24,7 @@ const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
     const session = await auth.api.getSession({
       headers: getRequest().headers,
     })
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
+    if (!session || getUserRole(session.user) !== 'admin') {
       throw new Error('Forbidden')
     }
 

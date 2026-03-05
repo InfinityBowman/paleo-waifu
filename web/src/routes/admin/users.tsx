@@ -7,6 +7,7 @@ import { createDb } from '@paleo-waifu/shared/db/client'
 import { currency, user, userCreature } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
+import { getUserRole } from '@/lib/auth-server'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -34,7 +35,7 @@ const getAdminUsers = createServerFn({ method: 'GET' })
     const session = await auth.api.getSession({
       headers: getRequest().headers,
     })
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
+    if (!session || getUserRole(session.user) !== 'admin') {
       throw new Error('Forbidden')
     }
 

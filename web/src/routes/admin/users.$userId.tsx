@@ -17,6 +17,7 @@ import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconArchiveResearch, IconTrade } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
+import { getUserRole } from '@/lib/auth-server'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -33,7 +34,7 @@ const getAdminUserDetail = createServerFn({ method: 'GET' })
     const session = await auth.api.getSession({
       headers: getRequest().headers,
     })
-    if (!session || (session.user as { role?: string }).role !== 'admin') {
+    if (!session || getUserRole(session.user) !== 'admin') {
       throw new Error('Forbidden')
     }
 

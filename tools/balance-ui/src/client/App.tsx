@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
 import { fetchCreatures, reloadCreatures, runSim } from './lib/api'
+import { useRunHistory } from './hooks/useRunHistory'
 import { CreatureTable } from './components/CreatureTable'
 import { GlobalKnobsPanel } from './components/GlobalKnobsPanel'
 import { SimControls } from './components/SimControls'
 import { ResultsPanel } from './components/ResultsPanel'
+import { RunHistoryPanel } from './components/RunHistoryPanel'
+import { ComparisonPanel } from './components/ComparisonPanel'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
@@ -50,6 +53,10 @@ export function App() {
     noPassives: false,
   })
 
+  // Run history (IndexedDB)
+  const history = useRunHistory()
+  const [selectedRunIds, setSelectedRunIds] = useState<Array<string>>([])
+
   const load = useCallback(async () => {
     const data = await fetchCreatures()
     setCreatures(data.creatures)
@@ -82,13 +89,15 @@ export function App() {
     setSimResult(null)
     setSimError(null)
 
+    const config = {
+      creaturePatches: [...patches.values()],
+      constants: constantsOverride,
+      options: simOptions,
+    }
+
     try {
       await runSim(
-        {
-          creaturePatches: [...patches.values()],
-          constants: constantsOverride,
-          options: simOptions,
-        },
+        config,
         (event: SimProgressEvent) => {
           if (event.type === 'generation') {
             setSimProgress({
@@ -101,6 +110,8 @@ export function App() {
             setSimResult(event.result)
             setSimState('done')
             setTab('results')
+            // Auto-save to IndexedDB
+            history.saveRun(config, event.result)
           } else {
             setSimError(event.message)
             setSimState('error')
@@ -116,6 +127,31 @@ export function App() {
   function handleResetPatches() {
     setPatches(new Map())
     setConstantsOverride({})
+  }
+
+  function handleSelectToggle(id: string) {
+    setSelectedRunIds((prev) =>
+      prev.includes(id)
+        ? prev.filter((r) => r !== id)
+        : prev.length < 4
+          ? [...prev, id]
+          : prev,
+    )
+  }
+
+  async function handleViewRun(id: string) {
+    const run = await history.getRun(id)
+    if (!run) return
+    setSimResult(run.result)
+    setSimState('done')
+    setSimError(null)
+    setTab('results')
+  }
+
+  function handleCompare() {
+    if (selectedRunIds.length >= 2) {
+      setTab('compare')
+    }
   }
 
   const patchCount =
@@ -164,7 +200,7 @@ export function App() {
 
         <div className="flex min-h-0 flex-1">
           {/* Left sidebar */}
-          <aside className="flex w-80 flex-shrink-0 flex-col overflow-y-auto border-r border-border">
+          <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-border">
             <SimControls
               options={simOptions}
               onOptionsChange={setSimOptions}
@@ -193,6 +229,26 @@ export function App() {
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />
                 )}
               </TabsTrigger>
+              <TabsTrigger value="history" className="gap-1.5">
+                History
+                {history.runs.length > 0 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    {history.runs.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                disabled={selectedRunIds.length < 2}
+                className="gap-1.5"
+              >
+                Compare
+                {selectedRunIds.length >= 2 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    {selectedRunIds.length}
+                  </span>
+                )}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="creatures" className="min-h-0 overflow-y-auto">
@@ -210,6 +266,27 @@ export function App() {
                 error={simError}
                 simState={simState}
                 population={simOptions.population}
+              />
+            </TabsContent>
+
+            <TabsContent value="history" className="min-h-0 overflow-y-auto">
+              <RunHistoryPanel
+                runs={history.runs}
+                selectedIds={selectedRunIds}
+                onSelectToggle={handleSelectToggle}
+                onDelete={history.deleteRun}
+                onRename={history.updateLabel}
+                onToggleStar={history.toggleStar}
+                onViewRun={handleViewRun}
+                onCompare={handleCompare}
+                onClearAll={history.clearAll}
+              />
+            </TabsContent>
+
+            <TabsContent value="compare" className="min-h-0 overflow-y-auto">
+              <ComparisonPanel
+                runIds={selectedRunIds}
+                getRun={history.getRun}
               />
             </TabsContent>
           </Tabs>

@@ -6,6 +6,7 @@ import { createDb } from '@paleo-waifu/shared/db/client'
 import { currency } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
+import { getUserRole } from '@/lib/auth-server'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
 const AdminBody = z.discriminatedUnion('action', [
@@ -48,7 +49,7 @@ export const Route = createFileRoute('/api/admin')({
           return jsonResponse({ error: 'Unauthorized' }, 401)
         }
 
-        if ((session.user as { role?: string }).role !== 'admin') {
+        if (getUserRole(session.user) !== 'admin') {
           return jsonResponse({ error: 'Forbidden' }, 403)
         }
 
@@ -113,7 +114,10 @@ export const Route = createFileRoute('/api/admin')({
         // body.action === 'set_role'
         await auth.api.setRole({
           headers: request.headers,
-          body: { userId: body.userId, role: body.role },
+          body: {
+            userId: body.userId,
+            role: body.role as 'user' | 'admin',
+          },
         })
         return jsonResponse({ success: true })
       },

@@ -166,17 +166,6 @@ interface PageInput {
   cursor: string | null
 }
 
-const getEncyclopediaPage = createServerFn({ method: 'GET' })
-  .inputValidator((d: PageInput) => d)
-  .handler(async ({ data }) => {
-    const db = await createDb(getCfEnv().DB)
-    return queryCreaturePage(
-      db,
-      data.filters,
-      data.cursor ? decodeCursor(data.cursor) : null,
-    )
-  })
-
 export const loadMoreCreatures = createServerFn({ method: 'GET' })
   .inputValidator((d: PageInput) => d)
   .handler(async ({ data }) => {
@@ -276,7 +265,7 @@ export const Route = createFileRoute('/_public/encyclopedia')({
       sort: deps.sort,
     }
     const [pageResult, filterOptions] = await Promise.all([
-      getEncyclopediaPage({ data: { filters, cursor: null } }),
+      loadMoreCreatures({ data: { filters, cursor: null } }),
       getFilterOptions(),
     ])
     return { ...pageResult, filterOptions, filters }

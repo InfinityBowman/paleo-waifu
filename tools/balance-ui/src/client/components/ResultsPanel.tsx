@@ -1,5 +1,7 @@
 import { Info } from 'lucide-react'
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -9,6 +11,7 @@ import {
   LineChart,
   Pie,
   PieChart,
+  ReferenceArea,
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
   XAxis,
@@ -22,6 +25,11 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import type { GenerationSnapshot, MetaResult, MetaRunResult } from '../../shared/types.ts'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
+
+const AVG_TURNS_TARGET_MIN = 7
+const AVG_TURNS_TARGET_MAX = 10
+
+const ROLE_ORDER = ['striker', 'tank', 'support', 'bruiser']
 
 const ROLE_COLORS: Record<string, string> = {
   striker: 'bg-role-striker',
@@ -99,6 +107,24 @@ export function ResultsPanel({ result, error, simState, population }: Props) {
         </CardContent>
       </Card>
 
+      {/* Role Evolution */}
+      {snapshots.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Role Evolution</CardTitle>
+              <SectionTooltip>
+                How role distribution in top-quartile teams shifts across generations. Stable bands suggest a settled meta; converging lines indicate a role taking over.
+              </SectionTooltip>
+            </div>
+            <CardDescription>Per-generation role share in top teams</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RoleEvolutionChart snapshots={snapshots} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Fitness Curve */}
       {snapshots.length > 1 && (
         <Card>
@@ -132,6 +158,7 @@ export function ResultsPanel({ result, error, simState, population }: Props) {
           </CardHeader>
           <CardContent>
             <MetricsChart snapshots={snapshots} population={population ?? 100} />
+            <TurnsTargetIndicator avgTurns={snapshots.at(-1)?.avgTurns ?? 0} />
           </CardContent>
         </Card>
       )}
@@ -534,9 +561,95 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
           formatter={(value: string) => value === 'avgTurns' ? 'Avg Turns' : 'Diversity'}
           wrapperStyle={{ fontSize: 11 }}
         />
+        <ReferenceArea
+          yAxisId="turns"
+          y1={AVG_TURNS_TARGET_MIN}
+          y2={AVG_TURNS_TARGET_MAX}
+          fill="oklch(0.65 0.15 145 / 8%)"
+          strokeDasharray="4 4"
+          stroke="oklch(0.65 0.15 145 / 25%)"
+        />
         <Line yAxisId="turns" type="monotone" dataKey="avgTurns" stroke={ROLE_COLOR_VALUES.bruiser} strokeWidth={2} dot={false} />
         <Line yAxisId="diversity" type="monotone" dataKey="diversity" stroke={ROLE_COLOR_VALUES.tank} strokeWidth={2} dot={false} opacity={0.7} />
       </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
+function TurnsTargetIndicator({ avgTurns }: { avgTurns: number }) {
+  const inBand = avgTurns >= AVG_TURNS_TARGET_MIN && avgTurns <= AVG_TURNS_TARGET_MAX
+
+  return (
+    <div
+      className={cn(
+        'mt-3 rounded-lg px-3 py-2 text-[11px]',
+        inBand
+          ? 'bg-success/10 text-success'
+          : 'bg-destructive/10 text-destructive',
+      )}
+    >
+      Target: {AVG_TURNS_TARGET_MIN}-{AVG_TURNS_TARGET_MAX} avg turns.{' '}
+      {inBand
+        ? `${avgTurns.toFixed(1)} turns — within target!`
+        : avgTurns < AVG_TURNS_TARGET_MIN
+          ? `${avgTurns.toFixed(1)} turns — too short (damage too high or HP too low)`
+          : `${avgTurns.toFixed(1)} turns — too long (damage too low or HP too high)`}
+    </div>
+  )
+}
+
+function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
+  const data = snapshots.map((s) => {
+    const total = Object.values(s.roleDistribution).reduce((a, b) => a + b, 0)
+    const row: Record<string, number> = { gen: s.generation }
+    for (const role of ROLE_ORDER) {
+      row[role] = total > 0
+        ? Math.round(((s.roleDistribution[role] ?? 0) / total) * 1000) / 10
+        : 0
+    }
+    return row
+  })
+
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <AreaChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
+        <XAxis
+          dataKey="gen"
+          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+        />
+        <YAxis
+          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tickFormatter={(v: number) => `${v}%`}
+          domain={[0, 100]}
+          width={40}
+        />
+        <RechartsTooltip
+          formatter={(value, name) => [`${value}%`, String(name).charAt(0).toUpperCase() + String(name).slice(1)]}
+          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
+          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
+          labelFormatter={(label) => `Gen ${label}`}
+        />
+        <Legend
+          verticalAlign="top"
+          height={28}
+          formatter={(value: string) => value.charAt(0).toUpperCase() + value.slice(1)}
+          wrapperStyle={{ fontSize: 11 }}
+        />
+        {ROLE_ORDER.map((role) => (
+          <Area
+            key={role}
+            type="monotone"
+            dataKey={role}
+            stackId="1"
+            fill={ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)'}
+            stroke={ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)'}
+            fillOpacity={0.6}
+          />
+        ))}
+      </AreaChart>
     </ResponsiveContainer>
   )
 }

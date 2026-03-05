@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router'
 import { AdminNav } from '@/components/admin/AdminNav'
-import { getSession } from '@/lib/auth-server'
+import { getSession, getUserRole } from '@/lib/auth-server'
 
 export const Route = createFileRoute('/admin')({
   beforeLoad: async () => {
@@ -8,7 +8,7 @@ export const Route = createFileRoute('/admin')({
     if (!session) {
       throw redirect({ to: '/' })
     }
-    if ((session.user as { role?: string }).role !== 'admin') {
+    if (getUserRole(session.user) !== 'admin') {
       throw redirect({ to: '/' })
     }
     return { session }

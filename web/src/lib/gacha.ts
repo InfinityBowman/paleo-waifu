@@ -89,13 +89,7 @@ export async function refundFossils(
   userId: string,
   amount: number,
 ): Promise<void> {
-  await db
-    .update(currency)
-    .set({
-      fossils: sql`${currency.fossils} + ${amount}`,
-      updatedAt: sql`(unixepoch())`,
-    })
-    .where(eq(currency.userId, userId))
+  await grantFossils(db, userId, amount)
 }
 
 /** Claim daily fossils if not already claimed today */

@@ -15,6 +15,7 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
+import { getUserRole } from '@/lib/auth-server'
 import { ActivityCharts } from '@/components/admin/analytics/ActivityCharts'
 import {
   CreatureCharts,
@@ -33,7 +34,7 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
   const session = await auth.api.getSession({
     headers: getRequest().headers,
   })
-  if (!session || (session.user as { role?: string }).role !== 'admin') {
+  if (!session || getUserRole(session.user) !== 'admin') {
     throw new Error('Forbidden')
   }
 

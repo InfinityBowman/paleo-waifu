@@ -1,3 +1,4 @@
+import type { DBSchema } from 'idb'
 import type { AbilityTemplate, Row } from '@paleo-waifu/shared/battle/types'
 
 // ─── Creature Record (mirrors battle-sim/src/db.ts) ──────────────
@@ -138,4 +139,43 @@ export interface ConstantsSnapshot {
 export interface CreaturesResponse {
   creatures: Array<CreatureRecord>
   constants: ConstantsSnapshot
+}
+
+// ─── Run History (IndexedDB) ────────────────────────────────
+
+export interface SavedRun {
+  id: string
+  label: string
+  starred: boolean
+  createdAt: number
+  config: {
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  }
+  result: MetaRunResult
+}
+
+export interface RunSummary {
+  id: string
+  label: string
+  starred: boolean
+  createdAt: number
+  population: number
+  generations: number
+  topFitness: number
+  avgTurns: number
+  roleMetaShare: Record<string, number>
+  patchCount: number
+  normalizeStats: boolean
+  noActives: boolean
+  noPassives: boolean
+}
+
+export interface RunHistoryDB extends DBSchema {
+  runs: {
+    key: string
+    value: SavedRun
+    indexes: { 'by-created': number }
+  }
 }
