@@ -99,10 +99,10 @@ ABILITY_ASSIGNMENTS: dict[str, tuple[str, str]] = {
     "Dimorphodon":      ("bite",           "venomous"),          # unusual fanged teeth
     # Uncommons get cooldown actives
     "Tarbosaurus":      ("crushing_jaw",   "predator_instinct"), # apex predator, massive bite
-    "Baryonyx":         ("feeding_frenzy", "venomous"),          # fish hunter, sustain + DoT
+    "Baryonyx":         ("bleed",          "venomous"),          # fish hunter, slashing claws + DoT
     "Acrocanthosaurus": ("bleed",          "pack_hunter"),       # slashing attacks, pack ambush
     # Rares get specialized kits
-    "Compsognathus":    ("feeding_frenzy", "pack_hunter"),       # tiny swarm hunters
+    "Compsognathus":    ("venom_strike",   "pack_hunter"),       # tiny swarm hunters, venomous bites
     "Megalania":        ("venom_strike",   "venomous"),          # actually venomous lizard!
     # Epic gets best-in-class
     "Carnotaurus":      ("crushing_jaw",   "evasive"),           # fast runner + devastating bite
@@ -119,20 +119,20 @@ ABILITY_ASSIGNMENTS: dict[str, tuple[str, str]] = {
     "Euoplocephalus":   ("taunt",          "ironclad"),          # iconic armoured tank
     # Rares get team-oriented kits
     "Mamenchisaurus":   ("herd_formation", "regenerative"),      # long-neck herd guardian
-    "Argentinosaurus":  ("shield_wall",    "territorial"),       # massive, protects allies
+    "Argentinosaurus":  ("shield_wall",    "thick_hide"),        # massive body, natural damage reduction
     # Epic gets the ultimate tank kit
-    "Diplodocus":       ("tail_sweep",     "territorial"),       # iconic tail whip, huge presence
+    "Diplodocus":       ("tail_sweep",     "ironclad"),          # iconic tail whip, tough hide
 
     # ── SUPPORTS ──────────────────────────────────────────────────────
     # Commons get single-purpose actives
     "Homalocephale":    ("mend",           "regenerative"),      # small healer
-    "Hesperornis":      ("armor_break",    "none"),              # diving bird, piercing debuff
-    "Lycorhinus":       ("rally_cry",      "none"),              # early ornithopod, inspiring
+    "Hesperornis":      ("armor_break",    "soothing_aura"),     # diving bird, nurturing presence
+    "Lycorhinus":       ("rally_cry",      "weakening_strikes"), # scrappy ornithopod, saps strength
     "Platypterygius":   ("intimidate",     "regenerative"),      # large ichthyosaur, menacing
     # Uncommons get team-wide impact
     "Edmontosaurus":    ("symbiosis",      "regenerative"),      # massive hadrosaur, group heal
     "Maiasaura":        ("mend",           "regenerative"),      # "good mother lizard" = healer
-    "Brachylophosaurus":("herd_formation", "none"),              # protective herd behavior
+    "Brachylophosaurus":("herd_formation", "fortifying_presence"),# protective herd, toughens allies
     # Rares get powerful combos
     "Iguanodon":        ("rally_cry",      "regenerative"),      # famous, inspiring presence
     "Rhabdodon":        ("armor_break",    "regenerative"),      # island dwarf, tenacious

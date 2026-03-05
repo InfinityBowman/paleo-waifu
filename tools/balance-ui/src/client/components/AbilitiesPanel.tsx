@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { Input } from './ui/input'
+import { NumericInput } from './ui/numeric-input'
 import { Badge } from './ui/badge'
 import { Button } from './ui/button'
 import type {
@@ -325,15 +325,12 @@ function AbilityRow({
                 <label className="w-20 text-[11px] text-muted-foreground">
                   Cooldown
                 </label>
-                <Input
-                  type="number"
+                <NumericInput
                   step={1}
                   min={0}
                   max={10}
                   value={effectiveCooldown ?? 0}
-                  onChange={(e) => {
-                    const val = parseInt(e.target.value, 10)
-                    if (isNaN(val)) return
+                  onChange={(val) => {
                     const next = {
                       ...override,
                       cooldown: val === cooldown ? undefined : val,
@@ -382,16 +379,13 @@ function AbilityRow({
                           <label className="text-[10px] text-muted-foreground w-16">
                             {param.label}
                           </label>
-                          <Input
-                            type="number"
+                          <NumericInput
+                            float={param.step < 1}
                             step={param.step}
                             min={param.min}
                             max={param.max}
                             value={currentVal}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value)
-                              if (isNaN(val)) return
-
+                            onChange={(val) => {
                               const existingEffects = {
                                 ...override?.effectOverrides,
                               }

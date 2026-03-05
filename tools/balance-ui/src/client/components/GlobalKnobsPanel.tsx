@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { BarChart3, ChevronDown, ChevronRight, Info } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { Input } from './ui/input'
+import { NumericInput } from './ui/numeric-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import type {
@@ -25,13 +25,17 @@ interface Props {
   creatures: Array<CreatureRecord>
   overrides: ConstantsOverride
   onChange: (overrides: ConstantsOverride) => void
+  normalizeStats?: boolean
 }
+
+const TARGET_TOTAL = 170
 
 export function GlobalKnobsPanel({
   constants,
   creatures,
   overrides,
   onChange,
+  normalizeStats = false,
 }: Props) {
   const [expanded, setExpanded] = useState({
     roles: true,
@@ -87,7 +91,11 @@ export function GlobalKnobsPanel({
         { min: number; avg: number; max: number }
       >
       for (const stat of STAT_KEYS) {
-        const vals = group.map((c) => c[stat])
+        const vals = group.map((c) => {
+          if (!normalizeStats) return c[stat]
+          const total = c.hp + c.atk + c.def + c.spd
+          return total > 0 ? Math.round(c[stat] * (TARGET_TOTAL / total)) : c[stat]
+        })
         stats[stat] = {
           min: Math.min(...vals),
           avg: Math.round(vals.reduce((a, b) => a + b, 0) / vals.length),
@@ -97,7 +105,7 @@ export function GlobalKnobsPanel({
       result[role] = stats
     }
     return result
-  }, [creatures])
+  }, [creatures, normalizeStats])
 
   return (
     <div className="flex flex-col text-xs">
@@ -196,18 +204,12 @@ export function GlobalKnobsPanel({
                         <label className="mb-0.5 text-[10px] uppercase text-muted-foreground">
                           {stat}%
                         </label>
-                        <Input
-                          type="number"
+                        <NumericInput
                           step={1}
                           min={-50}
                           max={100}
                           value={displayVal}
-                          onChange={(e) => {
-                            const pct = parseInt(e.target.value, 10)
-                            if (!isNaN(pct)) {
-                              setRoleStatMod(role, stat, pct / 100)
-                            }
-                          }}
+                          onChange={(pct) => setRoleStatMod(role, stat, pct / 100)}
                           className={cn(
                             'w-16 text-center text-xs h-7 px-2',
                             mod !== 0 && 'border-primary/50 text-primary',
@@ -232,13 +234,13 @@ export function GlobalKnobsPanel({
       >
         <div className="flex items-center gap-2 px-3 pb-3">
           <label className="w-24 text-muted-foreground">Damage Scale</label>
-          <Input
-            type="number"
+          <NumericInput
+            float
             step={0.1}
             min={0.1}
             max={2}
             value={effectiveScale}
-            onChange={(e) => setCombatScale(parseFloat(e.target.value) || 0.6)}
+            onChange={setCombatScale}
             className={cn(
               'w-20 text-center text-xs px-2',
               overrides.combatDamageScale !== undefined &&
@@ -270,18 +272,12 @@ export function GlobalKnobsPanel({
                 <span className="w-8 text-right text-[9px] font-mono text-muted-foreground/75">
                   {baseTotal}
                 </span>
-                <Input
-                  type="number"
+                <NumericInput
                   step={1}
                   min={-50}
                   max={100}
                   value={displayVal}
-                  onChange={(e) => {
-                    const pct = parseInt(e.target.value, 10)
-                    if (!isNaN(pct)) {
-                      setRarityMod(rarity, pct / 100)
-                    }
-                  }}
+                  onChange={(pct) => setRarityMod(rarity, pct / 100)}
                   className={cn(
                     'w-16 text-center text-xs h-7 px-2',
                     mod !== 0 && 'border-primary/50 text-primary',

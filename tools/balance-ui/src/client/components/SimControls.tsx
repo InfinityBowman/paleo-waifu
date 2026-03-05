@@ -1,6 +1,6 @@
 import { Info, Loader2, Play } from 'lucide-react'
 import { Button } from './ui/button'
-import { Input } from './ui/input'
+import { NumericInput } from './ui/numeric-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
@@ -65,15 +65,12 @@ export function SimControls({
           label="Population"
           tooltip="Number of teams per generation. Higher = more diverse meta exploration."
         >
-          <Input
-            type="number"
+          <NumericInput
             min={10}
             max={1000}
             step={1}
             value={options.population}
-            onChange={(e) =>
-              setOpt('population', parseInt(e.target.value, 10) || 100)
-            }
+            onChange={(v) => setOpt('population', v)}
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -82,15 +79,12 @@ export function SimControls({
           label="Generations"
           tooltip="Number of evolution cycles. More generations let the meta converge further."
         >
-          <Input
-            type="number"
+          <NumericInput
             min={5}
             max={200}
             step={1}
             value={options.generations}
-            onChange={(e) =>
-              setOpt('generations', parseInt(e.target.value, 10) || 25)
-            }
+            onChange={(v) => setOpt('generations', v)}
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -99,15 +93,12 @@ export function SimControls({
           label="Matches/Team"
           tooltip="Battles per team per generation. More matches reduce variance in fitness scores."
         >
-          <Input
-            type="number"
+          <NumericInput
             min={5}
             max={100}
             step={1}
             value={options.matchesPerTeam}
-            onChange={(e) =>
-              setOpt('matchesPerTeam', parseInt(e.target.value, 10) || 20)
-            }
+            onChange={(v) => setOpt('matchesPerTeam', v)}
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -116,15 +107,13 @@ export function SimControls({
           label="Elite Rate"
           tooltip="Fraction of top teams that pass unchanged to the next generation. Higher = faster convergence."
         >
-          <Input
-            type="number"
+          <NumericInput
+            float
             min={0.01}
             max={0.5}
             step={0.01}
             value={options.eliteRate}
-            onChange={(e) =>
-              setOpt('eliteRate', parseFloat(e.target.value) || 0.1)
-            }
+            onChange={(v) => setOpt('eliteRate', v)}
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />
@@ -133,15 +122,13 @@ export function SimControls({
           label="Mutation Rate"
           tooltip="Probability offspring are mutated vs crossed over. Higher = more exploration, lower = more exploitation."
         >
-          <Input
-            type="number"
+          <NumericInput
+            float
             min={0.1}
             max={1.0}
             step={0.1}
             value={options.mutationRate}
-            onChange={(e) =>
-              setOpt('mutationRate', parseFloat(e.target.value) || 0.8)
-            }
+            onChange={(v) => setOpt('mutationRate', v)}
             disabled={running}
             className="w-20 text-center text-xs px-2"
           />

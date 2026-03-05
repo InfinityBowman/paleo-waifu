@@ -54,11 +54,14 @@ TEMPLATE_NAMES = {
     "herd_formation": "Herd Formation", "intimidate": "Intimidate",
     "armor_break": "Armor Break", "symbiosis": "Symbiosis",
     "mend": "Mend", "shield_wall": "Shield Wall", "taunt": "Taunt",
-    "thick_hide": "Thick Hide", "armored_plates": "Armored Plates",
+    "thick_hide": "Thick Hide", "armored_plates": "Spiked Plates",
     "ironclad": "Ironclad", "evasive": "Evasive",
     "predator_instinct": "Predator Instinct", "venomous": "Venomous",
     "territorial": "Territorial", "pack_hunter": "Pack Hunter",
     "regenerative": "Regenerative", "scavenger": "Scavenger",
+    "soothing_aura": "Soothing Aura",
+    "fortifying_presence": "Fortifying Presence",
+    "weakening_strikes": "Weakening Strikes",
     "none": "None",
 }
 
@@ -67,6 +70,7 @@ def find_local_d1() -> Path:
     """Find the local D1 SQLite file in .wrangler state."""
     d1_dir = (
         Path(__file__).parent.parent.parent
+        / "web"
         / ".wrangler"
         / "state"
         / "v3"
@@ -221,7 +225,7 @@ def main():
     conn.close()
 
     # ── Write output ────────────────────────────────────────────────
-    out_path = Path(__file__).parent.parent.parent / "battle_seed.sql"
+    out_path = Path(__file__).parent.parent.parent / "web" / "battle_seed.sql"
     out_path.write_text("\n".join(lines) + "\n")
 
     print(f"\nGenerated: {out_path}")

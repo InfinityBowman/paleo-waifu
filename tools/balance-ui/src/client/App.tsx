@@ -270,6 +270,7 @@ export function App() {
               creatures={creatures}
               overrides={constantsOverride}
               onChange={setConstantsOverride}
+              normalizeStats={simOptions.normalizeStats}
             />
           </aside>
 

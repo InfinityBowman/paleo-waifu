@@ -253,10 +253,10 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Battle Health</CardTitle>
               <SectionTooltip>
-                Avg turns per battle and population diversity (unique genomes /
-                population) over generations. Falling diversity signals
-                convergence. Very low or high avg turns suggest damage scaling
-                issues.
+                Avg turns per battle, population diversity (unique genomes),
+                and meta breadth (% of creatures in top teams) over
+                generations. Falling diversity signals convergence. Low meta
+                breadth means few creatures dominate.
               </SectionTooltip>
             </div>
             <CardDescription>
@@ -267,12 +267,22 @@ export function ResultsPanel({
             <MetricsChart
               snapshots={snapshots}
               population={population ?? 100}
+              totalCreatures={creatures?.length ?? 0}
             />
             <TurnsTargetIndicator avgTurns={snapshots.at(-1)?.avgTurns ?? 0} />
             <DiversityIndicator
               diversity={
                 ((snapshots.at(-1)?.uniqueGenomes ?? 0) / (population ?? 100)) *
                 100
+              }
+            />
+            <MetaBreadthIndicator
+              breadth={
+                (creatures?.length ?? 0) > 0
+                  ? (Object.keys(snapshots.at(-1)?.creatureFrequency ?? {}).length /
+                      (creatures?.length ?? 1)) *
+                    100
+                  : 0
               }
             />
           </CardContent>
@@ -600,13 +610,17 @@ function AbilityLeaderboard({
     return map
   }, [snapshots])
 
-  // Count unique creatures per ability template
-  const creatureCountByAbility = useMemo(() => {
-    if (!creatures) return new Map<string, number>()
-    const map = new Map<string, number>()
+  // Count unique creatures and role distribution per ability template
+  const abilityCreatureInfo = useMemo(() => {
+    if (!creatures) return new Map<string, { count: number; roles: Record<string, number> }>()
+    const map = new Map<string, { count: number; roles: Record<string, number> }>()
     for (const c of creatures) {
-      map.set(c.active.templateId, (map.get(c.active.templateId) ?? 0) + 1)
-      map.set(c.passive.templateId, (map.get(c.passive.templateId) ?? 0) + 1)
+      for (const templateId of [c.active.templateId, c.passive.templateId]) {
+        const existing = map.get(templateId) ?? { count: 0, roles: {} }
+        existing.count++
+        existing.roles[c.role] = (existing.roles[c.role] ?? 0) + 1
+        map.set(templateId, existing)
+      }
     }
     return map
   }, [creatures])
@@ -625,13 +639,18 @@ function AbilityLeaderboard({
             <div className="flex flex-col gap-2.5">
               {items.map((a) => {
                 const barPct = (a.appearances / maxAppearances) * 100
-                const barColor =
-                  type === 'active'
-                    ? 'oklch(0.65 0.2 25)'
-                    : 'oklch(0.65 0.15 245)'
                 const points = sparklines.get(a.templateId) ?? []
-                const creatureCount =
-                  creatureCountByAbility.get(a.templateId) ?? 0
+                const info = abilityCreatureInfo.get(a.templateId)
+                const creatureCount = info?.count ?? 0
+                const roles = info?.roles ?? {}
+                const roleTotal = Object.values(roles).reduce((s, n) => s + n, 0)
+                const roleSegments = ROLE_ORDER
+                  .filter((r) => roles[r])
+                  .map((r) => ({
+                    role: r,
+                    pct: (roles[r] / roleTotal) * 100,
+                    color: ROLE_COLOR_VALUES[r] ?? 'oklch(0.5 0 0)',
+                  }))
                 return (
                   <Tooltip key={a.templateId}>
                     <TooltipTrigger asChild>
@@ -647,7 +666,7 @@ function AbilityLeaderboard({
                           </span>
                           <div className="flex items-center gap-2">
                             {points.length > 1 && (
-                              <Sparkline points={points} color={barColor} />
+                              <Sparkline points={points} color="oklch(0.65 0.03 290)" />
                             )}
                             <span className="font-mono text-muted-foreground">
                               {a.appearances}
@@ -657,19 +676,22 @@ function AbilityLeaderboard({
                             </span>
                           </div>
                         </div>
-                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{
-                              width: `${barPct}%`,
-                              backgroundColor: barColor,
-                              opacity: 0.4 + a.avgFitness * 0.6,
-                            }}
-                          />
+                        <div className="relative flex h-2 w-full overflow-hidden rounded-full bg-muted">
+                          {roleSegments.map((seg) => (
+                            <div
+                              key={seg.role}
+                              className="h-full transition-all first:rounded-l-full last:rounded-r-full"
+                              style={{
+                                width: `${(seg.pct / 100) * barPct}%`,
+                                backgroundColor: seg.color,
+                                opacity: 0.5 + a.avgFitness * 0.5,
+                              }}
+                            />
+                          ))}
                         </div>
                       </div>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="right">
                       <div className="text-[10px]">
                         <div>
                           {a.name} ({type})
@@ -679,6 +701,11 @@ function AbilityLeaderboard({
                           <div>
                             Used by: {creatureCount} creature
                             {creatureCount !== 1 ? 's' : ''}
+                            {roleSegments.length > 0 && (
+                              <span>
+                                {' '}({roleSegments.map((s) => `${s.role} ${Math.round(s.pct)}%`).join(', ')})
+                              </span>
+                            )}
                           </div>
                         )}
                         <div>
@@ -971,9 +998,11 @@ function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
 function MetricsChart({
   snapshots,
   population,
+  totalCreatures,
 }: {
   snapshots: Array<GenerationSnapshot>
   population: number
+  totalCreatures: number
 }) {
   const data = snapshots.map((s) => ({
     gen: s.generation,
@@ -982,6 +1011,12 @@ function MetricsChart({
       100,
       Math.round((s.uniqueGenomes / population) * 1000) / 10,
     ),
+    metaBreadth:
+      totalCreatures > 0
+        ? Math.round(
+            (Object.keys(s.creatureFrequency).length / totalCreatures) * 1000,
+          ) / 10
+        : 0,
   }))
 
   return (
@@ -1022,7 +1057,11 @@ function MetricsChart({
         <RechartsTooltip
           formatter={(value, name) => [
             name === 'avgTurns' ? `${value} turns` : `${value}%`,
-            name === 'avgTurns' ? 'Avg Turns' : 'Diversity',
+            name === 'avgTurns'
+              ? 'Avg Turns'
+              : name === 'metaBreadth'
+                ? 'Meta Breadth'
+                : 'Diversity',
           ]}
           contentStyle={{
             background: 'oklch(0.15 0.025 290)',
@@ -1038,7 +1077,11 @@ function MetricsChart({
           verticalAlign="top"
           height={28}
           formatter={(value: string) =>
-            value === 'avgTurns' ? 'Avg Turns' : 'Diversity'
+            value === 'avgTurns'
+              ? 'Avg Turns'
+              : value === 'metaBreadth'
+                ? 'Meta Breadth'
+                : 'Diversity'
           }
           wrapperStyle={{ fontSize: 11 }}
         />
@@ -1066,6 +1109,16 @@ function MetricsChart({
           strokeWidth={2}
           dot={false}
           opacity={0.7}
+        />
+        <Line
+          yAxisId="diversity"
+          type="monotone"
+          dataKey="metaBreadth"
+          stroke={ROLE_COLOR_VALUES.striker}
+          strokeWidth={2}
+          dot={false}
+          opacity={0.7}
+          strokeDasharray="4 3"
         />
       </LineChart>
     </ResponsiveContainer>
@@ -1113,6 +1166,29 @@ function DiversityIndicator({ diversity }: { diversity: number }) {
         {healthy
           ? 'Healthy variety in team building.'
           : 'Low diversity — meta is converging on a few dominant teams.'}
+      </span>
+    </div>
+  )
+}
+
+function MetaBreadthIndicator({ breadth }: { breadth: number }) {
+  const healthy = breadth >= 50
+
+  return (
+    <div
+      className={cn(
+        'mt-2 rounded-lg px-3 py-2 text-[11px]',
+        healthy
+          ? 'bg-success/10 text-success'
+          : 'bg-warning/10 text-warning',
+      )}
+    >
+      <span className="font-medium">Meta Breadth: {breadth.toFixed(0)}%</span>
+      <span className="ml-1.5 opacity-75">
+        — % of creatures appearing in top teams.{' '}
+        {healthy
+          ? 'Wide variety of creatures seeing play.'
+          : 'Narrow meta — few creatures dominate winning teams.'}
       </span>
     </div>
   )

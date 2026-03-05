@@ -154,7 +154,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     ],
     target: 'single_enemy',
     description: 'A frenzied attack that heals 25% of damage dealt.',
-    roleAffinity: ['striker', 'bruiser'],
+    roleAffinity: ['bruiser'],
   },
   {
     id: 'headbutt',
@@ -261,9 +261,12 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'taunt',
     name: 'Taunt',
     trigger: { type: 'onUse', cooldown: 1 },
-    effects: [{ type: 'taunt', duration: 2 }],
+    effects: [
+      { type: 'taunt', duration: 2 },
+      { type: 'buff', stat: 'def', percent: 25, duration: 2 },
+    ],
     target: 'self',
-    description: 'Draws all single-target attacks to self for 2 turns.',
+    description: 'Draws all single-target attacks to self for 2 turns and boosts DEF by 25%.',
     roleAffinity: ['tank'],
   },
 ]
@@ -283,11 +286,11 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   },
   {
     id: 'armored_plates',
-    name: 'Armored Plates',
-    trigger: { type: 'always' },
-    effects: [{ type: 'crit_reduction', percent: 50 }],
+    name: 'Spiked Plates',
+    trigger: { type: 'onBattleStart' },
+    effects: [{ type: 'reflect', percent: 20, duration: 999 }],
     target: 'self',
-    description: 'Reduces critical hit damage by 50%.',
+    description: 'Reflects 20% of incoming damage back to attackers.',
     roleAffinity: ['tank'],
   },
   {
@@ -345,7 +348,7 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     ],
     target: 'self',
     description: '+10% ATK and DEF when in the front row.',
-    roleAffinity: ['tank', 'bruiser'],
+    roleAffinity: ['bruiser'],
   },
   {
     id: 'pack_hunter',
@@ -375,6 +378,33 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     target: 'self',
     description: "Heals 15% max HP when an enemy is KO'd.",
     roleAffinity: ['bruiser'],
+  },
+  {
+    id: 'soothing_aura',
+    name: 'Soothing Aura',
+    trigger: { type: 'onTurnEnd' },
+    effects: [{ type: 'heal', percent: 2 }],
+    target: 'all_allies',
+    description: 'Heals all allies for 2% max HP at the end of each turn.',
+    roleAffinity: ['support'],
+  },
+  {
+    id: 'fortifying_presence',
+    name: 'Fortifying Presence',
+    trigger: { type: 'onBattleStart' },
+    effects: [{ type: 'buff', stat: 'def', percent: 10, duration: 999 }],
+    target: 'all_allies',
+    description: 'All allies gain +10% DEF at the start of battle.',
+    roleAffinity: ['support'],
+  },
+  {
+    id: 'weakening_strikes',
+    name: 'Weakening Strikes',
+    trigger: { type: 'onBasicAttack' },
+    effects: [{ type: 'debuff', stat: 'atk', percent: 15, duration: 2 }],
+    target: 'attack_target',
+    description: 'Basic attacks reduce the target\'s ATK by 15% for 2 turns.',
+    roleAffinity: ['support'],
   },
   // ── No passive ──
   {
