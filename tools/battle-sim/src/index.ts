@@ -1,14 +1,22 @@
 import chalk from 'chalk'
-import { loadCreatures } from './db.ts'
+import { loadCreatures, type CreatureRecord } from './db.ts'
 import { runMatchupReport } from './reports/matchup.ts'
 import { runTeamReport } from './reports/team.ts'
 import { runRoleReport } from './reports/role.ts'
 import { runCreatureReport } from './reports/creature.ts'
 import { runAbilityReport } from './reports/ability.ts'
+import { runMetaReport } from './reports/meta.ts'
 
 // ─── CLI Argument Parsing ─────────────────────────────────────────
 
-type Command = 'all' | 'matchup' | 'team' | 'role' | 'creature' | 'ability'
+type Command =
+  | 'all'
+  | 'matchup'
+  | 'team'
+  | 'role'
+  | 'creature'
+  | 'ability'
+  | 'meta'
 
 const COMMANDS = new Set<Command>([
   'all',
@@ -17,12 +25,19 @@ const COMMANDS = new Set<Command>([
   'role',
   'creature',
   'ability',
+  'meta',
 ])
 
 interface SimArgs {
   command: Command
   creatureName?: string
   trials?: number
+  population?: number
+  generations?: number
+  matchesPerTeam?: number
+  normalizeStats: boolean
+  noActives: boolean
+  noPassives: boolean
   csv: boolean
 }
 
@@ -31,6 +46,12 @@ function parseArgs(argv: string[]): SimArgs {
   let command: Command = 'all'
   let creatureName: string | undefined
   let trials: number | undefined
+  let population: number | undefined
+  let generations: number | undefined
+  let matchesPerTeam: number | undefined
+  let normalizeStats = false
+  let noActives = false
+  let noPassives = false
   let csv = false
 
   const tokens: string[] = []
@@ -39,6 +60,12 @@ function parseArgs(argv: string[]): SimArgs {
     if (args[i] === '--') continue // skip pnpm arg separator
     if (args[i] === '--csv') {
       csv = true
+    } else if (args[i] === '--normalize-stats') {
+      normalizeStats = true
+    } else if (args[i] === '--no-actives') {
+      noActives = true
+    } else if (args[i] === '--no-passives') {
+      noPassives = true
     } else if (args[i] === '--trials' && i + 1 < args.length) {
       trials = parseInt(args[i + 1]!, 10)
       if (isNaN(trials) || trials < 1) {
@@ -46,6 +73,15 @@ function parseArgs(argv: string[]): SimArgs {
         process.exit(1)
       }
       i++ // skip next arg
+    } else if (args[i] === '--population' && i + 1 < args.length) {
+      population = parseInt(args[i + 1]!, 10)
+      i++
+    } else if (args[i] === '--generations' && i + 1 < args.length) {
+      generations = parseInt(args[i + 1]!, 10)
+      i++
+    } else if (args[i] === '--matches' && i + 1 < args.length) {
+      matchesPerTeam = parseInt(args[i + 1]!, 10)
+      i++
     } else {
       tokens.push(args[i]!)
     }
@@ -68,7 +104,27 @@ function parseArgs(argv: string[]): SimArgs {
     process.exit(1)
   }
 
-  return { command, creatureName, trials, csv }
+  return { command, creatureName, trials, population, generations, matchesPerTeam, normalizeStats, noActives, noPassives, csv }
+}
+
+// ─── Stat Normalization ──────────────────────────────────────────
+
+/** Scale all creatures to the same total stat budget, removing rarity advantage. */
+function normalizeCreatures(creatures: CreatureRecord[]): CreatureRecord[] {
+  const TARGET_TOTAL = 170 // rare-tier baseline — value doesn't matter, just needs to be equal
+
+  return creatures.map((c) => {
+    const total = c.hp + c.atk + c.def + c.spd
+    if (total === 0) return c
+    const scale = TARGET_TOTAL / total
+    return {
+      ...c,
+      hp: Math.round(c.hp * scale),
+      atk: Math.round(c.atk * scale),
+      def: Math.round(c.def * scale),
+      spd: Math.round(c.spd * scale),
+    }
+  })
 }
 
 // ─── Default Trial Counts ─────────────────────────────────────────
@@ -79,6 +135,7 @@ const DEFAULTS = {
   role: 1_000,
   creature: 100,
   ability: 10_000,
+  meta: 25,
 }
 
 // ─── Main ─────────────────────────────────────────────────────────
@@ -96,8 +153,30 @@ function main(): void {
   // Load creature data
   log('  Loading creature data...')
   const t0 = Date.now()
-  const creatures = loadCreatures()
-  log(`  Loaded ${creatures.length} battle-ready creatures\n`)
+  let creatures = loadCreatures()
+  log(`  Loaded ${creatures.length} battle-ready creatures`)
+
+  if (args.normalizeStats) {
+    creatures = normalizeCreatures(creatures)
+    log(chalk.yellow('  ⚗ Stats normalized — all stats scaled to 170 total (rarity-neutral)'))
+  }
+
+  if (args.noActives) {
+    creatures = creatures.map((c) => ({
+      ...c,
+      active: { templateId: 'bite', displayName: 'Bite' },
+    }))
+    log(chalk.yellow('  ⚗ Active abilities disabled — all creatures use Bite'))
+  }
+
+  if (args.noPassives) {
+    creatures = creatures.map((c) => ({
+      ...c,
+      passive: { templateId: 'none', displayName: 'None' },
+    }))
+    log(chalk.yellow('  ⚗ Passive abilities disabled'))
+  }
+  log('')
 
   const run = (cmd: Command) => {
     const trials = args.trials
@@ -131,6 +210,16 @@ function main(): void {
       case 'ability':
         runAbilityReport(creatures, {
           trials: trials ?? DEFAULTS.ability,
+          csv: args.csv,
+        })
+        break
+      case 'meta':
+        runMetaReport(creatures, {
+          population: args.population ?? 100,
+          generations: trials ?? args.generations ?? DEFAULTS.meta,
+          matchesPerTeam: args.matchesPerTeam ?? 20,
+          eliteRate: 0.1,
+          mutationRate: 0.8,
           csv: args.csv,
         })
         break

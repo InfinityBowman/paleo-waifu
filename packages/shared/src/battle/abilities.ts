@@ -1,132 +1,200 @@
-import { calculateDamage, getDietModifier } from './damage'
+import { calculateDamage } from './damage'
+import { BASIC_ATTACK } from './constants'
 import type {
-  AbilityResolution,
+  Ability,
   BattleCreature,
-  ResolvedAbility,
+  Condition,
+  Effect,
+  EffectContext,
+  EffectResolution,
   SeededRng,
+  Stat,
   StatusEffect,
-  StatusTickResult,
+  StatusEffectKind,
+  Target,
+  Trigger,
 } from './types'
 
-// ─── Basic Attack ──────────────────────────────────────────────────
+// ─── Status Tick Result ─────────────────────────────────────────────
 
-export function getBasicAttack(): ResolvedAbility {
-  return {
-    templateId: 'basic_attack',
-    displayName: 'Basic Attack',
-    slot: 'active1',
-    type: 'active',
-    category: 'damage',
-    target: 'single_enemy',
-    multiplier: 1.0,
-    cooldown: 0,
-    duration: null,
-    statAffected: null,
-    effectValue: null,
-  }
+export interface StatusTickResult {
+  kind: StatusEffectKind
+  damage?: number
+  healing?: number
+  expired: boolean
+  stat?: Stat
 }
 
-// ─── Cooldown Helpers ──────────────────────────────────────────────
+// ─── Basic Attack ───────────────────────────────────────────────────
 
-export function isAbilityReady(
-  creature: BattleCreature,
-  ability: ResolvedAbility,
-): boolean {
-  if (ability.templateId === 'basic_attack') return true
-  return (creature.cooldowns[ability.templateId] ?? 0) <= 0
+export function getBasicAttack(): Ability {
+  return BASIC_ATTACK
 }
 
-export function decrementCooldowns(creature: BattleCreature): void {
-  for (const key of Object.keys(creature.cooldowns)) {
-    if (creature.cooldowns[key] > 0) {
-      creature.cooldowns[key]--
+// ─── Cooldown ───────────────────────────────────────────────────────
+
+export function isActiveReady(creature: BattleCreature): boolean {
+  return creature.cooldown <= 0
+}
+
+// ─── Target Resolution ──────────────────────────────────────────────
+
+export function resolveTarget(
+  target: Target,
+  caster: BattleCreature,
+  ctx: EffectContext,
+  rng: SeededRng,
+): BattleCreature[] {
+  const livingEnemies = ctx.allEnemies.filter((e) => e.isAlive)
+  const livingAllies = ctx.allAllies.filter((a) => a.isAlive)
+
+  switch (target) {
+    case 'self':
+      return [caster]
+
+    case 'all_allies':
+      return livingAllies
+
+    case 'all_enemies':
+      return livingEnemies
+
+    case 'lowest_hp_ally': {
+      if (livingAllies.length === 0) return []
+      const lowest = livingAllies.reduce((a, b) =>
+        a.currentHp / a.maxHp < b.currentHp / b.maxHp ? a : b,
+      )
+      return [lowest]
+    }
+
+    case 'single_enemy': {
+      if (livingEnemies.length === 0) return []
+      // Check for taunt
+      const taunting = livingEnemies.find((e) =>
+        e.statusEffects.some((s) => s.kind === 'taunt'),
+      )
+      if (taunting) return [taunting]
+      // Prefer front row
+      const frontRow = livingEnemies.filter((e) => e.row === 'front')
+      const pool = frontRow.length > 0 ? frontRow : livingEnemies
+      // Pick lowest HP% from pool
+      const picked = pool.reduce((a, b) =>
+        a.currentHp / a.maxHp <= b.currentHp / b.maxHp ? a : b,
+      )
+      return [picked]
+    }
+
+    case 'random_enemy': {
+      if (livingEnemies.length === 0) return []
+      const idx = rng.nextInt(0, livingEnemies.length - 1)
+      return [livingEnemies[idx]!]
+    }
+
+    case 'attack_target': {
+      return ctx.triggerAttackTarget ? [ctx.triggerAttackTarget] : []
+    }
+
+    case 'attacker': {
+      return ctx.triggerAttacker ? [ctx.triggerAttacker] : []
     }
   }
 }
 
-function putOnCooldown(
-  creature: BattleCreature,
-  ability: ResolvedAbility,
-): void {
-  if (ability.cooldown && ability.cooldown > 0) {
-    creature.cooldowns[ability.templateId] = ability.cooldown
+// ─── Condition Evaluation ───────────────────────────────────────────
+
+export function evaluateCondition(
+  condition: Condition | undefined,
+  owner: BattleCreature,
+  ctx: EffectContext,
+): boolean {
+  if (!condition) return true
+
+  switch (condition.type) {
+    case 'in_row':
+      return owner.row === condition.row
+
+    case 'target_hp_below': {
+      const primary =
+        ctx.triggerAttackTarget ?? ctx.targets[0]
+      if (!primary) return false
+      return (
+        primary.currentHp < primary.maxHp * (condition.percent / 100)
+      )
+    }
+
+    case 'per_ally_alive':
+    case 'per_dead_ally':
+      // These don't gate — they modify magnitude via stack multiplier
+      return true
   }
 }
 
-// ─── Ability Resolution ────────────────────────────────────────────
+export function computeStackMultiplier(
+  condition: Condition | undefined,
+  owner: BattleCreature,
+  ctx: EffectContext,
+): number {
+  if (!condition) return 1
 
-export function resolveAbility({
-  caster,
-  ability,
-  targets,
-  allAllies,
-  allEnemies,
-  rng,
-  turn,
-}: {
-  caster: BattleCreature
-  ability: ResolvedAbility
-  targets: BattleCreature[]
-  allAllies: BattleCreature[]
-  allEnemies: BattleCreature[]
-  rng: SeededRng
-  turn: number
-}): AbilityResolution[] {
-  putOnCooldown(caster, ability)
-  const results: AbilityResolution[] = []
+  switch (condition.type) {
+    case 'per_ally_alive':
+      return ctx.allAllies.filter(
+        (a) => a.id !== owner.id && a.isAlive,
+      ).length
 
-  switch (ability.category) {
-    case 'damage':
-    case 'aoe_damage':
-      resolveDamage(caster, ability, targets, rng, results)
-      break
+    case 'per_dead_ally':
+      return ctx.allAllies.filter(
+        (a) => a.id !== owner.id && !a.isAlive,
+      ).length
+
+    default:
+      return 1
+  }
+}
+
+function scaleEffect(effect: Effect, multiplier: number): Effect {
+  if (multiplier <= 0) return effect
+  if (multiplier === 1) return effect
+  switch (effect.type) {
     case 'buff':
-      resolveBuff(caster, ability, targets, turn, results)
-      break
+      return { ...effect, percent: effect.percent * multiplier }
     case 'debuff':
-      resolveDebuff(caster, ability, targets, turn, results)
-      break
+      return { ...effect, percent: effect.percent * multiplier }
     case 'heal':
-      resolveHeal(caster, ability, targets, allAllies, results)
-      break
-    case 'shield':
-      resolveShield(caster, ability, targets, results)
-      break
-    case 'stun':
-      resolveStun(caster, ability, targets, rng, results)
-      break
-    case 'dot':
-      resolveDot(caster, ability, targets, rng, results)
-      break
-    case 'taunt':
-      resolveTaunt(caster, ability, allAllies, results)
-      break
+      return { ...effect, percent: effect.percent * multiplier }
+    case 'damage':
+      return {
+        ...effect,
+        multiplier: effect.multiplier * multiplier,
+      }
+    default:
+      return effect
   }
-
-  return results
 }
 
-// ─── Category Resolvers ────────────────────────────────────────────
+// ─── Effect Resolution ──────────────────────────────────────────────
 
-function resolveDamage(
+export function resolveEffect(
+  effect: Effect,
   caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  rng: SeededRng,
-  results: AbilityResolution[],
-): void {
-  for (const target of targets) {
-    const dmgResult = calculateDamage({
-      attacker: caster,
-      defender: target,
-      ability,
-      rng,
-    })
+  target: BattleCreature,
+  ctx: EffectContext,
+): EffectResolution[] {
+  switch (effect.type) {
+    case 'damage': {
+      const result = calculateDamage({
+        attacker: caster,
+        defender: target,
+        effect,
+        rng: ctx.rng,
+      })
 
-    let finalDamage = dmgResult.damage
-    let reflectDmg: number | undefined
+      if (result.isDodged) {
+        return [{ kind: 'dodged', targetId: target.id }]
+      }
 
-    if (!dmgResult.isDodged) {
+      let finalDamage = result.damage
+      const resolutions: EffectResolution[] = []
+
       // Shield absorption
       const shieldEffect = target.statusEffects.find(
         (e) => e.kind === 'shield',
@@ -143,517 +211,416 @@ function resolveDamage(
       }
 
       // Reflect damage
-      if (target.reflectDamagePercent > 0 && finalDamage > 0) {
-        reflectDmg = Math.floor(
-          finalDamage * (target.reflectDamagePercent / 100),
+      const reflectEffect = target.statusEffects.find(
+        (e) => e.kind === 'reflect',
+      )
+      if (reflectEffect && finalDamage > 0) {
+        const reflectDmg = Math.floor(
+          finalDamage * (reflectEffect.value / 100),
         )
-        caster.currentHp = Math.max(0, caster.currentHp - reflectDmg)
-        if (caster.currentHp <= 0) caster.isAlive = false
+        if (reflectDmg > 0) {
+          caster.currentHp = Math.max(
+            0,
+            caster.currentHp - reflectDmg,
+          )
+          if (caster.currentHp <= 0) caster.isAlive = false
+          resolutions.push({
+            kind: 'reflect_damage',
+            targetId: caster.id,
+            sourceId: target.id,
+            amount: reflectDmg,
+          })
+        }
       }
 
       // Apply damage
       target.currentHp = Math.max(0, target.currentHp - finalDamage)
       if (target.currentHp <= 0) target.isAlive = false
 
-      // Lifesteal
-      if (
-        ability.statAffected === 'lifesteal' &&
-        ability.effectValue &&
-        finalDamage > 0
-      ) {
-        const healAmount = Math.floor(
-          finalDamage * (ability.effectValue / 100),
-        )
-        caster.currentHp = Math.min(
-          caster.maxHp,
-          caster.currentHp + healAmount,
-        )
-      }
-
-      // Stun chance (body_slam)
-      if (
-        ability.statAffected === 'stun_chance' &&
-        ability.effectValue &&
-        target.isAlive
-      ) {
-        const stunRoll = rng.next()
-        if (stunRoll < ability.effectValue / 100) {
-          // Check apex_predator immunity
-          if (target.passive.templateId !== 'apex_predator') {
-            applyStun(caster, target)
-          }
-        }
-      }
-
-      // Poison on hit (venom_strike)
-      if (
-        ability.statAffected === 'poison' &&
-        ability.effectValue &&
-        ability.duration &&
-        target.isAlive
-      ) {
-        applyDotEffect(
-          caster,
-          target,
-          'poison',
-          ability.effectValue,
-          ability.duration,
-        )
-      }
-
-      // Constrict slow
-      if (
-        ability.templateId === 'constrict' &&
-        ability.duration &&
-        target.isAlive
-      ) {
-        applyStatDebuff(
-          caster,
-          target,
-          'spd',
-          ability.effectValue ?? -20,
-          ability.duration,
-        )
-      }
-
-      // Venomous passive: basic attacks apply poison
-      if (
-        ability.templateId === 'basic_attack' &&
-        caster.passive.templateId === 'venomous' &&
-        target.isAlive
-      ) {
-        applyDotEffect(
-          caster,
-          target,
-          'poison',
-          caster.passive.effectValue ?? 3,
-          caster.passive.duration ?? 2,
-        )
-      }
-    }
-
-    results.push({
-      targetId: target.id,
-      damage: dmgResult.isDodged ? 0 : finalDamage,
-      isCrit: dmgResult.isCrit,
-      isDodged: dmgResult.isDodged,
-      isDietBonus: dmgResult.isDietBonus,
-      reflectDamage: reflectDmg,
-    })
-  }
-}
-
-function resolveBuff(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  turn: number,
-  results: AbilityResolution[],
-): void {
-  // Handle reflect as a special case
-  if (ability.statAffected === 'reflect') {
-    for (const target of targets) {
-      target.reflectDamagePercent = ability.effectValue ?? 0
-      const effect: StatusEffect = {
-        kind: 'reflect',
-        sourceCreatureId: caster.id,
-        value: ability.effectValue ?? 0,
-        turnsRemaining: ability.duration ?? 1,
-      }
-      target.statusEffects.push(effect)
-      results.push({
+      resolutions.unshift({
+        kind: 'damage',
         targetId: target.id,
-        statusApplied: effect,
+        amount: finalDamage,
+        isCrit: result.isCrit,
+        isDodged: false,
+        isDietBonus: result.isDietBonus,
       })
+
+      return resolutions
     }
-    return
-  }
 
-  const stats = (ability.statAffected ?? '').split(',')
-  const duration = ability.duration ?? 2
-  const value = ability.effectValue ?? 0
-
-  for (const target of targets) {
-    for (const stat of stats) {
-      const trimmed = stat.trim()
-      // Same-stat buff replaces previous
-      target.statusEffects = target.statusEffects.filter(
-        (e) => !(e.kind === 'buff' && e.stat === trimmed),
+    case 'heal': {
+      if (!target.isAlive) return []
+      const amount = Math.max(
+        1,
+        Math.floor(target.maxHp * (effect.percent / 100)),
       )
+      target.currentHp = Math.min(
+        target.maxHp,
+        target.currentHp + amount,
+      )
+      return [
+        {
+          kind: 'heal',
+          targetId: target.id,
+          amount,
+          newHp: target.currentHp,
+        },
+      ]
+    }
 
-      const effect: StatusEffect = {
+    case 'dot': {
+      if (!target.isAlive) return []
+      const se: StatusEffect = {
+        kind: effect.dotKind,
+        sourceCreatureId: caster.id,
+        value: effect.percent,
+        turnsRemaining: effect.duration,
+      }
+      target.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: target.id, effect: se },
+      ]
+    }
+
+    case 'buff': {
+      if (!target.isAlive) return []
+      // Replace same-stat buff
+      removeExistingStatEffect(target, 'buff', effect.stat)
+      applyStatModifier(target, effect.stat, effect.percent)
+      const se: StatusEffect = {
         kind: 'buff',
         sourceCreatureId: caster.id,
-        stat: trimmed,
-        value,
-        turnsRemaining: duration,
+        value: effect.percent,
+        turnsRemaining: effect.duration,
+        stat: effect.stat,
       }
-      target.statusEffects.push(effect)
-      applyStatModifier(target, trimmed, value)
-
-      results.push({
-        targetId: target.id,
-        statusApplied: effect,
-      })
-    }
-  }
-}
-
-function resolveDebuff(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  turn: number,
-  results: AbilityResolution[],
-): void {
-  const stats = (ability.statAffected ?? '').split(',')
-  const duration = ability.duration ?? 2
-  const value = ability.effectValue ?? 0
-
-  for (const target of targets) {
-    // thermal_regulation: immune to debuffs for first N turns
-    if (target.passive.templateId === 'thermal_regulation') {
-      const immuneTurns = target.passive.duration ?? 2
-      if (turn <= immuneTurns) continue
+      target.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: target.id, effect: se },
+      ]
     }
 
-    for (const stat of stats) {
-      const trimmed = stat.trim()
-      // Same-stat debuff replaces previous — undo old modifier first
-      const existing = target.statusEffects.find(
-        (e) => e.kind === 'debuff' && e.stat === trimmed,
-      )
-      if (existing) {
-        removeStatModifier(target, trimmed, existing.value)
-        target.statusEffects = target.statusEffects.filter(
-          (e) => e !== existing,
-        )
-      }
-
-      const effect: StatusEffect = {
+    case 'debuff': {
+      if (!target.isAlive) return []
+      // Replace same-stat debuff — undo old modifier first
+      removeExistingStatEffect(target, 'debuff', effect.stat)
+      applyStatModifier(target, effect.stat, -effect.percent)
+      const se: StatusEffect = {
         kind: 'debuff',
         sourceCreatureId: caster.id,
-        stat: trimmed,
-        value,
-        turnsRemaining: duration,
+        value: effect.percent,
+        turnsRemaining: effect.duration,
+        stat: effect.stat,
       }
-      target.statusEffects.push(effect)
-      applyStatModifier(target, trimmed, value)
-
-      results.push({
-        targetId: target.id,
-        statusApplied: effect,
-      })
+      target.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: target.id, effect: se },
+      ]
     }
-  }
-}
 
-function resolveHeal(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  allAllies: BattleCreature[],
-  results: AbilityResolution[],
-): void {
-  const pct = ability.effectValue ?? 0
-
-  // Handle HoT (regenerate)
-  if (ability.statAffected === 'hot') {
-    for (const target of targets) {
-      const effect: StatusEffect = {
-        kind: 'hot',
-        sourceCreatureId: caster.id,
-        value: pct,
-        turnsRemaining: ability.duration ?? 3,
-      }
-      // Replace existing HoT
+    case 'shield': {
+      if (!target.isAlive) return []
+      const hp = Math.floor(caster.maxHp * (effect.percent / 100))
       target.statusEffects = target.statusEffects.filter(
-        (e) => e.kind !== 'hot',
+        (e) => e.kind !== 'shield',
       )
-      target.statusEffects.push(effect)
-      results.push({ targetId: target.id, statusApplied: effect })
+      const se: StatusEffect = {
+        kind: 'shield',
+        sourceCreatureId: caster.id,
+        value: hp,
+        turnsRemaining: effect.duration,
+      }
+      target.statusEffects.push(se)
+      return [{ kind: 'shield_set', targetId: target.id, amount: hp }]
     }
-    return
-  }
 
-  // Mend: targets lowest HP ally specifically
-  if (ability.templateId === 'mend') {
-    const livingAllies = allAllies.filter((a) => a.isAlive)
-    if (livingAllies.length === 0) return
-    const lowestHpAlly = livingAllies.reduce((a, b) =>
-      a.currentHp / a.maxHp < b.currentHp / b.maxHp ? a : b,
-    )
-    const healAmount = Math.floor(lowestHpAlly.maxHp * (pct / 100))
-    lowestHpAlly.currentHp = Math.min(
-      lowestHpAlly.maxHp,
-      lowestHpAlly.currentHp + healAmount,
-    )
-    results.push({
-      targetId: lowestHpAlly.id,
-      healing: healAmount,
-    })
-    return
-  }
+    case 'stun': {
+      if (!target.isAlive) return []
+      target.isStunned = true
+      target.statusEffects = target.statusEffects.filter(
+        (e) => e.kind !== 'stun',
+      )
+      const se: StatusEffect = {
+        kind: 'stun',
+        sourceCreatureId: caster.id,
+        value: 0,
+        turnsRemaining: effect.duration,
+      }
+      target.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: target.id, effect: se },
+      ]
+    }
 
-  for (const target of targets) {
-    if (!target.isAlive) continue
-    const healAmount = Math.floor(target.maxHp * (pct / 100))
-    target.currentHp = Math.min(
-      target.maxHp,
-      target.currentHp + healAmount,
-    )
-    results.push({
-      targetId: target.id,
-      healing: healAmount,
-    })
+    case 'taunt': {
+      // Clear existing taunts on the caster's team
+      for (const ally of ctx.allAllies) {
+        ally.statusEffects = ally.statusEffects.filter(
+          (e) => e.kind !== 'taunt',
+        )
+      }
+      const se: StatusEffect = {
+        kind: 'taunt',
+        sourceCreatureId: caster.id,
+        value: 0,
+        turnsRemaining: effect.duration,
+      }
+      caster.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: caster.id, effect: se },
+      ]
+    }
+
+    case 'lifesteal': {
+      const dealt = ctx.lastDamageDealt ?? 0
+      if (dealt <= 0) return []
+      const amount = Math.max(
+        1,
+        Math.floor(dealt * (effect.percent / 100)),
+      )
+      caster.currentHp = Math.min(
+        caster.maxHp,
+        caster.currentHp + amount,
+      )
+      return [
+        {
+          kind: 'heal',
+          targetId: caster.id,
+          amount,
+          newHp: caster.currentHp,
+        },
+      ]
+    }
+
+    case 'reflect': {
+      if (!target.isAlive) return []
+      target.statusEffects = target.statusEffects.filter(
+        (e) => e.kind !== 'reflect',
+      )
+      const se: StatusEffect = {
+        kind: 'reflect',
+        sourceCreatureId: caster.id,
+        value: effect.percent,
+        turnsRemaining: effect.duration,
+      }
+      target.statusEffects.push(se)
+      return [
+        { kind: 'status_applied', targetId: target.id, effect: se },
+      ]
+    }
+
+    // 'damage_reduction', 'crit_reduction', 'flat_reduction', 'dodge'
+    // are handled by materializeAlwaysPassive(), not resolveEffect()
+    default:
+      return []
   }
 }
 
-function resolveShield(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
+// ─── Resolve Full Ability ───────────────────────────────────────────
+
+export function resolveAbilityEffects(
+  ability: Ability,
   targets: BattleCreature[],
-  results: AbilityResolution[],
-): void {
-  const pct = ability.effectValue ?? 0
+  ctx: EffectContext,
+): EffectResolution[] {
+  const allResolutions: EffectResolution[] = []
+
   for (const target of targets) {
-    const shieldHp = Math.floor(target.maxHp * (pct / 100))
-    // Remove existing shield
-    target.statusEffects = target.statusEffects.filter(
-      (e) => e.kind !== 'shield',
-    )
-    const effect: StatusEffect = {
-      kind: 'shield',
-      sourceCreatureId: caster.id,
-      value: shieldHp,
-      turnsRemaining: ability.duration ?? 2,
-    }
-    target.statusEffects.push(effect)
-    results.push({
-      targetId: target.id,
-      shieldAmount: shieldHp,
-      statusApplied: effect,
-    })
-  }
-}
+    let lastDamageDealt = 0
+    let targetKilled = false
 
-function resolveStun(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  rng: SeededRng,
-  results: AbilityResolution[],
-): void {
-  for (const target of targets) {
-    // Headbutt does damage + guaranteed stun
-    if (ability.multiplier && ability.multiplier > 0) {
-      const dmgResult = calculateDamage({
-        attacker: caster,
-        defender: target,
-        ability,
-        rng,
-      })
-      if (!dmgResult.isDodged) {
-        target.currentHp = Math.max(0, target.currentHp - dmgResult.damage)
-        if (target.currentHp <= 0) target.isAlive = false
-      }
-      results.push({
-        targetId: target.id,
-        damage: dmgResult.isDodged ? 0 : dmgResult.damage,
-        isCrit: dmgResult.isCrit,
-        isDodged: dmgResult.isDodged,
-      })
-    }
+    for (const effect of ability.effects) {
+      // Skip secondary effects on KO'd target (but not lifesteal — it heals caster)
+      if (targetKilled && effect.type !== 'lifesteal') continue
 
-    if (target.isAlive) {
-      // apex_predator: immune to stun
-      if (target.passive.templateId === 'apex_predator') {
-        continue
-      }
-      const stunEffect = applyStun(caster, target)
-      results.push({
-        targetId: target.id,
-        statusApplied: stunEffect,
-      })
-    }
-  }
-}
-
-function resolveDot(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  targets: BattleCreature[],
-  rng: SeededRng,
-  results: AbilityResolution[],
-): void {
-  for (const target of targets) {
-    // Bleed does initial damage + DoT
-    if (ability.multiplier && ability.multiplier > 0) {
-      const dmgResult = calculateDamage({
-        attacker: caster,
-        defender: target,
-        ability,
-        rng,
-      })
-      if (!dmgResult.isDodged) {
-        target.currentHp = Math.max(0, target.currentHp - dmgResult.damage)
-        if (target.currentHp <= 0) target.isAlive = false
-      }
-      results.push({
-        targetId: target.id,
-        damage: dmgResult.isDodged ? 0 : dmgResult.damage,
-        isCrit: dmgResult.isCrit,
-        isDodged: dmgResult.isDodged,
-      })
-    }
-
-    if (target.isAlive && ability.statAffected && ability.effectValue) {
-      const dotKind =
-        ability.statAffected === 'bleed' ? 'bleed' : 'poison'
-      const effect = applyDotEffect(
-        caster,
+      const effectCtx: EffectContext = { ...ctx, lastDamageDealt }
+      const resolutions = resolveEffect(
+        effect,
+        ctx.caster,
         target,
-        dotKind,
-        ability.effectValue,
-        ability.duration ?? 3,
+        effectCtx,
       )
-      results.push({
-        targetId: target.id,
-        statusApplied: effect,
-      })
+      allResolutions.push(...resolutions)
+
+      for (const res of resolutions) {
+        if (res.kind === 'damage') {
+          lastDamageDealt = res.amount
+          if (!target.isAlive) targetKilled = true
+        }
+      }
+    }
+  }
+
+  return allResolutions
+}
+
+// ─── Fire Trigger ───────────────────────────────────────────────────
+
+export function fireTrigger(
+  eventType: Trigger['type'],
+  owner: BattleCreature,
+  ctx: EffectContext,
+): EffectResolution[] {
+  const passive = owner.passive
+  if (!passive || passive.effects.length === 0) return []
+
+  // Match trigger type
+  if (passive.trigger.type !== eventType) return []
+
+  // For onBattleStart, check the trigger's own condition
+  if (
+    passive.trigger.type === 'onBattleStart' &&
+    passive.trigger.condition
+  ) {
+    if (
+      !evaluateCondition(passive.trigger.condition, owner, ctx)
+    )
+      return []
+  }
+
+  // Check the ability-level condition
+  if (!evaluateCondition(passive.condition, owner, ctx)) return []
+
+  const stackMultiplier = computeStackMultiplier(
+    passive.condition,
+    owner,
+    ctx,
+  )
+
+  const resolvedTargets = resolveTarget(
+    passive.target,
+    owner,
+    ctx,
+    ctx.rng,
+  )
+  const allResolutions: EffectResolution[] = []
+
+  for (const target of resolvedTargets) {
+    for (const effect of passive.effects) {
+      const scaledEffect = scaleEffect(effect, stackMultiplier)
+      const resolutions = resolveEffect(
+        scaledEffect,
+        owner,
+        target,
+        ctx,
+      )
+      allResolutions.push(...resolutions)
+    }
+  }
+
+  return allResolutions
+}
+
+// ─── Materialize Always Passives ────────────────────────────────────
+// Called at battle start and each turn for dynamic passives.
+// Writes permanent passive values into BattleCreature flat fields.
+
+export function materializeAlwaysPassive(
+  creature: BattleCreature,
+  allies: BattleCreature[],
+): void {
+  const passive = creature.passive
+  if (passive.trigger.type !== 'always') return
+
+  // Reset materialized fields
+  creature.damageReductionPercent = 0
+  creature.critReductionPercent = 0
+  creature.flatReductionDefPercent = 0
+  creature.dodgeBasePercent = 0
+
+  for (const effect of passive.effects) {
+    switch (effect.type) {
+      case 'damage_reduction':
+        creature.damageReductionPercent = effect.percent
+        break
+      case 'crit_reduction':
+        creature.critReductionPercent = effect.percent
+        break
+      case 'flat_reduction':
+        creature.flatReductionDefPercent = effect.scalingPercent
+        break
+      case 'dodge':
+        creature.dodgeBasePercent = effect.basePercent
+        break
+    }
+  }
+
+  // Dynamic: pack_hunter scales with living allies (per_ally_alive)
+  if (passive.condition?.type === 'per_ally_alive') {
+    const liveAllyCount = allies.filter(
+      (a) => a.id !== creature.id && a.isAlive,
+    ).length
+    // Use a tracking key to compute deltas
+    const prevCount =
+      (creature as any).__passiveAllyCount ?? 0
+    if (liveAllyCount !== prevCount) {
+      for (const effect of passive.effects) {
+        if (effect.type === 'buff') {
+          const prevBonus = Math.floor(
+            creature.baseStats[
+              effect.stat as keyof typeof creature.baseStats
+            ] *
+              ((effect.percent * prevCount) / 100),
+          )
+          const newBonus = Math.floor(
+            creature.baseStats[
+              effect.stat as keyof typeof creature.baseStats
+            ] *
+              ((effect.percent * liveAllyCount) / 100),
+          )
+          const stat = effect.stat
+          if (stat === 'atk')
+            creature.atk += newBonus - prevBonus
+          else if (stat === 'def')
+            creature.def += newBonus - prevBonus
+          else if (stat === 'spd')
+            creature.spd += newBonus - prevBonus
+        }
+      }
+      ;(creature as any).__passiveAllyCount = liveAllyCount
+    }
+  }
+
+  // Dynamic: per_dead_ally (ancient_resilience pattern, reserved for future)
+  if (passive.condition?.type === 'per_dead_ally') {
+    const deadCount = allies.filter(
+      (a) => a.id !== creature.id && !a.isAlive,
+    ).length
+    const prevCount = (creature as any).__passiveDeadCount ?? 0
+    if (deadCount !== prevCount) {
+      for (const effect of passive.effects) {
+        if (effect.type === 'buff') {
+          const prevBonus = Math.floor(
+            creature.baseStats[
+              effect.stat as keyof typeof creature.baseStats
+            ] *
+              ((effect.percent * prevCount) / 100),
+          )
+          const newBonus = Math.floor(
+            creature.baseStats[
+              effect.stat as keyof typeof creature.baseStats
+            ] *
+              ((effect.percent * deadCount) / 100),
+          )
+          const stat = effect.stat
+          if (stat === 'atk')
+            creature.atk += newBonus - prevBonus
+          else if (stat === 'def')
+            creature.def += newBonus - prevBonus
+          else if (stat === 'spd')
+            creature.spd += newBonus - prevBonus
+        }
+      }
+      ;(creature as any).__passiveDeadCount = deadCount
     }
   }
 }
 
-function resolveTaunt(
-  caster: BattleCreature,
-  ability: ResolvedAbility,
-  allAllies: BattleCreature[],
-  results: AbilityResolution[],
-): void {
-  // Remove existing taunts from allies
-  for (const ally of allAllies) {
-    ally.statusEffects = ally.statusEffects.filter(
-      (e) => e.kind !== 'taunt',
-    )
-  }
-  const effect: StatusEffect = {
-    kind: 'taunt',
-    sourceCreatureId: caster.id,
-    value: 0,
-    turnsRemaining: ability.duration ?? 2,
-  }
-  caster.statusEffects.push(effect)
-  results.push({
-    targetId: caster.id,
-    statusApplied: effect,
-  })
-}
-
-// ─── Status Effect Helpers ─────────────────────────────────────────
-
-function applyStun(
-  caster: BattleCreature,
-  target: BattleCreature,
-): StatusEffect {
-  target.isStunned = true
-  // Remove existing stun and add fresh
-  target.statusEffects = target.statusEffects.filter(
-    (e) => e.kind !== 'stun',
-  )
-  const effect: StatusEffect = {
-    kind: 'stun',
-    sourceCreatureId: caster.id,
-    value: 0,
-    turnsRemaining: 1,
-  }
-  target.statusEffects.push(effect)
-  return effect
-}
-
-function applyDotEffect(
-  caster: BattleCreature,
-  target: BattleCreature,
-  kind: 'poison' | 'bleed',
-  pctPerTurn: number,
-  duration: number,
-): StatusEffect {
-  // Stack DoTs — multiple sources can apply
-  const effect: StatusEffect = {
-    kind,
-    sourceCreatureId: caster.id,
-    value: pctPerTurn,
-    turnsRemaining: duration,
-  }
-  target.statusEffects.push(effect)
-  return effect
-}
-
-function applyStatDebuff(
-  caster: BattleCreature,
-  target: BattleCreature,
-  stat: string,
-  value: number,
-  duration: number,
-): void {
-  // Same-stat debuff replaces
-  const existing = target.statusEffects.find(
-    (e) => e.kind === 'debuff' && e.stat === stat,
-  )
-  if (existing) {
-    removeStatModifier(target, stat, existing.value)
-    target.statusEffects = target.statusEffects.filter(
-      (e) => e !== existing,
-    )
-  }
-  target.statusEffects.push({
-    kind: 'debuff',
-    sourceCreatureId: caster.id,
-    stat,
-    value,
-    turnsRemaining: duration,
-  })
-  applyStatModifier(target, stat, value)
-}
-
-function applyStatModifier(
-  creature: BattleCreature,
-  stat: string,
-  percentValue: number,
-): void {
-  const amount = Math.floor(
-    creature.baseStats[stat as keyof typeof creature.baseStats] *
-      (percentValue / 100),
-  )
-  switch (stat) {
-    case 'atk':
-      creature.atk += amount
-      break
-    case 'def':
-      creature.def += amount
-      break
-    case 'spd':
-      creature.spd += amount
-      break
-    case 'abl':
-      creature.abl += amount
-      break
-  }
-}
-
-function removeStatModifier(
-  creature: BattleCreature,
-  stat: string,
-  percentValue: number,
-): void {
-  applyStatModifier(creature, stat, -percentValue)
-}
-
-// ─── Status Effect Tick ────────────────────────────────────────────
+// ─── Status Effect Tick ─────────────────────────────────────────────
 
 export function tickStatusEffects(
   creature: BattleCreature,
-  _turn: number,
 ): StatusTickResult[] {
   const results: StatusTickResult[] = []
   const toRemove: StatusEffect[] = []
@@ -662,23 +629,19 @@ export function tickStatusEffects(
     switch (effect.kind) {
       case 'poison':
       case 'bleed': {
-        // Tick damage: % of max HP, ignores DEF
         const tickDmg = Math.max(
           1,
           Math.floor(creature.maxHp * (effect.value / 100)),
         )
-        creature.currentHp = Math.max(0, creature.currentHp - tickDmg)
+        creature.currentHp = Math.max(
+          0,
+          creature.currentHp - tickDmg,
+        )
         if (creature.currentHp <= 0) creature.isAlive = false
-
         effect.turnsRemaining--
         const expired = effect.turnsRemaining <= 0
         if (expired) toRemove.push(effect)
-
-        results.push({
-          kind: effect.kind,
-          damage: tickDmg,
-          expired,
-        })
+        results.push({ kind: effect.kind, damage: tickDmg, expired })
         break
       }
 
@@ -700,16 +663,18 @@ export function tickStatusEffects(
 
       case 'buff':
       case 'debuff': {
-        // Buffs/debuffs decrement when affected creature acts
-        // (called at end of creature's turn)
         effect.turnsRemaining--
         if (effect.turnsRemaining <= 0) {
-          // Remove stat modifier
           if (effect.stat) {
             if (effect.kind === 'buff') {
               removeStatModifier(creature, effect.stat, effect.value)
             } else {
-              removeStatModifier(creature, effect.stat, effect.value)
+              // Debuff: undo the negative modifier
+              removeStatModifier(
+                creature,
+                effect.stat,
+                -effect.value,
+              )
             }
           }
           toRemove.push(effect)
@@ -731,11 +696,9 @@ export function tickStatusEffects(
         break
       }
 
-      case 'stun': {
-        // Stun is consumed when the creature skips its turn
-        // It's handled in the engine turn loop, not here
+      case 'stun':
+        // Stun is consumed when creature skips turn, handled in engine
         break
-      }
 
       case 'taunt': {
         effect.turnsRemaining--
@@ -749,7 +712,6 @@ export function tickStatusEffects(
       case 'reflect': {
         effect.turnsRemaining--
         if (effect.turnsRemaining <= 0) {
-          creature.reflectDamagePercent = 0
           toRemove.push(effect)
           results.push({ kind: 'reflect', expired: true })
         }
@@ -763,4 +725,56 @@ export function tickStatusEffects(
   )
 
   return results
+}
+
+// ─── Stat Modifier Helpers ──────────────────────────────────────────
+
+function applyStatModifier(
+  creature: BattleCreature,
+  stat: Stat,
+  percentValue: number,
+): void {
+  const base =
+    creature.baseStats[stat as keyof typeof creature.baseStats]
+  const amount = Math.floor(base * (percentValue / 100))
+  switch (stat) {
+    case 'atk':
+      creature.atk += amount
+      break
+    case 'def':
+      creature.def += amount
+      break
+    case 'spd':
+      creature.spd += amount
+      break
+  }
+}
+
+function removeStatModifier(
+  creature: BattleCreature,
+  stat: Stat,
+  percentValue: number,
+): void {
+  applyStatModifier(creature, stat, -percentValue)
+}
+
+function removeExistingStatEffect(
+  creature: BattleCreature,
+  kind: 'buff' | 'debuff',
+  stat: Stat,
+): void {
+  const existing = creature.statusEffects.find(
+    (e) => e.kind === kind && e.stat === stat,
+  )
+  if (existing) {
+    if (kind === 'buff') {
+      removeStatModifier(creature, stat, existing.value)
+    } else {
+      // Debuff: undo the negative modifier
+      removeStatModifier(creature, stat, -existing.value)
+    }
+    creature.statusEffects = creature.statusEffects.filter(
+      (e) => e !== existing,
+    )
+  }
 }

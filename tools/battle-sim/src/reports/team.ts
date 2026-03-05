@@ -19,7 +19,7 @@ interface SynergyInfo {
   hasEraSynergy2: boolean
   hasEraSynergy3: boolean
   dietCategory: 'all_carnivore' | 'all_herbivore' | 'mixed' | 'none'
-  roleCombo: string // sorted role triple, e.g. "scout/striker/tank"
+  roleCombo: string // sorted role triple, e.g. "bruiser/striker/tank"
 }
 
 function detectSynergies(
@@ -120,16 +120,16 @@ export function runTeamReport(
 
       // Record synergy stats for both teams
       const recordSynergies = (syn: SynergyInfo, won: boolean) => {
-        if (syn.hasTypeSynergy3) addSynergyResult('Type 3x (+15% HP, +10% ATK)', won)
-        else if (syn.hasTypeSynergy2) addSynergyResult('Type 2x (+10% HP)', won)
-        if (syn.hasEraSynergy3) addSynergyResult('Era 3x (+10% all)', won)
-        else if (syn.hasEraSynergy2) addSynergyResult('Era 2x (+5% all)', won)
+        if (syn.hasTypeSynergy3) addSynergyResult('Type 3x (+7% HP, +3% ATK)', won)
+        else if (syn.hasTypeSynergy2) addSynergyResult('Type 2x (+5% HP)', won)
+        if (syn.hasEraSynergy3) addSynergyResult('Era 3x (+3% all)', won)
+        else if (syn.hasEraSynergy2) addSynergyResult('Era 2x (+3% all)', won)
         if (syn.dietCategory === 'all_carnivore')
-          addSynergyResult('All Carnivore (+15% ATK)', won)
+          addSynergyResult('All Carnivore (+10% ATK, +7% SPD)', won)
         if (syn.dietCategory === 'all_herbivore')
-          addSynergyResult('All Herbivore (+20% DEF)', won)
+          addSynergyResult('All Herbivore (+10% DEF, +10% HP)', won)
         if (syn.dietCategory === 'mixed')
-          addSynergyResult('Mixed Diet (+10% SPD)', won)
+          addSynergyResult('Mixed Diet (+12% SPD, +7% ATK)', won)
       }
 
       recordSynergies(synA, aWon)

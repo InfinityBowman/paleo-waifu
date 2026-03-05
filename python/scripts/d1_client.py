@@ -21,7 +21,9 @@ def _load_env() -> None:
     """Load env vars from pipeline-dashboard/.env if they aren't already set."""
     if os.environ.get("CF_ACCOUNT_ID"):
         return
-    env_file = Path(__file__).parent.parent.parent / "tools" / "pipeline-dashboard" / ".env"
+    env_file = Path(__file__).parent.parent.parent / "editor" / ".env"
+    if not env_file.exists():
+        env_file = Path(__file__).parent.parent.parent / "tools" / "pipeline-dashboard" / ".env"
     if not env_file.exists():
         return
     for line in env_file.read_text().splitlines():

@@ -1,22 +1,24 @@
 import {
-  decrementCooldowns,
-  resolveAbility,
+  fireTrigger,
+  materializeAlwaysPassive,
+  resolveAbilityEffects,
   tickStatusEffects,
 } from './abilities'
 import { selectAction } from './ai'
-import { ALL_ABILITY_TEMPLATES } from './constants'
+import { DEFAULT_ROLE, DIET_TO_ROLE, TYPE_TO_ROLE } from './constants'
 import { createRng } from './rng'
 import { applySynergies, calculateSynergies } from './synergies'
 import type {
-  AbilityTemplateData,
   BattleCreature,
   BattleLogEvent,
   BattleResult,
   BattleTeam,
   BattleTeamMember,
-  ResolvedAbility,
+  EffectContext,
+  EffectResolution,
   SeededRng,
   TeamSide,
+  Trigger,
 } from './types'
 
 const MAX_TURNS = 30
@@ -30,13 +32,14 @@ export function simulateBattle(
 ): BattleResult {
   const rng = createRng(options.seed)
   const log: BattleLogEvent[] = []
+  const koLogged = new Set<string>()
 
-  // 1. Convert team members to battle creatures
+  // 1. Hydrate
   const creaturesA = teamA.members.map((m, i) =>
-    hydrateBattleCreature(m, 'A', i, rng),
+    hydrateBattleCreature(m, 'A', i),
   )
   const creaturesB = teamB.members.map((m, i) =>
-    hydrateBattleCreature(m, 'B', i, rng),
+    hydrateBattleCreature(m, 'B', i),
   )
 
   log.push({
@@ -46,17 +49,30 @@ export function simulateBattle(
     seed: options.seed,
   })
 
-  // 2. Apply always-on passives
-  for (const creature of [...creaturesA, ...creaturesB]) {
-    applyAlwaysOnPassives(creature, creaturesA, creaturesB, log)
+  // 2. Materialize always-on passives (thick_hide, evasive, pack_hunter, etc.)
+  for (const c of [...creaturesA, ...creaturesB]) {
+    const allies = c.teamSide === 'A' ? creaturesA : creaturesB
+    materializeAlwaysPassive(c, allies)
   }
 
-  // 3. Calculate and apply synergies
+  // 3. Fire onBattleStart triggers (e.g., territorial)
+  for (const c of [...creaturesA, ...creaturesB]) {
+    fireAndLog(
+      'onBattleStart',
+      c,
+      creaturesA,
+      creaturesB,
+      rng,
+      0,
+      log,
+    )
+  }
+
+  // 4. Synergies
   const synergiesA = calculateSynergies(creaturesA)
   const synergiesB = calculateSynergies(creaturesB)
   applySynergies(creaturesA, synergiesA)
   applySynergies(creaturesB, synergiesB)
-
   for (const syn of synergiesA) {
     log.push({ type: 'synergy_applied', teamSide: 'A', synergy: syn })
   }
@@ -64,7 +80,7 @@ export function simulateBattle(
     log.push({ type: 'synergy_applied', teamSide: 'B', synergy: syn })
   }
 
-  // 4. Turn loop
+  // 5. Turn loop
   let turnCount = 0
   let winner: TeamSide | null = null
 
@@ -72,54 +88,65 @@ export function simulateBattle(
     turnCount = turn
     log.push({ type: 'turn_start', turn })
 
-    // Sort by SPD desc, ties broken by RNG
-    const allCreatures = [...creaturesA, ...creaturesB]
+    // Weighted initiative: spd × random(0.5, 1.5)
+    const turnOrder = [...creaturesA, ...creaturesB]
       .filter((c) => c.isAlive)
-      .sort((a, b) => {
-        if (b.spd !== a.spd) return b.spd - a.spd
-        return rng.next() - 0.5
-      })
+      .sort(
+        (a, b) =>
+          b.spd * rng.nextFloat(0.5, 1.5) -
+          a.spd * rng.nextFloat(0.5, 1.5),
+      )
 
-    for (const creature of allCreatures) {
+    for (const creature of turnOrder) {
       if (!creature.isAlive) continue
 
-      // Reset per-turn flags
-      creature.reflectDamagePercent = creature.statusEffects.some(
-        (e) => e.kind === 'reflect',
-      )
-        ? creature.statusEffects.find((e) => e.kind === 'reflect')!.value
-        : 0
+      // Decrement active cooldown
+      creature.cooldown = Math.max(0, creature.cooldown - 1)
 
-      // Decrement cooldowns
-      decrementCooldowns(creature)
-
-      // Check stun
+      // Stun check
       if (creature.isStunned) {
-        log.push({ type: 'stun_skip', turn, creatureId: creature.id })
+        log.push({
+          type: 'stun_skip',
+          turn,
+          creatureId: creature.id,
+        })
         creature.isStunned = false
         creature.statusEffects = creature.statusEffects.filter(
           (e) => e.kind !== 'stun',
         )
-        // Still tick status effects even when stunned
         tickAndLog(creature, turn, log)
         continue
       }
 
-      // Recalculate dynamic passives
-      recalcDynamicPassives(creature, creaturesA, creaturesB, turn)
-
-      // Determine allies/enemies
       const allies =
         creature.teamSide === 'A' ? creaturesA : creaturesB
       const enemies =
         creature.teamSide === 'A' ? creaturesB : creaturesA
 
-      // Select action via AI
+      // Re-materialize dynamic passives (pack_hunter ally count changes)
+      materializeAlwaysPassive(creature, allies)
+
+      // Fire onTurnStart passives
+      fireAndLog(
+        'onTurnStart',
+        creature,
+        creaturesA,
+        creaturesB,
+        rng,
+        turn,
+        log,
+      )
+
+      // AI selects action
+      const livingAllies = allies.filter((a) => a.isAlive)
+      const livingEnemies = enemies.filter((e) => e.isAlive)
+
       const { ability, targets } = selectAction({
         actor: creature,
-        allies: allies.filter((a) => a.isAlive),
-        enemies: enemies.filter((e) => e.isAlive),
+        allies: livingAllies,
+        enemies: livingEnemies,
         rng,
+        turn,
       })
 
       log.push({
@@ -127,187 +154,115 @@ export function simulateBattle(
         turn,
         creatureId: creature.id,
         creatureName: creature.name,
-        abilityId: ability.templateId,
+        abilityId: ability.id,
         abilityName: ability.displayName,
         targetIds: targets.map((t) => t.id),
       })
 
-      // Resolve ability
-      const resolutions = resolveAbility({
-        caster: creature,
-        ability,
-        targets,
-        allAllies: allies.filter((a) => a.isAlive),
-        allEnemies: enemies.filter((e) => e.isAlive),
-        rng,
-        turn,
-      })
+      // Set cooldown for active ability (not basic attack)
+      if (
+        ability.id !== 'basic_attack' &&
+        ability.trigger.type === 'onUse'
+      ) {
+        creature.cooldown = ability.trigger.cooldown
+      }
 
-      // Log resolutions
-      for (const res of resolutions) {
-        if (res.damage !== undefined && res.damage > 0) {
+      // Resolve ability effects
+      const ctx = makeCtx(creature, allies, enemies, rng, turn)
+      ctx.targets = targets
+      const resolutions = resolveAbilityEffects(ability, targets, ctx)
+      logResolutions(creature, resolutions, turn, log)
+
+      // Fire onBasicAttack passives (venomous, predator_instinct)
+      if (ability.id === 'basic_attack' && targets.length > 0) {
+        const attackCtx = makeCtx(
+          creature,
+          allies,
+          enemies,
+          rng,
+          turn,
+        )
+        attackCtx.triggerAttackTarget = targets[0]
+        const attackRes = fireTrigger(
+          'onBasicAttack',
+          creature,
+          attackCtx,
+        )
+        if (attackRes.length > 0) {
           log.push({
-            type: 'damage',
+            type: 'passive_trigger',
             turn,
-            sourceId: creature.id,
-            targetId: res.targetId,
-            amount: res.damage,
-            isCrit: res.isCrit ?? false,
-            isDodged: res.isDodged ?? false,
-            isDietBonus: res.isDietBonus ?? false,
+            creatureId: creature.id,
+            passiveId: creature.passive.id,
+            triggerKind: 'onBasicAttack',
+            description: creature.passive.description,
           })
-        }
-        if (res.isDodged) {
-          log.push({
-            type: 'damage',
-            turn,
-            sourceId: creature.id,
-            targetId: res.targetId,
-            amount: 0,
-            isCrit: false,
-            isDodged: true,
-            isDietBonus: false,
-          })
-        }
-        if (res.healing !== undefined && res.healing > 0) {
-          const target = findCreature(
-            res.targetId,
-            creaturesA,
-            creaturesB,
-          )
-          log.push({
-            type: 'heal',
-            turn,
-            sourceId: creature.id,
-            targetId: res.targetId,
-            amount: res.healing,
-            newHp: target?.currentHp ?? 0,
-          })
-        }
-        if (res.statusApplied) {
-          log.push({
-            type: 'status_applied',
-            turn,
-            targetId: res.targetId,
-            effect: res.statusApplied,
-          })
-        }
-        if (res.shieldAmount !== undefined) {
-          log.push({
-            type: 'shield_absorbed',
-            turn,
-            targetId: res.targetId,
-            absorbed: 0,
-            remaining: res.shieldAmount,
-          })
-        }
-        if (res.reflectDamage !== undefined && res.reflectDamage > 0) {
-          log.push({
-            type: 'reflect_damage',
-            turn,
-            sourceId: res.targetId,
-            targetId: creature.id,
-            amount: res.reflectDamage,
-          })
+          logResolutions(creature, attackRes, turn, log)
         }
       }
 
       // Handle KOs from damage
-      for (const c of [...creaturesA, ...creaturesB]) {
-        if (!c.isAlive && c.currentHp <= 0) {
-          // Only log if not already logged
-          const alreadyLogged = log.some(
-            (e) => e.type === 'ko' && e.creatureId === c.id,
-          )
-          if (!alreadyLogged) {
-            log.push({
-              type: 'ko',
-              turn,
-              creatureId: c.id,
-              creatureName: c.name,
-            })
+      processNewKOs(
+        creature,
+        creaturesA,
+        creaturesB,
+        koLogged,
+        turn,
+        log,
+        rng,
+      )
 
-            // Trigger scavenger passive
-            triggerScavenger(c, creaturesA, creaturesB, turn, log)
-          }
-        }
-      }
-
-      // Check reflect KO of attacker
-      if (!creature.isAlive) {
-        const alreadyLogged = log.some(
-          (e) => e.type === 'ko' && e.creatureId === creature.id,
-        )
-        if (!alreadyLogged) {
-          log.push({
-            type: 'ko',
-            turn,
-            creatureId: creature.id,
-            creatureName: creature.name,
-          })
-          triggerScavenger(creature, creaturesA, creaturesB, turn, log)
-        }
-      }
-
-      // Win check
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
 
-      // Tick status effects
+      // Tick status effects (DoT, buff/debuff expiry, shield duration)
       tickAndLog(creature, turn, log)
 
-      // Check DoT KOs
-      if (!creature.isAlive) {
-        const alreadyLogged = log.some(
-          (e) => e.type === 'ko' && e.creatureId === creature.id,
-        )
-        if (!alreadyLogged) {
-          log.push({
-            type: 'ko',
-            turn,
-            creatureId: creature.id,
-            creatureName: creature.name,
-          })
-          triggerScavenger(creature, creaturesA, creaturesB, turn, log)
-        }
-      }
+      // Handle KOs from DoT
+      processNewKOs(
+        creature,
+        creaturesA,
+        creaturesB,
+        koLogged,
+        turn,
+        log,
+        rng,
+      )
+
+      winner = checkWinner(creaturesA, creaturesB)
+      if (winner) break
+
+      // Fire onTurnEnd passives (regenerative)
+      fireAndLog(
+        'onTurnEnd',
+        creature,
+        creaturesA,
+        creaturesB,
+        rng,
+        turn,
+        log,
+      )
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
     }
 
     log.push({ type: 'turn_end', turn })
-
     if (winner) break
-
-    // Regenerative passive: heal 3% at end of turn
-    for (const c of [...creaturesA, ...creaturesB]) {
-      if (c.isAlive && c.passive.templateId === 'regenerative') {
-        const healAmt = Math.max(
-          1,
-          Math.floor(c.maxHp * ((c.passive.effectValue ?? 3) / 100)),
-        )
-        c.currentHp = Math.min(c.maxHp, c.currentHp + healAmt)
-        log.push({
-          type: 'passive_trigger',
-          turn,
-          creatureId: c.id,
-          passiveId: 'regenerative',
-          description: `Healed ${healAmt} HP`,
-        })
-      }
-    }
   }
 
-  // 5. Resolution
+  // 6. Resolution
   if (!winner) {
-    // Timeout — compare HP%
     const teamAHp = calcTeamHpPercent(creaturesA)
     const teamBHp = calcTeamHpPercent(creaturesB)
-    winner = teamAHp > teamBHp ? 'A' : 'B' // ties favor B (defender)
+    winner = teamAHp > teamBHp ? 'A' : 'B'
   }
 
-  const reason = turnCount >= MAX_TURNS && !checkWinner(creaturesA, creaturesB) ? 'timeout' : 'ko'
+  const reason =
+    turnCount >= MAX_TURNS &&
+    !checkWinner(creaturesA, creaturesB)
+      ? 'timeout'
+      : 'ko'
 
   log.push({
     type: 'battle_end',
@@ -334,38 +289,7 @@ function hydrateBattleCreature(
   member: BattleTeamMember,
   teamSide: TeamSide,
   index: number,
-  rng: SeededRng,
 ): BattleCreature {
-  const templateMap = new Map<string, AbilityTemplateData>()
-  for (const t of ALL_ABILITY_TEMPLATES) {
-    templateMap.set(t.id, t)
-  }
-
-  const resolveAbilityFromAssignment = (
-    assignment: { templateId: string; displayName: string },
-    slot: 'active1' | 'active2' | 'passive',
-  ): ResolvedAbility => {
-    const template = templateMap.get(assignment.templateId)
-    if (!template) {
-      throw new Error(
-        `Unknown ability template: ${assignment.templateId}`,
-      )
-    }
-    return {
-      templateId: template.id,
-      displayName: assignment.displayName,
-      slot,
-      type: template.type,
-      category: template.category,
-      target: template.target,
-      multiplier: template.multiplier,
-      cooldown: template.cooldown,
-      duration: template.duration,
-      statAffected: template.statAffected,
-      effectValue: template.effectValue,
-    }
-  }
-
   return {
     id: `${teamSide}-${index}-${member.creatureId}`,
     creatureId: member.creatureId,
@@ -378,210 +302,226 @@ function hydrateBattleCreature(
     atk: member.stats.atk,
     def: member.stats.def,
     spd: member.stats.spd,
-    abl: member.stats.abl,
-    role: 'bruiser', // role is derived from type in constants, not critical at runtime
+    role:
+      TYPE_TO_ROLE[member.type] ??
+      DIET_TO_ROLE[member.diet] ??
+      DEFAULT_ROLE,
     diet: member.diet,
     type: member.type,
     era: member.era,
     rarity: member.rarity,
-    active1: resolveAbilityFromAssignment(
-      member.abilities.active1,
-      'active1',
-    ),
-    active2: resolveAbilityFromAssignment(
-      member.abilities.active2,
-      'active2',
-    ),
-    passive: resolveAbilityFromAssignment(
-      member.abilities.passive,
-      'passive',
-    ),
-    cooldowns: {},
+    active: member.active,
+    passive: member.passive,
+    cooldown: 0,
     statusEffects: [],
     isAlive: true,
     isStunned: false,
-    reflectDamagePercent: 0,
+    damageReductionPercent: 0,
+    critReductionPercent: 0,
+    flatReductionDefPercent: 0,
+    dodgeBasePercent: 0,
   }
 }
 
-// ─── Passives ──────────────────────────────────────────────────────
+// ─── Trigger Helper ───────────────────────────────────────────────
 
-function applyAlwaysOnPassives(
+function makeCtx(
+  caster: BattleCreature,
+  allies: BattleCreature[],
+  enemies: BattleCreature[],
+  rng: SeededRng,
+  turn: number,
+): EffectContext {
+  return {
+    caster,
+    targets: [],
+    allAllies: allies.filter((a) => a.isAlive),
+    allEnemies: enemies.filter((e) => e.isAlive),
+    rng,
+    turn,
+  }
+}
+
+function fireAndLog(
+  triggerKind: Trigger['type'],
   creature: BattleCreature,
-  teamA: BattleCreature[],
-  teamB: BattleCreature[],
+  creaturesA: BattleCreature[],
+  creaturesB: BattleCreature[],
+  rng: SeededRng,
+  turn: number,
   log: BattleLogEvent[],
 ): void {
-  const passive = creature.passive
-
-  switch (passive.templateId) {
-    case 'aquatic_adaptation': {
-      // +20% SPD, note: description says -10% DEF but effectValue is 20
-      // We apply +20% SPD and -10% DEF as described
-      creature.spd += Math.floor(creature.baseStats.spd * 0.2)
-      creature.def -= Math.floor(creature.baseStats.def * 0.1)
-      log.push({
-        type: 'passive_trigger',
-        turn: 0,
-        creatureId: creature.id,
-        passiveId: 'aquatic_adaptation',
-        description: '+20% SPD, -10% DEF',
-      })
-      break
-    }
-
-    case 'territorial': {
-      // +15% ATK and DEF when in front row
-      if (creature.row === 'front') {
-        const pct = (passive.effectValue ?? 15) / 100
-        creature.atk += Math.floor(creature.baseStats.atk * pct)
-        creature.def += Math.floor(creature.baseStats.def * pct)
-        log.push({
-          type: 'passive_trigger',
-          turn: 0,
-          creatureId: creature.id,
-          passiveId: 'territorial',
-          description: '+15% ATK and DEF (front row)',
-        })
-      }
-      break
-    }
-
-    case 'apex_predator': {
-      // +10% ATK, stun immunity handled at resolution time
-      const pct = (passive.effectValue ?? 10) / 100
-      creature.atk += Math.floor(creature.baseStats.atk * pct)
-      log.push({
-        type: 'passive_trigger',
-        turn: 0,
-        creatureId: creature.id,
-        passiveId: 'apex_predator',
-        description: '+10% ATK, stun immune',
-      })
-      break
-    }
-
-    case 'pack_hunter': {
-      // +10% ATK per ally alive (initial = 2 allies)
-      const allies =
-        creature.teamSide === 'A' ? teamA : teamB
-      const allyCount = allies.filter(
-        (a) => a.id !== creature.id && a.isAlive,
-      ).length
-      const pct = ((passive.effectValue ?? 10) * allyCount) / 100
-      creature.atk += Math.floor(creature.baseStats.atk * pct)
-      log.push({
-        type: 'passive_trigger',
-        turn: 0,
-        creatureId: creature.id,
-        passiveId: 'pack_hunter',
-        description: `+${allyCount * (passive.effectValue ?? 10)}% ATK (${allyCount} allies)`,
-      })
-      break
-    }
-
-    case 'herd_mentality': {
-      // +10% all stats per ally of same creature type
-      const allies =
-        creature.teamSide === 'A' ? teamA : teamB
-      const sameTypeCount = allies.filter(
-        (a) => a.id !== creature.id && a.type === creature.type,
-      ).length
-      if (sameTypeCount > 0) {
-        const pct =
-          ((passive.effectValue ?? 10) * sameTypeCount) / 100
-        creature.maxHp += Math.floor(creature.baseStats.hp * pct)
-        creature.currentHp = creature.maxHp
-        creature.atk += Math.floor(creature.baseStats.atk * pct)
-        creature.def += Math.floor(creature.baseStats.def * pct)
-        creature.spd += Math.floor(creature.baseStats.spd * pct)
-        creature.abl += Math.floor(creature.baseStats.abl * pct)
-        log.push({
-          type: 'passive_trigger',
-          turn: 0,
-          creatureId: creature.id,
-          passiveId: 'herd_mentality',
-          description: `+${sameTypeCount * (passive.effectValue ?? 10)}% all stats (${sameTypeCount} same-type allies)`,
-        })
-      }
-      break
-    }
+  const allies =
+    creature.teamSide === 'A' ? creaturesA : creaturesB
+  const enemies =
+    creature.teamSide === 'A' ? creaturesB : creaturesA
+  const ctx = makeCtx(creature, allies, enemies, rng, turn)
+  const resolutions = fireTrigger(triggerKind, creature, ctx)
+  if (resolutions.length > 0) {
+    log.push({
+      type: 'passive_trigger',
+      turn,
+      creatureId: creature.id,
+      passiveId: creature.passive.id,
+      triggerKind,
+      description: creature.passive.description,
+    })
+    logResolutions(creature, resolutions, turn, log)
   }
 }
 
-function recalcDynamicPassives(
-  creature: BattleCreature,
-  teamA: BattleCreature[],
-  teamB: BattleCreature[],
+// ─── KO Processing ────────────────────────────────────────────────
+
+function processNewKOs(
+  attacker: BattleCreature,
+  creaturesA: BattleCreature[],
+  creaturesB: BattleCreature[],
+  koLogged: Set<string>,
   turn: number,
+  log: BattleLogEvent[],
+  rng: SeededRng,
 ): void {
-  const passive = creature.passive
+  for (const c of [...creaturesA, ...creaturesB]) {
+    if (!c.isAlive && !koLogged.has(c.id)) {
+      koLogged.add(c.id)
+      log.push({
+        type: 'ko',
+        turn,
+        creatureId: c.id,
+        creatureName: c.name,
+      })
 
-  // Use cooldowns map with reserved keys to track previously applied bonuses
-  // This ensures we only apply the delta, not the full amount each turn
+      // onKill for the attacker
+      if (attacker.isAlive && attacker.id !== c.id) {
+        fireAndLog(
+          'onKill',
+          attacker,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+        )
+      }
 
-  if (passive.templateId === 'ancient_resilience') {
-    // +5% all stats per KO'd ally
-    const allies =
-      creature.teamSide === 'A' ? teamA : teamB
-    const deadCount = allies.filter(
-      (a) => a.id !== creature.id && !a.isAlive,
-    ).length
-    const prevDeadCount = creature.cooldowns['__ar_dead'] ?? 0
+      // onEnemyKO for opponents of the dead creature
+      const opponents =
+        c.teamSide === 'A' ? creaturesB : creaturesA
+      for (const opp of opponents) {
+        if (!opp.isAlive) continue
+        fireAndLog(
+          'onEnemyKO',
+          opp,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+        )
+      }
 
-    if (deadCount !== prevDeadCount) {
-      const pct = ((passive.effectValue ?? 5) * deadCount) / 100
-      const prevPct = ((passive.effectValue ?? 5) * prevDeadCount) / 100
-
-      creature.atk +=
-        Math.floor(creature.baseStats.atk * pct) -
-        Math.floor(creature.baseStats.atk * prevPct)
-      creature.def +=
-        Math.floor(creature.baseStats.def * pct) -
-        Math.floor(creature.baseStats.def * prevPct)
-      creature.spd +=
-        Math.floor(creature.baseStats.spd * pct) -
-        Math.floor(creature.baseStats.spd * prevPct)
-      creature.abl +=
-        Math.floor(creature.baseStats.abl * pct) -
-        Math.floor(creature.baseStats.abl * prevPct)
-
-      creature.cooldowns['__ar_dead'] = deadCount
-    }
-  }
-
-  if (passive.templateId === 'pack_hunter') {
-    const allies =
-      creature.teamSide === 'A' ? teamA : teamB
-    const currentAllyCount = allies.filter(
-      (a) => a.id !== creature.id && a.isAlive,
-    ).length
-    const prevAllyCount = creature.cooldowns['__ph_allies'] ?? currentAllyCount
-
-    if (currentAllyCount !== prevAllyCount) {
-      const currentPct =
-        ((passive.effectValue ?? 10) * currentAllyCount) / 100
-      const prevPct =
-        ((passive.effectValue ?? 10) * prevAllyCount) / 100
-
-      creature.atk +=
-        Math.floor(creature.baseStats.atk * currentPct) -
-        Math.floor(creature.baseStats.atk * prevPct)
-
-      creature.cooldowns['__ph_allies'] = currentAllyCount
+      // onAllyKO for allies of the dead creature
+      const deadAllies =
+        c.teamSide === 'A' ? creaturesA : creaturesB
+      for (const ally of deadAllies) {
+        if (!ally.isAlive || ally.id === c.id) continue
+        fireAndLog(
+          'onAllyKO',
+          ally,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+        )
+      }
     }
   }
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────
+// ─── Resolution Logging ──────────────────────────────────────────
+
+function logResolutions(
+  source: BattleCreature,
+  resolutions: EffectResolution[],
+  turn: number,
+  log: BattleLogEvent[],
+): void {
+  for (const res of resolutions) {
+    switch (res.kind) {
+      case 'damage':
+        log.push({
+          type: 'damage',
+          turn,
+          sourceId: source.id,
+          targetId: res.targetId,
+          amount: res.amount,
+          isCrit: res.isCrit,
+          isDodged: false,
+          isDietBonus: res.isDietBonus,
+        })
+        break
+      case 'dodged':
+        log.push({
+          type: 'damage',
+          turn,
+          sourceId: source.id,
+          targetId: res.targetId,
+          amount: 0,
+          isCrit: false,
+          isDodged: true,
+          isDietBonus: false,
+        })
+        break
+      case 'heal':
+        log.push({
+          type: 'heal',
+          turn,
+          sourceId: source.id,
+          targetId: res.targetId,
+          amount: res.amount,
+          newHp: res.newHp,
+        })
+        break
+      case 'status_applied':
+        log.push({
+          type: 'status_applied',
+          turn,
+          targetId: res.targetId,
+          effect: res.effect,
+        })
+        break
+      case 'shield_set':
+        log.push({
+          type: 'shield_absorbed',
+          turn,
+          targetId: res.targetId,
+          absorbed: 0,
+          remaining: res.amount,
+        })
+        break
+      case 'reflect_damage':
+        log.push({
+          type: 'reflect_damage',
+          turn,
+          sourceId: res.sourceId,
+          targetId: res.targetId,
+          amount: res.amount,
+        })
+        break
+    }
+  }
+}
+
+// ─── Status Tick Logging ─────────────────────────────────────────
 
 function tickAndLog(
   creature: BattleCreature,
   turn: number,
   log: BattleLogEvent[],
 ): void {
-  const tickResults = tickStatusEffects(creature, turn)
-  for (const result of tickResults) {
+  const results = tickStatusEffects(creature)
+  for (const result of results) {
     if (result.damage !== undefined) {
       log.push({
         type: 'status_tick',
@@ -598,7 +538,7 @@ function tickAndLog(
         turn,
         targetId: creature.id,
         kind: result.kind,
-        damage: -(result.healing),
+        damage: -result.healing,
         newHp: creature.currentHp,
       })
     }
@@ -614,32 +554,7 @@ function tickAndLog(
   }
 }
 
-function triggerScavenger(
-  deadCreature: BattleCreature,
-  teamA: BattleCreature[],
-  teamB: BattleCreature[],
-  turn: number,
-  log: BattleLogEvent[],
-): void {
-  // Scavenger: opponents of the dead creature heal 15% when enemy KO'd
-  const opposingTeam =
-    deadCreature.teamSide === 'A' ? teamB : teamA
-  for (const c of opposingTeam) {
-    if (c.isAlive && c.passive.templateId === 'scavenger') {
-      const healAmt = Math.floor(
-        c.maxHp * ((c.passive.effectValue ?? 15) / 100),
-      )
-      c.currentHp = Math.min(c.maxHp, c.currentHp + healAmt)
-      log.push({
-        type: 'passive_trigger',
-        turn,
-        creatureId: c.id,
-        passiveId: 'scavenger',
-        description: `Healed ${healAmt} HP from enemy KO`,
-      })
-    }
-  }
-}
+// ─── Helpers ───────────────────────────────────────────────────────
 
 function checkWinner(
   teamA: BattleCreature[],
@@ -661,14 +576,4 @@ function calcTeamHpPercent(team: BattleCreature[]): number {
     0,
   )
   return (totalCurrent / totalMax) * 100
-}
-
-function findCreature(
-  id: string,
-  teamA: BattleCreature[],
-  teamB: BattleCreature[],
-): BattleCreature | undefined {
-  return (
-    teamA.find((c) => c.id === id) ?? teamB.find((c) => c.id === id)
-  )
 }

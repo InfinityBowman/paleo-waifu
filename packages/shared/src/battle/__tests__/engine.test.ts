@@ -5,18 +5,64 @@ import { calculateSynergies, applySynergies } from '../synergies'
 import { simulateBattle } from '../engine'
 import {
   getBasicAttack,
-  isAbilityReady,
-  decrementCooldowns,
+  isActiveReady,
   tickStatusEffects,
-  resolveAbility,
+  resolveAbilityEffects,
+  fireTrigger,
+  materializeAlwaysPassive,
+  resolveTarget,
 } from '../abilities'
-import { selectAction, selectTarget } from '../ai'
+import { selectAction } from '../ai'
 import type {
+  Ability,
   BattleCreature,
   BattleTeam,
   BattleTeamMember,
-  ResolvedAbility,
+  Effect,
+  EffectContext,
 } from '../types'
+
+// ─── Shared Abilities ──────────────────────────────────────────────
+
+const BITE: Ability = {
+  id: 'bite',
+  name: 'Bite',
+  displayName: 'Bite',
+  trigger: { type: 'onUse', cooldown: 0 },
+  effects: [{ type: 'damage', multiplier: 1.0, scaling: 'atk' }],
+  target: 'single_enemy',
+  description: 'A powerful bite attack.',
+}
+
+const TAIL_SWEEP: Ability = {
+  id: 'tail_sweep',
+  name: 'Tail Sweep',
+  displayName: 'Tail Sweep',
+  trigger: { type: 'onUse', cooldown: 2 },
+  effects: [{ type: 'damage', multiplier: 0.6, scaling: 'atk' }],
+  target: 'all_enemies',
+  description: 'A sweeping tail strike hitting all enemies.',
+}
+
+const THICK_HIDE: Ability = {
+  id: 'thick_hide',
+  name: 'Thick Hide',
+  displayName: 'Thick Hide',
+  trigger: { type: 'always' },
+  effects: [{ type: 'damage_reduction', percent: 15 }],
+  target: 'self',
+  description: 'Reduces all incoming damage by 15%.',
+}
+
+const NONE_PASSIVE: Ability = {
+  id: 'none',
+  name: 'None',
+  displayName: 'None',
+  trigger: { type: 'always' },
+  effects: [],
+  target: 'self',
+  description: 'No passive ability.',
+}
 
 // ─── Test Fixtures ─────────────────────────────────────────────────
 
@@ -26,13 +72,9 @@ function makeMember(
   return {
     creatureId: 'test-creature',
     name: 'TestDino',
-    stats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 },
-    abilities: {
-      creatureId: 'test-creature',
-      active1: { templateId: 'bite', displayName: 'Bite' },
-      active2: { templateId: 'tail_sweep', displayName: 'Tail Sweep' },
-      passive: { templateId: 'thick_hide', displayName: 'Thick Hide' },
-    },
+    stats: { hp: 100, atk: 30, def: 20, spd: 25 },
+    active: BITE,
+    passive: THICK_HIDE,
     diet: 'Carnivorous',
     type: 'large theropod',
     era: 'Cretaceous',
@@ -57,70 +99,33 @@ function makeTeam(
 function makeCreature(
   overrides: Partial<BattleCreature> = {},
 ): BattleCreature {
-  const basicPassive: ResolvedAbility = {
-    templateId: 'thick_hide',
-    displayName: 'Thick Hide',
-    slot: 'passive',
-    type: 'passive',
-    category: 'passive',
-    target: null,
-    multiplier: null,
-    cooldown: null,
-    duration: null,
-    statAffected: 'damage_reduction',
-    effectValue: 15,
-  }
-
   return {
     id: 'test-1',
     creatureId: 'c1',
     name: 'TestDino',
     teamSide: 'A',
     row: 'front',
-    baseStats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 },
+    baseStats: { hp: 100, atk: 30, def: 20, spd: 25 },
     maxHp: 100,
     currentHp: 100,
     atk: 30,
     def: 20,
     spd: 25,
-    abl: 15,
     role: 'striker',
     diet: 'Carnivorous',
     type: 'large theropod',
     era: 'Cretaceous',
     rarity: 'common',
-    active1: {
-      templateId: 'bite',
-      displayName: 'Bite',
-      slot: 'active1',
-      type: 'active',
-      category: 'damage',
-      target: 'single_enemy',
-      multiplier: 1.2,
-      cooldown: 0,
-      duration: null,
-      statAffected: null,
-      effectValue: null,
-    },
-    active2: {
-      templateId: 'tail_sweep',
-      displayName: 'Tail Sweep',
-      slot: 'active2',
-      type: 'active',
-      category: 'aoe_damage',
-      target: 'all_enemies',
-      multiplier: 0.7,
-      cooldown: 2,
-      duration: null,
-      statAffected: null,
-      effectValue: null,
-    },
-    passive: basicPassive,
-    cooldowns: {},
+    active: BITE,
+    passive: THICK_HIDE,
+    cooldown: 0,
     statusEffects: [],
     isAlive: true,
     isStunned: false,
-    reflectDamagePercent: 0,
+    damageReductionPercent: 0,
+    critReductionPercent: 0,
+    flatReductionDefPercent: 0,
+    dodgeBasePercent: 0,
     ...overrides,
   }
 }
@@ -178,109 +183,94 @@ describe('RNG', () => {
 describe('Damage', () => {
   it('calculates basic damage with DEF mitigation', () => {
     const rng = createRng(42)
-    const attacker = makeCreature({
-      atk: 30,
-      passive: {
-        ...makeCreature().passive,
-        templateId: 'none',
-      },
-    })
-    const defender = makeCreature({
-      def: 20,
-      passive: {
-        ...makeCreature().passive,
-        templateId: 'none',
-      },
-    })
-    const ability: ResolvedAbility = {
-      templateId: 'bite',
-      displayName: 'Bite',
-      slot: 'active1',
-      type: 'active',
-      category: 'damage',
-      target: 'single_enemy',
+    const attacker = makeCreature({ atk: 30, passive: NONE_PASSIVE })
+    const defender = makeCreature({ def: 20, passive: NONE_PASSIVE })
+    const effect: Effect & { type: 'damage' } = {
+      type: 'damage',
       multiplier: 1.0,
-      cooldown: 0,
-      duration: null,
-      statAffected: null,
-      effectValue: null,
+      scaling: 'atk',
     }
 
-    const result = calculateDamage({ attacker, defender, ability, rng })
-    // raw = 30 * 1.0 = 30, mitigated = 30 * (100/120) = 25, ±10% variance
+    const result = calculateDamage({ attacker, defender, effect, rng })
+    // raw = 30 * 1.0 = 30, DEF = 30*(100/120) ≈ 25, variance ±10%, scale *0.6
     expect(result.damage).toBeGreaterThan(0)
-    expect(result.damage).toBeLessThanOrEqual(35)
+    expect(result.damage).toBeLessThanOrEqual(30)
   })
 
-  it('applies thick_hide damage reduction', () => {
+  it('applies damage_reduction (Thick Hide)', () => {
     const rng1 = createRng(42)
     const rng2 = createRng(42)
 
-    const attacker = makeCreature({
-      atk: 50,
-      passive: { ...makeCreature().passive, templateId: 'none' },
-    })
-    const noHide = makeCreature({
+    const attacker = makeCreature({ atk: 50, passive: NONE_PASSIVE })
+    const noReduction = makeCreature({
       def: 10,
-      passive: { ...makeCreature().passive, templateId: 'none' },
+      passive: NONE_PASSIVE,
+      damageReductionPercent: 0,
     })
-    const withHide = makeCreature({
+    const withReduction = makeCreature({
       def: 10,
-      passive: { ...makeCreature().passive, templateId: 'thick_hide', effectValue: 15 },
+      passive: THICK_HIDE,
+      damageReductionPercent: 15,
     })
-    const ability: ResolvedAbility = {
-      templateId: 'bite',
-      displayName: 'Bite',
-      slot: 'active1',
-      type: 'active',
-      category: 'damage',
-      target: 'single_enemy',
+    const effect: Effect & { type: 'damage' } = {
+      type: 'damage',
       multiplier: 1.0,
-      cooldown: 0,
-      duration: null,
-      statAffected: null,
-      effectValue: null,
+      scaling: 'atk',
     }
 
-    const r1 = calculateDamage({ attacker, defender: noHide, ability, rng: rng1 })
-    const r2 = calculateDamage({ attacker, defender: withHide, ability, rng: rng2 })
+    const r1 = calculateDamage({
+      attacker,
+      defender: noReduction,
+      effect,
+      rng: rng1,
+    })
+    const r2 = calculateDamage({
+      attacker,
+      defender: withReduction,
+      effect,
+      rng: rng2,
+    })
 
-    // thick_hide should reduce damage by ~15%
+    // damage_reduction should reduce damage by ~15%
     expect(r2.damage).toBeLessThan(r1.damage)
   })
 
-  it('dive_attack ignores DEF', () => {
-    const rng = createRng(42)
-    const attacker = makeCreature({
-      atk: 30,
-      passive: { ...makeCreature().passive, templateId: 'none' },
+  it('flat_reduction (Ironclad) reduces damage', () => {
+    const rng1 = createRng(42)
+    const rng2 = createRng(42)
+
+    const attacker = makeCreature({ atk: 50, passive: NONE_PASSIVE })
+    const noFlat = makeCreature({
+      def: 30,
+      passive: NONE_PASSIVE,
+      flatReductionDefPercent: 0,
     })
-    const defender = makeCreature({
-      def: 100,
-      passive: { ...makeCreature().passive, templateId: 'none' },
+    const withFlat = makeCreature({
+      def: 30,
+      passive: NONE_PASSIVE,
+      flatReductionDefPercent: 10,
     })
-    const diveAbility: ResolvedAbility = {
-      templateId: 'dive_attack',
-      displayName: 'Dive Attack',
-      slot: 'active1',
-      type: 'active',
-      category: 'damage',
-      target: 'single_enemy',
-      multiplier: 1.4,
-      cooldown: 4,
-      duration: null,
-      statAffected: 'ignore_def',
-      effectValue: null,
+    const effect: Effect & { type: 'damage' } = {
+      type: 'damage',
+      multiplier: 1.0,
+      scaling: 'atk',
     }
 
-    const result = calculateDamage({
+    const r1 = calculateDamage({
       attacker,
-      defender,
-      ability: diveAbility,
-      rng,
+      defender: noFlat,
+      effect,
+      rng: rng1,
     })
-    // Without DEF, raw = 30 * 1.4 = 42 ±10%
-    expect(result.damage).toBeGreaterThanOrEqual(35)
+    const r2 = calculateDamage({
+      attacker,
+      defender: withFlat,
+      effect,
+      rng: rng2,
+    })
+
+    // Flat reduction subtracts 10% of DEF (3 points) from damage
+    expect(r2.damage).toBeLessThan(r1.damage)
   })
 
   it('getDietModifier returns correct values', () => {
@@ -292,29 +282,15 @@ describe('Damage', () => {
 
   it('floors damage to minimum 1', () => {
     const rng = createRng(42)
-    const attacker = makeCreature({
-      atk: 1,
-      passive: { ...makeCreature().passive, templateId: 'none' },
-    })
-    const defender = makeCreature({
-      def: 999,
-      passive: { ...makeCreature().passive, templateId: 'none' },
-    })
-    const ability: ResolvedAbility = {
-      templateId: 'test',
-      displayName: 'Test',
-      slot: 'active1',
-      type: 'active',
-      category: 'damage',
-      target: 'single_enemy',
+    const attacker = makeCreature({ atk: 1, passive: NONE_PASSIVE })
+    const defender = makeCreature({ def: 999, passive: NONE_PASSIVE })
+    const effect: Effect & { type: 'damage' } = {
+      type: 'damage',
       multiplier: 0.1,
-      cooldown: 0,
-      duration: null,
-      statAffected: null,
-      effectValue: null,
+      scaling: 'atk',
     }
 
-    const result = calculateDamage({ attacker, defender, ability, rng })
+    const result = calculateDamage({ attacker, defender, effect, rng })
     expect(result.damage).toBeGreaterThanOrEqual(0) // 0 only if dodged
   })
 })
@@ -332,7 +308,7 @@ describe('Synergies', () => {
     const typeSyn = bonuses.find((b) => b.kind === 'type')
     expect(typeSyn).toBeDefined()
     expect(typeSyn!.affectedCreatureIds).toEqual(['a', 'b'])
-    expect(typeSyn!.statBonuses.hp).toBe(10)
+    expect(typeSyn!.statBonuses.hp).toBe(5)
   })
 
   it('applies type synergy for 3 matching types', () => {
@@ -345,8 +321,8 @@ describe('Synergies', () => {
     const typeSyn = bonuses.find((b) => b.kind === 'type')
     expect(typeSyn).toBeDefined()
     expect(typeSyn!.affectedCreatureIds).toHaveLength(3)
-    expect(typeSyn!.statBonuses.hp).toBe(15)
-    expect(typeSyn!.statBonuses.atk).toBe(10)
+    expect(typeSyn!.statBonuses.hp).toBe(7)
+    expect(typeSyn!.statBonuses.atk).toBe(3)
   })
 
   it('applies diet synergy for all carnivores', () => {
@@ -358,7 +334,7 @@ describe('Synergies', () => {
     const bonuses = calculateSynergies(team)
     const dietSyn = bonuses.find((b) => b.kind === 'diet')
     expect(dietSyn).toBeDefined()
-    expect(dietSyn!.statBonuses.atk).toBe(15)
+    expect(dietSyn!.statBonuses.atk).toBe(10)
   })
 
   it('applies mixed diet synergy', () => {
@@ -370,7 +346,7 @@ describe('Synergies', () => {
     const bonuses = calculateSynergies(team)
     const dietSyn = bonuses.find((b) => b.kind === 'diet')
     expect(dietSyn).toBeDefined()
-    expect(dietSyn!.statBonuses.spd).toBe(10)
+    expect(dietSyn!.statBonuses.spd).toBe(12)
   })
 
   it('normalizes Herbivorous/omnivorous diet', () => {
@@ -382,23 +358,47 @@ describe('Synergies', () => {
     const bonuses = calculateSynergies(team)
     const dietSyn = bonuses.find((b) => b.kind === 'diet')
     expect(dietSyn).toBeDefined()
-    expect(dietSyn!.statBonuses.def).toBe(20)
+    expect(dietSyn!.statBonuses.def).toBe(10)
   })
 
   it('applySynergies modifies creature stats', () => {
     const team = [
-      makeCreature({ id: 'a', type: 'large theropod', era: 'Cretaceous', diet: 'Omnivorous', maxHp: 100, currentHp: 100, baseStats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 } }),
-      makeCreature({ id: 'b', type: 'large theropod', era: 'Jurassic', diet: 'Piscivorous', maxHp: 100, currentHp: 100, baseStats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 } }),
-      makeCreature({ id: 'c', type: 'sauropod', era: 'Triassic', diet: 'Herbivorous', maxHp: 100, currentHp: 100, baseStats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 } }),
+      makeCreature({
+        id: 'a',
+        type: 'large theropod',
+        era: 'Cretaceous',
+        diet: 'Omnivorous',
+        maxHp: 100,
+        currentHp: 100,
+        baseStats: { hp: 100, atk: 30, def: 20, spd: 25 },
+      }),
+      makeCreature({
+        id: 'b',
+        type: 'large theropod',
+        era: 'Jurassic',
+        diet: 'Piscivorous',
+        maxHp: 100,
+        currentHp: 100,
+        baseStats: { hp: 100, atk: 30, def: 20, spd: 25 },
+      }),
+      makeCreature({
+        id: 'c',
+        type: 'sauropod',
+        era: 'Triassic',
+        diet: 'Herbivorous',
+        maxHp: 100,
+        currentHp: 100,
+        baseStats: { hp: 100, atk: 30, def: 20, spd: 25 },
+      }),
     ]
     const bonuses = calculateSynergies(team)
     // With all different eras/diets, only type synergy applies (2× large theropod)
     applySynergies(team, bonuses)
 
-    // Team members a and b should have +10% HP from type synergy
-    expect(team[0].maxHp).toBe(110)
-    expect(team[0].currentHp).toBe(110)
-    expect(team[1].maxHp).toBe(110)
+    // Team members a and b should have +5% HP from type synergy (2-match)
+    expect(team[0].maxHp).toBe(105)
+    expect(team[0].currentHp).toBe(105)
+    expect(team[1].maxHp).toBe(105)
     // c should not be affected by the type synergy HP bonus
     expect(team[2].maxHp).toBe(100)
   })
@@ -407,37 +407,123 @@ describe('Synergies', () => {
 // ─── Ability Tests ─────────────────────────────────────────────────
 
 describe('Abilities', () => {
-  it('getBasicAttack returns a 1.0x single-target damage ability', () => {
+  it('getBasicAttack returns the BASIC_ATTACK ability', () => {
     const basic = getBasicAttack()
-    expect(basic.category).toBe('damage')
-    expect(basic.multiplier).toBe(1.0)
+    expect(basic.id).toBe('basic_attack')
     expect(basic.target).toBe('single_enemy')
-    expect(basic.templateId).toBe('basic_attack')
+    expect(basic.effects[0].type).toBe('damage')
+    const dmgEffect = basic.effects[0] as Extract<
+      Effect,
+      { type: 'damage' }
+    >
+    expect(dmgEffect.multiplier).toBe(0.9)
   })
 
-  it('isAbilityReady returns true when off cooldown', () => {
+  it('isActiveReady returns true when off cooldown', () => {
     const creature = makeCreature()
-    expect(isAbilityReady(creature, creature.active1)).toBe(true)
+    expect(isActiveReady(creature)).toBe(true)
   })
 
-  it('isAbilityReady returns false when on cooldown', () => {
-    const creature = makeCreature()
-    creature.cooldowns['bite'] = 2
-    expect(isAbilityReady(creature, creature.active1)).toBe(false)
+  it('isActiveReady returns false when on cooldown', () => {
+    const creature = makeCreature({ cooldown: 2 })
+    expect(isActiveReady(creature)).toBe(false)
   })
 
-  it('basic attack is always ready', () => {
-    const creature = makeCreature()
-    expect(isAbilityReady(creature, getBasicAttack())).toBe(true)
+  it('cooldown decrements by 1 each turn', () => {
+    const creature = makeCreature({ cooldown: 3 })
+    creature.cooldown = Math.max(0, creature.cooldown - 1)
+    expect(creature.cooldown).toBe(2)
+    creature.cooldown = Math.max(0, creature.cooldown - 1)
+    expect(creature.cooldown).toBe(1)
+    creature.cooldown = Math.max(0, creature.cooldown - 1)
+    expect(creature.cooldown).toBe(0)
   })
 
-  it('decrementCooldowns reduces all cooldowns by 1', () => {
-    const creature = makeCreature()
-    creature.cooldowns['bite'] = 3
-    creature.cooldowns['tail_sweep'] = 1
-    decrementCooldowns(creature)
-    expect(creature.cooldowns['bite']).toBe(2)
-    expect(creature.cooldowns['tail_sweep']).toBe(0)
+  it('materializeAlwaysPassive sets damageReductionPercent for thick_hide', () => {
+    const creature = makeCreature({ passive: THICK_HIDE })
+    materializeAlwaysPassive(creature, [creature])
+    expect(creature.damageReductionPercent).toBe(15)
+  })
+
+  it('materializeAlwaysPassive sets dodge for evasive', () => {
+    const evasivePassive: Ability = {
+      id: 'evasive',
+      name: 'Evasive',
+      displayName: 'Evasive',
+      trigger: { type: 'always' },
+      effects: [{ type: 'dodge', basePercent: 10 }],
+      target: 'self',
+      description: 'Chance to dodge attacks.',
+    }
+    const creature = makeCreature({ passive: evasivePassive })
+    materializeAlwaysPassive(creature, [creature])
+    expect(creature.dodgeBasePercent).toBe(10)
+  })
+
+  it('resolveTarget picks lowest HP ally for lowest_hp_ally', () => {
+    const rng = createRng(42)
+    const caster = makeCreature({ id: 'caster', passive: NONE_PASSIVE })
+    const ally1 = makeCreature({
+      id: 'ally1',
+      currentHp: 80,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+    const ally2 = makeCreature({
+      id: 'ally2',
+      currentHp: 30,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+
+    const ctx: EffectContext = {
+      caster,
+      targets: [],
+      allAllies: [caster, ally1, ally2],
+      allEnemies: [],
+      rng,
+      turn: 1,
+    }
+    const targets = resolveTarget('lowest_hp_ally', caster, ctx, rng)
+    expect(targets).toHaveLength(1)
+    expect(targets[0].id).toBe('ally2')
+  })
+
+  it('resolveTarget respects taunt for single_enemy', () => {
+    const rng = createRng(42)
+    const caster = makeCreature({ id: 'attacker', passive: NONE_PASSIVE })
+    const taunter = makeCreature({
+      id: 'taunter',
+      teamSide: 'B',
+      currentHp: 80,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+    taunter.statusEffects.push({
+      kind: 'taunt',
+      sourceCreatureId: 'taunter',
+      value: 0,
+      turnsRemaining: 2,
+    })
+    const other = makeCreature({
+      id: 'other',
+      teamSide: 'B',
+      currentHp: 10,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+
+    const ctx: EffectContext = {
+      caster,
+      targets: [],
+      allAllies: [caster],
+      allEnemies: [taunter, other],
+      rng,
+      turn: 1,
+    }
+    const targets = resolveTarget('single_enemy', caster, ctx, rng)
+    expect(targets).toHaveLength(1)
+    expect(targets[0].id).toBe('taunter')
   })
 })
 
@@ -453,7 +539,7 @@ describe('Status Effects', () => {
       turnsRemaining: 3,
     })
 
-    const results = tickStatusEffects(creature, 1)
+    const results = tickStatusEffects(creature)
     expect(results).toHaveLength(1)
     expect(results[0].kind).toBe('poison')
     expect(results[0].damage).toBe(10) // 5% of 200
@@ -469,7 +555,7 @@ describe('Status Effects', () => {
       turnsRemaining: 1,
     })
 
-    const results = tickStatusEffects(creature, 1)
+    const results = tickStatusEffects(creature)
     expect(results[0].expired).toBe(true)
     expect(creature.statusEffects).toHaveLength(0)
   })
@@ -483,14 +569,14 @@ describe('Status Effects', () => {
       turnsRemaining: 3,
     })
 
-    const results = tickStatusEffects(creature, 1)
+    const results = tickStatusEffects(creature)
     expect(results[0].healing).toBe(8)
     expect(creature.currentHp).toBe(58)
   })
 
   it('buff expires and removes stat modifier', () => {
     const creature = makeCreature({
-      baseStats: { hp: 100, atk: 30, def: 20, spd: 25, abl: 15 },
+      baseStats: { hp: 100, atk: 30, def: 20, spd: 25 },
       atk: 36, // 30 base + 6 from buff (20% of 30)
     })
     creature.statusEffects.push({
@@ -501,7 +587,7 @@ describe('Status Effects', () => {
       turnsRemaining: 1,
     })
 
-    const results = tickStatusEffects(creature, 1)
+    const results = tickStatusEffects(creature)
     expect(results[0].expired).toBe(true)
     // Buff removed — atk should decrease by the buff amount
     expect(creature.atk).toBe(30) // 36 - 6
@@ -516,14 +602,14 @@ describe('Status Effects', () => {
       turnsRemaining: 1,
     })
 
-    const results = tickStatusEffects(creature, 1)
+    const results = tickStatusEffects(creature)
     expect(results[0].kind).toBe('shield')
     expect(results[0].expired).toBe(true)
     expect(creature.statusEffects).toHaveLength(0)
   })
 
-  it('reflect clears reflectDamagePercent on expiry', () => {
-    const creature = makeCreature({ reflectDamagePercent: 40 })
+  it('reflect clears on expiry', () => {
+    const creature = makeCreature()
     creature.statusEffects.push({
       kind: 'reflect',
       sourceCreatureId: 'self',
@@ -531,8 +617,9 @@ describe('Status Effects', () => {
       turnsRemaining: 1,
     })
 
-    tickStatusEffects(creature, 1)
-    expect(creature.reflectDamagePercent).toBe(0)
+    const results = tickStatusEffects(creature)
+    expect(results[0].kind).toBe('reflect')
+    expect(results[0].expired).toBe(true)
     expect(creature.statusEffects).toHaveLength(0)
   })
 })
@@ -540,86 +627,71 @@ describe('Status Effects', () => {
 // ─── AI Tests ──────────────────────────────────────────────────────
 
 describe('AI', () => {
-  it('heals when self HP < 30%', () => {
+  it('heals wounded ally when available', () => {
     const rng = createRng(42)
+    const mendAbility: Ability = {
+      id: 'mend',
+      name: 'Mend',
+      displayName: 'Mend',
+      trigger: { type: 'onUse', cooldown: 1 },
+      effects: [{ type: 'heal', percent: 25 }],
+      target: 'lowest_hp_ally',
+      description: 'Heal lowest HP ally.',
+    }
     const actor = makeCreature({
       id: 'healer',
+      role: 'support',
+      currentHp: 100,
+      maxHp: 100,
+      active: mendAbility,
+      passive: NONE_PASSIVE,
+    })
+    const woundedAlly = makeCreature({
+      id: 'wounded',
       currentHp: 20,
       maxHp: 100,
-      active1: {
-        templateId: 'graze',
-        displayName: 'Graze',
-        slot: 'active1',
-        type: 'active',
-        category: 'heal',
-        target: 'self',
-        multiplier: null,
-        cooldown: 3,
-        duration: null,
-        statAffected: 'hp',
-        effectValue: 25,
-      },
-      active2: {
-        templateId: 'bite',
-        displayName: 'Bite',
-        slot: 'active2',
-        type: 'active',
-        category: 'damage',
-        target: 'single_enemy',
-        multiplier: 1.2,
-        cooldown: 0,
-        duration: null,
-        statAffected: null,
-        effectValue: null,
-      },
+      passive: NONE_PASSIVE,
     })
-    const enemy = makeCreature({ id: 'enemy-1', teamSide: 'B' })
+    const enemy = makeCreature({
+      id: 'enemy-1',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
 
     const action = selectAction({
       actor,
-      allies: [actor],
+      allies: [actor, woundedAlly],
       enemies: [enemy],
       rng,
     })
-    expect(action.ability.templateId).toBe('graze')
+    expect(action.ability.id).toBe('mend')
   })
 
-  it('uses AoE when 2+ enemies', () => {
+  it('uses AoE when multiple enemies make it worthwhile', () => {
     const rng = createRng(42)
     const actor = makeCreature({
       id: 'aoe-user',
       currentHp: 100,
       maxHp: 100,
-      active1: {
-        templateId: 'bite',
-        displayName: 'Bite',
-        slot: 'active1',
-        type: 'active',
-        category: 'damage',
-        target: 'single_enemy',
-        multiplier: 1.2,
-        cooldown: 0,
-        duration: null,
-        statAffected: null,
-        effectValue: null,
-      },
-      active2: {
-        templateId: 'tail_sweep',
-        displayName: 'Tail Sweep',
-        slot: 'active2',
-        type: 'active',
-        category: 'aoe_damage',
-        target: 'all_enemies',
-        multiplier: 0.7,
-        cooldown: 2,
-        duration: null,
-        statAffected: null,
-        effectValue: null,
-      },
+      active: TAIL_SWEEP,
+      passive: NONE_PASSIVE,
     })
     const enemies = [
-      makeCreature({ id: 'e1', teamSide: 'B' }),
-      makeCreature({ id: 'e2', teamSide: 'B' }),
+      makeCreature({
+        id: 'e1',
+        teamSide: 'B',
+        passive: NONE_PASSIVE,
+      }),
+      makeCreature({
+        id: 'e2',
+        teamSide: 'B',
+        passive: NONE_PASSIVE,
+      }),
+      makeCreature({
+        id: 'e3',
+        teamSide: 'B',
+        passive: NONE_PASSIVE,
+      }),
     ]
 
     const action = selectAction({
@@ -628,21 +700,23 @@ describe('AI', () => {
       enemies,
       rng,
     })
-    expect(action.ability.templateId).toBe('tail_sweep')
+    expect(action.ability.id).toBe('tail_sweep')
   })
 
-  it('finishes low HP enemies (priority 4)', () => {
+  it('finishes low HP enemies with damage', () => {
     const rng = createRng(42)
     const actor = makeCreature({
       id: 'finisher',
       currentHp: 100,
       maxHp: 100,
+      passive: NONE_PASSIVE,
     })
     const lowEnemy = makeCreature({
       id: 'low-hp',
       teamSide: 'B',
       currentHp: 10,
       maxHp: 100,
+      passive: NONE_PASSIVE,
     })
 
     const action = selectAction({
@@ -651,17 +725,25 @@ describe('AI', () => {
       enemies: [lowEnemy],
       rng,
     })
-    // Should use a damage ability (bite or basic)
-    expect(['damage', 'aoe_damage']).toContain(action.ability.category)
+    // Should use a damage ability
+    expect(
+      action.ability.effects.some((e) => e.type === 'damage'),
+    ).toBe(true)
     expect(action.targets).toContain(lowEnemy)
   })
 
-  it('falls back to basic attack when abilities on cooldown', () => {
+  it('falls back to basic attack when active is on cooldown', () => {
     const rng = createRng(42)
-    const actor = makeCreature({ id: 'cooldown-user' })
-    actor.cooldowns['bite'] = 3
-    actor.cooldowns['tail_sweep'] = 2
-    const enemy = makeCreature({ id: 'enemy', teamSide: 'B' })
+    const actor = makeCreature({
+      id: 'cooldown-user',
+      cooldown: 3,
+      passive: NONE_PASSIVE,
+    })
+    const enemy = makeCreature({
+      id: 'enemy',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
 
     const action = selectAction({
       actor,
@@ -669,39 +751,338 @@ describe('AI', () => {
       enemies: [enemy],
       rng,
     })
-    expect(action.ability.templateId).toBe('basic_attack')
+    expect(action.ability.id).toBe('basic_attack')
   })
 
-  it('taunt forces targeting the taunting creature', () => {
+  // ── DoT selection ──
+
+  it('selects DoT (bleed) against high-HP target without existing DoT', () => {
     const rng = createRng(42)
-    const taunter = makeCreature({
-      id: 'taunter',
-      teamSide: 'B',
-      row: 'front',
-      currentHp: 80,
+    const bleedAbility: Ability = {
+      id: 'bleed',
+      name: 'Bleed',
+      displayName: 'Bleed',
+      trigger: { type: 'onUse', cooldown: 2 },
+      effects: [
+        { type: 'damage', multiplier: 0.5, scaling: 'atk' },
+        {
+          type: 'dot',
+          dotKind: 'bleed',
+          percent: 5,
+          duration: 3,
+        },
+      ],
+      target: 'single_enemy',
+      description: 'A slashing wound that bleeds.',
+    }
+    const actor = makeCreature({
+      id: 'dot-user',
+      currentHp: 100,
       maxHp: 100,
+      active: bleedAbility,
+      passive: NONE_PASSIVE,
     })
-    taunter.statusEffects.push({
-      kind: 'taunt',
-      sourceCreatureId: 'taunter',
-      value: 0,
-      turnsRemaining: 2,
-    })
-    const other = makeCreature({
-      id: 'other',
+    const highHpEnemy = makeCreature({
+      id: 'tanky',
       teamSide: 'B',
-      row: 'front',
-      currentHp: 10,
-      maxHp: 100,
+      currentHp: 200,
+      maxHp: 200,
+      def: 40,
+      passive: NONE_PASSIVE,
     })
 
-    const targets = selectTarget({
-      enemies: [taunter, other],
-      targetType: 'single_enemy',
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [highHpEnemy],
       rng,
     })
-    expect(targets).toHaveLength(1)
-    expect(targets[0].id).toBe('taunter')
+    expect(action.ability.id).toBe('bleed')
+  })
+
+  it('does NOT select DoT against low-HP dying target', () => {
+    const rng = createRng(42)
+    const bleedAbility: Ability = {
+      id: 'bleed',
+      name: 'Bleed',
+      displayName: 'Bleed',
+      trigger: { type: 'onUse', cooldown: 2 },
+      effects: [
+        { type: 'damage', multiplier: 0.5, scaling: 'atk' },
+        {
+          type: 'dot',
+          dotKind: 'bleed',
+          percent: 5,
+          duration: 3,
+        },
+      ],
+      target: 'single_enemy',
+      description: 'A slashing wound that bleeds.',
+    }
+    const actor = makeCreature({
+      id: 'dot-user',
+      currentHp: 100,
+      maxHp: 100,
+      active: bleedAbility,
+      passive: NONE_PASSIVE,
+    })
+    const dyingEnemy = makeCreature({
+      id: 'dying',
+      teamSide: 'B',
+      currentHp: 15,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [dyingEnemy],
+      rng,
+    })
+    // DoT penalized by -50 for low HP. Basic attack should win with finish bonus.
+    expect(action.ability.id).not.toBe('bleed')
+  })
+
+  // ── Taunt selection ──
+
+  it('selects taunt when no active taunt and 2+ enemies', () => {
+    const rng = createRng(42)
+    const tauntAbility: Ability = {
+      id: 'taunt',
+      name: 'Taunt',
+      displayName: 'Taunt',
+      trigger: { type: 'onUse', cooldown: 1 },
+      effects: [{ type: 'taunt', duration: 2 }],
+      target: 'self',
+      description: 'Draws all single-target attacks to self.',
+    }
+    const actor = makeCreature({
+      id: 'taunter',
+      role: 'tank',
+      currentHp: 100,
+      maxHp: 100,
+      def: 40,
+      active: tauntAbility,
+      passive: NONE_PASSIVE,
+    })
+    const squishyAlly = makeCreature({
+      id: 'squishy',
+      def: 10,
+      passive: NONE_PASSIVE,
+    })
+    const enemies = [
+      makeCreature({
+        id: 'e1',
+        teamSide: 'B',
+        passive: NONE_PASSIVE,
+      }),
+      makeCreature({
+        id: 'e2',
+        teamSide: 'B',
+        passive: NONE_PASSIVE,
+      }),
+    ]
+
+    const action = selectAction({
+      actor,
+      allies: [actor, squishyAlly],
+      enemies,
+      rng,
+    })
+    expect(action.ability.id).toBe('taunt')
+  })
+
+  it('does NOT select taunt when only 1 enemy', () => {
+    const rng = createRng(42)
+    const tauntAbility: Ability = {
+      id: 'taunt',
+      name: 'Taunt',
+      displayName: 'Taunt',
+      trigger: { type: 'onUse', cooldown: 1 },
+      effects: [{ type: 'taunt', duration: 2 }],
+      target: 'self',
+      description: 'Draws all single-target attacks to self.',
+    }
+    const actor = makeCreature({
+      id: 'taunter',
+      role: 'tank',
+      currentHp: 100,
+      maxHp: 100,
+      active: tauntAbility,
+      passive: NONE_PASSIVE,
+    })
+    const enemy = makeCreature({
+      id: 'e1',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [enemy],
+      rng,
+    })
+    // Taunt score: 25 - 50 (1 enemy) = -25, should not be chosen
+    expect(action.ability.id).not.toBe('taunt')
+  })
+
+  // ── Overkill prevention ──
+
+  it('prefers basic attack over cooldown ability for easy kills', () => {
+    const rng = createRng(42)
+    const crushingJaw: Ability = {
+      id: 'crushing_jaw',
+      name: 'Crushing Jaw',
+      displayName: 'Crushing Jaw',
+      trigger: { type: 'onUse', cooldown: 3 },
+      effects: [{ type: 'damage', multiplier: 1.3, scaling: 'atk' }],
+      target: 'single_enemy',
+      description: 'The strongest bite.',
+    }
+    const actor = makeCreature({
+      id: 'overkiller',
+      atk: 50,
+      currentHp: 100,
+      maxHp: 100,
+      active: crushingJaw,
+      passive: NONE_PASSIVE,
+    })
+    const weakEnemy = makeCreature({
+      id: 'weak',
+      teamSide: 'B',
+      currentHp: 5,
+      maxHp: 100,
+      def: 10,
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [weakEnemy],
+      rng,
+    })
+    expect(action.ability.id).toBe('basic_attack')
+  })
+
+  // ── Role-aware behavior ──
+
+  it('tank role prefers shield over damage', () => {
+    const rng = createRng(42)
+    const shieldWall: Ability = {
+      id: 'shield_wall',
+      name: 'Shield Wall',
+      displayName: 'Shield Wall',
+      trigger: { type: 'onUse', cooldown: 2 },
+      effects: [{ type: 'shield', percent: 25, duration: 2 }],
+      target: 'lowest_hp_ally',
+      description: "Grants a shield absorbing 25% of caster's max HP.",
+    }
+    const actor = makeCreature({
+      id: 'tank',
+      role: 'tank',
+      currentHp: 50,
+      maxHp: 100,
+      active: shieldWall,
+      passive: NONE_PASSIVE,
+    })
+    const enemy = makeCreature({
+      id: 'e1',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [enemy],
+      rng,
+    })
+    expect(action.ability.id).toBe('shield_wall')
+  })
+
+  it('support role prefers healing over damage', () => {
+    const rng = createRng(42)
+    const symbiosis: Ability = {
+      id: 'symbiosis',
+      name: 'Symbiosis',
+      displayName: 'Symbiosis',
+      trigger: { type: 'onUse', cooldown: 2 },
+      effects: [{ type: 'heal', percent: 15 }],
+      target: 'all_allies',
+      description: 'A symbiotic bond heals all allies.',
+    }
+    const actor = makeCreature({
+      id: 'support',
+      role: 'support',
+      currentHp: 100,
+      maxHp: 100,
+      active: symbiosis,
+      passive: NONE_PASSIVE,
+    })
+    const woundedAlly = makeCreature({
+      id: 'wounded',
+      currentHp: 25,
+      maxHp: 100,
+      passive: NONE_PASSIVE,
+    })
+    const enemy = makeCreature({
+      id: 'e1',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor, woundedAlly],
+      enemies: [enemy],
+      rng,
+    })
+    expect(action.ability.id).toBe('symbiosis')
+  })
+
+  // ── Game-state awareness ──
+
+  it('prefers damage late game for urgency', () => {
+    const rng = createRng(42)
+    const rallyCry: Ability = {
+      id: 'rally_cry',
+      name: 'Rally Cry',
+      displayName: 'Rally Cry',
+      trigger: { type: 'onUse', cooldown: 2 },
+      effects: [
+        { type: 'buff', stat: 'atk', percent: 20, duration: 3 },
+      ],
+      target: 'all_allies',
+      description: "Boosts all allies' attack.",
+    }
+    const actor = makeCreature({
+      id: 'late-game',
+      currentHp: 100,
+      maxHp: 100,
+      active: rallyCry,
+      passive: NONE_PASSIVE,
+    })
+    const enemy = makeCreature({
+      id: 'e1',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
+
+    const action = selectAction({
+      actor,
+      allies: [actor],
+      enemies: [enemy],
+      rng,
+      turn: 25,
+    })
+    // Late game urgency multiplier (1.25) boosts damage.
+    // Buff gets defensive modifier reduced and urgency penalty (0.9).
+    expect(
+      action.ability.effects.some((e) => e.type === 'damage'),
+    ).toBe(true)
   })
 })
 
@@ -770,105 +1151,114 @@ describe('Battle Engine', () => {
     expect(result.log[result.log.length - 1].type).toBe('battle_end')
   })
 
-  it('battle with apex_predator resists stun', () => {
-    const teamA = makeTeam([
-      {
-        abilities: {
-          creatureId: 'stunner',
-          active1: { templateId: 'headbutt', displayName: 'Headbutt' },
-          active2: { templateId: 'bite', displayName: 'Bite' },
-          passive: {
-            templateId: 'thick_hide',
-            displayName: 'Thick Hide',
-          },
+  it('venomous passive applies poison on basic attack', () => {
+    const rng = createRng(42)
+    const venomousPassive: Ability = {
+      id: 'venomous',
+      name: 'Venomous',
+      displayName: 'Venomous',
+      trigger: { type: 'onBasicAttack' },
+      effects: [
+        {
+          type: 'dot',
+          dotKind: 'poison',
+          percent: 3,
+          duration: 2,
         },
-      },
-      {},
-      {},
-    ])
-    const teamB = makeTeam([
-      {
-        abilities: {
-          creatureId: 'apex',
-          active1: { templateId: 'bite', displayName: 'Bite' },
-          active2: {
-            templateId: 'crushing_jaw',
-            displayName: 'Crushing Jaw',
-          },
-          passive: {
-            templateId: 'apex_predator',
-            displayName: 'Apex Predator',
-          },
-        },
-      },
-      {},
-      {},
-    ])
+      ],
+      target: 'attack_target',
+      description: 'Basic attacks apply poison.',
+    }
+    const attacker = makeCreature({
+      id: 'attacker',
+      passive: venomousPassive,
+    })
+    const target = makeCreature({
+      id: 'target',
+      teamSide: 'B',
+      passive: NONE_PASSIVE,
+    })
 
-    const result = simulateBattle(teamA, teamB, { seed: 42 })
-    // The apex predator should never appear in stun_skip events
-    const apexId = result.finalState.teamB[0].id
-    const stunSkips = result.log.filter(
-      (e) => e.type === 'stun_skip' && e.creatureId === apexId,
-    )
-    expect(stunSkips).toHaveLength(0)
+    const ctx: EffectContext = {
+      caster: attacker,
+      targets: [target],
+      allAllies: [attacker],
+      allEnemies: [target],
+      rng,
+      turn: 1,
+      triggerAttackTarget: target,
+    }
+    const results = fireTrigger('onBasicAttack', attacker, ctx)
+    expect(
+      results.some((r) => r.kind === 'status_applied'),
+    ).toBe(true)
+    expect(
+      target.statusEffects.some((e) => e.kind === 'poison'),
+    ).toBe(true)
   })
 
-  it('mend targets the lowest HP ally', () => {
+  it('mend heals the lowest HP ally', () => {
     const rng = createRng(42)
-    const caster = makeCreature({ id: 'healer' })
+    const caster = makeCreature({
+      id: 'healer',
+      passive: NONE_PASSIVE,
+    })
     const ally1 = makeCreature({
       id: 'ally1',
       currentHp: 80,
       maxHp: 100,
+      passive: NONE_PASSIVE,
     })
     const ally2 = makeCreature({
       id: 'ally2',
       currentHp: 30,
       maxHp: 100,
+      passive: NONE_PASSIVE,
     })
 
-    const mendAbility: ResolvedAbility = {
-      templateId: 'mend',
+    const mendAbility: Ability = {
+      id: 'mend',
+      name: 'Mend',
       displayName: 'Mend',
-      slot: 'active1',
-      type: 'active',
-      category: 'heal',
-      target: 'all_allies',
-      multiplier: null,
-      cooldown: 2,
-      duration: null,
-      statAffected: 'hp',
-      effectValue: 20,
+      trigger: { type: 'onUse', cooldown: 1 },
+      effects: [{ type: 'heal', percent: 25 }],
+      target: 'lowest_hp_ally',
+      description: 'Heal lowest HP ally for 25% max HP.',
     }
 
-    const results = resolveAbility({
+    const ctx: EffectContext = {
       caster,
-      ability: mendAbility,
-      targets: [ally1, ally2],
+      targets: [],
       allAllies: [caster, ally1, ally2],
       allEnemies: [],
       rng,
       turn: 1,
-    })
+    }
 
-    // Should heal ally2 (lowest HP%) not ally1
+    // Resolve target
+    const targets = resolveTarget(
+      'lowest_hp_ally',
+      caster,
+      ctx,
+      rng,
+    )
+    expect(targets).toHaveLength(1)
+    expect(targets[0].id).toBe('ally2')
+
+    // Resolve ability effects
+    ctx.targets = targets
+    const results = resolveAbilityEffects(mendAbility, targets, ctx)
     expect(results).toHaveLength(1)
-    expect(results[0].targetId).toBe('ally2')
-    expect(results[0].healing).toBe(20) // 20% of 100
-    expect(ally2.currentHp).toBe(50)
+    expect(results[0].kind).toBe('heal')
+    expect(ally2.currentHp).toBe(55) // 30 + 25
   })
 
   it('timeout resolution favors defender (team B)', () => {
     // Create teams with very high def so nobody dies quickly
-    const tankMember = {
-      stats: { hp: 999, atk: 1, def: 999, spd: 10, abl: 1 },
-      abilities: {
-        creatureId: 'tank',
-        active1: { templateId: 'bite', displayName: 'Bite' },
-        active2: { templateId: 'fortify', displayName: 'Fortify' },
-        passive: { templateId: 'thick_hide', displayName: 'Thick Hide' },
-      },
+    const tankMember: Partial<BattleTeamMember> = {
+      stats: { hp: 999, atk: 1, def: 999, spd: 10 },
+      active: BITE,
+      passive: THICK_HIDE,
     }
 
     const teamA = makeTeam([
@@ -910,15 +1300,14 @@ describe('Battle Engine', () => {
       currentHp: 1,
       maxHp: 100,
       atk: 50,
-      passive: { ...makeCreature().passive, templateId: 'none' },
+      passive: NONE_PASSIVE,
     })
     const defender = makeCreature({
       id: 'defender',
       currentHp: 100,
       maxHp: 100,
       def: 10,
-      reflectDamagePercent: 100,
-      passive: { ...makeCreature().passive, templateId: 'none' },
+      passive: NONE_PASSIVE,
     })
     defender.statusEffects.push({
       kind: 'reflect',
@@ -927,84 +1316,17 @@ describe('Battle Engine', () => {
       turnsRemaining: 2,
     })
 
-    const results = resolveAbility({
+    const ctx: EffectContext = {
       caster: attacker,
-      ability: attacker.active1,
       targets: [defender],
       allAllies: [attacker],
       allEnemies: [defender],
       rng,
       turn: 1,
-    })
+    }
+    resolveAbilityEffects(attacker.active, [defender], ctx)
 
     // Attacker started with 1 HP, should be KO'd by reflect
     expect(attacker.isAlive).toBe(false)
-  })
-
-  it('thermal_regulation blocks early debuffs', () => {
-    const rng = createRng(42)
-    const caster = makeCreature({ id: 'debuffer' })
-    const target = makeCreature({
-      id: 'thermal',
-      passive: {
-        templateId: 'thermal_regulation',
-        displayName: 'Thermal Regulation',
-        slot: 'passive',
-        type: 'passive',
-        category: 'passive',
-        target: null,
-        multiplier: null,
-        cooldown: null,
-        duration: 2,
-        statAffected: 'debuff_immune',
-        effectValue: null,
-      },
-    })
-
-    const debuffAbility: ResolvedAbility = {
-      templateId: 'intimidate',
-      displayName: 'Intimidate',
-      slot: 'active1',
-      type: 'active',
-      category: 'debuff',
-      target: 'single_enemy',
-      multiplier: null,
-      cooldown: 3,
-      duration: 3,
-      statAffected: 'atk',
-      effectValue: -20,
-    }
-
-    // Turn 1: should be immune
-    const results1 = resolveAbility({
-      caster,
-      ability: debuffAbility,
-      targets: [target],
-      allAllies: [caster],
-      allEnemies: [target],
-      rng,
-      turn: 1,
-    })
-    const debuffsApplied = target.statusEffects.filter(
-      (e) => e.kind === 'debuff',
-    )
-    expect(debuffsApplied).toHaveLength(0)
-
-    // Turn 3: should NOT be immune
-    // Reset cooldown for the test
-    caster.cooldowns = {}
-    const results3 = resolveAbility({
-      caster,
-      ability: debuffAbility,
-      targets: [target],
-      allAllies: [caster],
-      allEnemies: [target],
-      rng,
-      turn: 3,
-    })
-    const debuffsApplied3 = target.statusEffects.filter(
-      (e) => e.kind === 'debuff',
-    )
-    expect(debuffsApplied3).toHaveLength(1)
   })
 })

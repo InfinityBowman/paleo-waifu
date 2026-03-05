@@ -22,16 +22,16 @@ export function calculateSynergies(
     if (creatures.length === 3) {
       bonuses.push({
         kind: 'type',
-        description: `3× ${type}: +15% HP, +10% ATK to all`,
+        description: `3× ${type}: +7% HP, +3% ATK to all`,
         affectedCreatureIds: team.map((c) => c.id),
-        statBonuses: { hp: 15, atk: 10 },
+        statBonuses: { hp: 7, atk: 3 },
       })
     } else if (creatures.length === 2) {
       bonuses.push({
         kind: 'type',
-        description: `2× ${type}: +10% HP`,
+        description: `2× ${type}: +5% HP`,
         affectedCreatureIds: creatures.map((c) => c.id),
-        statBonuses: { hp: 10 },
+        statBonuses: { hp: 5 },
       })
     }
   }
@@ -48,16 +48,16 @@ export function calculateSynergies(
     if (creatures.length === 3) {
       bonuses.push({
         kind: 'era',
-        description: `3× ${era}: +10% all stats to all`,
+        description: `3× ${era}: +3% all stats to all`,
         affectedCreatureIds: team.map((c) => c.id),
-        statBonuses: { hp: 10, atk: 10, def: 10, spd: 10, abl: 10 },
+        statBonuses: { hp: 3, atk: 3, def: 3, spd: 3 },
       })
     } else if (creatures.length === 2) {
       bonuses.push({
         kind: 'era',
-        description: `2× ${era}: +5% all stats`,
+        description: `2× ${era}: +3% all stats`,
         affectedCreatureIds: creatures.map((c) => c.id),
-        statBonuses: { hp: 5, atk: 5, def: 5, spd: 5, abl: 5 },
+        statBonuses: { hp: 3, atk: 3, def: 3, spd: 3 },
       })
     }
   }
@@ -72,23 +72,24 @@ export function calculateSynergies(
   if (allCarni) {
     bonuses.push({
       kind: 'diet',
-      description: 'All Carnivorous: +15% ATK',
+      description: 'All Carnivorous: +10% ATK, +7% SPD',
       affectedCreatureIds: team.map((c) => c.id),
-      statBonuses: { atk: 15 },
+      statBonuses: { atk: 10, spd: 7 },
     })
   } else if (allHerbi) {
     bonuses.push({
       kind: 'diet',
-      description: 'All Herbivorous: +20% DEF',
+      description: 'All Herbivorous: +10% DEF, +10% HP',
       affectedCreatureIds: team.map((c) => c.id),
-      statBonuses: { def: 20 },
+      statBonuses: { def: 10, hp: 10 },
     })
   } else if (hasCarni && hasHerbi) {
     bonuses.push({
       kind: 'diet',
-      description: 'Mixed (Carnivore + Herbivore): +10% SPD',
+      description:
+        'Mixed (Carnivore + Herbivore): +12% SPD, +7% ATK',
       affectedCreatureIds: team.map((c) => c.id),
-      statBonuses: { spd: 10 },
+      statBonuses: { spd: 12, atk: 7 },
     })
   }
 
@@ -101,13 +102,18 @@ export function applySynergies(
 ): void {
   for (const bonus of bonuses) {
     for (const creature of team) {
-      if (!bonus.affectedCreatureIds.includes(creature.id)) continue
+      if (!bonus.affectedCreatureIds.includes(creature.id))
+        continue
 
-      for (const [stat, percent] of Object.entries(bonus.statBonuses)) {
+      for (const [stat, percent] of Object.entries(
+        bonus.statBonuses,
+      )) {
         const pct = percent as number
         switch (stat) {
           case 'hp': {
-            const hpBonus = Math.floor(creature.maxHp * (pct / 100))
+            const hpBonus = Math.floor(
+              creature.maxHp * (pct / 100),
+            )
             creature.maxHp += hpBonus
             creature.currentHp += hpBonus
             break
@@ -125,11 +131,6 @@ export function applySynergies(
           case 'spd':
             creature.spd += Math.floor(
               creature.baseStats.spd * (pct / 100),
-            )
-            break
-          case 'abl':
-            creature.abl += Math.floor(
-              creature.baseStats.abl * (pct / 100),
             )
             break
         }

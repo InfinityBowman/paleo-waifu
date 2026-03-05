@@ -1,69 +1,112 @@
-export type Role =
-  | 'striker'
-  | 'tank'
-  | 'scout'
-  | 'support'
-  | 'bruiser'
-  | 'specialist'
+// ─── Primitives ────────────────────────────────────────────────────
 
-export type AbilitySlot = 'active1' | 'active2' | 'passive'
+export type Role = 'striker' | 'tank' | 'support' | 'bruiser'
 
-export type AbilityType = 'active' | 'passive'
+export type Stat = 'atk' | 'def' | 'spd'
 
-export type AbilityCategory =
-  | 'damage'
-  | 'aoe_damage'
-  | 'buff'
-  | 'debuff'
-  | 'heal'
-  | 'shield'
-  | 'stun'
-  | 'dot'
-  | 'taunt'
-  | 'passive'
+export type Row = 'front' | 'back'
 
-export type AbilityTarget =
+export type TeamSide = 'A' | 'B'
+
+export type DotKind = 'poison' | 'bleed'
+
+// ─── Effects ───────────────────────────────────────────────────────
+//
+// Each Effect does exactly ONE thing. Abilities are arrays of Effects.
+// The engine calls resolveEffect() for each element in order.
+
+export type Effect =
+  | { type: 'damage'; multiplier: number; scaling: 'atk' | 'def' }
+  | { type: 'heal'; percent: number }
+  | { type: 'dot'; dotKind: DotKind; percent: number; duration: number }
+  | { type: 'buff'; stat: Stat; percent: number; duration: number }
+  | { type: 'debuff'; stat: Stat; percent: number; duration: number }
+  | { type: 'shield'; percent: number; duration: number }
+  | { type: 'stun'; duration: number }
+  | { type: 'taunt'; duration: number }
+  | { type: 'lifesteal'; percent: number }
+  | { type: 'reflect'; percent: number; duration: number }
+  | { type: 'damage_reduction'; percent: number }
+  | { type: 'crit_reduction'; percent: number }
+  | {
+      type: 'flat_reduction'
+      scalingStat: 'def'
+      scalingPercent: number
+    }
+  | { type: 'dodge'; basePercent: number }
+
+// ─── Triggers ──────────────────────────────────────────────────────
+//
+// Trigger defines WHEN effects fire.
+// onUse → active ability (creature chooses it on their turn)
+// All other triggers → passive (engine fires automatically)
+
+export type Trigger =
+  | { type: 'onUse'; cooldown: number }
+  | { type: 'onBasicAttack' }
+  | { type: 'onHit' }
+  | { type: 'onKill' }
+  | { type: 'onEnemyKO' }
+  | { type: 'onAllyKO' }
+  | { type: 'onTurnStart' }
+  | { type: 'onTurnEnd' }
+  | { type: 'onBattleStart'; condition?: Condition }
+  | { type: 'always' }
+
+// ─── Targets ───────────────────────────────────────────────────────
+
+export type Target =
+  | 'self'
   | 'single_enemy'
   | 'all_enemies'
-  | 'self'
+  | 'lowest_hp_ally'
   | 'all_allies'
   | 'random_enemy'
+  | 'attack_target'
+  | 'attacker'
 
-export interface AbilityTemplateData {
+// ─── Conditions ────────────────────────────────────────────────────
+
+export type Condition =
+  | { type: 'in_row'; row: Row }
+  | { type: 'target_hp_below'; percent: number }
+  | { type: 'per_ally_alive' }
+  | { type: 'per_dead_ally' }
+
+// ─── Ability ───────────────────────────────────────────────────────
+//
+// Unified type for both active and passive abilities.
+// trigger.type === 'onUse' → active (AI selects it, has cooldown)
+// Any other trigger.type   → passive (engine fires automatically)
+
+export interface Ability {
   id: string
   name: string
-  type: AbilityType
-  category: AbilityCategory
-  target: AbilityTarget | null
-  multiplier: number | null
-  cooldown: number | null
-  duration: number | null
-  statAffected: string | null
-  effectValue: number | null
+  displayName: string
+  trigger: Trigger
+  effects: Effect[]
+  target: Target
+  condition?: Condition
   description: string
 }
 
-export interface CreatureBattleData {
-  creatureId: string
-  role: Role
-  hp: number
-  atk: number
-  def: number
-  spd: number
-  abl: number
+// ─── Ability Template ──────────────────────────────────────────────
+//
+// Source-of-truth library definition. displayName is set per-creature
+// during ability assignment — not stored here.
+
+export interface AbilityTemplate {
+  id: string
+  name: string
+  trigger: Trigger
+  effects: Effect[]
+  target: Target
+  condition?: Condition
+  description: string
+  roleAffinity: Role[]
 }
 
-export interface CreatureAbilityAssignment {
-  creatureId: string
-  active1: { templateId: string; displayName: string }
-  active2: { templateId: string; displayName: string }
-  passive: { templateId: string; displayName: string }
-}
-
-// ─── Runtime Battle Types ──────────────────────────────────────────
-
-export type Row = 'front' | 'back'
-export type TeamSide = 'A' | 'B'
+// ─── Status Effects (runtime) ──────────────────────────────────────
 
 export type StatusEffectKind =
   | 'poison'
@@ -79,24 +122,12 @@ export type StatusEffectKind =
 export interface StatusEffect {
   kind: StatusEffectKind
   sourceCreatureId: string
-  stat?: string
   value: number
   turnsRemaining: number
+  stat?: Stat
 }
 
-export interface ResolvedAbility {
-  templateId: string
-  displayName: string
-  slot: AbilitySlot
-  type: AbilityType
-  category: AbilityCategory
-  target: AbilityTarget | null
-  multiplier: number | null
-  cooldown: number | null
-  duration: number | null
-  statAffected: string | null
-  effectValue: number | null
-}
+// ─── BattleCreature (runtime) ──────────────────────────────────────
 
 export interface BattleCreature {
   id: string
@@ -104,33 +135,47 @@ export interface BattleCreature {
   name: string
   teamSide: TeamSide
   row: Row
-  baseStats: { hp: number; atk: number; def: number; spd: number; abl: number }
+
+  // Stats (4 — no ABL)
+  baseStats: { hp: number; atk: number; def: number; spd: number }
   maxHp: number
   currentHp: number
   atk: number
   def: number
   spd: number
-  abl: number
+
+  // Metadata
   role: Role
   diet: string
   type: string
   era: string
   rarity: string
-  active1: ResolvedAbility
-  active2: ResolvedAbility
-  passive: ResolvedAbility
-  cooldowns: Record<string, number>
+
+  // Abilities
+  active: Ability
+  passive: Ability
+
+  // Combat state
+  cooldown: number
   statusEffects: StatusEffect[]
   isAlive: boolean
   isStunned: boolean
-  reflectDamagePercent: number
+
+  // Materialized passive constants (set at battle start from 'always' effects)
+  damageReductionPercent: number
+  critReductionPercent: number
+  flatReductionDefPercent: number
+  dodgeBasePercent: number
 }
+
+// ─── BattleTeamMember (input) ──────────────────────────────────────
 
 export interface BattleTeamMember {
   creatureId: string
   name: string
-  stats: { hp: number; atk: number; def: number; spd: number; abl: number }
-  abilities: CreatureAbilityAssignment
+  stats: { hp: number; atk: number; def: number; spd: number }
+  active: Ability
+  passive: Ability
   diet: string
   type: string
   era: string
@@ -142,10 +187,23 @@ export type BattleTeam = {
   members: [BattleTeamMember, BattleTeamMember, BattleTeamMember]
 }
 
+// ─── SeededRng ─────────────────────────────────────────────────────
+
+export interface SeededRng {
+  next(): number
+  nextInt(min: number, max: number): number
+  nextFloat(min: number, max: number): number
+}
+
 // ─── Battle Log Events ─────────────────────────────────────────────
 
 export type BattleLogEvent =
-  | { type: 'battle_start'; teamA: string[]; teamB: string[]; seed: number }
+  | {
+      type: 'battle_start'
+      teamA: string[]
+      teamB: string[]
+      seed: number
+    }
   | {
       type: 'synergy_applied'
       teamSide: TeamSide
@@ -190,7 +248,7 @@ export type BattleLogEvent =
       turn: number
       targetId: string
       kind: StatusEffectKind
-      stat?: string
+      stat?: Stat
     }
   | {
       type: 'status_tick'
@@ -208,12 +266,18 @@ export type BattleLogEvent =
       remaining: number
     }
   | { type: 'stun_skip'; turn: number; creatureId: string }
-  | { type: 'ko'; turn: number; creatureId: string; creatureName: string }
+  | {
+      type: 'ko'
+      turn: number
+      creatureId: string
+      creatureName: string
+    }
   | {
       type: 'passive_trigger'
       turn: number
       creatureId: string
       passiveId: string
+      triggerKind: Trigger['type']
       description: string
     }
   | {
@@ -235,9 +299,7 @@ export interface SynergyBonus {
   kind: 'type' | 'era' | 'diet'
   description: string
   affectedCreatureIds: string[]
-  statBonuses: Partial<
-    Record<'hp' | 'atk' | 'def' | 'spd' | 'abl', number>
-  >
+  statBonuses: Partial<Record<'hp' | 'atk' | 'def' | 'spd', number>>
 }
 
 export interface BattleResult {
@@ -251,12 +313,6 @@ export interface BattleResult {
   seed: number
 }
 
-export interface SeededRng {
-  next(): number
-  nextInt(min: number, max: number): number
-  nextFloat(min: number, max: number): number
-}
-
 // ─── Internal Resolution Types ─────────────────────────────────────
 
 export interface DamageCalcResult {
@@ -264,30 +320,45 @@ export interface DamageCalcResult {
   isCrit: boolean
   isDodged: boolean
   isDietBonus: boolean
-  rawDamage: number
 }
 
-export interface AbilityResolution {
-  targetId: string
-  damage?: number
-  healing?: number
-  statusApplied?: StatusEffect
-  isCrit?: boolean
-  isDodged?: boolean
-  isDietBonus?: boolean
-  shieldAmount?: number
-  reflectDamage?: number
-}
+export type EffectResolution =
+  | {
+      kind: 'damage'
+      targetId: string
+      amount: number
+      isCrit: boolean
+      isDodged: boolean
+      isDietBonus: boolean
+    }
+  | { kind: 'heal'; targetId: string; amount: number; newHp: number }
+  | {
+      kind: 'status_applied'
+      targetId: string
+      effect: StatusEffect
+    }
+  | { kind: 'shield_set'; targetId: string; amount: number }
+  | {
+      kind: 'reflect_damage'
+      targetId: string
+      sourceId: string
+      amount: number
+    }
+  | { kind: 'dodged'; targetId: string }
 
-export interface StatusTickResult {
-  kind: StatusEffectKind
-  damage?: number
-  healing?: number
-  expired: boolean
-  stat?: string
+export interface EffectContext {
+  caster: BattleCreature
+  targets: BattleCreature[]
+  allAllies: BattleCreature[]
+  allEnemies: BattleCreature[]
+  rng: SeededRng
+  turn: number
+  triggerAttacker?: BattleCreature
+  triggerAttackTarget?: BattleCreature
+  lastDamageDealt?: number
 }
 
 export interface SelectedAction {
-  ability: ResolvedAbility
+  ability: Ability
   targets: BattleCreature[]
 }

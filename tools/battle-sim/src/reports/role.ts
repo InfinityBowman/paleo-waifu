@@ -9,7 +9,7 @@ import {
   writeCsvRow,
 } from '../report.ts'
 
-const ROLES = ['striker', 'tank', 'scout', 'support', 'bruiser', 'specialist']
+const ROLES = ['striker', 'tank', 'support', 'bruiser']
 
 export function runRoleReport(
   creatures: CreatureRecord[],
@@ -26,8 +26,8 @@ export function runRoleReport(
       .filter((c) => c.role === role)
       .sort(
         (a, b) =>
-          b.hp + b.atk + b.def + b.spd + b.abl -
-          (a.hp + a.atk + a.def + a.spd + a.abl),
+          b.hp + b.atk + b.def + b.spd -
+          (a.hp + a.atk + a.def + a.spd),
       )
       .slice(0, 3)
 

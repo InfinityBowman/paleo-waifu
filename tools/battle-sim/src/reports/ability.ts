@@ -17,7 +17,10 @@ const ABILITY_NAME_MAP = new Map<string, string>()
 const ABILITY_TYPE_MAP = new Map<string, string>()
 for (const t of ALL_ABILITY_TEMPLATES) {
   ABILITY_NAME_MAP.set(t.id, t.name)
-  ABILITY_TYPE_MAP.set(t.id, t.type)
+  ABILITY_TYPE_MAP.set(
+    t.id,
+    t.trigger.type === 'onUse' ? 'active' : 'passive',
+  )
 }
 
 function getAbilityIds(
@@ -25,8 +28,7 @@ function getAbilityIds(
 ): Set<string> {
   const ids = new Set<string>()
   for (const m of members) {
-    ids.add(m.active1.templateId)
-    ids.add(m.active2.templateId)
+    ids.add(m.active.templateId)
     ids.add(m.passive.templateId)
   }
   return ids

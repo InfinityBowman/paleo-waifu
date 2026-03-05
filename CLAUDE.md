@@ -47,7 +47,7 @@ Requires a `.env` file. Copy `.env.example` and fill in values:
 
 ## Architecture
 
-Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanStack Router** (file-based routing), React 19, Tailwind CSS v4, deployed to **Cloudflare Workers** with D1 database.
+Prehistoric animal waifu gacha game built with **TanStack Start** (SSR) + **TanStack Router** (file-based routing), React 19, Tailwind CSS v4, deployed to **Cloudflare Workers** with D1 database. wrangler.jsonc is the config file.
 
 ### Monorepo Structure
 

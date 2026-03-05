@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3'
-import { readdirSync, existsSync } from 'node:fs'
+import { readdirSync, existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -17,9 +17,7 @@ export interface CreatureRecord {
   atk: number
   def: number
   spd: number
-  abl: number
-  active1: { templateId: string; displayName: string }
-  active2: { templateId: string; displayName: string }
+  active: { templateId: string; displayName: string }
   passive: { templateId: string; displayName: string }
 }
 
@@ -43,15 +41,29 @@ function resolveDbPath(): string {
   }
 
   // Search for .sqlite files recursively (one level of subdirs)
+  // Pick the largest file when multiple exist (empty/new DBs will be smaller)
+  const candidates: { path: string; size: number }[] = []
   const subdirs = readdirSync(d1Dir, { withFileTypes: true })
   for (const sub of subdirs) {
     if (!sub.isDirectory()) continue
     const subPath = join(d1Dir, sub.name)
     const files = readdirSync(subPath)
-    const sqliteFile = files.find((f) => f.endsWith('.sqlite'))
-    if (sqliteFile) {
-      return join(subPath, sqliteFile)
+    for (const f of files) {
+      if (f.endsWith('.sqlite')) {
+        const fullPath = join(subPath, f)
+        candidates.push({ path: fullPath, size: statSync(fullPath).size })
+      }
     }
+  }
+
+  if (candidates.length > 0) {
+    candidates.sort((a, b) => b.size - a.size)
+    if (candidates.length > 1) {
+      console.log(
+        `  Found ${candidates.length} SQLite files, using largest (${(candidates[0].size / 1024).toFixed(0)}KB)`,
+      )
+    }
+    return candidates[0].path
   }
 
   throw new Error(
@@ -74,11 +86,8 @@ interface RawRow {
   atk: number
   def: number
   spd: number
-  abl: number
-  active1_template: string
-  active1_name: string
-  active2_template: string
-  active2_name: string
+  active_template: string
+  active_name: string
   passive_template: string
   passive_name: string
 }
@@ -86,15 +95,13 @@ interface RawRow {
 const QUERY = `
   SELECT
     c.id, c.name, c.era, c.diet, c.rarity, c.type,
-    cbs.role, cbs.hp, cbs.atk, cbs.def, cbs.spd, cbs.abl,
-    a1.template_id AS active1_template, a1.display_name AS active1_name,
-    a2.template_id AS active2_template, a2.display_name AS active2_name,
-    ap.template_id AS passive_template, ap.display_name AS passive_name
+    cbs.role, cbs.hp, cbs.atk, cbs.def, cbs.spd,
+    a_act.template_id AS active_template, a_act.display_name AS active_name,
+    a_pas.template_id AS passive_template, a_pas.display_name AS passive_name
   FROM creature c
   JOIN creature_battle_stats cbs ON cbs.creature_id = c.id
-  JOIN creature_ability a1 ON a1.creature_id = c.id AND a1.slot = 'active1'
-  JOIN creature_ability a2 ON a2.creature_id = c.id AND a2.slot = 'active2'
-  JOIN creature_ability ap ON ap.creature_id = c.id AND ap.slot = 'passive'
+  JOIN creature_ability a_act ON a_act.creature_id = c.id AND a_act.slot = 'active'
+  JOIN creature_ability a_pas ON a_pas.creature_id = c.id AND a_pas.slot = 'passive'
 `
 
 export function loadCreatures(): CreatureRecord[] {
@@ -123,14 +130,9 @@ export function loadCreatures(): CreatureRecord[] {
       atk: row.atk,
       def: row.def,
       spd: row.spd,
-      abl: row.abl,
-      active1: {
-        templateId: row.active1_template,
-        displayName: row.active1_name,
-      },
-      active2: {
-        templateId: row.active2_template,
-        displayName: row.active2_name,
+      active: {
+        templateId: row.active_template,
+        displayName: row.active_name,
       },
       passive: {
         templateId: row.passive_template,

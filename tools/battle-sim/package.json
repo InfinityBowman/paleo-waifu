@@ -10,6 +10,10 @@
     "sim:creature": "tsx src/index.ts creature",
     "sim:ability": "tsx src/index.ts ability",
     "sim:csv": "mkdir -p dist && tsx src/index.ts matchup --csv > dist/matchup.csv && tsx src/index.ts role --csv > dist/role.csv && tsx src/index.ts team --csv > dist/team.csv && tsx src/index.ts ability --csv > dist/ability.csv",
+    "sim:meta": "tsx src/index.ts meta",
+    "sim:meta:csv": "mkdir -p dist && tsx src/index.ts meta --csv > dist/meta.csv",
+    "sim:meta:normalized": "tsx src/index.ts meta --normalize-stats",
+    "sim:quick": "mkdir -p dist && tsx src/index.ts matchup --csv --trials 20 > dist/matchup.csv && tsx src/index.ts role --csv --trials 200 > dist/role.csv && tsx src/index.ts team --csv --trials 2000 > dist/team.csv && tsx src/index.ts ability --csv --trials 2000 > dist/ability.csv",
     "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:better-sqlite3",
     "typecheck": "tsc --noEmit"
   },

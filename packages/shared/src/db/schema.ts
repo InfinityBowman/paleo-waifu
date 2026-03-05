@@ -318,27 +318,15 @@ export const creatureBattleStats = sqliteTable('creature_battle_stats', {
   creatureId: text('creature_id')
     .primaryKey()
     .references(() => creature.id),
-  role: text('role').notNull(), // striker | tank | scout | support | bruiser | specialist
+  role: text('role').notNull(), // striker | tank | support | bruiser
   hp: integer('hp').notNull(),
   atk: integer('atk').notNull(),
   def: integer('def').notNull(),
   spd: integer('spd').notNull(),
-  abl: integer('abl').notNull(),
 })
 
-export const abilityTemplate = sqliteTable('ability_template', {
-  id: text('id').primaryKey(),
-  name: text('name').notNull(),
-  type: text('type').notNull(), // active | passive
-  category: text('category').notNull(), // damage | aoe_damage | buff | debuff | heal | shield | stun | dot | taunt | passive
-  target: text('target'), // single_enemy | all_enemies | self | all_allies | random_enemy
-  multiplier: real('multiplier'),
-  cooldown: integer('cooldown'),
-  duration: integer('duration'),
-  statAffected: text('stat_affected'),
-  effectValue: real('effect_value'),
-  description: text('description').notNull(),
-})
+// Ability templates are defined in code (battle/constants.ts), not in DB.
+// creatureAbility.templateId references template IDs from constants.
 
 export const creatureAbility = sqliteTable(
   'creature_ability',
@@ -347,10 +335,8 @@ export const creatureAbility = sqliteTable(
     creatureId: text('creature_id')
       .notNull()
       .references(() => creature.id),
-    templateId: text('template_id')
-      .notNull()
-      .references(() => abilityTemplate.id),
-    slot: text('slot').notNull(), // active1 | active2 | passive
+    templateId: text('template_id').notNull(), // references ACTIVE/PASSIVE_ABILITY_TEMPLATES in constants.ts
+    slot: text('slot').notNull(), // active | passive
     displayName: text('display_name').notNull(),
   },
   (table) => [

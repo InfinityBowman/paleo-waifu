@@ -155,14 +155,10 @@ export function roleColor(role: string): string {
       return chalk.red(role)
     case 'tank':
       return chalk.blue(role)
-    case 'scout':
-      return chalk.green(role)
     case 'support':
       return chalk.yellow(role)
     case 'bruiser':
       return chalk.magenta(role)
-    case 'specialist':
-      return chalk.cyan(role)
     default:
       return role
   }

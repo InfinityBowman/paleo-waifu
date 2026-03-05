@@ -66,10 +66,8 @@ export function runCreatureReport(
       ATK: target.atk,
       DEF: target.def,
       SPD: target.spd,
-      ABL: target.abl,
-      'Total Stats': target.hp + target.atk + target.def + target.spd + target.abl,
-      Active1: `${target.active1.displayName} (${target.active1.templateId})`,
-      Active2: `${target.active2.displayName} (${target.active2.templateId})`,
+      'Total Stats': target.hp + target.atk + target.def + target.spd,
+      Active: `${target.active.displayName} (${target.active.templateId})`,
       Passive: `${target.passive.displayName} (${target.passive.templateId})`,
     })
   }

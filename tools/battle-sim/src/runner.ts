@@ -1,7 +1,13 @@
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
+import {
+  ALL_ABILITY_TEMPLATES,
+  templateToAbility,
+} from '@paleo-waifu/shared/battle/constants'
 import type {
+  Ability,
   BattleTeam,
   BattleTeamMember,
+  Row,
 } from '@paleo-waifu/shared/battle/types'
 import type { CreatureRecord } from './db.ts'
 
@@ -21,6 +27,25 @@ export interface TrialSummary {
   avgTurns: number
 }
 
+// ─── Template Resolution ─────────────────────────────────────────
+
+const TEMPLATE_MAP = new Map(
+  ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]),
+)
+
+function resolveAbility(assignment: {
+  templateId: string
+  displayName: string
+}): Ability {
+  const template = TEMPLATE_MAP.get(assignment.templateId)
+  if (!template) {
+    throw new Error(
+      `Unknown ability template: ${assignment.templateId}`,
+    )
+  }
+  return templateToAbility(template, assignment.displayName)
+}
+
 // ─── Row Assignment ───────────────────────────────────────────────
 
 export function assignRow(role: string): 'front' | 'back' {
@@ -29,7 +54,10 @@ export function assignRow(role: string): 'front' | 'back' {
 
 // ─── Team Building ────────────────────────────────────────────────
 
-function toMember(record: CreatureRecord, index: number): BattleTeamMember {
+function toMember(
+  record: CreatureRecord,
+  index: number,
+): BattleTeamMember {
   return {
     creatureId: `${record.id}-${index}`,
     name: record.name,
@@ -38,14 +66,9 @@ function toMember(record: CreatureRecord, index: number): BattleTeamMember {
       atk: record.atk,
       def: record.def,
       spd: record.spd,
-      abl: record.abl,
     },
-    abilities: {
-      creatureId: `${record.id}-${index}`,
-      active1: record.active1,
-      active2: record.active2,
-      passive: record.passive,
-    },
+    active: resolveAbility(record.active),
+    passive: resolveAbility(record.passive),
     diet: record.diet,
     type: record.type,
     era: record.era,
@@ -101,6 +124,26 @@ export function runTrials(
   return results
 }
 
+// ─── Team Building with Explicit Rows ────────────────────────────
+
+export function buildTeamWithRows(
+  members: [CreatureRecord, CreatureRecord, CreatureRecord],
+  rows: [Row, Row, Row],
+): BattleTeam {
+  const teamMembers = members.map((m, i) => {
+    const member = toMember(m, i)
+    member.row = rows[i]!
+    return member
+  }) as [BattleTeamMember, BattleTeamMember, BattleTeamMember]
+
+  const hasFront = teamMembers.some((m) => m.row === 'front')
+  if (!hasFront) {
+    teamMembers[0]!.row = 'front'
+  }
+
+  return { members: teamMembers }
+}
+
 // ─── Random Team Sampling ─────────────────────────────────────────
 
 export function sampleTeam(
@@ -117,7 +160,9 @@ export function sampleTeam(
   return [creatures[i]!, creatures[j]!, creatures[k]!]
 }
 
-export function summarizeTrials(results: TrialResult[]): TrialSummary {
+export function summarizeTrials(
+  results: TrialResult[],
+): TrialSummary {
   if (results.length === 0) {
     return { winsA: 0, winsB: 0, winRateA: 0, avgTurns: 0 }
   }
