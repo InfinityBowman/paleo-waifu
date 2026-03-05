@@ -6,29 +6,27 @@ import { cors } from 'hono/cors'
 import { loadEnv } from './env'
 import { createEditorDb } from './db'
 import { initR2 } from './r2'
-import { initAuth, createAuthRoutes, requireAuth } from './auth'
-import { initImages } from './images'
-import type { EditorUser } from './auth'
-import type { EditorDatabase } from './db'
+import { createAuthRoutes, initAuth, requireAuth } from './auth'
+import { deleteImage,
+  deleteR2Object,
+  getLocalImage,
+  initImages,
+  listOrphanedR2Objects,
+  processAndUploadImage,
+  pushExistingImageToR2,
+  syncAllToR2 } from './images'
 import {
   VALID_RARITIES,
+  deleteCreatureBySlug,
   getCreatureBySlug,
   getStats,
   insertCreature,
   listCreatures,
   slugify,
   updateCreatureBySlug,
-  deleteCreatureBySlug,
 } from './creature-repo'
-import {
-  deleteImage,
-  deleteR2Object,
-  getLocalImage,
-  listOrphanedR2Objects,
-  processAndUploadImage,
-  pushExistingImageToR2,
-  syncAllToR2,
-} from './images'
+import type { EditorUser } from './auth'
+import type { EditorDatabase } from './db'
 import type { Creature } from './creature-repo'
 import type { SyncProgress } from './images'
 
@@ -89,7 +87,7 @@ app.get('/api/creatures/:slug', async (c) => {
 })
 
 app.post('/api/creatures', async (c) => {
-  const body = (await c.req.json()) as Partial<Creature>
+  const body = (await c.req.json())
   if (!body.name || !body.scientificName || !body.era || !body.rarity) {
     return c.json(
       { error: 'Missing required fields: name, scientificName, era, rarity' },
@@ -133,7 +131,7 @@ app.post('/api/creatures', async (c) => {
 
 app.put('/api/creatures/:slug', async (c) => {
   const slug = c.req.param('slug')
-  const body = (await c.req.json()) as Partial<Creature>
+  const body = (await c.req.json())
 
   if (body.rarity && !VALID_RARITIES.has(body.rarity)) {
     return c.json({ error: `Invalid rarity: ${body.rarity}` }, 400)

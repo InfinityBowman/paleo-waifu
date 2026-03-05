@@ -54,7 +54,7 @@ export interface GenerationSnapshot {
 }
 
 export interface MetaResult {
-  hallOfFame: Individual[]
+  hallOfFame: Array<Individual>
   creatureLeaderboard: Array<{
     creature: CreatureRecord
     appearances: number
@@ -74,7 +74,7 @@ export interface MetaResult {
 
 export interface MetaRunResult {
   result: MetaResult
-  snapshots: GenerationSnapshot[]
+  snapshots: Array<GenerationSnapshot>
 }
 
 // ─── Override / Patch Types ──────────────────────────────────────
@@ -100,12 +100,17 @@ export interface ConstantsOverride {
 }
 
 export interface SimRequest {
-  creaturePatches: CreatureOverridePatch[]
+  creaturePatches: Array<CreatureOverridePatch>
   constants: ConstantsOverride
   options: {
     population: number
     generations: number
     matchesPerTeam: number
+    eliteRate: number
+    mutationRate: number
+    normalizeStats: boolean
+    noActives: boolean
+    noPassives: boolean
   }
 }
 
@@ -121,17 +126,16 @@ export type SimProgressEvent =
   | { type: 'error'; message: string }
 
 export interface ConstantsSnapshot {
-  rarityBaseTotals: Record<string, number>
-  roleDistributions: Record<
-    string,
-    { hp: number; atk: number; def: number; spd: number }
+  rarityBaseTotals: Partial<Record<string, number>>
+  roleDistributions: Partial<
+    Record<string, { hp: number; atk: number; def: number; spd: number }>
   >
   combatDamageScale: number
-  activeTemplates: AbilityTemplate[]
-  passiveTemplates: AbilityTemplate[]
+  activeTemplates: Array<AbilityTemplate>
+  passiveTemplates: Array<AbilityTemplate>
 }
 
 export interface CreaturesResponse {
-  creatures: CreatureRecord[]
+  creatures: Array<CreatureRecord>
   constants: ConstantsSnapshot
 }

@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
+import { RefreshCw } from 'lucide-react'
 import { fetchCreatures, reloadCreatures, runSim } from './lib/api'
 import { CreatureTable } from './components/CreatureTable'
 import { GlobalKnobsPanel } from './components/GlobalKnobsPanel'
 import { SimControls } from './components/SimControls'
 import { ResultsPanel } from './components/ResultsPanel'
-import { RefreshCw } from 'lucide-react'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
 import { TooltipProvider } from './components/ui/tooltip'
 import type {
-  CreatureRecord,
+  ConstantsOverride,
   ConstantsSnapshot,
   CreatureOverridePatch,
-  ConstantsOverride,
+  CreatureRecord,
   MetaRunResult,
   SimProgressEvent,
 } from '../shared/types.ts'
@@ -21,7 +21,7 @@ import type {
 type SimState = 'idle' | 'running' | 'done' | 'error'
 
 export function App() {
-  const [creatures, setCreatures] = useState<CreatureRecord[]>([])
+  const [creatures, setCreatures] = useState<Array<CreatureRecord>>([])
   const [constants, setConstants] = useState<ConstantsSnapshot | null>(null)
   const [patches, setPatches] = useState<Map<string, CreatureOverridePatch>>(
     new Map(),
@@ -43,6 +43,11 @@ export function App() {
     population: 100,
     generations: 25,
     matchesPerTeam: 20,
+    eliteRate: 0.1,
+    mutationRate: 0.8,
+    normalizeStats: false,
+    noActives: false,
+    noPassives: false,
   })
 
   const load = useCallback(async () => {
@@ -96,7 +101,7 @@ export function App() {
             setSimResult(event.result)
             setSimState('done')
             setTab('results')
-          } else if (event.type === 'error') {
+          } else {
             setSimError(event.message)
             setSimState('error')
           }
@@ -204,6 +209,7 @@ export function App() {
                 result={simResult}
                 error={simError}
                 simState={simState}
+                population={simOptions.population}
               />
             </TabsContent>
           </Tabs>

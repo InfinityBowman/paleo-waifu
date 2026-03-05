@@ -84,7 +84,7 @@ export interface Ability {
   name: string
   displayName: string
   trigger: Trigger
-  effects: Effect[]
+  effects: Array<Effect>
   target: Target
   condition?: Condition
   description: string
@@ -99,11 +99,11 @@ export interface AbilityTemplate {
   id: string
   name: string
   trigger: Trigger
-  effects: Effect[]
+  effects: Array<Effect>
   target: Target
   condition?: Condition
   description: string
-  roleAffinity: Role[]
+  roleAffinity: Array<Role>
 }
 
 // ─── Status Effects (runtime) ──────────────────────────────────────
@@ -157,7 +157,7 @@ export interface BattleCreature {
 
   // Combat state
   cooldown: number
-  statusEffects: StatusEffect[]
+  statusEffects: Array<StatusEffect>
   isAlive: boolean
   isStunned: boolean
 
@@ -190,9 +190,9 @@ export type BattleTeam = {
 // ─── SeededRng ─────────────────────────────────────────────────────
 
 export interface SeededRng {
-  next(): number
-  nextInt(min: number, max: number): number
-  nextFloat(min: number, max: number): number
+  next: () => number
+  nextInt: (min: number, max: number) => number
+  nextFloat: (min: number, max: number) => number
 }
 
 // ─── Battle Log Events ─────────────────────────────────────────────
@@ -200,8 +200,8 @@ export interface SeededRng {
 export type BattleLogEvent =
   | {
       type: 'battle_start'
-      teamA: string[]
-      teamB: string[]
+      teamA: Array<string>
+      teamB: Array<string>
       seed: number
     }
   | {
@@ -217,7 +217,7 @@ export type BattleLogEvent =
       creatureName: string
       abilityId: string
       abilityName: string
-      targetIds: string[]
+      targetIds: Array<string>
     }
   | {
       type: 'damage'
@@ -298,7 +298,7 @@ export type BattleLogEvent =
 export interface SynergyBonus {
   kind: 'type' | 'era' | 'diet'
   description: string
-  affectedCreatureIds: string[]
+  affectedCreatureIds: Array<string>
   statBonuses: Partial<Record<'hp' | 'atk' | 'def' | 'spd', number>>
 }
 
@@ -308,8 +308,8 @@ export interface BattleResult {
   turns: number
   teamAHpPercent: number
   teamBHpPercent: number
-  log: BattleLogEvent[]
-  finalState: { teamA: BattleCreature[]; teamB: BattleCreature[] }
+  log: Array<BattleLogEvent>
+  finalState: { teamA: Array<BattleCreature>; teamB: Array<BattleCreature> }
   seed: number
 }
 
@@ -348,9 +348,9 @@ export type EffectResolution =
 
 export interface EffectContext {
   caster: BattleCreature
-  targets: BattleCreature[]
-  allAllies: BattleCreature[]
-  allEnemies: BattleCreature[]
+  targets: Array<BattleCreature>
+  allAllies: Array<BattleCreature>
+  allEnemies: Array<BattleCreature>
   rng: SeededRng
   turn: number
   triggerAttacker?: BattleCreature
@@ -360,5 +360,5 @@ export interface EffectContext {
 
 export interface SelectedAction {
   ability: Ability
-  targets: BattleCreature[]
+  targets: Array<BattleCreature>
 }

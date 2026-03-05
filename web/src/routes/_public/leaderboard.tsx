@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { asc, count, desc, eq, sql } from 'drizzle-orm'
-import { IconCrown } from '@/components/icons'
-import { getCfEnv } from '@/lib/env'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import { creature, user, userCreature, userXp } from '@paleo-waifu/shared/db/schema'
 import { xpForLevel } from '@paleo-waifu/shared/xp'
+import { getCfEnv } from '@/lib/env'
+import { IconCrown } from '@/components/icons'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 

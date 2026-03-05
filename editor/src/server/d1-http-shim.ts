@@ -14,7 +14,7 @@ interface D1ShimConfig {
 }
 
 interface D1RawResult {
-  results: Record<string, unknown>[]
+  results: Array<Record<string, unknown>>
   meta: { changes: number; last_row_id: number; duration: number }
   success: boolean
 }
@@ -33,7 +33,7 @@ function authHeaders(config: D1ShimConfig): Record<string, string> {
 async function queryD1(
   config: D1ShimConfig,
   sql: string,
-  params: unknown[],
+  params: Array<unknown>,
 ): Promise<D1RawResult> {
   const res = await fetch(queryUrl(config), {
     method: 'POST',
@@ -47,9 +47,9 @@ async function queryD1(
   }
 
   const body = (await res.json()) as {
-    result: D1RawResult[]
+    result: Array<D1RawResult>
     success: boolean
-    errors: { message: string }[]
+    errors: Array<{ message: string }>
   }
   if (!body.success) {
     throw new Error(`D1 query failed: ${body.errors.map((e) => e.message).join(', ')}`)
@@ -59,20 +59,20 @@ async function queryD1(
 }
 
 class D1PreparedStatementShim {
-  params: unknown[] = []
+  params: Array<unknown> = []
   constructor(
     private config: D1ShimConfig,
     readonly sql: string,
   ) {}
 
-  bind(...values: unknown[]): D1PreparedStatementShim {
+  bind(...values: Array<unknown>): D1PreparedStatementShim {
     const bound = new D1PreparedStatementShim(this.config, this.sql)
     bound.params = values
     return bound
   }
 
   async run(): Promise<{
-    results: Record<string, unknown>[]
+    results: Array<Record<string, unknown>>
     success: boolean
     meta: { changes: number; last_row_id: number; duration: number }
   }> {
@@ -80,12 +80,12 @@ class D1PreparedStatementShim {
     return { results: r.results, success: r.success, meta: r.meta }
   }
 
-  async all(): Promise<{ results: Record<string, unknown>[] }> {
+  async all(): Promise<{ results: Array<Record<string, unknown>> }> {
     const r = await queryD1(this.config, this.sql, this.params)
     return { results: r.results }
   }
 
-  async raw(): Promise<unknown[][]> {
+  async raw(): Promise<Array<Array<unknown>>> {
     const r = await queryD1(this.config, this.sql, this.params)
     return r.results.map((row) => Object.values(row))
   }
@@ -106,8 +106,8 @@ export class D1DatabaseShim {
   }
 
   async batch(
-    stmts: D1PreparedStatementShim[],
-  ): Promise<D1RawResult[]> {
+    stmts: Array<D1PreparedStatementShim>,
+  ): Promise<Array<D1RawResult>> {
     // D1 REST API accepts an array of statements for atomic batch execution
     const res = await fetch(queryUrl(this.config), {
       method: 'POST',
@@ -123,9 +123,9 @@ export class D1DatabaseShim {
     }
 
     const body = (await res.json()) as {
-      result: D1RawResult[]
+      result: Array<D1RawResult>
       success: boolean
-      errors: { message: string }[]
+      errors: Array<{ message: string }>
     }
     if (!body.success) {
       throw new Error(`D1 batch failed: ${body.errors.map((e) => e.message).join(', ')}`)
@@ -139,7 +139,7 @@ export class D1DatabaseShim {
     return { count: r.meta.changes, duration: r.meta.duration }
   }
 
-  async dump(): Promise<ArrayBuffer> {
+  dump(): Promise<ArrayBuffer> {
     throw new Error('dump() not supported via REST API')
   }
 }

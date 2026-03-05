@@ -2,13 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { count, eq, sql } from 'drizzle-orm'
 import { Dices } from 'lucide-react'
-import {
-  IconArchiveResearch,
-  IconCrystalCluster,
-  IconDinosaurBones,
-  IconTrade,
-} from '@/components/icons'
-import { getCfEnv } from '@/lib/env'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   creature,
@@ -18,6 +11,13 @@ import {
   userXp,
 } from '@paleo-waifu/shared/db/schema'
 import { xpForLevel } from '@paleo-waifu/shared/xp'
+import { getCfEnv } from '@/lib/env'
+import {
+  IconArchiveResearch,
+  IconCrystalCluster,
+  IconDinosaurBones,
+  IconTrade,
+} from '@/components/icons'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent } from '@/components/ui/card'
 

@@ -1,7 +1,7 @@
-import Database from 'better-sqlite3'
-import { readdirSync, existsSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import Database from 'better-sqlite3'
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -31,7 +31,7 @@ function getRepoRoot(): string {
 
 function resolveDbPath(): string {
   const root = getRepoRoot()
-  const d1Dir = join(root, '.wrangler', 'state', 'v3', 'd1')
+  const d1Dir = join(root, 'web', '.wrangler', 'state', 'v3', 'd1')
 
   if (!existsSync(d1Dir)) {
     throw new Error(
@@ -42,7 +42,7 @@ function resolveDbPath(): string {
 
   // Search for .sqlite files recursively (one level of subdirs)
   // Pick the largest file when multiple exist (empty/new DBs will be smaller)
-  const candidates: { path: string; size: number }[] = []
+  const candidates: Array<{ path: string; size: number }> = []
   const subdirs = readdirSync(d1Dir, { withFileTypes: true })
   for (const sub of subdirs) {
     if (!sub.isDirectory()) continue
@@ -77,10 +77,10 @@ function resolveDbPath(): string {
 interface RawRow {
   id: string
   name: string
-  era: string
-  diet: string
+  era: string | null
+  diet: string | null
   rarity: string
-  type: string
+  type: string | null
   role: string
   hp: number
   atk: number
@@ -104,12 +104,12 @@ const QUERY = `
   JOIN creature_ability a_pas ON a_pas.creature_id = c.id AND a_pas.slot = 'passive'
 `
 
-export function loadCreatures(): CreatureRecord[] {
+export function loadCreatures(): Array<CreatureRecord> {
   const dbPath = resolveDbPath()
   const db = new Database(dbPath, { readonly: true })
 
   try {
-    const rows = db.prepare(QUERY).all() as RawRow[]
+    const rows = db.prepare(QUERY).all() as Array<RawRow>
 
     if (rows.length < 3) {
       throw new Error(

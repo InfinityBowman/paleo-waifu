@@ -1,21 +1,21 @@
-import type { CreatureRecord } from '../db.ts'
 import { runTrials, summarizeTrials } from '../runner.ts'
 import {
-  printHeader,
-  printSubheader,
-  printRankedList,
   createProgressBar,
-  winRateColor,
+  printHeader,
+  printRankedList,
+  printSubheader,
   rarityColor,
   roleColor,
+  winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { CreatureRecord } from '../db.ts'
 
 const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary']
 
 export function runMatchupReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: { trials: number; csv: boolean },
 ): void {
   // Calculate total pairs
@@ -43,8 +43,8 @@ export function runMatchupReport(
 
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
-      const a = creatures[i]!
-      const b = creatures[j]!
+      const a = creatures[i]
+      const b = creatures[j]
 
       const results = runTrials(
         [a, a, a],
@@ -163,14 +163,14 @@ export function runMatchupReport(
   printSubheader('RARITY TIER WIN RATES')
 
   // Rarity summary using per-creature win rates grouped by rarity
-  const byRarity = new Map<string, number[]>()
+  const byRarity = new Map<string, Array<number>>()
   for (const s of ranked) {
     const r = s.creature.rarity
     if (!byRarity.has(r)) byRarity.set(r, [])
     byRarity.get(r)!.push(s.winRate)
   }
 
-  const rarityRows: string[][] = []
+  const rarityRows: Array<Array<string>> = []
   for (const rarity of RARITY_ORDER) {
     const rates = byRarity.get(rarity)
     if (!rates || rates.length === 0) continue

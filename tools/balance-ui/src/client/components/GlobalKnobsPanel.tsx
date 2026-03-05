@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Info } from 'lucide-react'
-import { Input } from './ui/input'
-import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
 import { cn } from '../lib/utils'
-import type { ConstantsSnapshot, ConstantsOverride } from '../../shared/types.ts'
+import { Input } from './ui/input'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import type { ConstantsOverride, ConstantsSnapshot } from '../../shared/types.ts'
 
 interface Props {
   constants: ConstantsSnapshot
@@ -203,7 +203,7 @@ function Section({
         {tooltip && (
           <Tooltip>
             <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Info size={10} className="text-muted-foreground/40 cursor-help" />
+              <Info size={10} className="text-muted-foreground/40" />
             </TooltipTrigger>
             <TooltipContent side="right">{tooltip}</TooltipContent>
           </Tooltip>

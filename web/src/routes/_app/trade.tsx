@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, inArray, lt } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
-import { getCfEnv } from '@/lib/env'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   creature,
@@ -11,6 +10,7 @@ import {
   user,
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
+import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { TradeList } from '@/components/trade/TradeList'
 

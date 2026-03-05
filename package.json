@@ -45,7 +45,9 @@
     "deps:up": "pnpm update --latest --recursive"
   },
   "devDependencies": {
+    "@tanstack/eslint-config": "^0.4.0",
     "concurrently": "^9.2.1",
+    "eslint": "^9.39.3",
     "prettier": "^3.8.1"
   },
   "pnpm": {

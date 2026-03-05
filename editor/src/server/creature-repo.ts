@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 import { eq } from 'drizzle-orm'
-import type { EditorDatabase } from './db'
-import { schema } from './db'
 import { slugify } from '../shared/types'
+import { schema } from './db'
+import type { EditorDatabase } from './db'
 import type { Creature } from '../shared/types'
 
 export type { Creature }
@@ -22,10 +22,10 @@ export const VALID_RARITIES = new Set([
 // Reduces D1 REST API calls since findRowBySlug does a full table scan.
 
 const CACHE_TTL = 60_000 // 1 minute
-let cachedRows: CreatureRow[] | null = null
+let cachedRows: Array<CreatureRow> | null = null
 let cacheTime = 0
 
-async function getAllRows(db: EditorDatabase): Promise<CreatureRow[]> {
+async function getAllRows(db: EditorDatabase): Promise<Array<CreatureRow>> {
   const now = Date.now()
   if (cachedRows && now - cacheTime < CACHE_TTL) {
     return cachedRows
@@ -122,7 +122,7 @@ export async function insertCreature(
     weightKg: data.weightKg,
     rarity: data.rarity,
     description: data.description || '',
-    funFacts: JSON.stringify(data.funFacts || []),
+    funFacts: JSON.stringify(data.funFacts),
     imageUrl: data.imageUrl,
     imageAspectRatio: data.imageAspectRatio,
     source: data.source || 'manual',

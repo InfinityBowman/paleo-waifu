@@ -1,8 +1,8 @@
+import { xpForLevel, xpToNextLevel } from '@paleo-waifu/shared/xp'
 import { RARITY_EMOJI, RARITY_HEX, RARITY_LABEL } from './constants'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import type { PullResult } from '@/lib/gacha'
 import type { Embed } from './discord'
-import { xpForLevel, xpToNextLevel } from '@paleo-waifu/shared/xp'
 
 /** Build a full creature embed for a single pull */
 export function creatureEmbed(pull: PullResult): Embed {

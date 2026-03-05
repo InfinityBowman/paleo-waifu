@@ -29,7 +29,7 @@ export const ROLE_DISTRIBUTIONS: Record<
 // ─── Type-to-Role Mapping ───────────────────────────────────────────
 // Scout → Striker, Specialist → Support
 
-export const TYPE_TO_ROLE: Record<string, Role> = {
+export const TYPE_TO_ROLE: Partial<Record<string, Role>> = {
   // Core dinosaur types
   'large theropod': 'striker',
   'small theropod': 'striker', // was scout
@@ -98,7 +98,7 @@ export const TYPE_TO_ROLE: Record<string, Role> = {
 
 // ─── Diet Fallback ──────────────────────────────────────────────────
 
-export const DIET_TO_ROLE: Record<string, Role> = {
+export const DIET_TO_ROLE: Partial<Record<string, Role>> = {
   Carnivorous: 'striker',
   Herbivorous: 'tank',
   Piscivorous: 'support', // was specialist
@@ -111,7 +111,7 @@ export const DEFAULT_ROLE: Role = 'bruiser'
 
 // ─── Active Ability Templates (15) ──────────────────────────────────
 
-export const ACTIVE_ABILITY_TEMPLATES: AbilityTemplate[] = [
+export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   // ── Damage ──
   {
     id: 'bite',
@@ -276,7 +276,7 @@ export const ACTIVE_ABILITY_TEMPLATES: AbilityTemplate[] = [
 
 // ─── Passive Ability Templates (10) ─────────────────────────────────
 
-export const PASSIVE_ABILITY_TEMPLATES: AbilityTemplate[] = [
+export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   // ── Defensive (always) ──
   {
     id: 'thick_hide',
@@ -394,7 +394,7 @@ export const PASSIVE_ABILITY_TEMPLATES: AbilityTemplate[] = [
   },
 ]
 
-export const ALL_ABILITY_TEMPLATES: AbilityTemplate[] = [
+export const ALL_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   ...ACTIVE_ABILITY_TEMPLATES,
   ...PASSIVE_ABILITY_TEMPLATES,
 ]

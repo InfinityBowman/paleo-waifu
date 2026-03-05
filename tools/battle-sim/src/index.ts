@@ -1,11 +1,12 @@
 import chalk from 'chalk'
-import { loadCreatures, type CreatureRecord } from './db.ts'
+import {  loadCreatures } from './db.ts'
 import { runMatchupReport } from './reports/matchup.ts'
 import { runTeamReport } from './reports/team.ts'
 import { runRoleReport } from './reports/role.ts'
 import { runCreatureReport } from './reports/creature.ts'
 import { runAbilityReport } from './reports/ability.ts'
 import { runMetaReport } from './reports/meta.ts'
+import type {CreatureRecord} from './db.ts';
 
 // ─── CLI Argument Parsing ─────────────────────────────────────────
 
@@ -41,7 +42,7 @@ interface SimArgs {
   csv: boolean
 }
 
-function parseArgs(argv: string[]): SimArgs {
+function parseArgs(argv: Array<string>): SimArgs {
   const args = argv.slice(2)
   let command: Command = 'all'
   let creatureName: string | undefined
@@ -54,7 +55,7 @@ function parseArgs(argv: string[]): SimArgs {
   let noPassives = false
   let csv = false
 
-  const tokens: string[] = []
+  const tokens: Array<string> = []
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--') continue // skip pnpm arg separator
@@ -67,23 +68,23 @@ function parseArgs(argv: string[]): SimArgs {
     } else if (args[i] === '--no-passives') {
       noPassives = true
     } else if (args[i] === '--trials' && i + 1 < args.length) {
-      trials = parseInt(args[i + 1]!, 10)
+      trials = parseInt(args[i + 1], 10)
       if (isNaN(trials) || trials < 1) {
         console.error('Error: --trials must be a positive integer')
         process.exit(1)
       }
       i++ // skip next arg
     } else if (args[i] === '--population' && i + 1 < args.length) {
-      population = parseInt(args[i + 1]!, 10)
+      population = parseInt(args[i + 1], 10)
       i++
     } else if (args[i] === '--generations' && i + 1 < args.length) {
-      generations = parseInt(args[i + 1]!, 10)
+      generations = parseInt(args[i + 1], 10)
       i++
     } else if (args[i] === '--matches' && i + 1 < args.length) {
-      matchesPerTeam = parseInt(args[i + 1]!, 10)
+      matchesPerTeam = parseInt(args[i + 1], 10)
       i++
     } else {
-      tokens.push(args[i]!)
+      tokens.push(args[i])
     }
   }
 
@@ -110,7 +111,7 @@ function parseArgs(argv: string[]): SimArgs {
 // ─── Stat Normalization ──────────────────────────────────────────
 
 /** Scale all creatures to the same total stat budget, removing rarity advantage. */
-function normalizeCreatures(creatures: CreatureRecord[]): CreatureRecord[] {
+function normalizeCreatures(creatures: Array<CreatureRecord>): Array<CreatureRecord> {
   const TARGET_TOTAL = 170 // rare-tier baseline — value doesn't matter, just needs to be equal
 
   return creatures.map((c) => {
@@ -145,7 +146,7 @@ function main(): void {
 
   // In CSV mode, suppress decorative output (goes to stderr so piping works)
   const log = args.csv
-    ? (...a: unknown[]) => console.error(...a)
+    ? (...a: Array<unknown>) => console.error(...a)
     : console.log.bind(console)
 
   log(chalk.bold('\n  Paleo Waifu — Battle Simulator\n'))
@@ -228,7 +229,7 @@ function main(): void {
 
   if (args.command === 'all') {
     // Run all reports except creature (requires a name)
-    const reports: Command[] = ['role', 'matchup', 'team', 'ability']
+    const reports: Array<Command> = ['role', 'matchup', 'team', 'ability']
     for (const report of reports) {
       run(report)
     }

@@ -1,6 +1,6 @@
 import { and, eq } from 'drizzle-orm'
-import type { Database } from '@paleo-waifu/shared/db/client'
 import { account, user } from '@paleo-waifu/shared/db/schema'
+import type { Database } from '@paleo-waifu/shared/db/client'
 
 export interface AppUser {
   id: string

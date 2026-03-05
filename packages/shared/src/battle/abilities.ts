@@ -44,7 +44,7 @@ export function resolveTarget(
   caster: BattleCreature,
   ctx: EffectContext,
   rng: SeededRng,
-): BattleCreature[] {
+): Array<BattleCreature> {
   const livingEnemies = ctx.allEnemies.filter((e) => e.isAlive)
   const livingAllies = ctx.allAllies.filter((a) => a.isAlive)
 
@@ -86,7 +86,7 @@ export function resolveTarget(
     case 'random_enemy': {
       if (livingEnemies.length === 0) return []
       const idx = rng.nextInt(0, livingEnemies.length - 1)
-      return [livingEnemies[idx]!]
+      return [livingEnemies[idx]]
     }
 
     case 'attack_target': {
@@ -114,7 +114,7 @@ export function evaluateCondition(
 
     case 'target_hp_below': {
       const primary =
-        ctx.triggerAttackTarget ?? ctx.targets[0]
+        ctx.triggerAttackTarget ?? (ctx.targets[0] as BattleCreature | undefined)
       if (!primary) return false
       return (
         primary.currentHp < primary.maxHp * (condition.percent / 100)
@@ -178,7 +178,7 @@ export function resolveEffect(
   caster: BattleCreature,
   target: BattleCreature,
   ctx: EffectContext,
-): EffectResolution[] {
+): Array<EffectResolution> {
   switch (effect.type) {
     case 'damage': {
       const result = calculateDamage({
@@ -193,7 +193,7 @@ export function resolveEffect(
       }
 
       let finalDamage = result.damage
-      const resolutions: EffectResolution[] = []
+      const resolutions: Array<EffectResolution> = []
 
       // Shield absorption
       const shieldEffect = target.statusEffects.find(
@@ -421,10 +421,10 @@ export function resolveEffect(
 
 export function resolveAbilityEffects(
   ability: Ability,
-  targets: BattleCreature[],
+  targets: Array<BattleCreature>,
   ctx: EffectContext,
-): EffectResolution[] {
-  const allResolutions: EffectResolution[] = []
+): Array<EffectResolution> {
+  const allResolutions: Array<EffectResolution> = []
 
   for (const target of targets) {
     let lastDamageDealt = 0
@@ -461,8 +461,8 @@ export function fireTrigger(
   eventType: Trigger['type'],
   owner: BattleCreature,
   ctx: EffectContext,
-): EffectResolution[] {
-  const passive = owner.passive
+): Array<EffectResolution> {
+  const passive = owner.passive as typeof owner.passive | undefined
   if (!passive || passive.effects.length === 0) return []
 
   // Match trigger type
@@ -494,7 +494,7 @@ export function fireTrigger(
     ctx,
     ctx.rng,
   )
-  const allResolutions: EffectResolution[] = []
+  const allResolutions: Array<EffectResolution> = []
 
   for (const target of resolvedTargets) {
     for (const effect of passive.effects) {
@@ -518,7 +518,7 @@ export function fireTrigger(
 
 export function materializeAlwaysPassive(
   creature: BattleCreature,
-  allies: BattleCreature[],
+  allies: Array<BattleCreature>,
 ): void {
   const passive = creature.passive
   if (passive.trigger.type !== 'always') return
@@ -574,8 +574,7 @@ export function materializeAlwaysPassive(
             creature.atk += newBonus - prevBonus
           else if (stat === 'def')
             creature.def += newBonus - prevBonus
-          else if (stat === 'spd')
-            creature.spd += newBonus - prevBonus
+          else creature.spd += newBonus - prevBonus
         }
       }
       ;(creature as any).__passiveAllyCount = liveAllyCount
@@ -608,8 +607,7 @@ export function materializeAlwaysPassive(
             creature.atk += newBonus - prevBonus
           else if (stat === 'def')
             creature.def += newBonus - prevBonus
-          else if (stat === 'spd')
-            creature.spd += newBonus - prevBonus
+          else creature.spd += newBonus - prevBonus
         }
       }
       ;(creature as any).__passiveDeadCount = deadCount
@@ -621,9 +619,9 @@ export function materializeAlwaysPassive(
 
 export function tickStatusEffects(
   creature: BattleCreature,
-): StatusTickResult[] {
-  const results: StatusTickResult[] = []
-  const toRemove: StatusEffect[] = []
+): Array<StatusTickResult> {
+  const results: Array<StatusTickResult> = []
+  const toRemove: Array<StatusEffect> = []
 
   for (const effect of creature.statusEffects) {
     switch (effect.kind) {

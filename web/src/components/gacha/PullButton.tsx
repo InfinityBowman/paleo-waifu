@@ -1,8 +1,8 @@
 import { useState } from 'react'
+import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@paleo-waifu/shared/types'
 import type { PullResult } from '@/lib/gacha'
 import { IconDinosaurBones, IconMining } from '@/components/icons'
 import { useAppStore } from '@/store/appStore'
-import { PULL_COST_MULTI, PULL_COST_SINGLE } from '@paleo-waifu/shared/types'
 import { Button } from '@/components/ui/button'
 
 export function PullButton({

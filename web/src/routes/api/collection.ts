@@ -1,10 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { getCfEnv } from '@/lib/env'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { createAuth } from '@/lib/auth'
 import { userCreature } from '@paleo-waifu/shared/db/schema'
+import { getCfEnv } from '@/lib/env'
+import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
 const FavoriteBody = z.object({

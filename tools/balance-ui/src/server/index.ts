@@ -1,20 +1,20 @@
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
-import { loadCreatures } from '../../../battle-sim/src/db.ts'
-import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
 import {
+  ACTIVE_ABILITY_TEMPLATES,
+  COMBAT_DAMAGE_SCALE,
+  PASSIVE_ABILITY_TEMPLATES,
   RARITY_BASE_TOTALS,
   ROLE_DISTRIBUTIONS,
-  COMBAT_DAMAGE_SCALE,
-  ACTIVE_ABILITY_TEMPLATES,
-  PASSIVE_ABILITY_TEMPLATES,
 } from '@paleo-waifu/shared/battle/constants'
+import { loadCreatures } from '../../../battle-sim/src/db.ts'
+import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
 import type {
-  CreatureRecord,
-  SimRequest,
-  SimProgressEvent,
   ConstantsSnapshot,
+  CreatureRecord,
+  SimProgressEvent,
+  SimRequest,
 } from '../shared/types.ts'
 
 const app = new Hono()
@@ -29,9 +29,9 @@ app.use(
 
 // ─── Module-scope cache ──────────────────────────────────────────
 
-let cachedCreatures: CreatureRecord[] | null = null
+let cachedCreatures: Array<CreatureRecord> | null = null
 
-function getCreatures(): CreatureRecord[] {
+function getCreatures(): Array<CreatureRecord> {
   if (!cachedCreatures) {
     cachedCreatures = loadCreatures()
   }
@@ -66,9 +66,9 @@ app.get('/api/creatures/reload', (c) => {
 // ─── Apply Overrides ─────────────────────────────────────────────
 
 function applyOverrides(
-  base: CreatureRecord[],
+  base: Array<CreatureRecord>,
   request: SimRequest,
-): CreatureRecord[] {
+): Array<CreatureRecord> {
   const patchMap = new Map(request.creaturePatches.map((p) => [p.id, p]))
 
   let creatures = base
@@ -97,11 +97,11 @@ function applyOverrides(
   // If rarity totals or role distributions changed, recompute stats
   // for creatures that weren't individually patched
   if (request.constants.rarityBaseTotals || request.constants.roleDistributions) {
-    const rarityTotals = {
+    const rarityTotals: Partial<Record<string, number>> = {
       ...RARITY_BASE_TOTALS,
       ...request.constants.rarityBaseTotals,
     }
-    const roleDists = {
+    const roleDists: Partial<Record<string, { hp: number; atk: number; def: number; spd: number }>> = {
       ...Object.fromEntries(
         Object.entries(ROLE_DISTRIBUTIONS).map(([k, v]) => [k, { ...v }]),
       ),
@@ -118,22 +118,17 @@ function applyOverrides(
         patch?.spd !== undefined
       ) return c
 
-      const baseTotal = rarityTotals[c.rarity] ?? RARITY_BASE_TOTALS[c.rarity] ?? 170
-      const dist = roleDists[c.role] ?? ROLE_DISTRIBUTIONS[c.role as keyof typeof ROLE_DISTRIBUTIONS]
+      const baseTotal = rarityTotals[c.rarity] ?? 170
+      const dist = roleDists[c.role]
       if (!dist) return c
 
-      // Recompute stats preserving the creature's original variance
-      const origTotal = c.hp + c.atk + c.def + c.spd
-      const newTotal = baseTotal
-      if (origTotal === 0) return c
-
-      const scale = newTotal / origTotal
+      // Recompute stats from role distribution ratios and rarity total
       return {
         ...c,
-        hp: Math.round(c.hp * scale),
-        atk: Math.round(c.atk * scale),
-        def: Math.round(c.def * scale),
-        spd: Math.round(c.spd * scale),
+        hp: Math.round(baseTotal * dist.hp),
+        atk: Math.round(baseTotal * dist.atk),
+        def: Math.round(baseTotal * dist.def),
+        spd: Math.round(baseTotal * dist.spd),
       }
     })
   }
@@ -144,9 +139,40 @@ function applyOverrides(
 // ─── Sim SSE Endpoint ────────────────────────────────────────────
 
 app.post('/api/sim', async (c) => {
-  const body = (await c.req.json()) as SimRequest
+  const body: SimRequest = await c.req.json()
   const base = getCreatures()
-  const creatures = applyOverrides(base, body)
+  let creatures = applyOverrides(base, body)
+
+  // Isolation transforms (same logic as battle-sim CLI)
+  if (body.options.normalizeStats) {
+    const TARGET_TOTAL = 170
+    creatures = creatures.map((cr) => {
+      const total = cr.hp + cr.atk + cr.def + cr.spd
+      if (total === 0) return cr
+      const scale = TARGET_TOTAL / total
+      return {
+        ...cr,
+        hp: Math.round(cr.hp * scale),
+        atk: Math.round(cr.atk * scale),
+        def: Math.round(cr.def * scale),
+        spd: Math.round(cr.spd * scale),
+      }
+    })
+  }
+
+  if (body.options.noActives) {
+    creatures = creatures.map((cr) => ({
+      ...cr,
+      active: { templateId: 'bite', displayName: 'Bite' },
+    }))
+  }
+
+  if (body.options.noPassives) {
+    creatures = creatures.map((cr) => ({
+      ...cr,
+      passive: { templateId: 'none', displayName: 'None' },
+    }))
+  }
 
   if (creatures.length < 3) {
     return c.json({ error: 'Need at least 3 enabled creatures' }, 400)
@@ -165,8 +191,8 @@ app.post('/api/sim', async (c) => {
           population: body.options.population,
           generations: body.options.generations,
           matchesPerTeam: body.options.matchesPerTeam,
-          eliteRate: 0.1,
-          mutationRate: 0.8,
+          eliteRate: body.options.eliteRate,
+          mutationRate: body.options.mutationRate,
           csv: false,
           onGeneration: (gen, snap) => {
             send({

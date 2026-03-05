@@ -31,7 +31,7 @@ export function simulateBattle(
   options: { seed: number },
 ): BattleResult {
   const rng = createRng(options.seed)
-  const log: BattleLogEvent[] = []
+  const log: Array<BattleLogEvent> = []
   const koLogged = new Set<string>()
 
   // 1. Hydrate
@@ -327,8 +327,8 @@ function hydrateBattleCreature(
 
 function makeCtx(
   caster: BattleCreature,
-  allies: BattleCreature[],
-  enemies: BattleCreature[],
+  allies: Array<BattleCreature>,
+  enemies: Array<BattleCreature>,
   rng: SeededRng,
   turn: number,
 ): EffectContext {
@@ -345,11 +345,11 @@ function makeCtx(
 function fireAndLog(
   triggerKind: Trigger['type'],
   creature: BattleCreature,
-  creaturesA: BattleCreature[],
-  creaturesB: BattleCreature[],
+  creaturesA: Array<BattleCreature>,
+  creaturesB: Array<BattleCreature>,
   rng: SeededRng,
   turn: number,
-  log: BattleLogEvent[],
+  log: Array<BattleLogEvent>,
 ): void {
   const allies =
     creature.teamSide === 'A' ? creaturesA : creaturesB
@@ -374,11 +374,11 @@ function fireAndLog(
 
 function processNewKOs(
   attacker: BattleCreature,
-  creaturesA: BattleCreature[],
-  creaturesB: BattleCreature[],
+  creaturesA: Array<BattleCreature>,
+  creaturesB: Array<BattleCreature>,
   koLogged: Set<string>,
   turn: number,
-  log: BattleLogEvent[],
+  log: Array<BattleLogEvent>,
   rng: SeededRng,
 ): void {
   for (const c of [...creaturesA, ...creaturesB]) {
@@ -443,9 +443,9 @@ function processNewKOs(
 
 function logResolutions(
   source: BattleCreature,
-  resolutions: EffectResolution[],
+  resolutions: Array<EffectResolution>,
   turn: number,
-  log: BattleLogEvent[],
+  log: Array<BattleLogEvent>,
 ): void {
   for (const res of resolutions) {
     switch (res.kind) {
@@ -518,7 +518,7 @@ function logResolutions(
 function tickAndLog(
   creature: BattleCreature,
   turn: number,
-  log: BattleLogEvent[],
+  log: Array<BattleLogEvent>,
 ): void {
   const results = tickStatusEffects(creature)
   for (const result of results) {
@@ -557,8 +557,8 @@ function tickAndLog(
 // ─── Helpers ───────────────────────────────────────────────────────
 
 function checkWinner(
-  teamA: BattleCreature[],
-  teamB: BattleCreature[],
+  teamA: Array<BattleCreature>,
+  teamB: Array<BattleCreature>,
 ): TeamSide | null {
   const aAlive = teamA.some((c) => c.isAlive)
   const bAlive = teamB.some((c) => c.isAlive)
@@ -568,7 +568,7 @@ function checkWinner(
   return null
 }
 
-function calcTeamHpPercent(team: BattleCreature[]): number {
+function calcTeamHpPercent(team: Array<BattleCreature>): number {
   const totalMax = team.reduce((sum, c) => sum + c.maxHp, 0)
   if (totalMax === 0) return 0
   const totalCurrent = team.reduce(

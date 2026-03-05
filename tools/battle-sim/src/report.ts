@@ -18,9 +18,9 @@ export function printSubheader(text: string): void {
 // ─── Tables ───────────────────────────────────────────────────────
 
 export function printTable(
-  rowHeaders: string[],
-  colHeaders: string[],
-  cells: string[][],
+  rowHeaders: Array<string>,
+  colHeaders: Array<string>,
+  cells: Array<Array<string>>,
   options?: { title?: string },
 ): void {
   if (options?.title) {
@@ -42,7 +42,7 @@ export function printTable(
 
 export function printRankedList(
   columns: Array<{ header: string; width?: number }>,
-  rows: string[][],
+  rows: Array<Array<string>>,
   options?: { title?: string },
 ): void {
   if (options?.title) {
@@ -80,8 +80,8 @@ export function printStatBlock(stats: Record<string, string | number>): void {
 // ─── Progress Bar ─────────────────────────────────────────────────
 
 export interface ProgressBarHandle {
-  increment(): void
-  stop(): void
+  increment: () => void
+  stop: () => void
 }
 
 export function createProgressBar(
@@ -117,11 +117,11 @@ function escapeCsv(value: string): string {
   return value
 }
 
-export function writeCsvRow(values: (string | number)[]): void {
+export function writeCsvRow(values: Array<string | number>): void {
   console.log(values.map((v) => escapeCsv(String(v))).join(','))
 }
 
-export function writeCsvHeader(headers: string[]): void {
+export function writeCsvHeader(headers: Array<string>): void {
   writeCsvRow(headers)
 }
 

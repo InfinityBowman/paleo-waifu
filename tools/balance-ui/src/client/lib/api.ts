@@ -1,7 +1,7 @@
 import type {
   CreaturesResponse,
-  SimRequest,
   SimProgressEvent,
+  SimRequest,
 } from '../../shared/types.ts'
 
 export async function fetchCreatures(): Promise<CreaturesResponse> {
@@ -29,11 +29,12 @@ export async function runSim(
     throw new Error(err.error ?? 'Sim failed')
   }
 
-  const reader = res.body!.getReader()
+  if (!res.body) throw new Error('No response body')
+  const reader = res.body.getReader()
   const decoder = new TextDecoder()
   let buffer = ''
 
-  while (true) {
+  for (;;) {
     const { done, value } = await reader.read()
     if (done) break
 

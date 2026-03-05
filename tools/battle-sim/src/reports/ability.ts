@@ -1,16 +1,16 @@
-import type { CreatureRecord } from '../db.ts'
-import { buildTeam, sampleTeam } from '../runner.ts'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
+import { buildTeam, sampleTeam } from '../runner.ts'
 import {
-  printHeader,
-  printSubheader,
-  printRankedList,
   createProgressBar,
+  printHeader,
+  printRankedList,
+  printSubheader,
   winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { CreatureRecord } from '../db.ts'
 
 // Build a lookup for ability names
 const ABILITY_NAME_MAP = new Map<string, string>()
@@ -35,7 +35,7 @@ function getAbilityIds(
 }
 
 export function runAbilityReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: { trials: number; csv: boolean },
 ): void {
   if (!options.csv) {

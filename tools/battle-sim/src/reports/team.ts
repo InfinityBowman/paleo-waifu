@@ -1,15 +1,15 @@
-import type { CreatureRecord } from '../db.ts'
-import { buildTeam, sampleTeam } from '../runner.ts'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
+import { buildTeam, sampleTeam } from '../runner.ts'
 import {
-  printHeader,
-  printSubheader,
-  printRankedList,
   createProgressBar,
+  printHeader,
+  printRankedList,
+  printSubheader,
   winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { CreatureRecord } from '../db.ts'
 
 // ─── Synergy Detection (from creature metadata, not engine) ──────
 
@@ -70,7 +70,7 @@ function detectSynergies(
 // ─── Report ───────────────────────────────────────────────────────
 
 export function runTeamReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: { trials: number; csv: boolean },
 ): void {
   if (!options.csv) {

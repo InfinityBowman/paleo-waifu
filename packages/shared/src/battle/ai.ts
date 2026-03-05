@@ -95,8 +95,8 @@ interface GameStateModifiers {
 }
 
 function getGameStateModifiers(
-  allies: BattleCreature[],
-  enemies: BattleCreature[],
+  allies: Array<BattleCreature>,
+  enemies: Array<BattleCreature>,
   turn: number,
 ): GameStateModifiers {
   const allyHpAvg = avgHpPercent(allies)
@@ -112,7 +112,7 @@ function getGameStateModifiers(
   }
 }
 
-function avgHpPercent(creatures: BattleCreature[]): number {
+function avgHpPercent(creatures: Array<BattleCreature>): number {
   if (creatures.length === 0) return 0
   const total = creatures.reduce(
     (sum, c) => sum + c.currentHp / c.maxHp,
@@ -126,7 +126,7 @@ function avgHpPercent(creatures: BattleCreature[]): number {
 interface ScoredAction {
   ability: Ability
   score: number
-  targets: BattleCreature[]
+  targets: Array<BattleCreature>
   slotOrder: number
 }
 
@@ -138,8 +138,8 @@ export function selectAction({
   turn,
 }: {
   actor: BattleCreature
-  allies: BattleCreature[]
-  enemies: BattleCreature[]
+  allies: Array<BattleCreature>
+  enemies: Array<BattleCreature>
   rng: SeededRng
   turn?: number
 }): SelectedAction {
@@ -154,7 +154,7 @@ export function selectAction({
   )
   const roleWeights = ROLE_WEIGHTS[actor.role]
 
-  const candidates: ScoredAction[] = []
+  const candidates: Array<ScoredAction> = []
 
   // Score active ability if ready
   if (isActiveReady(actor)) {
@@ -209,7 +209,7 @@ export function selectAction({
     (a, b) => b.score - a.score || a.slotOrder - b.slotOrder,
   )
 
-  const chosen = candidates[0]!
+  const chosen = candidates[0]
 
   // Fallback targets if empty
   let targets = chosen.targets
@@ -265,10 +265,10 @@ function scoreAbility(
   ability: Ability,
   category: AICategory,
   actor: BattleCreature,
-  allies: BattleCreature[],
-  enemies: BattleCreature[],
+  allies: Array<BattleCreature>,
+  enemies: Array<BattleCreature>,
   turn: number,
-): { score: number; targets: BattleCreature[] } {
+): { score: number; targets: Array<BattleCreature> } {
   switch (category) {
     case 'damage':
       return scoreDamage(ability, actor, enemies)
@@ -296,13 +296,13 @@ function scoreAbility(
 function scoreDamage(
   ability: Ability,
   actor: BattleCreature,
-  enemies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  enemies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const multiplier = getDamageMultiplier(ability)
   let bestScore = -Infinity
-  let bestTarget: BattleCreature = enemies[0]!
+  let bestTarget: BattleCreature = enemies[0]
 
   for (const enemy of enemies) {
     let score = multiplier * 100
@@ -354,8 +354,8 @@ function scoreDamage(
 
 function scoreAoeDamage(
   ability: Ability,
-  enemies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  enemies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const base = getDamageMultiplier(ability) * 100
@@ -367,15 +367,15 @@ function scoreAoeDamage(
 function scoreDot(
   ability: Ability,
   _actor: BattleCreature,
-  enemies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  enemies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const multiplier = getDamageMultiplier(ability)
   const dotParams = getDotParams(ability)
 
   let bestScore = -Infinity
-  let bestTarget: BattleCreature = enemies[0]!
+  let bestTarget: BattleCreature = enemies[0]
 
   for (const enemy of enemies) {
     let score = multiplier * 80
@@ -405,8 +405,8 @@ function scoreDot(
 function scoreHeal(
   ability: Ability,
   actor: BattleCreature,
-  allies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  allies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (allies.length === 0) return { score: 0, targets: [] }
 
   let score = 0
@@ -447,8 +447,8 @@ function scoreHeal(
 function scoreBuff(
   ability: Ability,
   actor: BattleCreature,
-  allies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  allies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   let score = 30
 
   const buffStats = ability.effects
@@ -486,9 +486,9 @@ function scoreBuff(
 
 function scoreDebuff(
   ability: Ability,
-  enemies: BattleCreature[],
+  enemies: Array<BattleCreature>,
   _turn: number,
-): { score: number; targets: BattleCreature[] } {
+): { score: number; targets: Array<BattleCreature> } {
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const debuffStats = ability.effects
@@ -498,7 +498,7 @@ function scoreDebuff(
     .map((e) => e.stat)
 
   let bestScore = -Infinity
-  let bestTarget: BattleCreature = enemies[0]!
+  let bestTarget: BattleCreature = enemies[0]
 
   for (const enemy of enemies) {
     let score = 40
@@ -534,8 +534,8 @@ function scoreDebuff(
 function scoreShield(
   ability: Ability,
   actor: BattleCreature,
-  allies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  allies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (ability.target === 'lowest_hp_ally') {
     if (allies.length === 0) return { score: 0, targets: [] }
 
@@ -576,13 +576,13 @@ function scoreShield(
 function scoreStun(
   ability: Ability,
   _actor: BattleCreature,
-  enemies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  enemies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   if (enemies.length === 0) return { score: 0, targets: [] }
 
   const multiplier = getDamageMultiplier(ability)
   let bestScore = -Infinity
-  let bestTarget: BattleCreature = enemies[0]!
+  let bestTarget: BattleCreature = enemies[0]
 
   for (const enemy of enemies) {
     let score = 50
@@ -603,9 +603,9 @@ function scoreStun(
 
 function scoreTaunt(
   actor: BattleCreature,
-  allies: BattleCreature[],
-  enemies: BattleCreature[],
-): { score: number; targets: BattleCreature[] } {
+  allies: Array<BattleCreature>,
+  enemies: Array<BattleCreature>,
+): { score: number; targets: Array<BattleCreature> } {
   let score = 25
 
   if (enemies.length <= 1) score -= 50
@@ -671,10 +671,10 @@ function hasHealAbility(creature: BattleCreature): boolean {
 function resolveTargetsSimple(
   ability: Ability,
   actor: BattleCreature,
-  allies: BattleCreature[],
-  enemies: BattleCreature[],
+  allies: Array<BattleCreature>,
+  enemies: Array<BattleCreature>,
   rng: SeededRng,
-): BattleCreature[] {
+): Array<BattleCreature> {
   switch (ability.target) {
     case 'self':
       return [actor]
@@ -706,7 +706,7 @@ function resolveTargetsSimple(
     }
     case 'random_enemy': {
       if (enemies.length === 0) return []
-      return [enemies[rng.nextInt(0, enemies.length - 1)]!]
+      return [enemies[rng.nextInt(0, enemies.length - 1)]]
     }
     default:
       return [actor]

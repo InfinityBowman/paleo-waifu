@@ -1,20 +1,20 @@
-import type { CreatureRecord } from '../db.ts'
-import { buildTeamWithRows, sampleTeam, assignRow } from '../runner.ts'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
-import type { Row } from '@paleo-waifu/shared/battle/types'
+import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import {
+  createProgressBar,
   printHeader,
-  printSubheader,
   printRankedList,
   printStatBlock,
-  createProgressBar,
-  winRateColor,
+  printSubheader,
   rarityColor,
   roleColor,
+  winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { Row } from '@paleo-waifu/shared/battle/types'
+import type { CreatureRecord } from '../db.ts'
 
 // ─── Ability Name Lookup ──────────────────────────────────────────
 
@@ -74,7 +74,7 @@ export interface MetaOptions {
 }
 
 export interface MetaResult {
-  hallOfFame: Individual[]
+  hallOfFame: Array<Individual>
   creatureLeaderboard: Array<{
     creature: CreatureRecord
     appearances: number
@@ -94,7 +94,7 @@ export interface MetaResult {
 
 // ─── Genome Utilities ─────────────────────────────────────────────
 
-function canonicalGenome(slots: CreatureSlot[]): TeamGenome {
+function canonicalGenome(slots: Array<CreatureSlot>): TeamGenome {
   return [...slots].sort((a, b) => a.id.localeCompare(b.id)) as TeamGenome
 }
 
@@ -106,9 +106,9 @@ function getRows(g: TeamGenome): [Row, Row, Row] {
   return [g[0].row, g[1].row, g[2].row]
 }
 
-function ensureFrontRow(slots: CreatureSlot[]): void {
+function ensureFrontRow(slots: Array<CreatureSlot>): void {
   if (!slots.some((s) => s.row === 'front')) {
-    slots[0]!.row = 'front'
+    slots[0].row = 'front'
   }
 }
 
@@ -127,8 +127,8 @@ function resolveMembers(
 
 function detectSynergySummary(
   members: [CreatureRecord, CreatureRecord, CreatureRecord],
-): string[] {
-  const labels: string[] = []
+): Array<string> {
+  const labels: Array<string> = []
 
   const types = members.map((m) => m.type)
   const eras = members.map((m) => m.era)
@@ -166,16 +166,16 @@ function detectSynergySummary(
 // ─── Population Initialization ────────────────────────────────────
 
 function initializePopulation(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   size: number,
   creatureIndex: Map<string, CreatureRecord>,
-): Individual[] {
-  const population: Individual[] = []
+): Array<Individual> {
+  const population: Array<Individual> = []
   const seen = new Set<string>()
 
   for (let attempt = 0; attempt < size * 3 && population.length < size; attempt++) {
     const members = sampleTeam(creatures)
-    const slots: CreatureSlot[] = members.map((m) => ({
+    const slots: Array<CreatureSlot> = members.map((m) => ({
       id: m.id,
       row: assignRow(m.role),
     }))
@@ -183,7 +183,7 @@ function initializePopulation(
     // 20% chance to try a non-default row to seed formation exploration
     if (Math.random() < 0.2) {
       const flipIdx = Math.floor(Math.random() * 3)
-      slots[flipIdx]!.row = slots[flipIdx]!.row === 'front' ? 'back' : 'front'
+      slots[flipIdx].row = slots[flipIdx].row === 'front' ? 'back' : 'front'
     }
 
     ensureFrontRow(slots)
@@ -210,7 +210,7 @@ function initializePopulation(
 // ─── Evaluation (Swiss Pairing + Both-Sides Play) ────────────────
 
 function evaluateGeneration(
-  population: Individual[],
+  population: Array<Individual>,
   matchesPerTeam: number,
   seedOffset: number,
 ): { avgTurns: number } {
@@ -236,13 +236,13 @@ function evaluateGeneration(
       // First round: Fisher-Yates shuffle for random pairing
       for (let i = order.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1))
-        ;[order[i]!, order[j]!] = [order[j]!, order[i]!]
+        ;[order[i], order[j]] = [order[j], order[i]]
       }
     } else {
       // Swiss: sort by current win rate, randomize ties
       order.sort((a, b) => {
-        const aInd = population[a]!
-        const bInd = population[b]!
+        const aInd = population[a]
+        const bInd = population[b]
         const aTotal = aInd.wins + aInd.losses + aInd.draws
         const bTotal = bInd.wins + bInd.losses + bInd.draws
         const aRate =
@@ -257,8 +257,8 @@ function evaluateGeneration(
     // Pair adjacent teams, play both sides
     const pairCount = Math.floor(order.length / 2)
     for (let p = 0; p < pairCount; p++) {
-      const indA = population[order[p * 2]!]!
-      const indB = population[order[p * 2 + 1]!]!
+      const indA = population[order[p * 2]]
+      const indB = population[order[p * 2 + 1]]
 
       const seed = seedOffset + battleIdx
       battleIdx += 2
@@ -324,7 +324,7 @@ function evaluateGeneration(
 
 function mutate(
   parent: Individual,
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   creatureIndex: Map<string, CreatureRecord>,
   generation: number,
 ): Individual {
@@ -337,8 +337,8 @@ function mutate(
   if (Math.random() < 0.3) {
     // Row mutation: flip a random member's row
     const slotIdx = Math.floor(Math.random() * 3)
-    newSlots[slotIdx]!.row =
-      newSlots[slotIdx]!.row === 'front' ? 'back' : 'front'
+    newSlots[slotIdx].row =
+      newSlots[slotIdx].row === 'front' ? 'back' : 'front'
   } else {
     // Creature mutation: replace a random member
     const slotIdx = Math.floor(Math.random() * 3)
@@ -346,7 +346,7 @@ function mutate(
 
     for (let attempt = 0; attempt < 20; attempt++) {
       const candidate =
-        creatures[Math.floor(Math.random() * creatures.length)]!
+        creatures[Math.floor(Math.random() * creatures.length)]
       if (!existing.has(candidate.id)) {
         newSlots[slotIdx] = {
           id: candidate.id,
@@ -373,13 +373,13 @@ function mutate(
 function crossover(
   parentA: Individual,
   parentB: Individual,
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   creatureIndex: Map<string, CreatureRecord>,
   generation: number,
 ): Individual {
   // Take 1 or 2 slots from parentA, fill rest from parentB
   const crossPoint = Math.random() < 0.5 ? 1 : 2
-  const childSlots: CreatureSlot[] = parentA.genome
+  const childSlots: Array<CreatureSlot> = parentA.genome
     .slice(0, crossPoint)
     .map((s) => ({ ...s }))
   const childSet = new Set(childSlots.map((s) => s.id))
@@ -396,7 +396,7 @@ function crossover(
   // If still not full (parents share creatures), fill from random pool
   for (let attempt = 0; attempt < 50 && childSlots.length < 3; attempt++) {
     const candidate =
-      creatures[Math.floor(Math.random() * creatures.length)]!
+      creatures[Math.floor(Math.random() * creatures.length)]
     if (!childSet.has(candidate.id)) {
       childSlots.push({
         id: candidate.id,
@@ -429,14 +429,14 @@ function crossover(
 // ─── Selection & Reproduction (with Diversity Pressure) ──────────
 
 function selectAndReproduce(
-  population: Individual[],
+  population: Array<Individual>,
   targetSize: number,
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   creatureIndex: Map<string, CreatureRecord>,
   eliteRate: number,
   mutationRate: number,
   generation: number,
-): Individual[] {
+): Array<Individual> {
   // Sort by fitness descending
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
 
@@ -444,12 +444,12 @@ function selectAndReproduce(
   const survivorCount = Math.ceil(population.length / 2)
   const survivors = sorted.slice(0, survivorCount)
 
-  const nextGen: Individual[] = []
+  const nextGen: Array<Individual> = []
   const seen = new Set<string>()
 
   // Elite pass-through (reset fitness but keep genome)
   for (let i = 0; i < eliteCount && i < survivors.length; i++) {
-    const elite = survivors[i]!
+    const elite = survivors[i]
     const key = genomeKey(elite.genome)
     seen.add(key)
     nextGen.push({
@@ -468,14 +468,14 @@ function selectAndReproduce(
   while (nextGen.length < targetSize && attempts < maxAttempts) {
     attempts++
     const parentIdx = Math.floor(Math.random() * survivors.length)
-    const parent = survivors[parentIdx]!
+    const parent = survivors[parentIdx]
 
     let child: Individual
     if (Math.random() < mutationRate) {
       child = mutate(parent, creatures, creatureIndex, generation)
     } else {
       const otherIdx = Math.floor(Math.random() * survivors.length)
-      const other = survivors[otherIdx]!
+      const other = survivors[otherIdx]
       child = crossover(parent, other, creatures, creatureIndex, generation)
     }
 
@@ -489,7 +489,7 @@ function selectAndReproduce(
   // If couldn't fill due to convergence, allow duplicates with forced mutation
   while (nextGen.length < targetSize) {
     const parentIdx = Math.floor(Math.random() * survivors.length)
-    const parent = survivors[parentIdx]!
+    const parent = survivors[parentIdx]
     nextGen.push(mutate(parent, creatures, creatureIndex, generation))
   }
 
@@ -499,7 +499,7 @@ function selectAndReproduce(
 // ─── Snapshot ─────────────────────────────────────────────────────
 
 function snapshotGeneration(
-  population: Individual[],
+  population: Array<Individual>,
   generation: number,
   avgTurns: number,
 ): GenerationSnapshot {
@@ -545,7 +545,7 @@ function snapshotGeneration(
     }
   }
 
-  const topInd = sorted[0]!
+  const topInd = sorted[0]
   let totalFitness = 0
   for (const ind of population) totalFitness += ind.fitness
 
@@ -578,7 +578,7 @@ function snapshotGeneration(
 // ─── Final Aggregation ────────────────────────────────────────────
 
 function buildFinalResult(
-  snapshots: GenerationSnapshot[],
+  snapshots: Array<GenerationSnapshot>,
   allTimeBest: Map<string, Individual>,
   creatureIndex: Map<string, CreatureRecord>,
 ): MetaResult {
@@ -606,11 +606,11 @@ function buildFinalResult(
 
   const creatureLeaderboard = [...creatureAgg.entries()]
     .map(([id, agg]) => ({
-      creature: creatureIndex.get(id)!,
+      creature: creatureIndex.get(id),
       appearances: agg.appearances,
       avgFitness: agg.fitnessSum / agg.appearances,
     }))
-    .filter((c) => c.creature)
+    .filter((c): c is typeof c & { creature: NonNullable<typeof c.creature> } => !!c.creature)
     .sort((a, b) => b.appearances - a.appearances)
     .slice(0, 30)
 
@@ -703,7 +703,7 @@ function buildFinalResult(
 
 function renderTerminal(
   result: MetaResult,
-  snapshots: GenerationSnapshot[],
+  snapshots: Array<GenerationSnapshot>,
   options: MetaOptions,
 ): void {
   printHeader('GENERATIONAL META EVOLUTION')
@@ -735,13 +735,13 @@ function renderTerminal(
     snapshots.length <= 15
       ? snapshots
       : (() => {
-          const picks: GenerationSnapshot[] = [snapshots[0]!]
+          const picks: Array<GenerationSnapshot> = [snapshots[0]]
           const step = (snapshots.length - 1) / 9
           for (let i = 1; i < 10; i++) {
-            picks.push(snapshots[Math.round(i * step)]!)
+            picks.push(snapshots[Math.round(i * step)])
           }
           if (picks[picks.length - 1] !== snapshots[snapshots.length - 1]) {
-            picks.push(snapshots[snapshots.length - 1]!)
+            picks.push(snapshots[snapshots.length - 1])
           }
           return picks
         })()
@@ -860,7 +860,7 @@ function renderTerminal(
 
 function renderCsv(
   result: MetaResult,
-  snapshots: GenerationSnapshot[],
+  snapshots: Array<GenerationSnapshot>,
 ): void {
   // Generation progression
   writeCsvHeader([
@@ -997,14 +997,14 @@ interface RoleActionProfile {
   role: string
   totalActions: number
   basicAttackPct: number
-  topAbilities: ActionStats[]
+  topAbilities: Array<ActionStats>
   totalDamageDealt: number
   avgDamagePerAction: number
 }
 
 function analyzeBattleActions(
-  population: Individual[],
-): RoleActionProfile[] {
+  population: Array<Individual>,
+): Array<RoleActionProfile> {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topTeams = sorted.slice(0, Math.ceil(population.length / 4))
 
@@ -1018,7 +1018,7 @@ function analyzeBattleActions(
   // Run each top team against random opponents, analyze both sides
   for (const team of topTeams) {
     for (let m = 0; m < 10; m++) {
-      const opp = sorted[Math.floor(Math.random() * sorted.length)]!
+      const opp = sorted[Math.floor(Math.random() * sorted.length)]
       const baseSeed = Math.floor(Math.random() * 1_000_000)
 
       // Play both sides so action analysis isn't side-biased
@@ -1044,7 +1044,7 @@ function analyzeBattleActions(
           const prefix = `${asSide}-`
           const creatureRoleMap = new Map<string, string>()
           for (let i = 0; i < team.members.length; i++) {
-            const member = team.members[i]!
+            const member = team.members[i]
             const battleId = `${asSide}-${i}-${member.id}-${i}`
             creatureRoleMap.set(battleId, member.role)
           }
@@ -1113,7 +1113,7 @@ function analyzeBattleActions(
   }
 
   // Build profiles
-  const profiles: RoleActionProfile[] = []
+  const profiles: Array<RoleActionProfile> = []
 
   for (const [role, actionMap] of roleActions) {
     const totalActions = roleTotalActions.get(role) ?? 0
@@ -1147,7 +1147,7 @@ function analyzeBattleActions(
   return profiles.sort((a, b) => b.totalDamageDealt - a.totalDamageDealt)
 }
 
-function renderActionAnalysis(profiles: RoleActionProfile[]): void {
+function renderActionAnalysis(profiles: Array<RoleActionProfile>): void {
   printSubheader('WINNING TEAM ACTION ANALYSIS (by role)')
 
   for (const profile of profiles) {
@@ -1178,15 +1178,15 @@ function renderActionAnalysis(profiles: RoleActionProfile[]): void {
 
 export interface MetaRunResult {
   result: MetaResult
-  snapshots: GenerationSnapshot[]
+  snapshots: Array<GenerationSnapshot>
 }
 
 export function runMetaReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: MetaOptions,
 ): MetaRunResult {
   const log = options.csv
-    ? (...a: unknown[]) => console.error(...a)
+    ? (...a: Array<unknown>) => console.error(...a)
     : console.log.bind(console)
 
   if (creatures.length < 3) {
@@ -1198,7 +1198,7 @@ export function runMetaReport(
     creatures.map((c) => [c.id, c]),
   )
 
-  const snapshots: GenerationSnapshot[] = []
+  const snapshots: Array<GenerationSnapshot> = []
   const allTimeBest = new Map<string, Individual>()
 
   // Initialize population
@@ -1238,7 +1238,7 @@ export function runMetaReport(
 
     // Snapshot
     snapshots.push(snapshotGeneration(population, gen, avgTurns))
-    options.onGeneration?.(gen, snapshots[snapshots.length - 1]!)
+    options.onGeneration?.(gen, snapshots[snapshots.length - 1])
 
     // Reproduce (skip on last generation)
     if (gen < options.generations) {

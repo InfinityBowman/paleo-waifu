@@ -13,7 +13,7 @@ export function createEditorDb(env: EditorEnv) {
   })
 
   // Cast shim to D1Database — implements the same runtime interface
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return drizzle(client as any, { schema })
 }
 

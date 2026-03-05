@@ -1,8 +1,8 @@
 import { asc, count, desc, eq, sql } from 'drizzle-orm'
+import { creature, user, userCreature, userXp } from '@paleo-waifu/shared/db/schema'
 import { immediateResponse } from '../lib/discord'
 import { leaderboardCollectionEmbed, leaderboardXpEmbed } from '../lib/embeds'
 import type { Database } from '@paleo-waifu/shared/db/client'
-import { creature, user, userCreature, userXp } from '@paleo-waifu/shared/db/schema'
 
 /** /leaderboard-xp — Top 10 players by XP level (immediate, ephemeral) */
 export async function handleLeaderboardXp(db: Database): Promise<Response> {

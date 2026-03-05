@@ -1,6 +1,5 @@
 import { eq, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
-import type { Database } from '@paleo-waifu/shared/db/client'
 import { userXp } from '@paleo-waifu/shared/db/schema'
 import {
   XP_MAX_PER_MESSAGE,
@@ -8,6 +7,7 @@ import {
   fossilsForLevel,
   levelFromXp,
 } from '@paleo-waifu/shared/xp'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import { ensureUserCurrency, grantFossils } from '@/lib/gacha'
 
 export interface XpAwardResult {

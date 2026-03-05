@@ -3,10 +3,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
 import { count, sql } from 'drizzle-orm'
 import { BarChart3, Coins, Pickaxe, Users } from 'lucide-react'
-import { IconTrade } from '@/components/icons'
-import { getCfEnv } from '@/lib/env'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { createAuth } from '@/lib/auth'
 import {
   creature,
   currency,
@@ -14,6 +11,9 @@ import {
   user,
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
+import { IconTrade } from '@/components/icons'
+import { getCfEnv } from '@/lib/env'
+import { createAuth } from '@/lib/auth'
 import { Card, CardContent } from '@/components/ui/card'
 
 const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
@@ -76,6 +76,7 @@ const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
 
 export const Route = createFileRoute('/admin/')({
   loader: () => getAdminDashboardData(),
+  staleTime: 5 * 60 * 1000,
   component: DashboardPage,
 })
 

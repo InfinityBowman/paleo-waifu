@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import { Hono } from 'hono'
-import { setCookie, getCookie, deleteCookie } from 'hono/cookie'
+import { deleteCookie, getCookie, setCookie } from 'hono/cookie'
 import { createMiddleware } from 'hono/factory'
 import { SignJWT, jwtVerify } from 'jose'
-import { eq, and } from 'drizzle-orm'
-import type { EditorDatabase } from './db'
+import { and, eq } from 'drizzle-orm'
 import { schema } from './db'
+import type { EditorDatabase } from './db'
 import type { EditorEnv } from './env'
 
 export interface EditorUser {
@@ -54,7 +54,7 @@ async function verifyToken(token: string): Promise<EditorUser | null> {
     return {
       id: payload.sub!,
       name: payload.name as string,
-      image: (payload.image as string) ?? null,
+      image: (payload.image as string | undefined) ?? null,
       role: payload.role as string,
     }
   } catch {

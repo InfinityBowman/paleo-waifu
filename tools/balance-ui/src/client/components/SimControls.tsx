@@ -1,7 +1,7 @@
-import { Play, Loader2, Info } from 'lucide-react'
+import { Info, Loader2, Play } from 'lucide-react'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
-import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
 
@@ -9,6 +9,11 @@ interface SimOptions {
   population: number
   generations: number
   matchesPerTeam: number
+  eliteRate: number
+  mutationRate: number
+  normalizeStats: boolean
+  noActives: boolean
+  noPassives: boolean
 }
 
 interface Props {
@@ -33,7 +38,7 @@ export function SimControls({
 }: Props) {
   const running = simState === 'running'
 
-  function setOpt<K extends keyof SimOptions>(key: K, value: SimOptions[K]) {
+  function setOpt<TKey extends keyof SimOptions>(key: TKey, value: SimOptions[TKey]) {
     onOptionsChange({ ...options, [key]: value })
   }
 
@@ -43,7 +48,7 @@ export function SimControls({
         Sim Options
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info size={12} className="cursor-help text-muted-foreground/60" />
+            <Info size={12} className="text-muted-foreground/60" />
           </TooltipTrigger>
           <TooltipContent side="right">
             Configure the genetic algorithm parameters. Higher values = more accurate but slower.
@@ -97,6 +102,74 @@ export function SimControls({
             className="w-20 text-center text-xs px-2"
           />
         </OptionRow>
+        <OptionRow
+          label="Elite Rate"
+          tooltip="Fraction of top teams that pass unchanged to the next generation. Higher = faster convergence."
+        >
+          <Input
+            type="number"
+            min={0.01}
+            max={0.5}
+            step={0.05}
+            value={options.eliteRate}
+            onChange={(e) => setOpt('eliteRate', parseFloat(e.target.value) || 0.1)}
+            disabled={running}
+            className="w-20 text-center text-xs px-2"
+          />
+        </OptionRow>
+        <OptionRow
+          label="Mutation Rate"
+          tooltip="Probability offspring are mutated vs crossed over. Higher = more exploration, lower = more exploitation."
+        >
+          <Input
+            type="number"
+            min={0.1}
+            max={1.0}
+            step={0.05}
+            value={options.mutationRate}
+            onChange={(e) => setOpt('mutationRate', parseFloat(e.target.value) || 0.8)}
+            disabled={running}
+            className="w-20 text-center text-xs px-2"
+          />
+        </OptionRow>
+      </div>
+
+      {/* Isolation Flags */}
+      <div className="mb-3 border-t border-border/50 pt-3">
+        <div className="mb-2 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+          Isolation Mode
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info size={12} className="text-muted-foreground/60" />
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              Strip away abilities or rarity advantage to isolate specific balance axes.
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <CheckboxRow
+            label="Normalize Stats"
+            tooltip="Scale all creatures to 170 total stats, removing rarity advantage."
+            checked={options.normalizeStats}
+            onChange={(v) => setOpt('normalizeStats', v)}
+            disabled={running}
+          />
+          <CheckboxRow
+            label="No Actives"
+            tooltip="Replace all active abilities with Bite (baseline damage)."
+            checked={options.noActives}
+            onChange={(v) => setOpt('noActives', v)}
+            disabled={running}
+          />
+          <CheckboxRow
+            label="No Passives"
+            tooltip="Disable all passive abilities."
+            checked={options.noPassives}
+            onChange={(v) => setOpt('noPassives', v)}
+            disabled={running}
+          />
+        </div>
       </div>
 
       <Button
@@ -159,12 +232,47 @@ function OptionRow({
         <label className="text-xs text-muted-foreground">{label}</label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info size={10} className="cursor-help text-muted-foreground/40" />
+            <Info size={10} className="text-muted-foreground/40" />
           </TooltipTrigger>
           <TooltipContent side="right">{tooltip}</TooltipContent>
         </Tooltip>
       </div>
       {children}
+    </div>
+  )
+}
+
+function CheckboxRow({
+  label,
+  tooltip,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: string
+  tooltip: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled: boolean
+}) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-1">
+        <label className="text-xs text-muted-foreground">{label}</label>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Info size={10} className="text-muted-foreground/40" />
+          </TooltipTrigger>
+          <TooltipContent side="right">{tooltip}</TooltipContent>
+        </Tooltip>
+      </div>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
+        className="accent-primary"
+      />
     </div>
   )
 }

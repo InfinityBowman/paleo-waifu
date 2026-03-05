@@ -1,25 +1,25 @@
 import { Info } from 'lucide-react'
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip as RechartsTooltip,
-  LineChart,
-  Line,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
 } from 'recharts'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/card'
-import { Badge } from './ui/badge'
-import { Tooltip, TooltipTrigger, TooltipContent } from './ui/tooltip'
-import { Popover, PopoverTrigger, PopoverContent } from './ui/popover'
 import { cn } from '../lib/utils'
-import type { MetaRunResult, MetaResult, GenerationSnapshot } from '../../shared/types.ts'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Badge } from './ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
+import type { GenerationSnapshot, MetaResult, MetaRunResult } from '../../shared/types.ts'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
 
@@ -46,17 +46,18 @@ const FORMATION_COLORS = [
   'oklch(0.7 0.1 200)',
 ]
 
-function entries(obj: Record<string, number>): [string, number][] {
-  return Object.entries(obj) as [string, number][]
+function entries(obj: Record<string, number>): Array<[string, number]> {
+  return Object.entries(obj)
 }
 
 interface Props {
   result: MetaRunResult | null
   error: string | null
   simState: SimState
+  population?: number
 }
 
-export function ResultsPanel({ result, error, simState }: Props) {
+export function ResultsPanel({ result, error, simState, population }: Props) {
   if (simState === 'error' && error) {
     return (
       <div className="p-6">
@@ -112,6 +113,25 @@ export function ResultsPanel({ result, error, simState }: Props) {
           </CardHeader>
           <CardContent>
             <FitnessCurve snapshots={snapshots} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Battle Health Metrics */}
+      {snapshots.length > 1 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Battle Health</CardTitle>
+              <SectionTooltip>
+                Avg turns per battle and population diversity (unique genomes / population) over generations.
+                Falling diversity signals convergence. Very low or high avg turns suggest damage scaling issues.
+              </SectionTooltip>
+            </div>
+            <CardDescription>Average turns and genome diversity across generations</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MetricsChart snapshots={snapshots} population={population ?? 100} />
           </CardContent>
         </Card>
       )}
@@ -241,7 +261,7 @@ function CreatureLeaderboard({
         {leaderboard.slice(0, 20).map((entry, i) => (
           <Tooltip key={entry.creature.id}>
             <TooltipTrigger asChild>
-              <tr className="border-b border-border/20 hover:bg-muted/30 transition-colors cursor-help">
+              <tr className="border-b border-border/20 hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
                 <td className="px-2 py-1.5 font-medium">{entry.creature.name}</td>
                 <td className="px-2 py-1.5">
@@ -327,7 +347,7 @@ function HallOfFame({
       {hallOfFame.slice(0, 10).map((team, i) => (
         <Tooltip key={i}>
           <TooltipTrigger asChild>
-            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-3 py-2 hover:bg-muted/40 transition-colors cursor-help">
+            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-3 py-2 hover:bg-muted/40 transition-colors">
               <div className="flex items-center gap-3">
                 <span className="text-xs font-medium text-muted-foreground w-6">
                   #{i + 1}
@@ -426,7 +446,7 @@ function RoleMetaChart({ roleShares }: { roleShares: Record<string, number> }) {
   )
 }
 
-function FitnessCurve({ snapshots }: { snapshots: GenerationSnapshot[] }) {
+function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
   const data = snapshots.map((s) => ({
     gen: s.generation,
     top: Math.round(s.topFitness * 1000) / 10,
@@ -463,6 +483,59 @@ function FitnessCurve({ snapshots }: { snapshots: GenerationSnapshot[] }) {
         />
         <Line type="monotone" dataKey="top" stroke={ROLE_COLOR_VALUES.striker} strokeWidth={2} dot={false} />
         <Line type="monotone" dataKey="avg" stroke={ROLE_COLOR_VALUES.support} strokeWidth={2} dot={false} opacity={0.7} />
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
+function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSnapshot>; population: number }) {
+  const data = snapshots.map((s) => ({
+    gen: s.generation,
+    avgTurns: Math.round(s.avgTurns * 10) / 10,
+    diversity: Math.min(100, Math.round((s.uniqueGenomes / population) * 1000) / 10),
+  }))
+
+  return (
+    <ResponsiveContainer width="100%" height={200}>
+      <LineChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
+        <XAxis
+          dataKey="gen"
+          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+        />
+        <YAxis
+          yAxisId="turns"
+          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          width={40}
+          label={{ value: 'Turns', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+        />
+        <YAxis
+          yAxisId="diversity"
+          orientation="right"
+          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tickFormatter={(v: number) => `${v}%`}
+          domain={[0, 100]}
+          width={40}
+        />
+        <RechartsTooltip
+          formatter={(value, name) => [
+            name === 'avgTurns' ? `${value} turns` : `${value}%`,
+            name === 'avgTurns' ? 'Avg Turns' : 'Diversity',
+          ]}
+          contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
+          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
+          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
+          labelFormatter={(label) => `Gen ${label}`}
+        />
+        <Legend
+          verticalAlign="top"
+          height={28}
+          formatter={(value: string) => value === 'avgTurns' ? 'Avg Turns' : 'Diversity'}
+          wrapperStyle={{ fontSize: 11 }}
+        />
+        <Line yAxisId="turns" type="monotone" dataKey="avgTurns" stroke={ROLE_COLOR_VALUES.bruiser} strokeWidth={2} dot={false} />
+        <Line yAxisId="diversity" type="monotone" dataKey="diversity" stroke={ROLE_COLOR_VALUES.tank} strokeWidth={2} dot={false} opacity={0.7} />
       </LineChart>
     </ResponsiveContainer>
   )

@@ -1,18 +1,18 @@
-import type { CreatureRecord } from '../db.ts'
 import { runTrials, summarizeTrials } from '../runner.ts'
 import {
+  createProgressBar,
   printHeader,
   printTable,
-  createProgressBar,
   winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { CreatureRecord } from '../db.ts'
 
 const ROLES = ['striker', 'tank', 'support', 'bruiser']
 
 export function runRoleReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: { trials: number; csv: boolean },
 ): void {
   if (!options.csv) {
@@ -20,7 +20,7 @@ export function runRoleReport(
   }
 
   // Group by role, pick top 3 by total stats
-  const byRole = new Map<string, CreatureRecord[]>()
+  const byRole = new Map<string, Array<CreatureRecord>>()
   for (const role of ROLES) {
     const members = creatures
       .filter((c) => c.role === role)
@@ -45,10 +45,10 @@ export function runRoleReport(
   const bar = options.csv ? null : createProgressBar(totalPairs, 'Role pairs')
 
   // Build win rate matrix
-  const matrix: number[][] = []
+  const matrix: Array<Array<number>> = []
 
   for (const atkRole of activeRoles) {
-    const row: number[] = []
+    const row: Array<number> = []
     const teamA = byRole.get(atkRole)! as [
       CreatureRecord,
       CreatureRecord,
@@ -78,9 +78,9 @@ export function runRoleReport(
     for (let i = 0; i < activeRoles.length; i++) {
       for (let j = 0; j < activeRoles.length; j++) {
         writeCsvRow([
-          activeRoles[i]!,
-          activeRoles[j]!,
-          (matrix[i]![j]! * 100).toFixed(2),
+          activeRoles[i],
+          activeRoles[j],
+          (matrix[i][j] * 100).toFixed(2),
         ])
       }
     }
@@ -97,7 +97,7 @@ export function runRoleReport(
   // Print per-role average win rate
   console.log('Average win rates:')
   for (let i = 0; i < activeRoles.length; i++) {
-    const row = matrix[i]!
+    const row = matrix[i]
     const avg = row.reduce((a, b) => a + b, 0) / row.length
     const flag = avg < 0.4 ? ' !! LOW' : avg > 0.6 ? ' !! HIGH' : ''
     console.log(`  ${activeRoles[i]}: ${winRateColor(avg)}${flag}`)

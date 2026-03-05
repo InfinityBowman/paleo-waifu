@@ -1,16 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { calculateDamage, getDietModifier } from '../damage'
 import { createRng } from '../rng'
-import { calculateSynergies, applySynergies } from '../synergies'
+import { applySynergies, calculateSynergies } from '../synergies'
 import { simulateBattle } from '../engine'
 import {
+  fireTrigger,
   getBasicAttack,
   isActiveReady,
-  tickStatusEffects,
-  resolveAbilityEffects,
-  fireTrigger,
   materializeAlwaysPassive,
+  resolveAbilityEffects,
   resolveTarget,
+  tickStatusEffects,
 } from '../abilities'
 import { selectAction } from '../ai'
 import type {
@@ -85,7 +85,7 @@ function makeMember(
 }
 
 function makeTeam(
-  overrides: Partial<BattleTeamMember>[] = [{}, {}, {}],
+  overrides: Array<Partial<BattleTeamMember>> = [{}, {}, {}],
 ): BattleTeam {
   return {
     members: overrides.map((o) => makeMember(o)) as [

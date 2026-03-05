@@ -1,9 +1,9 @@
 import { and, eq } from 'drizzle-orm'
+import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@paleo-waifu/shared/types'
+import { banner, pityCounter } from '@paleo-waifu/shared/db/schema'
 import { ephemeralResponse } from '../lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
-import { HARD_PITY_THRESHOLD, SOFT_PITY_THRESHOLD } from '@paleo-waifu/shared/types'
-import { banner, pityCounter } from '@paleo-waifu/shared/db/schema'
 
 /** /pity — Show pity counters for active banner (immediate, ephemeral) */
 export async function handlePity(

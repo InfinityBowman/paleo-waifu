@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { eq } from 'drizzle-orm'
+import { createDb } from '@paleo-waifu/shared/db/client'
+import { banner, currency } from '@paleo-waifu/shared/db/schema'
+import { DAILY_FOSSILS } from '@paleo-waifu/shared/types'
 import {
   IconDinosaurBones,
   IconSunrise,
   IconTreasureChest,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { createDb } from '@paleo-waifu/shared/db/client'
-import { banner, currency } from '@paleo-waifu/shared/db/schema'
 import { ensureUserCurrency, getFossils } from '@/lib/gacha'
-import { DAILY_FOSSILS } from '@paleo-waifu/shared/types'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'

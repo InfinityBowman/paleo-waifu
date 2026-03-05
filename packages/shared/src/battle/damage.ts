@@ -1,14 +1,14 @@
+import { COMBAT_DAMAGE_SCALE } from './constants'
 import type {
   BattleCreature,
   DamageCalcResult,
   Effect,
   SeededRng,
 } from './types'
-import { COMBAT_DAMAGE_SCALE } from './constants'
 
 // ─── Diet Effectiveness ────────────────────────────────────────────
 
-const DIET_ADVANTAGE: Record<string, string[]> = {
+const DIET_ADVANTAGE: Partial<Record<string, Array<string>>> = {
   Carnivorous: ['Herbivorous', 'Herbivorous/omnivorous'],
   Herbivorous: ['Omnivorous'],
   'Herbivorous/omnivorous': ['Omnivorous'],

@@ -101,8 +101,8 @@ export function runTrials(
   teamAMembers: [CreatureRecord, CreatureRecord, CreatureRecord],
   teamBMembers: [CreatureRecord, CreatureRecord, CreatureRecord],
   trials: number,
-): TrialResult[] {
-  const results: TrialResult[] = []
+): Array<TrialResult> {
+  const results: Array<TrialResult> = []
 
   for (let i = 1; i <= trials; i++) {
     const teamA = buildTeam(teamAMembers)
@@ -138,7 +138,7 @@ export function buildTeamWithRows(
 
   const hasFront = teamMembers.some((m) => m.row === 'front')
   if (!hasFront) {
-    teamMembers[0]!.row = 'front'
+    teamMembers[0].row = 'front'
   }
 
   return { members: teamMembers }
@@ -147,7 +147,7 @@ export function buildTeamWithRows(
 // ─── Random Team Sampling ─────────────────────────────────────────
 
 export function sampleTeam(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
 ): [CreatureRecord, CreatureRecord, CreatureRecord] {
   const n = creatures.length
   const i = Math.floor(Math.random() * n)
@@ -157,11 +157,11 @@ export function sampleTeam(
   if (k >= Math.min(i, j)) k++
   if (k >= Math.max(i, j)) k++
 
-  return [creatures[i]!, creatures[j]!, creatures[k]!]
+  return [creatures[i], creatures[j], creatures[k]]
 }
 
 export function summarizeTrials(
-  results: TrialResult[],
+  results: Array<TrialResult>,
 ): TrialSummary {
   if (results.length === 0) {
     return { winsA: 0, winsB: 0, winRateA: 0, avgTurns: 0 }

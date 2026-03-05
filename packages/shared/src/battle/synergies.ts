@@ -6,12 +6,12 @@ function normalizeDiet(diet: string): string {
 }
 
 export function calculateSynergies(
-  team: BattleCreature[],
-): SynergyBonus[] {
-  const bonuses: SynergyBonus[] = []
+  team: Array<BattleCreature>,
+): Array<SynergyBonus> {
+  const bonuses: Array<SynergyBonus> = []
 
   // ── Type synergy ──
-  const typeCounts = new Map<string, BattleCreature[]>()
+  const typeCounts = new Map<string, Array<BattleCreature>>()
   for (const c of team) {
     const list = typeCounts.get(c.type) ?? []
     list.push(c)
@@ -37,7 +37,7 @@ export function calculateSynergies(
   }
 
   // ── Era synergy ──
-  const eraCounts = new Map<string, BattleCreature[]>()
+  const eraCounts = new Map<string, Array<BattleCreature>>()
   for (const c of team) {
     const list = eraCounts.get(c.era) ?? []
     list.push(c)
@@ -97,8 +97,8 @@ export function calculateSynergies(
 }
 
 export function applySynergies(
-  team: BattleCreature[],
-  bonuses: SynergyBonus[],
+  team: Array<BattleCreature>,
+  bonuses: Array<SynergyBonus>,
 ): void {
   for (const bonus of bonuses) {
     for (const creature of team) {
@@ -108,7 +108,7 @@ export function applySynergies(
       for (const [stat, percent] of Object.entries(
         bonus.statBonuses,
       )) {
-        const pct = percent as number
+        const pct = percent
         switch (stat) {
           case 'hp': {
             const hpBonus = Math.floor(

@@ -1,28 +1,31 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequest } from '@tanstack/react-start/server'
-import { count, eq, sql } from 'drizzle-orm'
-import type { Rarity } from '@paleo-waifu/shared/types'
-import { RARITY_ORDER } from '@paleo-waifu/shared/types'
-import { getCfEnv } from '@/lib/env'
+import { count, desc, eq, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { createAuth } from '@/lib/auth'
 import {
   creature,
   currency,
+  pityCounter,
   tradeOffer,
   user,
   userCreature,
+  userXp,
+  wishlist,
 } from '@paleo-waifu/shared/db/schema'
-import { Card, CardContent } from '@/components/ui/card'
-
-const RARITY_BAR_COLORS: Record<Rarity, string> = {
-  common: 'bg-rarity-common',
-  uncommon: 'bg-rarity-uncommon',
-  rare: 'bg-rarity-rare',
-  epic: 'bg-rarity-epic',
-  legendary: 'bg-rarity-legendary',
-}
+import { getCfEnv } from '@/lib/env'
+import { createAuth } from '@/lib/auth'
+import { ActivityCharts } from '@/components/admin/analytics/ActivityCharts'
+import {
+  CreatureCharts,
+  WishlistChart,
+} from '@/components/admin/analytics/CreatureCharts'
+import { EconomySection } from '@/components/admin/analytics/EconomySection'
+import {
+  PitySection,
+  PullDistribution,
+  TradeActivity,
+} from '@/components/admin/analytics/GameHealthSection'
 
 const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
   const cfEnv = getCfEnv()
@@ -35,6 +38,7 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
   }
 
   const db = await createDb(cfEnv.DB)
+  const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60
 
   const [
     rarityDist,
@@ -43,12 +47,17 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
     tradesByStatus,
     totalUsers,
     totalCreatures,
+    pullsPerDay,
+    usersPerDay,
+    topCreatures,
+    leastCreatures,
+    fossilDistribution,
+    levelDistribution,
+    pityStats,
+    topWishlisted,
   ] = await Promise.all([
     db
-      .select({
-        rarity: creature.rarity,
-        count: count(),
-      })
+      .select({ rarity: creature.rarity, count: count() })
       .from(userCreature)
       .innerJoin(creature, eq(creature.id, userCreature.creatureId))
       .groupBy(creature.rarity)
@@ -64,15 +73,120 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
       .from(currency)
       .get(),
     db
-      .select({
-        status: tradeOffer.status,
-        count: count(),
-      })
+      .select({ status: tradeOffer.status, count: count() })
       .from(tradeOffer)
       .groupBy(tradeOffer.status)
       .all(),
     db.select({ count: count() }).from(user).get(),
     db.select({ count: count() }).from(creature).get(),
+    db
+      .select({
+        date: sql<string>`date(${userCreature.pulledAt}, 'unixepoch')`.as(
+          'date',
+        ),
+        count: count(),
+      })
+      .from(userCreature)
+      .where(sql`${userCreature.pulledAt} >= ${thirtyDaysAgo}`)
+      .groupBy(sql`date(${userCreature.pulledAt}, 'unixepoch')`)
+      .orderBy(sql`date(${userCreature.pulledAt}, 'unixepoch')`)
+      .all(),
+    db
+      .select({
+        date: sql<string>`date(${user.createdAt}, 'unixepoch')`.as('date'),
+        count: count(),
+      })
+      .from(user)
+      .where(sql`${user.createdAt} >= ${thirtyDaysAgo}`)
+      .groupBy(sql`date(${user.createdAt}, 'unixepoch')`)
+      .orderBy(sql`date(${user.createdAt}, 'unixepoch')`)
+      .all(),
+    db
+      .select({
+        name: creature.name,
+        rarity: creature.rarity,
+        count: count(),
+      })
+      .from(userCreature)
+      .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+      .groupBy(userCreature.creatureId)
+      .orderBy(desc(count()))
+      .limit(10)
+      .all(),
+    db
+      .select({
+        name: creature.name,
+        rarity: creature.rarity,
+        count: count(userCreature.id),
+      })
+      .from(creature)
+      .leftJoin(userCreature, eq(userCreature.creatureId, creature.id))
+      .groupBy(creature.id)
+      .orderBy(count(userCreature.id))
+      .limit(10)
+      .all(),
+    db
+      .select({
+        bucket: sql<string>`case
+          when ${currency.fossils} = 0 then '0'
+          when ${currency.fossils} between 1 and 10 then '1-10'
+          when ${currency.fossils} between 11 and 50 then '11-50'
+          when ${currency.fossils} between 51 and 100 then '51-100'
+          when ${currency.fossils} between 101 and 500 then '101-500'
+          when ${currency.fossils} between 501 and 1000 then '501-1k'
+          else '1k+'
+        end`.as('bucket'),
+        count: count(),
+      })
+      .from(currency)
+      .groupBy(
+        sql`case
+          when ${currency.fossils} = 0 then '0'
+          when ${currency.fossils} between 1 and 10 then '1-10'
+          when ${currency.fossils} between 11 and 50 then '11-50'
+          when ${currency.fossils} between 51 and 100 then '51-100'
+          when ${currency.fossils} between 101 and 500 then '101-500'
+          when ${currency.fossils} between 501 and 1000 then '501-1k'
+          else '1k+'
+        end`,
+      )
+      .all(),
+    db
+      .select({ level: userXp.level, count: count() })
+      .from(userXp)
+      .groupBy(userXp.level)
+      .orderBy(userXp.level)
+      .all(),
+    db
+      .select({
+        avgPullsToLegendary:
+          sql<number>`coalesce(round(avg(${pityCounter.pullsSinceLegendary}), 1), 0)`.as(
+            'avg',
+          ),
+        maxPullsToLegendary:
+          sql<number>`coalesce(max(${pityCounter.pullsSinceLegendary}), 0)`.as(
+            'max',
+          ),
+        dangerZone:
+          sql<number>`coalesce(sum(case when ${pityCounter.pullsSinceLegendary} >= 50 then 1 else 0 end), 0)`.as(
+            'danger',
+          ),
+        totalCounters: count(),
+      })
+      .from(pityCounter)
+      .get(),
+    db
+      .select({
+        name: creature.name,
+        rarity: creature.rarity,
+        count: count(),
+      })
+      .from(wishlist)
+      .innerJoin(creature, eq(creature.id, wishlist.creatureId))
+      .groupBy(wishlist.creatureId)
+      .orderBy(desc(count()))
+      .limit(10)
+      .all(),
   ])
 
   return {
@@ -88,28 +202,55 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
     }>,
     totalUsers: totalUsers?.count ?? 0,
     totalCreatures: totalCreatures?.count ?? 0,
+    pullsPerDay: pullsPerDay as Array<{ date: string; count: number }>,
+    usersPerDay: usersPerDay as Array<{ date: string; count: number }>,
+    topCreatures: topCreatures as Array<{
+      name: string
+      rarity: string
+      count: number
+    }>,
+    leastCreatures: leastCreatures as Array<{
+      name: string
+      rarity: string
+      count: number
+    }>,
+    fossilDistribution: fossilDistribution as Array<{
+      bucket: string
+      count: number
+    }>,
+    levelDistribution: levelDistribution as Array<{
+      level: number
+      count: number
+    }>,
+    pityStats: {
+      avgPullsToLegendary:
+        (pityStats as { avgPullsToLegendary: number } | undefined)
+          ?.avgPullsToLegendary ?? 0,
+      maxPullsToLegendary:
+        (pityStats as { maxPullsToLegendary: number } | undefined)
+          ?.maxPullsToLegendary ?? 0,
+      dangerZone:
+        (pityStats as { dangerZone: number } | undefined)?.dangerZone ?? 0,
+      totalCounters:
+        (pityStats as { totalCounters: number } | undefined)?.totalCounters ??
+        0,
+    },
+    topWishlisted: topWishlisted as Array<{
+      name: string
+      rarity: string
+      count: number
+    }>,
   }
 })
 
 export const Route = createFileRoute('/admin/analytics')({
   loader: () => getAnalyticsData(),
+  staleTime: 5 * 60 * 1000,
   component: AnalyticsPage,
 })
 
 function AnalyticsPage() {
   const data = Route.useLoaderData()
-
-  const totalPulls = data.rarityDistribution.reduce(
-    (sum, r) => sum + r.count,
-    0,
-  )
-
-  const sortedRarity = [...data.rarityDistribution].sort(
-    (a, b) =>
-      RARITY_ORDER[a.rarity as Rarity] - RARITY_ORDER[b.rarity as Rarity],
-  )
-
-  const totalTrades = data.tradesByStatus.reduce((sum, t) => sum + t.count, 0)
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -118,128 +259,25 @@ function AnalyticsPage() {
         Game health and statistics
       </p>
 
-      {/* Pull Distribution */}
-      <section className="mt-8">
-        <h2 className="font-display text-xl font-bold">Pull Distribution</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {totalPulls.toLocaleString()} total pulls across all users
-        </p>
-
-        <Card className="mt-4">
-          <CardContent className="py-6">
-            {totalPulls === 0 ? (
-              <p className="text-center text-muted-foreground">
-                No pull data yet.
-              </p>
-            ) : (
-              <>
-                {/* Stacked bar */}
-                <div className="flex h-8 overflow-hidden rounded-full">
-                  {sortedRarity.map((r) => {
-                    const pct = (r.count / totalPulls) * 100
-                    if (pct === 0) return null
-                    return (
-                      <div
-                        key={r.rarity}
-                        className={`${RARITY_BAR_COLORS[r.rarity as Rarity]} transition-all`}
-                        style={{ width: `${pct}%` }}
-                        title={`${r.rarity}: ${r.count} (${pct.toFixed(1)}%)`}
-                      />
-                    )
-                  })}
-                </div>
-
-                {/* Legend */}
-                <div className="mt-4 flex flex-wrap gap-4">
-                  {sortedRarity.map((r) => {
-                    const pct = (r.count / totalPulls) * 100
-                    return (
-                      <div key={r.rarity} className="flex items-center gap-2">
-                        <div
-                          className={`h-3 w-3 rounded-full ${RARITY_BAR_COLORS[r.rarity as Rarity]}`}
-                        />
-                        <span className="text-sm capitalize">{r.rarity}</span>
-                        <span className="text-sm text-muted-foreground">
-                          {r.count.toLocaleString()} ({pct.toFixed(1)}%)
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Economy */}
-      <section className="mt-8">
-        <h2 className="font-display text-xl font-bold">Fossil Economy</h2>
-
-        <div className="mt-4 grid gap-4 sm:grid-cols-3">
-          <Card size="sm">
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                Total in Circulation
-              </div>
-              <div className="mt-1 font-display text-2xl font-bold">
-                {data.totalFossils.toLocaleString()}
-              </div>
-            </CardContent>
-          </Card>
-          <Card size="sm">
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                Average per User
-              </div>
-              <div className="mt-1 font-display text-2xl font-bold">
-                {data.avgFossils}
-              </div>
-            </CardContent>
-          </Card>
-          <Card size="sm">
-            <CardContent>
-              <div className="text-sm text-muted-foreground">
-                Creatures in Database
-              </div>
-              <div className="mt-1 font-display text-2xl font-bold">
-                {data.totalCreatures}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Trades */}
-      <section className="mt-8">
-        <h2 className="font-display text-xl font-bold">Trade Activity</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {totalTrades} total trade offers
-        </p>
-
-        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.tradesByStatus.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                No trades yet.
-              </CardContent>
-            </Card>
-          ) : (
-            data.tradesByStatus.map((t) => (
-              <Card key={t.status} size="sm">
-                <CardContent>
-                  <div className="text-sm capitalize text-muted-foreground">
-                    {t.status}
-                  </div>
-                  <div className="mt-1 font-display text-2xl font-bold">
-                    {t.count}
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </div>
-      </section>
+      <ActivityCharts
+        pullsPerDay={data.pullsPerDay}
+        usersPerDay={data.usersPerDay}
+      />
+      <PullDistribution rarityDistribution={data.rarityDistribution} />
+      <CreatureCharts
+        topCreatures={data.topCreatures}
+        leastCreatures={data.leastCreatures}
+      />
+      <WishlistChart topWishlisted={data.topWishlisted} />
+      <EconomySection
+        totalFossils={data.totalFossils}
+        avgFossils={data.avgFossils}
+        totalCreatures={data.totalCreatures}
+        fossilDistribution={data.fossilDistribution}
+        levelDistribution={data.levelDistribution}
+      />
+      <PitySection pityStats={data.pityStats} />
+      <TradeActivity tradesByStatus={data.tradesByStatus} />
     </div>
   )
 }

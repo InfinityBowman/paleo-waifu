@@ -1,20 +1,20 @@
-import type { CreatureRecord } from '../db.ts'
 import { runTrials, summarizeTrials } from '../runner.ts'
 import {
-  printHeader,
-  printSubheader,
-  printStatBlock,
-  printRankedList,
   createProgressBar,
-  winRateColor,
+  printHeader,
+  printRankedList,
+  printStatBlock,
+  printSubheader,
   rarityColor,
   roleColor,
+  winRateColor,
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
+import type { CreatureRecord } from '../db.ts'
 
 export function runCreatureReport(
-  creatures: CreatureRecord[],
+  creatures: Array<CreatureRecord>,
   options: { name: string; trials: number; csv: boolean },
 ): void {
   // Find creature by partial case-insensitive match
@@ -48,7 +48,7 @@ export function runCreatureReport(
     matches.push(exact)
   }
 
-  const target = matches[0]!
+  const target = matches[0]
 
   // Run vs all other creatures
   const opponents = creatures.filter((c) => c.id !== target.id)
