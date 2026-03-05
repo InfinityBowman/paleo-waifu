@@ -12,7 +12,7 @@ import {
   userXp,
   wishlist,
 } from '@paleo-waifu/shared/db/schema'
-import { requireAdminSession } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-admin'
 import { ActivityCharts } from '@/components/admin/analytics/ActivityCharts'
 import {
   CreatureCharts,

@@ -14,7 +14,7 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconArchiveResearch, IconTrade } from '@/components/icons'
-import { requireAdminSession } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-admin'
 import { countDistinctSpecies } from '@/lib/queries'
 import { StatCard } from '@/components/shared/StatCard'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'

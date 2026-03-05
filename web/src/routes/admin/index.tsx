@@ -11,7 +11,7 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import { IconTrade } from '@/components/icons'
-import { requireAdminSession } from '@/lib/auth-server'
+import { requireAdminSession } from '@/lib/auth-admin'
 import { StatCard } from '@/components/shared/StatCard'
 
 const getAdminDashboardData = createServerFn({ method: 'GET' }).handler(
