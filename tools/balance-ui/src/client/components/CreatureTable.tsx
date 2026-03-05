@@ -61,12 +61,6 @@ const STAT_TOOLTIPS: Record<string, string> = {
   spd: 'Speed - determines turn order; higher speed acts first',
 }
 
-const ROLE_TOOLTIPS: Record<string, string> = {
-  striker: 'Striker - high ATK, low DEF. Glass cannon damage dealer.',
-  tank: 'Tank - high HP & DEF, low ATK. Absorbs damage for the team.',
-  support: 'Support - balanced stats with utility abilities. Enables teammates.',
-  bruiser: 'Bruiser - balanced ATK & DEF. Versatile front-liner.',
-}
 
 function getEffective(
   c: CreatureRecord,
@@ -263,12 +257,7 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
               </th>
               <SortHeader k="name" label="Name" className="min-w-[140px]" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
               <SortHeader k="rarity" label="Rarity" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
-              <SortHeader
-                k="role"
-                label="Role"
-                tooltip="Click column to sort. Hover a role name for details."
-                sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort}
-              />
+              <SortHeader k="role" label="Role" sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
               <SortHeader k="hp" label="HP" tooltip={STAT_TOOLTIPS.hp} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
               <SortHeader k="atk" label="ATK" tooltip={STAT_TOOLTIPS.atk} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
               <SortHeader k="def" label="DEF" tooltip={STAT_TOOLTIPS.def} sortKey={sortKey} sortDir={sortDir} onToggle={toggleSort} />
@@ -322,19 +311,12 @@ export function CreatureTable({ creatures, patches, constants, onPatch }: Props)
                     </Badge>
                   </td>
                   <td className="px-2 py-1.5">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <span className={cn(
-                          'text-xs capitalize',
-                          ROLE_CLASSES[c.role],
-                        )}>
-                          {c.role}
-                        </span>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        {ROLE_TOOLTIPS[c.role] ?? c.role}
-                      </TooltipContent>
-                    </Tooltip>
+                    <span className={cn(
+                      'text-xs capitalize',
+                      ROLE_CLASSES[c.role],
+                    )}>
+                      {c.role}
+                    </span>
                   </td>
                   <StatCell
                     creature={c}

@@ -6,7 +6,8 @@ import { Badge } from './ui/badge'
 import { Input } from './ui/input'
 import { Card, CardContent } from './ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
-import type { RunSummary } from '../../shared/types.ts'
+import { BaselineDiffSummary } from './BaselineDiffSummary'
+import type { ConstantsSnapshot, RunSummary } from '../../shared/types.ts'
 
 const ROLE_COLOR_VALUES: Record<string, string> = {
   striker: 'oklch(0.65 0.2 25)',
@@ -32,6 +33,7 @@ function formatRelativeTime(ts: number): string {
 interface Props {
   runs: Array<RunSummary>
   selectedIds: Array<string>
+  constants?: ConstantsSnapshot | null
   onSelectToggle: (id: string) => void
   onDelete: (id: string) => Promise<void>
   onRename: (id: string, label: string) => Promise<void>
@@ -44,6 +46,7 @@ interface Props {
 export function RunHistoryPanel({
   runs,
   selectedIds,
+  constants,
   onSelectToggle,
   onDelete,
   onRename,
@@ -245,6 +248,19 @@ export function RunHistoryPanel({
                     </Badge>
                   )}
                 </div>
+
+                {/* Baseline diff summary */}
+                {run.patchCount > 0 && (
+                  <BaselineDiffSummary
+                    constants={run.config.constants}
+                    creaturePatches={run.config.creaturePatches}
+                    options={run.config.options}
+                    activeTemplates={constants?.activeTemplates}
+                    passiveTemplates={constants?.passiveTemplates}
+                    compact
+                    className="mb-2"
+                  />
+                )}
 
                 {/* Stats row */}
                 <div className="flex items-center gap-4">

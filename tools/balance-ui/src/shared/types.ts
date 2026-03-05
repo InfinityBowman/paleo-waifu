@@ -96,12 +96,22 @@ export type StatKey = 'hp' | 'atk' | 'def' | 'spd'
 /** Per-stat percentage modifier (0 = no change, 0.1 = +10%, -0.15 = -15%) */
 export type StatModifiers = Partial<Record<StatKey, number>>
 
+/** Override for a single ability template's parameters */
+export interface AbilityOverride {
+  /** Cooldown override (only meaningful for active abilities with onUse trigger) */
+  cooldown?: number
+  /** Per-effect parameter overrides, keyed by effect index → { paramName: value } */
+  effectOverrides?: Record<number, Record<string, number>>
+}
+
 export interface ConstantsOverride {
   /** Per-role stat multipliers, e.g. { striker: { atk: 0.1 } } = +10% ATK for all strikers */
   roleModifiers?: Record<string, StatModifiers>
   /** Per-rarity uniform scaling, e.g. { common: -0.05 } = -5% all stats for commons */
   rarityModifiers?: Record<string, number>
   combatDamageScale?: number
+  /** Per-ability template overrides, e.g. { shield_wall: { effectOverrides: { 0: { percent: 20 } } } } */
+  abilityOverrides?: Record<string, AbilityOverride>
 }
 
 export interface SimRequest {
@@ -174,6 +184,12 @@ export interface RunSummary {
   normalizeStats: boolean
   noActives: boolean
   noPassives: boolean
+  /** Lightweight config for rendering baseline diff summaries */
+  config: {
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  }
 }
 
 export interface RunHistoryDB extends DBSchema {

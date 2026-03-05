@@ -3,14 +3,17 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import {
   ACTIVE_ABILITY_TEMPLATES,
+  ALL_ABILITY_TEMPLATES,
   COMBAT_DAMAGE_SCALE,
   PASSIVE_ABILITY_TEMPLATES,
   RARITY_BASE_TOTALS,
   ROLE_DISTRIBUTIONS,
 } from '@paleo-waifu/shared/battle/constants'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import { loadCreatures } from '../../../battle-sim/src/db.ts'
 import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
 import type {
+  AbilityOverride,
   ConstantsSnapshot,
   CreatureRecord,
   SimProgressEvent,
@@ -130,6 +133,48 @@ function applyOverrides(
     })
 }
 
+// ─── Ability Override Support ────────────────────────────────────
+
+function buildTemplateMap(
+  overrides?: Record<string, AbilityOverride>,
+): Map<string, AbilityTemplate> | undefined {
+  if (!overrides || Object.keys(overrides).length === 0) return undefined
+
+  const map = new Map<string, AbilityTemplate>(
+    ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]),
+  )
+
+  for (const [templateId, override] of Object.entries(overrides)) {
+    const base = map.get(templateId)
+    if (!base) continue
+
+    // Deep-clone the template
+    const patched: AbilityTemplate = {
+      ...base,
+      trigger: { ...base.trigger },
+      effects: base.effects.map((e) => ({ ...e })),
+    }
+
+    // Apply cooldown override (only for onUse triggers)
+    if (override.cooldown !== undefined && patched.trigger.type === 'onUse') {
+      patched.trigger = { ...patched.trigger, cooldown: override.cooldown }
+    }
+
+    // Apply per-effect parameter overrides
+    if (override.effectOverrides) {
+      for (const [indexStr, params] of Object.entries(override.effectOverrides)) {
+        const idx = parseInt(indexStr, 10)
+        if (idx < 0 || idx >= patched.effects.length) continue
+        patched.effects[idx] = { ...patched.effects[idx], ...params } as typeof patched.effects[number]
+      }
+    }
+
+    map.set(templateId, patched)
+  }
+
+  return map
+}
+
 // ─── Sim SSE Endpoint ────────────────────────────────────────────
 
 app.post('/api/sim', async (c) => {
@@ -172,6 +217,8 @@ app.post('/api/sim', async (c) => {
     return c.json({ error: 'Need at least 3 enabled creatures' }, 400)
   }
 
+  const templateMap = buildTemplateMap(body.constants.abilityOverrides)
+
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
     start(controller) {
@@ -188,6 +235,7 @@ app.post('/api/sim', async (c) => {
           eliteRate: body.options.eliteRate,
           mutationRate: body.options.mutationRate,
           csv: false,
+          templateMap,
           onGeneration: (gen, snap) => {
             send({
               type: 'generation',

@@ -8,6 +8,7 @@ import { SimControls } from './components/SimControls'
 import { ResultsPanel } from './components/ResultsPanel'
 import { RunHistoryPanel } from './components/RunHistoryPanel'
 import { ComparisonPanel } from './components/ComparisonPanel'
+import { AbilitiesPanel } from './components/AbilitiesPanel'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
@@ -19,6 +20,7 @@ import type {
   CreatureRecord,
   MetaRunResult,
   SimProgressEvent,
+  SimRequest,
 } from '../shared/types.ts'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
@@ -41,6 +43,11 @@ export function App() {
     avgFitness: number
   } | null>(null)
   const [simResult, setSimResult] = useState<MetaRunResult | null>(null)
+  const [simConfig, setSimConfig] = useState<{
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  } | null>(null)
   const [simError, setSimError] = useState<string | null>(null)
   const [simOptions, setSimOptions] = useState({
     population: 100,
@@ -48,7 +55,7 @@ export function App() {
     matchesPerTeam: 20,
     eliteRate: 0.1,
     mutationRate: 0.8,
-    normalizeStats: false,
+    normalizeStats: true,
     noActives: false,
     noPassives: false,
   })
@@ -66,6 +73,18 @@ export function App() {
   useEffect(() => {
     load()
   }, [load])
+
+  // Auto-restore latest run on mount
+  useEffect(() => {
+    if (history.loading) return
+    if (simResult) return // already have a result
+    history.getLatestRun().then((run) => {
+      if (!run) return
+      setSimResult(run.result)
+      setSimConfig(run.config)
+      setSimState('done')
+    })
+  }, [history.loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleReload() {
     const data = await reloadCreatures()
@@ -108,6 +127,7 @@ export function App() {
             })
           } else if (event.type === 'done') {
             setSimResult(event.result)
+            setSimConfig(config)
             setSimState('done')
             setTab('results')
             // Auto-save to IndexedDB
@@ -143,6 +163,7 @@ export function App() {
     const run = await history.getRun(id)
     if (!run) return
     setSimResult(run.result)
+    setSimConfig(run.config)
     setSimState('done')
     setSimError(null)
     setTab('results')
@@ -159,7 +180,8 @@ export function App() {
       (m) => Object.keys(m).length > 0,
     ).length +
     Object.keys(constantsOverride.rarityModifiers ?? {}).length +
-    (constantsOverride.combatDamageScale !== undefined ? 1 : 0)
+    (constantsOverride.combatDamageScale !== undefined ? 1 : 0) +
+    Object.keys(constantsOverride.abilityOverrides ?? {}).length
 
   const patchCount =
     [...patches.values()].filter(
@@ -230,6 +252,14 @@ export function App() {
           >
             <TabsList className="w-full">
               <TabsTrigger value="creatures">Creatures</TabsTrigger>
+              <TabsTrigger value="abilities" className="gap-1.5">
+                Abilities
+                {Object.keys(constantsOverride.abilityOverrides ?? {}).length > 0 && (
+                  <span className="text-[10px] text-muted-foreground">
+                    {Object.keys(constantsOverride.abilityOverrides ?? {}).length}
+                  </span>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="results" className="gap-1.5">
                 Results
                 {simResult && (
@@ -267,12 +297,22 @@ export function App() {
               />
             </TabsContent>
 
+            <TabsContent value="abilities" className="min-h-0 overflow-y-auto">
+              <AbilitiesPanel
+                constants={constants}
+                overrides={constantsOverride}
+                onChange={setConstantsOverride}
+              />
+            </TabsContent>
+
             <TabsContent value="results" className="min-h-0 overflow-y-auto">
               <ResultsPanel
                 result={simResult}
                 error={simError}
                 simState={simState}
                 population={simOptions.population}
+                config={simConfig}
+                constants={constants}
               />
             </TabsContent>
 
@@ -280,6 +320,7 @@ export function App() {
               <RunHistoryPanel
                 runs={history.runs}
                 selectedIds={selectedRunIds}
+                constants={constants}
                 onSelectToggle={handleSelectToggle}
                 onDelete={history.deleteRun}
                 onRename={history.updateLabel}

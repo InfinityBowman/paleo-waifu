@@ -5,6 +5,7 @@ import {
 } from '@paleo-waifu/shared/battle/constants'
 import type {
   Ability,
+  AbilityTemplate,
   BattleTeam,
   BattleTeamMember,
   Row,
@@ -29,15 +30,16 @@ export interface TrialSummary {
 
 // ─── Template Resolution ─────────────────────────────────────────
 
-const TEMPLATE_MAP = new Map(
+const DEFAULT_TEMPLATE_MAP = new Map(
   ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]),
 )
 
-function resolveAbility(assignment: {
-  templateId: string
-  displayName: string
-}): Ability {
-  const template = TEMPLATE_MAP.get(assignment.templateId)
+function resolveAbility(
+  assignment: { templateId: string; displayName: string },
+  templateMap?: Map<string, AbilityTemplate>,
+): Ability {
+  const map = templateMap ?? DEFAULT_TEMPLATE_MAP
+  const template = map.get(assignment.templateId)
   if (!template) {
     throw new Error(
       `Unknown ability template: ${assignment.templateId}`,
@@ -57,6 +59,7 @@ export function assignRow(role: string): 'front' | 'back' {
 function toMember(
   record: CreatureRecord,
   index: number,
+  templateMap?: Map<string, AbilityTemplate>,
 ): BattleTeamMember {
   return {
     creatureId: `${record.id}-${index}`,
@@ -67,8 +70,8 @@ function toMember(
       def: record.def,
       spd: record.spd,
     },
-    active: resolveAbility(record.active),
-    passive: resolveAbility(record.passive),
+    active: resolveAbility(record.active, templateMap),
+    passive: resolveAbility(record.passive, templateMap),
     diet: record.diet,
     type: record.type,
     era: record.era,
@@ -79,8 +82,9 @@ function toMember(
 
 export function buildTeam(
   members: [CreatureRecord, CreatureRecord, CreatureRecord],
+  templateMap?: Map<string, AbilityTemplate>,
 ): BattleTeam {
-  const teamMembers = members.map((m, i) => toMember(m, i)) as [
+  const teamMembers = members.map((m, i) => toMember(m, i, templateMap)) as [
     BattleTeamMember,
     BattleTeamMember,
     BattleTeamMember,
@@ -129,9 +133,10 @@ export function runTrials(
 export function buildTeamWithRows(
   members: [CreatureRecord, CreatureRecord, CreatureRecord],
   rows: [Row, Row, Row],
+  templateMap?: Map<string, AbilityTemplate>,
 ): BattleTeam {
   const teamMembers = members.map((m, i) => {
-    const member = toMember(m, i)
+    const member = toMember(m, i, templateMap)
     member.row = rows[i]!
     return member
   }) as [BattleTeamMember, BattleTeamMember, BattleTeamMember]

@@ -48,7 +48,7 @@ export function SimControls({
         Sim Options
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info size={12} className="text-muted-foreground/60" />
+            <Info size={12} className="text-muted-foreground/80" />
           </TooltipTrigger>
           <TooltipContent side="right">
             Configure the genetic algorithm parameters. Higher values = more accurate but slower.
@@ -65,7 +65,7 @@ export function SimControls({
             type="number"
             min={10}
             max={1000}
-            step={10}
+            step={1}
             value={options.population}
             onChange={(e) => setOpt('population', parseInt(e.target.value, 10) || 100)}
             disabled={running}
@@ -80,7 +80,7 @@ export function SimControls({
             type="number"
             min={5}
             max={200}
-            step={5}
+            step={1}
             value={options.generations}
             onChange={(e) => setOpt('generations', parseInt(e.target.value, 10) || 25)}
             disabled={running}
@@ -95,7 +95,7 @@ export function SimControls({
             type="number"
             min={5}
             max={100}
-            step={5}
+            step={1}
             value={options.matchesPerTeam}
             onChange={(e) => setOpt('matchesPerTeam', parseInt(e.target.value, 10) || 20)}
             disabled={running}
@@ -110,7 +110,7 @@ export function SimControls({
             type="number"
             min={0.01}
             max={0.5}
-            step={0.05}
+            step={0.01}
             value={options.eliteRate}
             onChange={(e) => setOpt('eliteRate', parseFloat(e.target.value) || 0.1)}
             disabled={running}
@@ -125,7 +125,7 @@ export function SimControls({
             type="number"
             min={0.1}
             max={1.0}
-            step={0.05}
+            step={0.1}
             value={options.mutationRate}
             onChange={(e) => setOpt('mutationRate', parseFloat(e.target.value) || 0.8)}
             disabled={running}
@@ -140,7 +140,7 @@ export function SimControls({
           Isolation Mode
           <Tooltip>
             <TooltipTrigger asChild>
-              <Info size={12} className="text-muted-foreground/60" />
+              <Info size={12} className="text-muted-foreground/80" />
             </TooltipTrigger>
             <TooltipContent side="right">
               Strip away abilities or rarity advantage to isolate specific balance axes.
@@ -232,7 +232,7 @@ function OptionRow({
         <label className="text-xs text-muted-foreground">{label}</label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info size={10} className="text-muted-foreground/40" />
+            <Info size={10} className="text-muted-foreground/70" />
           </TooltipTrigger>
           <TooltipContent side="right">{tooltip}</TooltipContent>
         </Tooltip>
@@ -261,7 +261,7 @@ function CheckboxRow({
         <label className="text-xs text-muted-foreground">{label}</label>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Info size={10} className="text-muted-foreground/40" />
+            <Info size={10} className="text-muted-foreground/70" />
           </TooltipTrigger>
           <TooltipContent side="right">{tooltip}</TooltipContent>
         </Tooltip>

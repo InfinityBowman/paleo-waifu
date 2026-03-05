@@ -1,5 +1,6 @@
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import {
   createProgressBar,
@@ -71,6 +72,8 @@ export interface MetaOptions {
   mutationRate: number
   csv: boolean
   onGeneration?: (gen: number, snapshot: GenerationSnapshot) => void
+  /** Optional custom template map for ability overrides (falls back to global templates) */
+  templateMap?: Map<string, AbilityTemplate>
 }
 
 export interface MetaResult {
@@ -213,6 +216,7 @@ function evaluateGeneration(
   population: Array<Individual>,
   matchesPerTeam: number,
   seedOffset: number,
+  templateMap?: Map<string, AbilityTemplate>,
 ): { avgTurns: number } {
   const n = population.length
 
@@ -265,8 +269,8 @@ function evaluateGeneration(
 
       // Game 1: indA as team A, indB as team B
       try {
-        const teamA = buildTeamWithRows(indA.members, getRows(indA.genome))
-        const teamB = buildTeamWithRows(indB.members, getRows(indB.genome))
+        const teamA = buildTeamWithRows(indA.members, getRows(indA.genome), templateMap)
+        const teamB = buildTeamWithRows(indB.members, getRows(indB.genome), templateMap)
         const result = simulateBattle(teamA, teamB, { seed })
         totalTurns += result.turns
         battleCount++
@@ -286,8 +290,8 @@ function evaluateGeneration(
 
       // Game 2: swap sides (indB as team A, indA as team B)
       try {
-        const teamA = buildTeamWithRows(indB.members, getRows(indB.genome))
-        const teamB = buildTeamWithRows(indA.members, getRows(indA.genome))
+        const teamA = buildTeamWithRows(indB.members, getRows(indB.genome), templateMap)
+        const teamB = buildTeamWithRows(indA.members, getRows(indA.genome), templateMap)
         const result = simulateBattle(teamA, teamB, { seed: seed + 1 })
         totalTurns += result.turns
         battleCount++
@@ -1004,6 +1008,7 @@ interface RoleActionProfile {
 
 function analyzeBattleActions(
   population: Array<Individual>,
+  templateMap?: Map<string, AbilityTemplate>,
 ): Array<RoleActionProfile> {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topTeams = sorted.slice(0, Math.ceil(population.length / 4))
@@ -1026,11 +1031,11 @@ function analyzeBattleActions(
         try {
           let teamA, teamB
           if (asSide === 'A') {
-            teamA = buildTeamWithRows(team.members, getRows(team.genome))
-            teamB = buildTeamWithRows(opp.members, getRows(opp.genome))
+            teamA = buildTeamWithRows(team.members, getRows(team.genome), templateMap)
+            teamB = buildTeamWithRows(opp.members, getRows(opp.genome), templateMap)
           } else {
-            teamA = buildTeamWithRows(opp.members, getRows(opp.genome))
-            teamB = buildTeamWithRows(team.members, getRows(team.genome))
+            teamA = buildTeamWithRows(opp.members, getRows(opp.genome), templateMap)
+            teamB = buildTeamWithRows(team.members, getRows(team.genome), templateMap)
           }
 
           const result = simulateBattle(teamA, teamB, {
@@ -1222,6 +1227,7 @@ export function runMetaReport(
       population,
       options.matchesPerTeam,
       seedOffset,
+      options.templateMap,
     )
 
     // Update all-time best
@@ -1267,7 +1273,7 @@ export function runMetaReport(
 
     // Action analysis on final generation
     log('\n  Analyzing battle actions from top teams...')
-    const actionProfiles = analyzeBattleActions(population)
+    const actionProfiles = analyzeBattleActions(population, options.templateMap)
     renderActionAnalysis(actionProfiles)
   }
 

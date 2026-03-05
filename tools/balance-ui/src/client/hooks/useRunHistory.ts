@@ -19,7 +19,8 @@ function toSummary(run: SavedRun): RunSummary {
       (m) => Object.keys(m).length > 0,
     ).length +
     Object.keys(run.config.constants.rarityModifiers ?? {}).length +
-    (run.config.constants.combatDamageScale !== undefined ? 1 : 0)
+    (run.config.constants.combatDamageScale !== undefined ? 1 : 0) +
+    Object.keys(run.config.constants.abilityOverrides ?? {}).length
   const patchCount =
     run.config.creaturePatches.filter((p) => Object.keys(p).length > 1)
       .length + constantsCount
@@ -38,6 +39,7 @@ function toSummary(run: SavedRun): RunSummary {
     normalizeStats: run.config.options.normalizeStats,
     noActives: run.config.options.noActives,
     noPassives: run.config.options.noPassives,
+    config: run.config,
   }
 }
 
@@ -53,6 +55,7 @@ export interface UseRunHistory {
     result: MetaRunResult,
   ) => Promise<string>
   getRun: (id: string) => Promise<SavedRun | undefined>
+  getLatestRun: () => Promise<SavedRun | undefined>
   deleteRun: (id: string) => Promise<void>
   updateLabel: (id: string, label: string) => Promise<void>
   toggleStar: (id: string) => Promise<void>
@@ -134,6 +137,12 @@ export function useRunHistory(): UseRunHistory {
     return db.get('runs', id)
   }, [])
 
+  const getLatestRun = useCallback(async () => {
+    const db = await getDb()
+    const all = await db.getAllFromIndex('runs', 'by-created')
+    return all.at(-1)
+  }, [])
+
   const deleteRun = useCallback(async (id: string) => {
     const db = await getDb()
     await db.delete('runs', id)
@@ -170,5 +179,5 @@ export function useRunHistory(): UseRunHistory {
     setRuns([])
   }, [])
 
-  return { runs, loading, saveRun, getRun, deleteRun, updateLabel, toggleStar, clearAll }
+  return { runs, loading, saveRun, getRun, getLatestRun, deleteRun, updateLabel, toggleStar, clearAll }
 }

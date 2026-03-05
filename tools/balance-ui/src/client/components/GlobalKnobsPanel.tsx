@@ -82,7 +82,7 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
                     {role}
                   </span>
                   {/* Show base distribution as reference */}
-                  <span className="text-[9px] font-mono text-muted-foreground/50">
+                  <span className="text-[9px] font-mono text-muted-foreground/75">
                     base: {STAT_KEYS.map(
                       (s) => `${s} ${Math.round(dist[s] * 100)}%`,
                     ).join(' ')}
@@ -99,7 +99,7 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
                         </label>
                         <Input
                           type="number"
-                          step={5}
+                          step={1}
                           min={-50}
                           max={100}
                           value={displayVal}
@@ -135,7 +135,7 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
           <label className="w-24 text-muted-foreground">Damage Scale</label>
           <Input
             type="number"
-            step={0.05}
+            step={0.1}
             min={0.1}
             max={2}
             value={effectiveScale}
@@ -170,12 +170,12 @@ export function GlobalKnobsPanel({ constants, overrides, onChange }: Props) {
                 >
                   {rarity}%
                 </label>
-                <span className="w-8 text-right text-[9px] font-mono text-muted-foreground/50">
+                <span className="w-8 text-right text-[9px] font-mono text-muted-foreground/75">
                   {baseTotal}
                 </span>
                 <Input
                   type="number"
-                  step={5}
+                  step={1}
                   min={-50}
                   max={100}
                   value={displayVal}
@@ -224,7 +224,7 @@ function Section({
         {tooltip && (
           <Tooltip>
             <TooltipTrigger asChild onClick={(e) => e.stopPropagation()}>
-              <Info size={10} className="text-muted-foreground/40" />
+              <Info size={10} className="text-muted-foreground/70" />
             </TooltipTrigger>
             <TooltipContent side="right">{tooltip}</TooltipContent>
           </Tooltip>

@@ -47,7 +47,7 @@ const TOOLTIP_STYLE = {
   labelStyle: { color: 'oklch(0.9 0.02 290)' },
 }
 
-const TICK_STYLE = { fontSize: 10, fill: 'oklch(0.55 0.03 290)' }
+const TICK_STYLE = { fontSize: 10, fill: 'oklch(0.65 0.03 290)' }
 
 interface Props {
   runIds: Array<string>
@@ -198,7 +198,7 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info size={13} className="cursor-help text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+        <Info size={13} className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors" />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>
     </Tooltip>
@@ -517,7 +517,7 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
                         </TooltipContent>
                       </Tooltip>
                     ) : (
-                      <span className="text-muted-foreground/40">—</span>
+                      <span className="text-muted-foreground/70">—</span>
                     )}
                   </td>
                 )
@@ -543,7 +543,7 @@ function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
 
 function RankChange({ from, to }: { from: number; to: number }) {
   const delta = from - to // positive = improved (lower rank number)
-  if (delta === 0) return <span className="text-muted-foreground/40">—</span>
+  if (delta === 0) return <span className="text-muted-foreground/70">—</span>
   return (
     <span
       className={cn(
@@ -597,6 +597,14 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
       },
     },
     { label: 'Damage Scale', getValue: (r) => r.config.constants.combatDamageScale !== undefined ? String(r.config.constants.combatDamageScale) : 'default' },
+    {
+      label: 'Ability Overrides',
+      getValue: (r) => {
+        const mods = r.config.constants.abilityOverrides
+        if (!mods || Object.keys(mods).length === 0) return 'none'
+        return `${Object.keys(mods).length} modified`
+      },
+    },
   ]
 
   return (

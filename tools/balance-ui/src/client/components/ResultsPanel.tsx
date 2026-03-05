@@ -1,4 +1,5 @@
-import { Info } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, Info } from 'lucide-react'
 import {
   Area,
   AreaChart,
@@ -22,7 +23,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Badge } from './ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
-import type { GenerationSnapshot, MetaResult, MetaRunResult } from '../../shared/types.ts'
+import { BaselineDiffSummary } from './BaselineDiffSummary'
+import type {
+  ConstantsOverride,
+  ConstantsSnapshot,
+  CreatureOverridePatch,
+  GenerationSnapshot,
+  MetaResult,
+  MetaRunResult,
+  SimRequest,
+} from '../../shared/types.ts'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
 
@@ -63,9 +73,16 @@ interface Props {
   error: string | null
   simState: SimState
   population?: number
+  config?: {
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  } | null
+  constants?: ConstantsSnapshot | null
 }
 
-export function ResultsPanel({ result, error, simState, population }: Props) {
+export function ResultsPanel({ result, error, simState, population, config, constants }: Props) {
+  const [baselineOpen, setBaselineOpen] = useState(false)
   if (simState === 'error' && error) {
     return (
       <div className="p-6">
@@ -90,6 +107,37 @@ export function ResultsPanel({ result, error, simState, population }: Props) {
 
   return (
     <div className="flex flex-col gap-4 p-4">
+      {/* Changes from Baseline */}
+      {config && (
+        <Card className="py-1">
+          <button
+            type="button"
+            onClick={() => setBaselineOpen((v) => !v)}
+            className="flex w-full items-center justify-between px-4 py-1.5"
+          >
+            <span className="text-sm font-semibold">Changes from Baseline</span>
+            <ChevronDown
+              size={14}
+              className={cn(
+                'text-muted-foreground transition-transform',
+                baselineOpen && 'rotate-180',
+              )}
+            />
+          </button>
+          {baselineOpen && (
+            <CardContent className="px-4 pt-0 pb-2">
+              <BaselineDiffSummary
+                constants={config.constants}
+                creaturePatches={config.creaturePatches}
+                options={config.options}
+                activeTemplates={constants?.activeTemplates}
+                passiveTemplates={constants?.passiveTemplates}
+              />
+            </CardContent>
+          )}
+        </Card>
+      )}
+
       {/* Role Meta Share */}
       <Card>
         <CardHeader className="pb-2">
@@ -260,7 +308,7 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Info size={13} className="cursor-help text-muted-foreground/50 hover:text-muted-foreground transition-colors" />
+        <Info size={13} className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors" />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>
     </Tooltip>
@@ -455,8 +503,8 @@ function RoleMetaChart({ roleShares }: { roleShares: Record<string, number> }) {
     <ResponsiveContainer width="100%" height={160}>
       <BarChart data={data} layout="vertical" margin={{ top: 0, right: 12, bottom: 0, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" horizontal={false} />
-        <XAxis type="number" domain={[0, 50]} tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }} />
-        <YAxis type="category" dataKey="role" width={60} tick={{ fontSize: 11, fill: 'oklch(0.55 0.03 290)' }} />
+        <XAxis type="number" domain={[0, 50]} tickFormatter={(v: number) => `${v}%`} tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }} />
+        <YAxis type="category" dataKey="role" width={60} tick={{ fontSize: 11, fill: 'oklch(0.65 0.03 290)' }} />
         <RechartsTooltip
           formatter={(value) => [`${value}%`, 'Meta Share']}
           contentStyle={{ background: 'oklch(0.15 0.025 290)', border: '1px solid oklch(1 0 0 / 8%)', borderRadius: 8, fontSize: 12 }}
@@ -486,11 +534,11 @@ function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           tickFormatter={(v: number) => `${v}%`}
           domain={['dataMin - 2', 'dataMax + 2']}
           width={40}
@@ -528,19 +576,19 @@ function MetricsChart({ snapshots, population }: { snapshots: Array<GenerationSn
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
         />
         <YAxis
           yAxisId="turns"
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           width={40}
-          label={{ value: 'Turns', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          label={{ value: 'Turns', angle: -90, position: 'insideLeft', fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
         />
         <YAxis
           yAxisId="diversity"
           orientation="right"
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           tickFormatter={(v: number) => `${v}%`}
           domain={[0, 100]}
           width={40}
@@ -616,11 +664,11 @@ function RoleEvolutionChart({ snapshots }: { snapshots: Array<GenerationSnapshot
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
-          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
+          label={{ value: 'Generation', position: 'insideBottom', offset: -2, fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
         />
         <YAxis
-          tick={{ fontSize: 10, fill: 'oklch(0.55 0.03 290)' }}
+          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           tickFormatter={(v: number) => `${v}%`}
           domain={[0, 100]}
           width={40}
@@ -675,7 +723,7 @@ function FormationChart({ formationShares }: { formationShares: Record<string, n
           innerRadius={40}
           paddingAngle={2}
           label={({ name, value }) => `${name ?? ''} ${value}%`}
-          labelLine={{ stroke: 'oklch(0.55 0.03 290)' }}
+          labelLine={{ stroke: 'oklch(0.65 0.03 290)' }}
           fontSize={10}
         >
           {data.map((_, i) => (
