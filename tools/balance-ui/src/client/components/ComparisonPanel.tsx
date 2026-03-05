@@ -222,7 +222,7 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
       <TooltipTrigger asChild>
         <Info
           size={13}
-          className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors"
+          className="text-muted-foreground/75 hover:text-muted-foreground transition-colors"
         />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>

@@ -34,11 +34,13 @@ export function calculateDamage({
   defender,
   effect,
   rng,
+  damageScale,
 }: {
   attacker: BattleCreature
   defender: BattleCreature
   effect: Effect & { type: 'damage' }
   rng: SeededRng
+  damageScale?: number
 }): DamageCalcResult {
   const stat = effect.scaling === 'def' ? attacker.def : attacker.atk
 
@@ -79,7 +81,7 @@ export function calculateDamage({
   const isDietBonus = dietMod !== 1.0
 
   // Global damage scaling
-  rawDamage *= COMBAT_DAMAGE_SCALE
+  rawDamage *= damageScale ?? COMBAT_DAMAGE_SCALE
 
   // Floor, minimum 1
   let finalDamage = Math.max(1, Math.floor(rawDamage))

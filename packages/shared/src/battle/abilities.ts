@@ -181,6 +181,7 @@ export function resolveEffect(
         defender: target,
         effect,
         rng: ctx.rng,
+        damageScale: ctx.damageScale,
       })
 
       if (result.isDodged) {

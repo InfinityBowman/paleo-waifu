@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { ChevronDown, Info } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ChevronDown, Info, RotateCcw } from 'lucide-react'
 import {
   Area,
   AreaChart,
@@ -27,13 +27,16 @@ import {
   CardTitle,
 } from './ui/card'
 import { Badge } from './ui/badge'
+import { Button } from './ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { BaselineDiffSummary } from './BaselineDiffSummary'
+import type { AbilityTemplate, Effect } from '@paleo-waifu/shared/battle/types'
 import type {
   ConstantsOverride,
   ConstantsSnapshot,
   CreatureOverridePatch,
+  CreatureRecord,
   GenerationSnapshot,
   MetaResult,
   MetaRunResult,
@@ -85,6 +88,12 @@ interface Props {
     creaturePatches: Array<CreatureOverridePatch>
   } | null
   constants?: ConstantsSnapshot | null
+  creatures?: Array<CreatureRecord>
+  onApplyConfig?: (config: {
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  }) => void
 }
 
 export function ResultsPanel({
@@ -94,6 +103,8 @@ export function ResultsPanel({
   population,
   config,
   constants,
+  creatures,
+  onApplyConfig,
 }: Props) {
   const [baselineOpen, setBaselineOpen] = useState(false)
   if (simState === 'error' && error) {
@@ -123,20 +134,41 @@ export function ResultsPanel({
       {/* Changes from Baseline */}
       {config && (
         <Card className="py-1">
-          <button
-            type="button"
+          <div
+            role="button"
+            tabIndex={0}
             onClick={() => setBaselineOpen((v) => !v)}
-            className="flex w-full items-center justify-between px-4 py-1.5"
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setBaselineOpen((v) => !v) }}
+            className="flex items-center justify-between px-4 py-1.5"
           >
-            <span className="text-sm font-semibold">Changes from Baseline</span>
-            <ChevronDown
-              size={14}
-              className={cn(
-                'text-muted-foreground transition-transform',
-                baselineOpen && 'rotate-180',
-              )}
-            />
-          </button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-semibold">Changes from Baseline</span>
+              <ChevronDown
+                size={14}
+                className={cn(
+                  'text-muted-foreground transition-transform',
+                  baselineOpen && 'rotate-180',
+                )}
+              />
+            </div>
+            {onApplyConfig && (
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onApplyConfig({
+                    options: config.options,
+                    constants: config.constants,
+                    creaturePatches: config.creaturePatches,
+                  })
+                }}
+              >
+                <RotateCcw size={10} />
+                Apply to Editor
+              </Button>
+            )}
+          </div>
           {baselineOpen && (
             <CardContent className="px-4 pt-0 pb-2">
               <BaselineDiffSummary
@@ -237,6 +269,12 @@ export function ResultsPanel({
               population={population ?? 100}
             />
             <TurnsTargetIndicator avgTurns={snapshots.at(-1)?.avgTurns ?? 0} />
+            <DiversityIndicator
+              diversity={
+                ((snapshots.at(-1)?.uniqueGenomes ?? 0) / (population ?? 100)) *
+                100
+              }
+            />
           </CardContent>
         </Card>
       )}
@@ -272,7 +310,7 @@ export function ResultsPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="px-0">
-          <CreatureLeaderboard leaderboard={meta.creatureLeaderboard} />
+          <CreatureLeaderboard leaderboard={meta.creatureLeaderboard} constants={constants} />
         </CardContent>
       </Card>
 
@@ -288,7 +326,7 @@ export function ResultsPanel({
           </div>
         </CardHeader>
         <CardContent>
-          <AbilityLeaderboard leaderboard={meta.abilityLeaderboard} />
+          <AbilityLeaderboard leaderboard={meta.abilityLeaderboard} snapshots={snapshots} creatures={creatures} />
         </CardContent>
       </Card>
 
@@ -324,18 +362,7 @@ export function ResultsPanel({
             </div>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {entries(meta.synergyMetaShare)
-                .sort(([, a], [, b]) => b - a)
-                .map(([synergy, share]) => (
-                  <Badge key={synergy} variant="outline" className="text-xs">
-                    {synergy}
-                    <span className="ml-1 text-muted-foreground">
-                      {(share * 100).toFixed(1)}%
-                    </span>
-                  </Badge>
-                ))}
-            </div>
+            <SynergyBars synergyShares={meta.synergyMetaShare} />
           </CardContent>
         </Card>
       )}
@@ -349,7 +376,7 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
       <TooltipTrigger asChild>
         <Info
           size={13}
-          className="cursor-help text-muted-foreground/75 hover:text-muted-foreground transition-colors"
+          className="text-muted-foreground/75 hover:text-muted-foreground transition-colors"
         />
       </TooltipTrigger>
       <TooltipContent className="max-w-xs">{children}</TooltipContent>
@@ -359,19 +386,29 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
 
 function CreatureLeaderboard({
   leaderboard,
+  constants,
 }: {
   leaderboard: MetaResult['creatureLeaderboard']
+  constants?: ConstantsSnapshot | null
 }) {
+  const templateMap = useMemo(() => {
+    if (!constants) return new Map<string, AbilityTemplate>()
+    const map = new Map<string, AbilityTemplate>()
+    for (const t of [...constants.activeTemplates, ...constants.passiveTemplates]) {
+      map.set(t.id, t)
+    }
+    return map
+  }, [constants])
+
   return (
     <table className="w-full text-xs">
       <thead>
         <tr className="border-b border-border">
           <th className="px-4 py-1.5 text-left text-muted-foreground">#</th>
           <th className="px-2 py-1.5 text-left text-muted-foreground">Name</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">
-            Rarity
-          </th>
           <th className="px-2 py-1.5 text-left text-muted-foreground">Role</th>
+          <th className="px-2 py-1.5 text-left text-muted-foreground">Active</th>
+          <th className="px-2 py-1.5 text-left text-muted-foreground">Passive</th>
           <th className="px-2 py-1.5 text-right text-muted-foreground">
             Appearances
           </th>
@@ -381,102 +418,356 @@ function CreatureLeaderboard({
         </tr>
       </thead>
       <tbody>
-        {leaderboard.slice(0, 20).map((entry, i) => (
-          <Tooltip key={entry.creature.id}>
-            <TooltipTrigger asChild>
-              <tr className="border-b border-border/20 hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
-                <td className="px-2 py-1.5 font-medium">
+        {leaderboard.slice(0, 20).map((entry, i) => {
+          const activeTpl = templateMap.get(entry.creature.active.templateId)
+          const passiveTpl = templateMap.get(entry.creature.passive.templateId)
+          return (
+            <tr
+              key={entry.creature.id}
+              className="border-b border-border/20 hover:bg-muted/30 transition-colors"
+            >
+              <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
+              <td className="px-2 py-1.5 font-medium">
+                <span className={`text-rarity-${entry.creature.rarity}`}>
                   {entry.creature.name}
-                </td>
-                <td className="px-2 py-1.5">
-                  <span
-                    className={cn(
-                      'capitalize',
-                      `text-rarity-${entry.creature.rarity}`,
-                    )}
-                  >
-                    {entry.creature.rarity}
-                  </span>
-                </td>
-                <td className="px-2 py-1.5">
-                  <span
-                    className={cn(
-                      'capitalize',
-                      `text-role-${entry.creature.role}`,
-                    )}
-                  >
-                    {entry.creature.role}
-                  </span>
-                </td>
-                <td className="px-2 py-1.5 text-right">{entry.appearances}</td>
-                <td className="px-4 py-1.5 text-right font-mono">
-                  {(entry.avgFitness * 100).toFixed(1)}%
-                </td>
-              </tr>
-            </TooltipTrigger>
-            <TooltipContent>
-              {entry.creature.name} — {entry.creature.role}{' '}
-              {entry.creature.rarity}
-              <br />
-              Stats: {entry.creature.hp}/{entry.creature.atk}/
-              {entry.creature.def}/{entry.creature.spd}
-              <br />
-              Active: {entry.creature.active.displayName} | Passive:{' '}
-              {entry.creature.passive.displayName}
-            </TooltipContent>
-          </Tooltip>
-        ))}
+                </span>
+              </td>
+              <td className="px-2 py-1.5">
+                <span className={cn('capitalize', `text-role-${entry.creature.role}`)}>
+                  {entry.creature.role}
+                </span>
+              </td>
+              <td className="px-2 py-1.5">
+                <AbilityCell template={activeTpl} displayName={entry.creature.active.displayName} />
+              </td>
+              <td className="px-2 py-1.5">
+                <AbilityCell template={passiveTpl} displayName={entry.creature.passive.displayName} />
+              </td>
+              <td className="px-2 py-1.5 text-right">{entry.appearances}</td>
+              <td className="px-4 py-1.5 text-right font-mono">
+                {(entry.avgFitness * 100).toFixed(1)}%
+              </td>
+            </tr>
+          )
+        })}
       </tbody>
     </table>
   )
 }
 
+function formatTarget(target: string): string {
+  switch (target) {
+    case 'self': return 'self'
+    case 'single_enemy': return 'single target'
+    case 'all_enemies': return 'AOE'
+    case 'lowest_hp_ally': return 'lowest HP ally'
+    case 'all_allies': return 'all allies'
+    default: return target
+  }
+}
+
+function formatEffect(e: Effect): string {
+  switch (e.type) {
+    case 'damage':
+      return `${e.multiplier}x ${e.scaling} dmg`
+    case 'heal':
+      return `heal ${e.percent}%`
+    case 'dot':
+      return `${e.dotKind} ${e.percent}% ${e.duration}t`
+    case 'buff':
+      return `+${e.percent}% ${e.stat} ${e.duration}t`
+    case 'debuff':
+      return `-${e.percent}% ${e.stat} ${e.duration}t`
+    case 'shield':
+      return `shield ${e.percent}% ${e.duration}t`
+    case 'stun':
+      return `stun ${e.duration}t`
+    case 'taunt':
+      return `taunt ${e.duration}t`
+    case 'lifesteal':
+      return `lifesteal ${e.percent}%`
+    case 'reflect':
+      return `reflect ${e.percent}% ${e.duration}t`
+    case 'damage_reduction':
+      return `dmg red ${e.percent}%`
+    case 'crit_reduction':
+      return `crit red ${e.percent}%`
+    case 'flat_reduction':
+      return `flat red ${e.scalingPercent}% def`
+    case 'dodge':
+      return `dodge ${e.basePercent}%`
+  }
+}
+
+function formatTrigger(template: AbilityTemplate): string {
+  const t = template.trigger
+  switch (t.type) {
+    case 'onUse': return `Active · cd: ${t.cooldown}t`
+    case 'onBasicAttack': return 'On basic attack'
+    case 'onHit': return 'On hit'
+    case 'onKill': return 'On kill'
+    case 'onEnemyKO': return 'On enemy KO'
+    case 'onAllyKO': return 'On ally KO'
+    case 'onTurnStart': return 'On turn start'
+    case 'onTurnEnd': return 'On turn end'
+    case 'onBattleStart': return 'On battle start'
+    case 'always': return 'Always active'
+    default: return (t as { type: string }).type
+  }
+}
+
+function AbilityCell({
+  template,
+  displayName,
+}: {
+  template?: AbilityTemplate
+  displayName: string
+}) {
+  if (!template) {
+    return <span className="text-muted-foreground">{displayName}</span>
+  }
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        <button type="button" className="text-left text-muted-foreground hover:text-foreground transition-colors">
+          {displayName}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="right" className="w-64 p-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium">{template.name}</span>
+          <div className="flex gap-0.5">
+            {template.roleAffinity.map((role) => (
+              <span
+                key={role}
+                className={cn('h-1.5 w-1.5 rounded-full', `bg-role-${role}`)}
+                title={role}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-1 text-[10px] text-muted-foreground">
+          {formatTrigger(template)} · {formatTarget(template.target)}
+        </div>
+
+        <p className="mt-1.5 text-[10px] text-muted-foreground/80">
+          {template.description}
+        </p>
+
+        <div className="mt-2 flex flex-col gap-1 border-t border-border/50 pt-2">
+          {template.effects.map((effect, i) => (
+            <div key={i} className="flex items-start gap-2 text-[10px]">
+              <span className="shrink-0 font-medium text-muted-foreground uppercase">
+                {effect.type}
+                {'stat' in effect && ` (${(effect as { stat: string }).stat})`}
+                {'dotKind' in effect && ` (${(effect as { dotKind: string }).dotKind})`}
+              </span>
+              <span className="font-mono text-foreground">
+                {formatEffect(effect)}
+              </span>
+            </div>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 function AbilityLeaderboard({
   leaderboard,
+  snapshots,
+  creatures,
 }: {
   leaderboard: MetaResult['abilityLeaderboard']
+  snapshots: Array<GenerationSnapshot>
+  creatures?: Array<CreatureRecord>
 }) {
+  // Build per-ability sparkline data from generation snapshots
+  const sparklines = useMemo(() => {
+    const map = new Map<string, Array<number>>()
+    for (const snap of snapshots) {
+      for (const [templateId, count] of Object.entries(snap.abilityPresence)) {
+        let arr = map.get(templateId)
+        if (!arr) {
+          arr = []
+          map.set(templateId, arr)
+        }
+        arr.push(count)
+      }
+    }
+    return map
+  }, [snapshots])
+
+  // Count unique creatures per ability template
+  const creatureCountByAbility = useMemo(() => {
+    if (!creatures) return new Map<string, number>()
+    const map = new Map<string, number>()
+    for (const c of creatures) {
+      map.set(c.active.templateId, (map.get(c.active.templateId) ?? 0) + 1)
+      map.set(c.passive.templateId, (map.get(c.passive.templateId) ?? 0) + 1)
+    }
+    return map
+  }, [creatures])
+
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {(['active', 'passive'] as const).map((type) => (
-        <div key={type}>
-          <h4 className="mb-2 text-xs font-medium capitalize text-muted-foreground">
-            {type}
-          </h4>
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="px-2 py-1 text-left text-muted-foreground">
-                  Ability
-                </th>
-                <th className="px-2 py-1 text-right text-muted-foreground">
-                  Count
-                </th>
-                <th className="px-2 py-1 text-right text-muted-foreground">
-                  Avg Fitness
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {leaderboard
-                .filter((a) => a.abilityType === type)
-                .map((a) => (
-                  <tr
-                    key={a.templateId}
-                    className="border-b border-border/20 hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-2 py-1">{a.name}</td>
-                    <td className="px-2 py-1 text-right">{a.appearances}</td>
-                    <td className="px-2 py-1 text-right font-mono">
-                      {(a.avgFitness * 100).toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      ))}
+    <div className="grid grid-cols-2 gap-6">
+      {(['active', 'passive'] as const).map((type) => {
+        const items = leaderboard.filter((a) => a.abilityType === type)
+        const maxAppearances = Math.max(...items.map((a) => a.appearances), 1)
+
+        return (
+          <div key={type}>
+            <h4 className="mb-3 text-xs font-medium capitalize text-muted-foreground">
+              {type}
+            </h4>
+            <div className="flex flex-col gap-2.5">
+              {items.map((a) => {
+                const barPct = (a.appearances / maxAppearances) * 100
+                const barColor =
+                  type === 'active'
+                    ? 'oklch(0.65 0.2 25)'
+                    : 'oklch(0.65 0.15 245)'
+                const points = sparklines.get(a.templateId) ?? []
+                const creatureCount =
+                  creatureCountByAbility.get(a.templateId) ?? 0
+                return (
+                  <Tooltip key={a.templateId}>
+                    <TooltipTrigger asChild>
+                      <div className="group">
+                        <div className="mb-0.5 flex items-center justify-between text-[11px]">
+                          <span className="flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors">
+                            {a.name}
+                            {creatureCount > 0 && (
+                              <span className="text-[9px] text-muted-foreground/70">
+                                {creatureCount}cr
+                              </span>
+                            )}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            {points.length > 1 && (
+                              <Sparkline points={points} color={barColor} />
+                            )}
+                            <span className="font-mono text-muted-foreground">
+                              {a.appearances}
+                              <span className="ml-1.5 text-foreground">
+                                {(a.avgFitness * 100).toFixed(1)}%
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                              width: `${barPct}%`,
+                              backgroundColor: barColor,
+                              opacity: 0.4 + a.avgFitness * 0.6,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <div className="text-[10px]">
+                        <div>
+                          {a.name} ({type})
+                        </div>
+                        <div>Appearances: {a.appearances}</div>
+                        {creatureCount > 0 && (
+                          <div>
+                            Used by: {creatureCount} creature
+                            {creatureCount !== 1 ? 's' : ''}
+                          </div>
+                        )}
+                        <div>
+                          Avg Team Fitness: {(a.avgFitness * 100).toFixed(1)}%
+                        </div>
+                        {points.length > 1 && (
+                          <div>
+                            Trend: {points[0]} → {points[points.length - 1]}
+                            {points[points.length - 1] > points[0]
+                              ? ' (rising)'
+                              : points[points.length - 1] < points[0]
+                                ? ' (falling)'
+                                : ' (stable)'}
+                          </div>
+                        )}
+                      </div>
+                    </TooltipContent>
+                  </Tooltip>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function Sparkline({
+  points,
+  color,
+  width = 40,
+  height = 14,
+}: {
+  points: Array<number>
+  color: string
+  width?: number
+  height?: number
+}) {
+  if (points.length < 2) return null
+  const min = Math.min(...points)
+  const max = Math.max(...points)
+  const range = max - min || 1
+  const pad = 1
+
+  const d = points
+    .map((v, i) => {
+      const x = pad + (i / (points.length - 1)) * (width - pad * 2)
+      const y = pad + (1 - (v - min) / range) * (height - pad * 2)
+      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+    })
+    .join(' ')
+
+  return (
+    <svg width={width} height={height} className="shrink-0">
+      <path d={d} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function SynergyBars({ synergyShares }: { synergyShares: Record<string, number> }) {
+  const sorted = entries(synergyShares).sort(([, a], [, b]) => b - a)
+  const maxShare = Math.max(...sorted.map(([, s]) => s), 0.01)
+
+  return (
+    <div className="flex flex-col gap-2">
+      {sorted.map(([synergy, share]) => {
+        const barPct = (share / maxShare) * 100
+        return (
+          <div key={synergy}>
+            <div className="mb-0.5 flex items-center justify-between text-[11px]">
+              <span className="font-medium">{synergy}</span>
+              <span className="font-mono text-muted-foreground">
+                {(share * 100).toFixed(1)}%
+              </span>
+            </div>
+            <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${barPct}%`,
+                  backgroundColor: 'oklch(0.7 0.17 300)',
+                  opacity: 0.4 + share * 0.6,
+                }}
+              />
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -800,6 +1091,29 @@ function TurnsTargetIndicator({ avgTurns }: { avgTurns: number }) {
         : avgTurns < AVG_TURNS_TARGET_MIN
           ? `${avgTurns.toFixed(1)} turns — too short (damage too high or HP too low)`
           : `${avgTurns.toFixed(1)} turns — too long (damage too low or HP too high)`}
+    </div>
+  )
+}
+
+function DiversityIndicator({ diversity }: { diversity: number }) {
+  const healthy = diversity >= 30
+
+  return (
+    <div
+      className={cn(
+        'mt-2 rounded-lg px-3 py-2 text-[11px]',
+        healthy
+          ? 'bg-success/10 text-success'
+          : 'bg-warning/10 text-warning',
+      )}
+    >
+      <span className="font-medium">Diversity: {diversity.toFixed(0)}%</span>
+      <span className="ml-1.5 opacity-75">
+        — % of unique team compositions in the population.{' '}
+        {healthy
+          ? 'Healthy variety in team building.'
+          : 'Low diversity — meta is converging on a few dominant teams.'}
+      </span>
     </div>
   )
 }

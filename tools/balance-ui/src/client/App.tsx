@@ -105,7 +105,17 @@ export function App() {
     setPatches((prev) => {
       const next = new Map(prev)
       const existing = next.get(patch.id) ?? { id: patch.id }
-      next.set(patch.id, { ...existing, ...patch })
+      const merged = { ...existing, ...patch }
+      // Remove keys set to undefined so they don't inflate patchCount
+      for (const key of Object.keys(merged) as Array<keyof CreatureOverridePatch>) {
+        if (merged[key] === undefined) delete merged[key]
+      }
+      // If only 'id' remains, remove the patch entirely
+      if (Object.keys(merged).length <= 1) {
+        next.delete(patch.id)
+      } else {
+        next.set(patch.id, merged)
+      }
       return next
     })
   }
@@ -152,6 +162,20 @@ export function App() {
   function handleResetPatches() {
     setPatches(new Map())
     setConstantsOverride({})
+  }
+
+  function handleApplyConfig(cfg: {
+    options: SimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  }) {
+    setSimOptions(cfg.options)
+    setConstantsOverride(cfg.constants)
+    const next = new Map<string, CreatureOverridePatch>()
+    for (const p of cfg.creaturePatches) {
+      next.set(p.id, p)
+    }
+    setPatches(next)
   }
 
   function handleSelectToggle(id: string) {
@@ -318,6 +342,8 @@ export function App() {
                 population={simOptions.population}
                 config={simConfig}
                 constants={constants}
+                creatures={creatures}
+                onApplyConfig={handleApplyConfig}
               />
             </TabsContent>
 

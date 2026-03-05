@@ -356,6 +356,8 @@ export interface EffectContext {
   triggerAttacker?: BattleCreature
   triggerAttackTarget?: BattleCreature
   lastDamageDealt?: number
+  /** Override for COMBAT_DAMAGE_SCALE (balance-ui tuning) */
+  damageScale?: number
 }
 
 export interface SelectedAction {

@@ -191,9 +191,9 @@ function buildTemplateMap(
 app.post('/api/sim', async (c) => {
   const body: SimRequest = await c.req.json()
   const base = getCreatures()
-  let creatures = applyOverrides(base, body)
 
-  // Isolation transforms (same logic as battle-sim CLI)
+  // Normalize BEFORE applying overrides so role/rarity modifiers aren't erased
+  let creatures = base
   if (body.options.normalizeStats) {
     const TARGET_TOTAL = 170
     creatures = creatures.map((cr) => {
@@ -209,6 +209,8 @@ app.post('/api/sim', async (c) => {
       }
     })
   }
+
+  creatures = applyOverrides(creatures, body)
 
   if (body.options.noActives) {
     creatures = creatures.map((cr) => ({
@@ -245,6 +247,7 @@ app.post('/api/sim', async (c) => {
           mutationRate: body.options.mutationRate,
           csv: false,
           templateMap,
+          damageScale: body.constants.combatDamageScale,
           onGeneration: (gen, snap) => {
             send({
               type: 'generation',

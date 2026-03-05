@@ -70,6 +70,8 @@ export interface MetaOptions {
   onGeneration?: (gen: number, snapshot: GenerationSnapshot) => void
   /** Optional custom template map for ability overrides (falls back to global templates) */
   templateMap?: Map<string, AbilityTemplate>
+  /** Override for COMBAT_DAMAGE_SCALE (balance-ui tuning) */
+  damageScale?: number
 }
 
 export interface MetaResult {
@@ -217,6 +219,7 @@ function evaluateGeneration(
   matchesPerTeam: number,
   seedOffset: number,
   templateMap?: Map<string, AbilityTemplate>,
+  damageScale?: number,
 ): { avgTurns: number } {
   const n = population.length
 
@@ -277,7 +280,7 @@ function evaluateGeneration(
           getRows(indB.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed })
+        const result = simulateBattle(teamA, teamB, { seed, damageScale })
         totalTurns += result.turns
         battleCount++
         if (result.winner === 'A') {
@@ -306,7 +309,7 @@ function evaluateGeneration(
           getRows(indA.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed: seed + 1 })
+        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale })
         totalTurns += result.turns
         battleCount++
         if (result.winner === 'A') {
@@ -1000,6 +1003,7 @@ interface RoleActionProfile {
 function analyzeBattleActions(
   population: Array<Individual>,
   templateMap?: Map<string, AbilityTemplate>,
+  damageScale?: number,
 ): Array<RoleActionProfile> {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topTeams = sorted.slice(0, Math.ceil(population.length / 4))
@@ -1047,6 +1051,7 @@ function analyzeBattleActions(
 
           const result = simulateBattle(teamA, teamB, {
             seed: baseSeed + (asSide === 'B' ? 1 : 0),
+            damageScale,
           })
 
           // Only analyze when the top team wins
@@ -1226,6 +1231,7 @@ export function runMetaReport(
       options.matchesPerTeam,
       seedOffset,
       options.templateMap,
+      options.damageScale,
     )
 
     // Update all-time best
@@ -1271,7 +1277,7 @@ export function runMetaReport(
 
     // Action analysis on final generation
     log('\n  Analyzing battle actions from top teams...')
-    const actionProfiles = analyzeBattleActions(population, options.templateMap)
+    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale)
     renderActionAnalysis(actionProfiles)
   }
 
