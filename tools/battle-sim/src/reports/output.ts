@@ -85,7 +85,7 @@ export function renderTerminal(
       { header: 'Rows' },
       { header: 'Peak Fitness' },
     ],
-    result.hallOfFame.map((ind) => [
+    result.hallOfFame.slice(0, 10).map((ind) => [
       ind.members.map((m) => m.name).join(', '),
       ind.members.map((m) => rarityColor(m.rarity)).join(', '),
       ind.members.map((m) => roleColor(m.role)).join(', '),
@@ -118,6 +118,7 @@ export function renderTerminal(
       { header: 'Rarity' },
       { header: 'Role' },
       { header: 'Appearances' },
+      { header: 'All WR' },
     ],
     result.creatureLeaderboard
       .slice(0, 20)
@@ -126,6 +127,7 @@ export function renderTerminal(
         rarityColor(c.creature.rarity),
         roleColor(c.creature.role),
         String(c.appearances),
+        winRateColor(c.allTeamWinRate),
       ]),
   )
 
@@ -136,8 +138,8 @@ export function renderTerminal(
     .slice(0, 15)
 
   printRankedList(
-    [{ header: 'Ability' }, { header: 'Appearances' }],
-    activeAbilities.map((a) => [a.name, String(a.appearances)]),
+    [{ header: 'Ability' }, { header: 'Appearances' }, { header: 'All WR' }],
+    activeAbilities.map((a) => [a.name, String(a.appearances), winRateColor(a.allTeamWinRate)]),
   )
 
   printSubheader('META ABILITY PRESENCE (passive)')
@@ -146,8 +148,8 @@ export function renderTerminal(
     .slice(0, 10)
 
   printRankedList(
-    [{ header: 'Passive' }, { header: 'Appearances' }],
-    passiveAbilities.map((a) => [a.name, String(a.appearances)]),
+    [{ header: 'Passive' }, { header: 'Appearances' }, { header: 'All WR' }],
+    passiveAbilities.map((a) => [a.name, String(a.appearances), winRateColor(a.allTeamWinRate)]),
   )
 
   // Synergy presence
@@ -256,6 +258,7 @@ export function renderCsv(
     'era',
     'appearances',
     'avg_fitness',
+    'all_team_wr',
   ])
   for (const c of result.creatureLeaderboard) {
     writeCsvRow([
@@ -268,6 +271,7 @@ export function renderCsv(
       c.creature.era,
       c.appearances,
       (c.avgFitness * 100).toFixed(2),
+      (c.allTeamWinRate * 100).toFixed(2),
     ])
   }
 

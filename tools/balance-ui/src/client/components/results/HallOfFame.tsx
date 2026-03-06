@@ -1,11 +1,17 @@
+import { useState } from 'react'
 import { Badge } from '../ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import type { MetaResult } from '../../../shared/types.ts'
+import { ROLE_COLOR_VALUES } from './constants'
 
 export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'] }) {
+  const [showAll, setShowAll] = useState(false)
+  const displayed = showAll ? hallOfFame : hallOfFame.slice(0, 10)
+
   return (
-    <div className="flex flex-col gap-2">
-      {hallOfFame.slice(0, 10).map((team, i) => (
+    <div>
+      <div className={`flex flex-col gap-2 ${showAll ? 'max-h-150 overflow-y-auto' : ''}`}>
+      {displayed.map((team, i) => (
         <Tooltip key={i}>
           <TooltipTrigger asChild>
             <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-3 py-2 hover:bg-muted/40 transition-colors">
@@ -15,7 +21,12 @@ export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'
                 </span>
                 <div className="flex gap-1.5">
                   {team.members.map((m, j) => (
-                    <Badge key={j} variant="secondary" className="text-[10px]">
+                    <Badge
+                      key={j}
+                      variant="secondary"
+                      className="text-[10px]"
+                      style={{ color: ROLE_COLOR_VALUES[m.role] }}
+                    >
                       {m.name}
                     </Badge>
                   ))}
@@ -43,6 +54,16 @@ export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'
           </TooltipContent>
         </Tooltip>
       ))}
+      </div>
+      {hallOfFame.length > 10 && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="mt-2 w-full text-center text-[11px] text-muted-foreground hover:text-foreground transition-colors py-1"
+        >
+          {showAll ? 'Show top 10' : `Show all ${hallOfFame.length} teams`}
+        </button>
+      )}
     </div>
   )
 }

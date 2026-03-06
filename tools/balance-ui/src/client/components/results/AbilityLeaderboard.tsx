@@ -36,7 +36,7 @@ export function AbilityLeaderboard({
     if (!creatures) return new Map<string, { count: number; roles: Record<string, number> }>()
     const map = new Map<string, { count: number; roles: Record<string, number> }>()
     for (const c of creatures) {
-      for (const templateId of [c.active.templateId, c.passive.templateId]) {
+      for (const templateId of ['basic_attack', c.active.templateId, c.passive.templateId]) {
         const existing = map.get(templateId) ?? { count: 0, roles: {} }
         existing.count++
         existing.roles[c.role] = (existing.roles[c.role] ?? 0) + 1
@@ -63,8 +63,8 @@ export function AbilityLeaderboard({
                 const barPct = (a.appearances / maxAppearances) * 100
                 const points = sparklines.get(a.templateId) ?? []
                 const info = abilityCreatureInfo.get(a.templateId)
-                const creatureCount = isBasicAttack ? 0 : (info?.count ?? 0)
-                const roles = isBasicAttack ? {} : (info?.roles ?? {})
+                const creatureCount = info?.count ?? 0
+                const roles = info?.roles ?? {}
                 const roleTotal = Object.values(roles).reduce((s, n) => s + n, 0)
                 const roleSegments = ROLE_ORDER
                   .filter((r) => roles[r])
@@ -92,35 +92,24 @@ export function AbilityLeaderboard({
                             )}
                             <span className="font-mono text-muted-foreground">
                               {a.appearances}
-                              <span className="ml-1.5 text-foreground">
-                                {(a.avgFitness * 100).toFixed(1)}%
+                              <span className={`ml-1.5 ${a.allTeamWinRate < -0.02 ? 'text-red-400' : a.allTeamWinRate > 0.02 ? 'text-green-400' : 'text-foreground'}`}>
+                                {a.allTeamWinRate > 0 ? '+' : ''}{(a.allTeamWinRate * 100).toFixed(1)}pp
                               </span>
                             </span>
                           </div>
                         </div>
                         <div className="relative flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                          {isBasicAttack ? (
+                          {roleSegments.map((seg) => (
                             <div
-                              className="h-full rounded-full transition-all"
+                              key={seg.role}
+                              className="h-full transition-all first:rounded-l-full last:rounded-r-full"
                               style={{
-                                width: `${barPct}%`,
-                                backgroundColor: 'oklch(0.55 0.05 290)',
-                                opacity: 0.6,
+                                width: `${(seg.pct / 100) * barPct}%`,
+                                backgroundColor: seg.color,
+                                opacity: 0.5 + a.avgFitness * 0.5,
                               }}
                             />
-                          ) : (
-                            roleSegments.map((seg) => (
-                              <div
-                                key={seg.role}
-                                className="h-full transition-all first:rounded-l-full last:rounded-r-full"
-                                style={{
-                                  width: `${(seg.pct / 100) * barPct}%`,
-                                  backgroundColor: seg.color,
-                                  opacity: 0.5 + a.avgFitness * 0.5,
-                                }}
-                              />
-                            ))
-                          )}
+                          ))}
                         </div>
                       </div>
                     </TooltipTrigger>
@@ -142,7 +131,10 @@ export function AbilityLeaderboard({
                           </div>
                         )}
                         <div>
-                          Avg Team Fitness: {(a.avgFitness * 100).toFixed(1)}%
+                          WR Diff: {a.allTeamWinRate > 0 ? '+' : ''}{(a.allTeamWinRate * 100).toFixed(1)}pp
+                        </div>
+                        <div>
+                          Top-Quartile Fitness: {(a.avgFitness * 100).toFixed(1)}%
                         </div>
                         {points.length > 1 && (
                           <div>

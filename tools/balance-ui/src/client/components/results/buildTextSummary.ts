@@ -9,6 +9,11 @@ import type {
   SimRequest,
 } from '../../../shared/types.ts'
 
+function ppDiff(v: number): string {
+  const pp = (v * 100).toFixed(1)
+  return v > 0 ? `+${pp}pp` : `${pp}pp`
+}
+
 export function buildTextSummary(
   meta: MetaResult,
   snapshots: Array<GenerationSnapshot>,
@@ -19,14 +24,24 @@ export function buildTextSummary(
     creaturePatches: Array<CreatureOverridePatch>
   } | null,
   constantsSnapshot?: ConstantsSnapshot | null,
+  totalCreatures?: number,
 ): string {
   const lines: Array<string> = []
   const last = snapshots[snapshots.length - 1]
+  const pop = population ?? 100
 
   lines.push('=== Balance Sim Summary ===')
-  lines.push(`Generations: ${snapshots.length} | Population: ${population ?? '?'}`)
+  lines.push(`Generations: ${snapshots.length} | Population: ${pop}`)
   lines.push(`Avg Turns: ${last.avgTurns.toFixed(1)} (P10: ${last.turnP10.toFixed(1)}, P90: ${last.turnP90.toFixed(1)})`)
   lines.push(`Top Fitness: ${last.topFitness.toFixed(3)} | Avg Fitness: ${last.avgFitness.toFixed(3)}`)
+
+  // Battle health
+  const diversity = ((last.uniqueGenomes / pop) * 100).toFixed(0)
+  const creaturesInMeta = Object.keys(last.creatureFrequency).length
+  const breadth = (totalCreatures ?? 0) > 0
+    ? ((creaturesInMeta / (totalCreatures ?? 1)) * 100).toFixed(0)
+    : '?'
+  lines.push(`Diversity: ${diversity}% unique genomes | Meta Breadth: ${breadth}% (${creaturesInMeta} creatures in top teams)`)
 
   if (config) {
     const templates = [
@@ -41,6 +56,7 @@ export function buildTextSummary(
     }
   }
 
+  // Role Meta Share + Win Rates
   lines.push('')
   lines.push('--- Role Meta Share ---')
   for (const [role, share] of entries(meta.roleMetaShare).sort(([, a], [, b]) => b - a)) {
@@ -48,6 +64,17 @@ export function buildTextSummary(
     lines.push(`  ${role}: ${pct(share)}${wr != null ? ` (WR: ${pct(wr)})` : ''}`)
   }
 
+  // Team Compositions
+  if (meta.compMetaShare && Object.keys(meta.compMetaShare).length > 0) {
+    lines.push('')
+    lines.push('--- Team Compositions ---')
+    for (const [comp, share] of entries(meta.compMetaShare).sort(([, a], [, b]) => b - a).slice(0, 10)) {
+      const wr = meta.compWinRates?.[comp]
+      lines.push(`  ${comp}: ${pct(share)}${wr != null ? ` (WR: ${pct(wr)})` : ''}`)
+    }
+  }
+
+  // Role Contributions
   if (meta.roleContributions && Object.keys(meta.roleContributions).length > 0) {
     lines.push('')
     lines.push('--- Role Contributions (per battle avg) ---')
@@ -56,19 +83,11 @@ export function buildTextSummary(
     }
   }
 
+  // Formation + Synergy
   lines.push('')
   lines.push('--- Formation Distribution ---')
   for (const [form, share] of entries(meta.formationMetaShare).sort(([, a], [, b]) => b - a)) {
     lines.push(`  ${form}: ${pct(share)}`)
-  }
-
-  if (meta.compMetaShare && Object.keys(meta.compMetaShare).length > 0) {
-    lines.push('')
-    lines.push('--- Team Compositions ---')
-    for (const [comp, share] of entries(meta.compMetaShare).sort(([, a], [, b]) => b - a).slice(0, 10)) {
-      const wr = meta.compWinRates?.[comp]
-      lines.push(`  ${comp}: ${pct(share)}${wr != null ? ` (WR: ${pct(wr)})` : ''}`)
-    }
   }
 
   if (Object.keys(meta.synergyMetaShare).length > 0) {
@@ -79,18 +98,46 @@ export function buildTextSummary(
     }
   }
 
+  // Top Creatures
   lines.push('')
   lines.push('--- Top 15 Creatures ---')
   for (const entry of meta.creatureLeaderboard.slice(0, 15)) {
-    lines.push(`  ${entry.creature.name} (${entry.creature.role}) — ${entry.appearances} appearances, fitness ${entry.avgFitness.toFixed(3)}`)
+    lines.push(`  ${entry.creature.name} (${entry.creature.role}) — ${entry.appearances} appearances, WR diff ${ppDiff(entry.allTeamWinRate)}, fitness ${entry.avgFitness.toFixed(3)}`)
   }
 
+  // Bottom 10 by WR diff
+  const worstCreatures = [...meta.creatureLeaderboard]
+    .sort((a, b) => a.allTeamWinRate - b.allTeamWinRate)
+    .slice(0, 10)
+  if (worstCreatures.length > 0) {
+    lines.push('')
+    lines.push('--- Bottom 10 Creatures by WR Diff ---')
+    for (const entry of worstCreatures) {
+      lines.push(`  ${entry.creature.name} (${entry.creature.role}) — WR diff ${ppDiff(entry.allTeamWinRate)}, ${entry.appearances} appearances`)
+    }
+  }
+
+  // Top Abilities
   lines.push('')
   lines.push('--- Top 15 Abilities ---')
-  for (const entry of meta.abilityLeaderboard.slice(0, 15)) {
-    lines.push(`  ${entry.name} (${entry.abilityType}) — ${entry.appearances} appearances, fitness ${entry.avgFitness.toFixed(3)}`)
+  for (const entry of meta.abilityLeaderboard.filter((a) => a.templateId !== 'basic_attack').slice(0, 15)) {
+    lines.push(`  ${entry.name} (${entry.abilityType}) — ${entry.appearances} appearances, WR diff ${ppDiff(entry.allTeamWinRate)}, fitness ${entry.avgFitness.toFixed(3)}`)
   }
 
+  // Bottom 10 abilities by WR diff
+  const worstAbilities = [...meta.abilityLeaderboard]
+    .filter((a) => a.templateId !== 'basic_attack')
+    .sort((a, b) => a.allTeamWinRate - b.allTeamWinRate)
+    .slice(0, 10)
+  if (worstAbilities.length > 0) {
+    lines.push('')
+    lines.push('--- Bottom 10 Abilities by WR Diff ---')
+    for (const entry of worstAbilities) {
+      lines.push(`  ${entry.name} (${entry.abilityType}) — WR diff ${ppDiff(entry.allTeamWinRate)}, ${entry.appearances} appearances`)
+    }
+  }
+
+  // Ability Usage
   if (meta.abilityUsage && meta.abilityUsage.length > 0) {
     lines.push('')
     lines.push('--- Ability Usage (final gen battles) ---')
@@ -99,6 +146,7 @@ export function buildTextSummary(
     }
   }
 
+  // Hall of Fame
   lines.push('')
   lines.push('--- Hall of Fame (Top 3) ---')
   for (const ind of meta.hallOfFame.slice(0, 3)) {

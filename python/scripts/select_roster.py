@@ -90,8 +90,8 @@ ABILITY_ASSIGNMENTS: dict[str, tuple[str, str]] = {
     "Dimorphodon":      ("bite",           "venomous"),          # unusual fanged teeth
     # Uncommons get cooldown actives
     "Tarbosaurus":      ("crushing_jaw",   "predator_instinct"), # apex predator, massive bite
-    "Baryonyx":         ("bleed",          "venomous"),          # fish hunter, slashing claws + DoT
-    "Acrocanthosaurus": ("bleed",          "pack_hunter"),       # slashing attacks, pack ambush
+    "Baryonyx":         ("crushing_jaw",   "venomous"),          # massive jaws, toxic fish-eater
+    "Acrocanthosaurus": ("crushing_jaw",   "pack_hunter"),       # apex predator, pack ambush
     # Rares get specialized kits
     "Compsognathus":    ("venom_strike",   "pack_hunter"),       # tiny swarm hunters, venomous bites
     "Megalania":        ("venom_strike",   "venomous"),          # actually venomous lizard!
@@ -103,9 +103,9 @@ ABILITY_ASSIGNMENTS: dict[str, tuple[str, str]] = {
     "Huayangosaurus":   ("tail_sweep",     "thick_hide"),        # stegosaur tail spikes
     "Anchisaurus":      ("herd_formation", "regenerative"),      # early sauropod, herd animal
     "Edaphosaurus":     ("taunt",          "armored_plates"),    # sail draws attention
-    "Silvisaurus":      ("headbutt",       "ironclad"),          # ankylosaur headbutt
+    "Silvisaurus":      ("shield_wall",    "ironclad"),          # protective ankylosaur
     # Uncommons get stronger combos
-    "Tarchia":          ("headbutt",       "thick_hide"),        # armoured + club tail
+    "Tarchia":          ("taunt",          "thick_hide"),        # armoured, draws aggro
     "Hesperosaurus":    ("tail_sweep",     "armored_plates"),    # stegosaur plates
     "Euoplocephalus":   ("taunt",          "ironclad"),          # iconic armoured tank
     # Rares get team-oriented kits
@@ -116,19 +116,19 @@ ABILITY_ASSIGNMENTS: dict[str, tuple[str, str]] = {
 
     # ── SUPPORTS ──────────────────────────────────────────────────────
     # Commons get single-purpose actives
-    "Homalocephale":    ("mend",           "regenerative"),      # small healer
+    "Homalocephale":    ("mend",           "soothing_aura"),     # healer + passive team sustain
     "Hesperornis":      ("armor_break",    "soothing_aura"),     # diving bird, nurturing presence
     "Lycorhinus":       ("rally_cry",      "weakening_strikes"), # scrappy ornithopod, saps strength
-    "Platypterygius":   ("intimidate",     "regenerative"),      # large ichthyosaur, menacing
+    "Platypterygius":   ("intimidate",     "fortifying_presence"), # menacing presence toughens allies
     # Uncommons get team-wide impact
     "Edmontosaurus":    ("symbiosis",      "regenerative"),      # massive hadrosaur, group heal
-    "Maiasaura":        ("mend",           "regenerative"),      # "good mother lizard" = healer
+    "Maiasaura":        ("mend",           "weakening_strikes"), # protective mother, weakens threats
     "Brachylophosaurus":("herd_formation", "fortifying_presence"),# protective herd, toughens allies
     # Rares get powerful combos
     "Iguanodon":        ("rally_cry",      "regenerative"),      # famous, inspiring presence
     "Rhabdodon":        ("armor_break",    "regenerative"),      # island dwarf, tenacious
     # Epic gets the best support kit
-    "Parasaurolophus":  ("symbiosis",      "regenerative"),      # crest = communication = team heal
+    "Parasaurolophus":  ("symbiosis",      "weakening_strikes"), # crest communication debilitates foes
 
     # ── BRUISERS ──────────────────────────────────────────────────────
     # Commons get bite/headbutt + front-row passives

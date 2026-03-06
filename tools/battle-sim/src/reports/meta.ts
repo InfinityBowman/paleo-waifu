@@ -303,13 +303,22 @@ function snapshotGeneration(
   const roleDistribution: Record<string, number> = {}
   const rarityDistribution: Record<string, number> = {}
   const abilityPresence: Record<string, number> = {}
+  const abilityFitnessSum: Record<string, number> = {}
   const creatureFrequency: Record<string, number> = {}
+  const creatureFitnessSum: Record<string, number> = {}
   const synergyPresence: Record<string, number> = {}
   const formationDistribution: Record<string, number> = {}
 
   // Track comp distribution and win rates across ALL teams
   const compDistribution: Record<string, number> = {}
   const compWinAcc: Record<string, { wins: number; total: number }> = {}
+
+  // Track per-creature and per-ability win rates across ALL teams
+  const creaturePresenceAll: Record<string, number> = {}
+  const creatureWinAcc: Record<string, { wins: number; total: number }> = {}
+  const abilityPresenceAll: Record<string, number> = {}
+  const abilityWinAcc: Record<string, { wins: number; total: number }> = {}
+
   for (const ind of population) {
     const roleCounts: Record<string, number> = {}
     for (const m of ind.members) {
@@ -320,15 +329,63 @@ function snapshotGeneration(
       .map(([role, count]) => `${role}×${count}`)
       .join(' / ')
     compDistribution[compKey] = (compDistribution[compKey] ?? 0) + 1
-    const acc = compWinAcc[compKey] ?? { wins: 0, total: 0 }
     const total = ind.wins + ind.losses + ind.draws
-    acc.wins += ind.wins + ind.draws * 0.5
+    const wins = ind.wins + ind.draws * 0.5
+    const acc = compWinAcc[compKey] ?? { wins: 0, total: 0 }
+    acc.wins += wins
     acc.total += total
     compWinAcc[compKey] = acc
+
+    // Per-creature tracking (all teams)
+    for (const m of ind.members) {
+      creaturePresenceAll[m.id] = (creaturePresenceAll[m.id] ?? 0) + 1
+      const cAcc = creatureWinAcc[m.id] ?? { wins: 0, total: 0 }
+      cAcc.wins += wins
+      cAcc.total += total
+      creatureWinAcc[m.id] = cAcc
+
+      // Per-ability tracking (all teams)
+      const abilityIds = ['basic_attack', m.active.templateId, m.passive.templateId]
+      for (const aid of abilityIds) {
+        abilityPresenceAll[aid] = (abilityPresenceAll[aid] ?? 0) + 1
+        const aAcc = abilityWinAcc[aid] ?? { wins: 0, total: 0 }
+        aAcc.wins += wins
+        aAcc.total += total
+        abilityWinAcc[aid] = aAcc
+      }
+    }
   }
   const compWinRates: Record<string, number> = {}
   for (const [comp, acc] of Object.entries(compWinAcc)) {
     compWinRates[comp] = acc.total > 0 ? acc.wins / acc.total : 0.5
+  }
+  // Compute global totals for differential calculation
+  let globalWins = 0
+  let globalTotal = 0
+  for (const ind of population) {
+    const total = ind.wins + ind.losses + ind.draws
+    globalWins += ind.wins + ind.draws * 0.5
+    globalTotal += total
+  }
+
+  // Win rate differential: WR(with) - WR(without) for each ability/creature
+  const abilityWinRateAll: Record<string, number> = {}
+  for (const [id, acc] of Object.entries(abilityWinAcc)) {
+    const wrWith = acc.total > 0 ? acc.wins / acc.total : 0.5
+    const withoutWins = globalWins - acc.wins
+    const withoutTotal = globalTotal - acc.total
+    const wrWithout = withoutTotal > 0 ? withoutWins / withoutTotal : 0.5
+    abilityWinRateAll[id] = wrWith - wrWithout
+  }
+  const creatureWinRateAll: Record<string, number> = {}
+  const creatureAbsWinRate: Record<string, number> = {}
+  for (const [id, acc] of Object.entries(creatureWinAcc)) {
+    const wrWith = acc.total > 0 ? acc.wins / acc.total : 0.5
+    const withoutWins = globalWins - acc.wins
+    const withoutTotal = globalTotal - acc.total
+    const wrWithout = withoutTotal > 0 ? withoutWins / withoutTotal : 0.5
+    creatureWinRateAll[id] = wrWith - wrWithout
+    creatureAbsWinRate[id] = wrWith
   }
 
   for (const ind of topQuartile) {
@@ -341,11 +398,13 @@ function snapshotGeneration(
       roleDistribution[m.role] = (roleDistribution[m.role] ?? 0) + 1
       rarityDistribution[m.rarity] = (rarityDistribution[m.rarity] ?? 0) + 1
       creatureFrequency[m.id] = (creatureFrequency[m.id] ?? 0) + 1
+      creatureFitnessSum[m.id] = (creatureFitnessSum[m.id] ?? 0) + ind.fitness
 
       // Track abilities (including basic attack)
       const abilityIds = ['basic_attack', m.active.templateId, m.passive.templateId]
       for (const aid of abilityIds) {
         abilityPresence[aid] = (abilityPresence[aid] ?? 0) + 1
+        abilityFitnessSum[aid] = (abilityFitnessSum[aid] ?? 0) + ind.fitness
       }
     }
 
@@ -375,11 +434,18 @@ function snapshotGeneration(
     roleDistribution,
     rarityDistribution,
     abilityPresence,
+    abilityFitnessSum,
     creatureFrequency,
+    creatureFitnessSum,
     synergyPresence,
     formationDistribution,
     compDistribution,
     compWinRates,
+    creaturePresenceAll,
+    creatureWinRateAll,
+    creatureAbsWinRate,
+    abilityPresenceAll,
+    abilityWinRateAll,
     uniqueGenomes,
   }
 }
@@ -391,10 +457,9 @@ function buildFinalResult(
   allTimeBest: Map<string, Individual>,
   creatureIndex: Map<string, CreatureRecord>,
 ): MetaResult {
-  // Hall of fame: top 10 unique teams by peak fitness
+  // Hall of fame: all unique teams by peak fitness (UI handles display limit)
   const hallOfFame = [...allTimeBest.values()]
     .sort((a, b) => b.fitness - a.fitness)
-    .slice(0, 10)
 
   // Creature leaderboard: aggregate appearances and avg fitness from top-quartile snapshots
   const creatureAgg = new Map<
@@ -408,9 +473,41 @@ function buildFinalResult(
         fitnessSum: 0,
       }
       existing.appearances += count
-      existing.fitnessSum += snap.topFitness * count
+      existing.fitnessSum += snap.creatureFitnessSum[id] ?? 0
       creatureAgg.set(id, existing)
     }
+  }
+
+  // Aggregate per-creature all-team win rates (weighted avg across snapshots)
+  const creatureWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  for (const snap of snapshots) {
+    for (const [id, wr] of Object.entries(snap.creatureWinRateAll)) {
+      const count = snap.creaturePresenceAll[id] ?? 0
+      const acc = creatureWrAcc[id] ?? { weightedWr: 0, weight: 0 }
+      acc.weightedWr += wr * count
+      acc.weight += count
+      creatureWrAcc[id] = acc
+    }
+  }
+  const creatureWinRates: Record<string, number> = {}
+  for (const [id, acc] of Object.entries(creatureWrAcc)) {
+    creatureWinRates[id] = acc.weight > 0 ? acc.weightedWr / acc.weight : 0
+  }
+
+  // Aggregate absolute creature win rates (weighted avg across snapshots)
+  const creatureAbsWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  for (const snap of snapshots) {
+    for (const [id, wr] of Object.entries(snap.creatureAbsWinRate)) {
+      const count = snap.creaturePresenceAll[id] ?? 0
+      const acc = creatureAbsWrAcc[id] ?? { weightedWr: 0, weight: 0 }
+      acc.weightedWr += wr * count
+      acc.weight += count
+      creatureAbsWrAcc[id] = acc
+    }
+  }
+  const creatureAbsWinRates: Record<string, number> = {}
+  for (const [id, acc] of Object.entries(creatureAbsWrAcc)) {
+    creatureAbsWinRates[id] = acc.weight > 0 ? acc.weightedWr / acc.weight : 0
   }
 
   const creatureLeaderboard = [...creatureAgg.entries()]
@@ -418,13 +515,14 @@ function buildFinalResult(
       creature: creatureIndex.get(id),
       appearances: agg.appearances,
       avgFitness: agg.fitnessSum / agg.appearances,
+      allTeamWinRate: creatureWinRates[id] ?? 0,
+      winRate: creatureAbsWinRates[id] ?? 0.5,
     }))
     .filter(
       (c): c is typeof c & { creature: NonNullable<typeof c.creature> } =>
         !!c.creature,
     )
     .sort((a, b) => b.appearances - a.appearances)
-    .slice(0, 30)
 
   // Ability leaderboard
   const abilityAgg = new Map<
@@ -438,9 +536,25 @@ function buildFinalResult(
         fitnessSum: 0,
       }
       existing.appearances += count
-      existing.fitnessSum += snap.topFitness * count
+      existing.fitnessSum += snap.abilityFitnessSum[id] ?? 0
       abilityAgg.set(id, existing)
     }
+  }
+
+  // Aggregate per-ability all-team win rates (weighted avg across snapshots)
+  const abilityWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  for (const snap of snapshots) {
+    for (const [id, wr] of Object.entries(snap.abilityWinRateAll)) {
+      const count = snap.abilityPresenceAll[id] ?? 0
+      const acc = abilityWrAcc[id] ?? { weightedWr: 0, weight: 0 }
+      acc.weightedWr += wr * count
+      acc.weight += count
+      abilityWrAcc[id] = acc
+    }
+  }
+  const abilityWinRates: Record<string, number> = {}
+  for (const [id, acc] of Object.entries(abilityWrAcc)) {
+    abilityWinRates[id] = acc.weight > 0 ? acc.weightedWr / acc.weight : 0
   }
 
   const abilityLeaderboard = [...abilityAgg.entries()]
@@ -450,6 +564,7 @@ function buildFinalResult(
       abilityType: ABILITY_TYPE_MAP.get(id) ?? 'unknown',
       appearances: agg.appearances,
       avgFitness: agg.fitnessSum / agg.appearances,
+      allTeamWinRate: abilityWinRates[id] ?? 0,
     }))
     .sort((a, b) => b.appearances - a.appearances)
 
@@ -540,6 +655,8 @@ function buildFinalResult(
     formationMetaShare,
     compMetaShare,
     compWinRates,
+    creatureWinRates,
+    abilityWinRates,
   }
 }
 

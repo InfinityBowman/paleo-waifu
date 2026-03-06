@@ -2,10 +2,10 @@ import type { Ability, AbilityTemplate, Role } from './types'
 
 // ─── Combat Tuning ─────────────────────────────────────────────────
 // Global damage multiplier — scales ALL damage output to control battle length.
-export const COMBAT_DAMAGE_SCALE = 0.6
+export const COMBAT_DAMAGE_SCALE = 0.48
 // DEF formula constant: damage *= DEF_SCALING / (DEF_SCALING + def)
-// Lower values make DEF stronger. At 100 (default), DEF 60 = 62.5% through. At 80, DEF 60 = 57.1%.
-export const DEF_SCALING_CONSTANT = 100
+// Lower values make DEF stronger. At 75, DEF 60 = 55.6% through. At 100 (default), DEF 60 = 62.5%.
+export const DEF_SCALING_CONSTANT = 75
 
 // ─── Rarity Base Stat Totals ────────────────────────────────────────
 
@@ -36,8 +36,8 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   {
     id: 'bite',
     name: 'Bite',
-    trigger: { type: 'onUse', cooldown: 0 },
-    effects: [{ type: 'damage', multiplier: 1.0, scaling: 'atk' }],
+    trigger: { type: 'onUse', cooldown: 1 },
+    effects: [{ type: 'damage', multiplier: 0.8, scaling: 'atk' }],
     target: 'single_enemy',
     description: 'A powerful bite attack.',
     roleAffinity: ['striker', 'bruiser'],
@@ -46,7 +46,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'crushing_jaw',
     name: 'Crushing Jaw',
     trigger: { type: 'onUse', cooldown: 3 },
-    effects: [{ type: 'damage', multiplier: 1.3, scaling: 'atk' }],
+    effects: [{ type: 'damage', multiplier: 1.2, scaling: 'atk' }],
     target: 'single_enemy',
     description: 'The strongest single-target bite, crushing bones.',
     roleAffinity: ['striker'],
@@ -86,7 +86,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     ],
     target: 'single_enemy',
     description: 'A forceful headbutt that stuns the target for 1 turn.',
-    roleAffinity: ['bruiser', 'tank'],
+    roleAffinity: ['bruiser'],
   },
   {
     id: 'tail_sweep',
@@ -107,25 +107,34 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     ],
     target: 'single_enemy',
     description: 'A slashing wound that bleeds for 5% max HP per turn.',
-    roleAffinity: ['striker'],
+    roleAffinity: ['bruiser'],
   },
   // ── Buff ──
   {
     id: 'rally_cry',
     name: 'Rally Cry',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [{ type: 'buff', stat: 'atk', percent: 20, duration: 3 }],
+    effects: [
+      { type: 'buff', stat: 'atk', percent: 20, duration: 3 },
+      { type: 'buff', stat: 'spd', percent: 15, duration: 3 },
+      { type: 'heal', percent: 10 },
+    ],
     target: 'all_allies',
-    description: "A rallying roar that boosts all allies' attack by 20%.",
+    description:
+      "A rallying roar that boosts all allies' ATK by 20% and SPD by 15% for 3 turns, and heals 10% max HP.",
     roleAffinity: ['support'],
   },
   {
     id: 'herd_formation',
     name: 'Herd Formation',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [{ type: 'buff', stat: 'def', percent: 30, duration: 3 }],
+    effects: [
+      { type: 'buff', stat: 'def', percent: 25, duration: 3 },
+      { type: 'buff', stat: 'atk', percent: 10, duration: 3 },
+    ],
     target: 'all_allies',
-    description: "Tightens formation, boosting all allies' defense by 30%.",
+    description:
+      "Tightens formation, boosting all allies' defense by 25% and attack by 10%.",
     roleAffinity: ['support', 'tank'],
   },
   // ── Debuff ──
@@ -143,9 +152,9 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'armor_break',
     name: 'Armor Break',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [{ type: 'debuff', stat: 'def', percent: 25, duration: 3 }],
+    effects: [{ type: 'debuff', stat: 'def', percent: 25, duration: 4 }],
     target: 'single_enemy',
-    description: "Shatters an enemy's armor, reducing defense by 25%.",
+    description: "Shatters an enemy's armor, reducing defense by 25% for 4 turns.",
     roleAffinity: ['support', 'bruiser'],
   },
   // ── Heal ──
@@ -153,18 +162,18 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'symbiosis',
     name: 'Symbiosis',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [{ type: 'heal', percent: 15 }],
+    effects: [{ type: 'heal', percent: 25 }],
     target: 'all_allies',
-    description: 'A symbiotic bond heals all allies for 15% of max HP.',
+    description: 'A symbiotic bond heals all allies for 25% of max HP.',
     roleAffinity: ['support'],
   },
   {
     id: 'mend',
     name: 'Mend',
     trigger: { type: 'onUse', cooldown: 1 },
-    effects: [{ type: 'heal', percent: 25 }],
+    effects: [{ type: 'heal', percent: 35 }],
     target: 'lowest_hp_ally',
-    description: 'Mends the wounds of the lowest-HP ally, healing 25% max HP.',
+    description: 'Mends the wounds of the lowest-HP ally, healing 35% max HP.',
     roleAffinity: ['support'],
   },
   // ── Utility ──
@@ -172,9 +181,9 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'shield_wall',
     name: 'Shield Wall',
     trigger: { type: 'onUse', cooldown: 2 },
-    effects: [{ type: 'shield', percent: 25, duration: 2 }],
+    effects: [{ type: 'shield', percent: 55, duration: 2 }],
     target: 'lowest_hp_ally',
-    description: "Grants a shield absorbing 25% of caster's max HP.",
+    description: "Grants a shield absorbing 55% of caster's max HP.",
     roleAffinity: ['tank'],
   },
   {
@@ -183,10 +192,11 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     trigger: { type: 'onUse', cooldown: 1 },
     effects: [
       { type: 'taunt', duration: 2 },
-      { type: 'buff', stat: 'def', percent: 25, duration: 2 },
+      { type: 'buff', stat: 'def', percent: 40, duration: 2 },
+      { type: 'shield', percent: 30, duration: 2 },
     ],
     target: 'self',
-    description: 'Draws all single-target attacks to self for 2 turns and boosts DEF by 25%.',
+    description: 'Draws all single-target attacks to self for 2 turns, boosts DEF by 40%, and grants a shield absorbing 30% max HP.',
     roleAffinity: ['tank'],
   },
 ]
@@ -208,9 +218,9 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'armored_plates',
     name: 'Spiked Plates',
     trigger: { type: 'onBattleStart' },
-    effects: [{ type: 'reflect', percent: 20, duration: 999 }],
+    effects: [{ type: 'reflect', percent: 30, duration: 999 }],
     target: 'self',
-    description: 'Reflects 20% of incoming damage back to attackers.',
+    description: 'Reflects 30% of incoming damage back to attackers.',
     roleAffinity: ['tank'],
   },
   {
@@ -278,16 +288,16 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     target: 'self',
     condition: { type: 'per_ally_alive' },
     description: '+10% ATK per ally still alive.',
-    roleAffinity: ['striker'],
+    roleAffinity: ['striker', 'bruiser'],
   },
   // ── Sustain ──
   {
     id: 'regenerative',
     name: 'Regenerative',
     trigger: { type: 'onTurnEnd' },
-    effects: [{ type: 'heal', percent: 3 }],
+    effects: [{ type: 'heal', percent: 5 }],
     target: 'self',
-    description: 'Heals 3% max HP at the end of each turn.',
+    description: 'Heals 5% max HP at the end of each turn.',
     roleAffinity: ['tank', 'support'],
   },
   {
@@ -303,27 +313,27 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'soothing_aura',
     name: 'Soothing Aura',
     trigger: { type: 'onTurnEnd' },
-    effects: [{ type: 'heal', percent: 2 }],
+    effects: [{ type: 'heal', percent: 10 }],
     target: 'all_allies',
-    description: 'Heals all allies for 2% max HP at the end of each turn.',
+    description: 'Heals all allies for 10% max HP at the end of each turn.',
     roleAffinity: ['support'],
   },
   {
     id: 'fortifying_presence',
     name: 'Fortifying Presence',
     trigger: { type: 'onBattleStart' },
-    effects: [{ type: 'buff', stat: 'def', percent: 10, duration: 999 }],
+    effects: [{ type: 'buff', stat: 'def', percent: 25, duration: 999 }],
     target: 'all_allies',
-    description: 'All allies gain +10% DEF at the start of battle.',
+    description: 'All allies gain +25% DEF at the start of battle.',
     roleAffinity: ['support'],
   },
   {
     id: 'weakening_strikes',
     name: 'Weakening Strikes',
-    trigger: { type: 'onBasicAttack' },
-    effects: [{ type: 'debuff', stat: 'atk', percent: 15, duration: 2 }],
-    target: 'attack_target',
-    description: 'Basic attacks reduce the target\'s ATK by 15% for 2 turns.',
+    trigger: { type: 'onTurnStart' },
+    effects: [{ type: 'debuff', stat: 'atk', percent: 35, duration: 2 }],
+    target: 'random_enemy',
+    description: 'At the start of each turn, weakens a random enemy\'s ATK by 35% for 2 turns.',
     roleAffinity: ['support'],
   },
   // ── No passive ──

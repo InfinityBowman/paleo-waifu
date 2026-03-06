@@ -10,32 +10,37 @@ import {
   YAxis,
   ZAxis,
 } from 'recharts'
+import { ROLE_COLOR_VALUES, ROLE_ORDER } from '../constants'
 import type { MetaResult } from '../../../../shared/types.ts'
 
-export function AbilityScatterChart({
+export function CreatureScatterChart({
   leaderboard,
 }: {
-  leaderboard: MetaResult['abilityLeaderboard']
+  leaderboard: MetaResult['creatureLeaderboard']
 }) {
-  const filtered = leaderboard.filter((a) => a.templateId !== 'basic_attack')
-  const maxAppearances = Math.max(...filtered.map((a) => a.appearances), 1)
+  const maxAppearances = Math.max(...leaderboard.map((c) => c.appearances), 1)
 
-  const data = filtered.map((a) => ({
-    name: a.name,
-    pickRate: Math.round((a.appearances / maxAppearances) * 1000) / 10,
-    wrDiff: Math.round(a.allTeamWinRate * 1000) / 10,
-    type: a.abilityType,
+  const data = leaderboard.map((c) => ({
+    name: c.creature.name,
+    presence: Math.round((c.appearances / maxAppearances) * 1000) / 10,
+    wrDiff: Math.round(c.allTeamWinRate * 1000) / 10,
+    role: c.creature.role,
   }))
 
-  const actives = data.filter((d) => d.type === 'active')
-  const passives = data.filter((d) => d.type !== 'active')
-
-  const avgPickRate = data.length > 0 ? data.reduce((s, d) => s + d.pickRate, 0) / data.length : 50
+  const avgPresence = data.length > 0 ? data.reduce((s, d) => s + d.presence, 0) / data.length : 50
   const maxAbs = Math.max(
     ...data.map((d) => Math.abs(d.wrDiff)),
     5,
   )
   const yBound = Math.ceil(maxAbs / 5) * 5
+
+  const byRole = ROLE_ORDER
+    .map((role) => ({
+      role,
+      data: data.filter((d) => d.role === role),
+      color: ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)',
+    }))
+    .filter((g) => g.data.length > 0)
 
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -43,13 +48,13 @@ export function AbilityScatterChart({
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           type="number"
-          dataKey="pickRate"
-          name="Pick Rate"
+          dataKey="presence"
+          name="Presence"
           tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
           tickFormatter={(v: number) => `${v}%`}
           domain={[0, 100]}
           label={{
-            value: 'Pick Rate',
+            value: 'Presence',
             position: 'insideBottom',
             offset: -10,
             fontSize: 10,
@@ -75,13 +80,13 @@ export function AbilityScatterChart({
         <ZAxis range={[40, 40]} />
         <RechartsTooltip
           content={({ payload }) => {
-            if (!payload[0]) return null
+            if (!payload?.[0]) return null
             const d = payload[0].payload as (typeof data)[number]
             return (
               <div className="rounded-lg border border-border/50 bg-card px-3 py-2 text-xs shadow-md">
                 <div className="font-medium">{d.name}</div>
                 <div className="text-muted-foreground">
-                  {d.type} · Pick: {d.pickRate}% · WR diff: {d.wrDiff > 0 ? '+' : ''}{d.wrDiff}pp
+                  {d.role} · Presence: {d.presence}% · WR diff: {d.wrDiff > 0 ? '+' : ''}{d.wrDiff}pp
                 </div>
               </div>
             )
@@ -92,20 +97,17 @@ export function AbilityScatterChart({
           height={24}
           wrapperStyle={{ fontSize: 11 }}
         />
-        <ReferenceLine x={avgPickRate} stroke="oklch(1 0 0 / 10%)" strokeDasharray="4 4" />
+        <ReferenceLine x={avgPresence} stroke="oklch(1 0 0 / 10%)" strokeDasharray="4 4" />
         <ReferenceLine y={0} stroke="oklch(1 0 0 / 15%)" strokeDasharray="4 4" />
-        <Scatter
-          name="Active"
-          data={actives}
-          fill="oklch(0.65 0.2 25)"
-          opacity={0.8}
-        />
-        <Scatter
-          name="Passive"
-          data={passives}
-          fill="oklch(0.65 0.15 245)"
-          opacity={0.8}
-        />
+        {byRole.map((group) => (
+          <Scatter
+            key={group.role}
+            name={group.role}
+            data={group.data}
+            fill={group.color}
+            opacity={0.8}
+          />
+        ))}
       </ScatterChart>
     </ResponsiveContainer>
   )

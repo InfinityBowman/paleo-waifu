@@ -44,11 +44,18 @@ export interface GenerationSnapshot {
   roleDistribution: Record<string, number>
   rarityDistribution: Record<string, number>
   abilityPresence: Record<string, number>
+  abilityFitnessSum: Record<string, number>
   creatureFrequency: Record<string, number>
+  creatureFitnessSum: Record<string, number>
   synergyPresence: Record<string, number>
   formationDistribution: Record<string, number>
   compDistribution: Record<string, number>
   compWinRates: Record<string, number>
+  creaturePresenceAll: Record<string, number>
+  creatureWinRateAll: Record<string, number>
+  creatureAbsWinRate: Record<string, number>
+  abilityPresenceAll: Record<string, number>
+  abilityWinRateAll: Record<string, number>
   uniqueGenomes: number
 }
 
@@ -76,6 +83,8 @@ export interface MetaResult {
     creature: CreatureRecord
     appearances: number
     avgFitness: number
+    allTeamWinRate: number
+    winRate: number
   }>
   abilityLeaderboard: Array<{
     templateId: string
@@ -83,7 +92,10 @@ export interface MetaResult {
     abilityType: string
     appearances: number
     avgFitness: number
+    allTeamWinRate: number
   }>
+  creatureWinRates?: Record<string, number>
+  abilityWinRates?: Record<string, number>
   roleMetaShare: Record<string, number>
   synergyMetaShare: Record<string, number>
   formationMetaShare: Record<string, number>

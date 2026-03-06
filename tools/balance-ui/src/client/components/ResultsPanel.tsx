@@ -30,6 +30,7 @@ import { MetricsChart } from './results/charts/MetricsChart'
 import { RoleWinRateChart } from './results/charts/RoleWinRateChart'
 import { CompArchetypeChart } from './results/charts/CompArchetypeChart'
 import { AbilityScatterChart } from './results/charts/AbilityScatterChart'
+import { CreatureScatterChart } from './results/charts/CreatureScatterChart'
 import { RoleEvolutionChart } from './results/charts/RoleEvolutionChart'
 import { RoleHpCurvesChart } from './results/charts/RoleHpCurvesChart'
 import { RoleContributionsChart } from './results/charts/RoleContributionsChart'
@@ -79,7 +80,7 @@ export function ResultsPanel({
 
   const summaryText = useMemo(() => {
     if (!result) return ''
-    return buildTextSummary(result.result, result.snapshots, population, config, constants)
+    return buildTextSummary(result.result, result.snapshots, population, config, constants, creatures?.length)
   }, [result, population, config, constants])
 
   const handleCopy = useCallback(() => {
@@ -267,18 +268,42 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Ability Balance Scatter</CardTitle>
               <SectionTooltip>
-                Each dot is an ability. X = pick rate, Y = win rate. Top-right =
-                meta-defining (popular + strong). Top-left = sleeper OP (rare
-                but strong). Bottom-right = noob trap (popular but weak).
-                Bottom-left = dead ability.
+                Each dot is an ability. X = pick rate, Y = win rate
+                differential (WR of teams with ability minus WR of teams
+                without). Above 0 = having it helps, below 0 = having it
+                hurts. Top-right = meta-defining, top-left = sleeper OP,
+                bottom-right = noob trap.
               </SectionTooltip>
             </div>
             <CardDescription>
-              Pick rate vs win rate per ability
+              Pick rate vs WR differential per ability
             </CardDescription>
           </CardHeader>
           <CardContent>
             <AbilityScatterChart leaderboard={meta.abilityLeaderboard} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Creature Balance Scatter */}
+      {meta.creatureLeaderboard.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Creature Balance Scatter</CardTitle>
+              <SectionTooltip>
+                Each dot is a creature. X = presence across all teams, Y = win
+                rate differential (WR of teams with creature minus WR of teams
+                without). Color = role. Above 0 = having it helps, below 0 =
+                having it hurts. Top-right = meta dominant.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Presence vs WR differential per creature (all teams)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CreatureScatterChart leaderboard={meta.creatureLeaderboard} />
           </CardContent>
         </Card>
       )}
@@ -312,8 +337,10 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Fitness Progression</CardTitle>
               <SectionTooltip>
-                Shows how the best and average team fitness evolve across
-                generations. Converging lines suggest a stable meta.
+                Fitness = (wins + draws × 0.5) / total matches — essentially
+                a win rate from 0 to 1. Shows how the best and average team
+                fitness evolve across generations. Converging lines suggest a
+                stable meta.
               </SectionTooltip>
             </div>
             <CardDescription>
@@ -461,6 +488,7 @@ export function ResultsPanel({
             <SectionTooltip>
               Creatures most frequently appearing in top-performing teams,
               ranked by number of appearances and average team fitness.
+              Fitness = (wins + draws × 0.5) / total matches.
             </SectionTooltip>
           </div>
           <CardDescription>
@@ -478,8 +506,10 @@ export function ResultsPanel({
           <div className="flex items-center gap-2">
             <CardTitle>Ability Presence</CardTitle>
             <SectionTooltip>
-              Which active and passive abilities appear most in winning teams.
-              High concentration may indicate an ability is overtuned.
+              Which active and passive abilities appear most in winning teams,
+              with average team fitness. Fitness = (wins + draws × 0.5) /
+              total matches. High concentration may indicate an ability is
+              overtuned.
             </SectionTooltip>
           </div>
         </CardHeader>
@@ -517,8 +547,9 @@ export function ResultsPanel({
           <div className="flex items-center gap-2">
             <CardTitle>Hall of Fame</CardTitle>
             <SectionTooltip>
-              The top 10 performing teams from the final generation. Shows team
-              composition and win/loss records.
+              The top 10 performing teams from the final generation, ranked by
+              fitness. Fitness = (wins + draws × 0.5) / total matches. Shows
+              team composition and win/loss records.
             </SectionTooltip>
           </div>
           <CardDescription>
