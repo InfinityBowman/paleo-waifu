@@ -72,6 +72,7 @@ function makeMember(
   return {
     creatureId: 'test-creature',
     name: 'TestDino',
+    role: 'striker',
     stats: { hp: 100, atk: 30, def: 20, spd: 25 },
     active: BITE,
     passive: THICK_HIDE,

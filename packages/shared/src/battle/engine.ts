@@ -5,7 +5,6 @@ import {
   tickStatusEffects,
 } from './abilities'
 import { selectAction } from './ai'
-import { DEFAULT_ROLE, DIET_TO_ROLE, TYPE_TO_ROLE } from './constants'
 import { createRng } from './rng'
 import { applySynergies, calculateSynergies } from './synergies'
 import type {
@@ -275,8 +274,7 @@ function hydrateBattleCreature(
     atk: member.stats.atk,
     def: member.stats.def,
     spd: member.stats.spd,
-    role:
-      TYPE_TO_ROLE[member.type] ?? DIET_TO_ROLE[member.diet] ?? DEFAULT_ROLE,
+    role: member.role,
     diet: member.diet,
     type: member.type,
     era: member.era,

@@ -12,72 +12,63 @@ Usage:
 from collections import defaultdict
 from d1_client import D1Client
 
-# ─── Role Mapping (matches constants.ts) ──────────────────────────────
+# ─── Role Mapping (hard-coded per creature) ──────────────────────────
 
-TYPE_TO_ROLE = {
-    "large theropod": "striker",
-    "small theropod": "striker",
-    "sauropod": "tank",
-    "armoured dinosaur": "tank",
-    "ceratopsian": "bruiser",
-    "euornithopod": "support",
-    "Pterosauria": "striker",
-    "Ichthyosauria": "support",
-    "Plesiosauria": "support",
-    "Eurypterida": "striker",
-    "Saurischia": "bruiser",
-    "Ornithischia": "bruiser",
-    "Crocodylia": "bruiser",
-    "Proboscidea": "tank",
-    "Mammalia": "bruiser",
-    "Perissodactyla": "bruiser",
-    "Artiodactyla": "support",
-    "Condylarthra": "bruiser",
-    "Cimolesta": "striker",
-    "Multituberculata": "striker",
-    "Sirenia": "support",
-    "Primates": "support",
-    "Lagomorpha": "striker",
-    "Rodentia": "striker",
-    "Squamata": "striker",
-    "Reptilia": "bruiser",
-    "Temnospondyli": "support",
-    "Urodela": "support",
-    "Anura": "striker",
-    "Phlyctaeniiformes": "support",
-    "Actinolepidiformes": "support",
-    "Bothriolepidiformes": "support",
-    "Asterolepidiformes": "tank",
-    "Asaphida": "tank",
-    "Phacopida": "bruiser",
-    "Odontopleurida": "support",
-    "Corynexochida": "bruiser",
-    "Trinucleida": "support",
-    "Redlichiida": "bruiser",
-    "Hesperornithiformes": "support",
-    "Ichthyornithes": "striker",
-    "Anseriformes": "support",
-    "Columbiformes": "striker",
-    "Charadriiformes": "striker",
-    "Galliformes": "bruiser",
-    "Sphenisciformes": "support",
-    "1.0m": "support",
+CREATURE_ROLES: dict[str, str] = {
+    # ── STRIKERS ──
+    "Coelophysis":      "striker",
+    "Achillobator":     "striker",
+    "Rhamphorhynchus":  "striker",
+    "Dimorphodon":      "striker",
+    "Tarbosaurus":      "striker",
+    "Baryonyx":         "striker",
+    "Acrocanthosaurus": "striker",
+    "Compsognathus":    "striker",
+    "Megalania":        "striker",
+    "Carnotaurus":      "striker",
+    # ── TANKS ──
+    "Huayangosaurus":   "tank",
+    "Anchisaurus":      "tank",
+    "Edaphosaurus":     "tank",
+    "Silvisaurus":      "tank",
+    "Tarchia":          "tank",
+    "Hesperosaurus":    "tank",
+    "Euoplocephalus":   "tank",
+    "Mamenchisaurus":   "tank",
+    "Argentinosaurus":  "tank",
+    "Diplodocus":       "tank",
+    # ── SUPPORTS ──
+    "Homalocephale":    "support",
+    "Hesperornis":      "support",
+    "Lycorhinus":       "support",
+    "Platypterygius":   "support",
+    "Edmontosaurus":    "support",
+    "Maiasaura":        "support",
+    "Brachylophosaurus":"support",
+    "Iguanodon":        "support",
+    "Rhabdodon":        "support",
+    "Parasaurolophus":  "support",
+    # ── BRUISERS ──
+    "Protoceratops":    "bruiser",
+    "Machimosaurus":    "bruiser",
+    "Psittacosaurus":   "bruiser",
+    "Euskelosaurus":    "bruiser",
+    "Styracosaurus":    "bruiser",
+    "Centrosaurus":     "bruiser",
+    "Pachyrhinosaurus": "bruiser",
+    "Teleoceras":       "bruiser",
+    "Richardoestesia":  "bruiser",
+    "Chasmosaurus":     "bruiser",
 }
-
-DIET_TO_ROLE = {
-    "Carnivorous": "striker",
-    "Herbivorous": "tank",
-    "Piscivorous": "support",
-    "Omnivorous": "bruiser",
-    "Herbivorous/omnivorous": "tank",
-    "Unknown": "bruiser",
-}
-
 
 def get_role(creature: dict) -> str:
-    return TYPE_TO_ROLE.get(
-        creature["type"], DIET_TO_ROLE.get(creature["diet"], "bruiser")
-    )
+    role = CREATURE_ROLES.get(creature["name"])
+    if role is None:
+        raise ValueError(
+            f"No role mapping for creature '{creature['name']}'. "
+            f"Add it to CREATURE_ROLES."
+        )
+    return role
 
 
 # ─── Target Distribution ──────────────────────────────────────────────

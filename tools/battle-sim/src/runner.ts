@@ -62,6 +62,7 @@ function toMember(
   return {
     creatureId: `${record.id}-${index}`,
     name: record.name,
+    role: record.role as BattleTeamMember['role'],
     stats: {
       hp: record.hp,
       atk: record.atk,

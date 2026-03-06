@@ -174,6 +174,7 @@ export interface BattleCreature {
 export interface BattleTeamMember {
   creatureId: string
   name: string
+  role: Role
   stats: { hp: number; atk: number; def: number; spd: number }
   active: Ability
   passive: Ability
