@@ -10,6 +10,8 @@ for (const t of ALL_ABILITY_TEMPLATES) {
   ABILITY_NAME_MAP.set(t.id, t.name)
   ABILITY_TYPE_MAP.set(t.id, t.trigger.type === 'onUse' ? 'active' : 'passive')
 }
+ABILITY_NAME_MAP.set('basic_attack', 'Basic Attack')
+ABILITY_TYPE_MAP.set('basic_attack', 'active')
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -64,6 +66,8 @@ export interface MetaOptions {
   damageScale?: number
   /** Override for DEF_SCALING_CONSTANT (balance-ui tuning) */
   defScaling?: number
+  /** Override for BASIC_ATTACK multiplier (default 0.9) */
+  basicAttackMultiplier?: number
 }
 
 export interface MetaResult {

@@ -298,6 +298,7 @@ app.post('/api/sim', async (c) => {
           templateMap,
           damageScale: body.constants.combatDamageScale,
           defScaling: body.constants.defScalingConstant,
+          basicAttackMultiplier: body.constants.basicAttackMultiplier,
           onGeneration: (gen, snap) => {
             send({
               type: 'generation',

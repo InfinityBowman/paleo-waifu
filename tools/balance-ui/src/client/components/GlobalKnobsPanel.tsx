@@ -72,6 +72,10 @@ export function GlobalKnobsPanel({
     onChange({ ...overrides, defScalingConstant: value })
   }
 
+  function setBasicAttackMultiplier(value: number) {
+    onChange({ ...overrides, basicAttackMultiplier: value })
+  }
+
   const getRoleStatMod = (role: string, stat: StatKey) =>
     overrides.roleModifiers?.[role]?.[stat] ?? 0
   const getRarityMod = (rarity: string) =>
@@ -269,6 +273,23 @@ export function GlobalKnobsPanel({
             )}
           />
           <span className="text-[9px] text-muted-foreground/60">lower = DEF stronger</span>
+        </div>
+        <div className="flex items-center gap-2 px-3 pb-3">
+          <label className="w-24 text-muted-foreground">Basic ATK</label>
+          <NumericInput
+            float
+            step={0.05}
+            min={0.1}
+            max={3}
+            value={overrides.basicAttackMultiplier ?? 0.9}
+            onChange={setBasicAttackMultiplier}
+            className={cn(
+              'w-20 text-center text-xs px-2',
+              overrides.basicAttackMultiplier !== undefined &&
+                'border-primary/50 text-primary',
+            )}
+          />
+          <span className="text-[9px] text-muted-foreground/60">default 0.9</span>
         </div>
       </Section>
 

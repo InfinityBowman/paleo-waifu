@@ -27,11 +27,12 @@ const MAX_TURNS = 30
 export function simulateBattle(
   teamA: BattleTeam,
   teamB: BattleTeam,
-  options: { seed: number; damageScale?: number; defScaling?: number },
+  options: { seed: number; damageScale?: number; defScaling?: number; basicAttackMultiplier?: number },
 ): BattleResult {
   const rng = createRng(options.seed)
   const ds = options.damageScale
   const defS = options.defScaling
+  const bam = options.basicAttackMultiplier
   const log: Array<BattleLogEvent> = []
   const koLogged = new Set<string>()
 
@@ -174,10 +175,16 @@ export function simulateBattle(
         }
       }
 
+      // Patch basic attack multiplier if overridden
+      const resolvedAbility =
+        ability.id === 'basic_attack' && bam != null
+          ? { ...ability, effects: [{ ...ability.effects[0], multiplier: bam }] }
+          : ability
+
       // Resolve ability effects
       const ctx = makeCtx(creature, allies, enemies, rng, turn, ds, defS)
       ctx.targets = targets
-      const resolutions = resolveAbilityEffects(ability, targets, ctx)
+      const resolutions = resolveAbilityEffects(resolvedAbility, targets, ctx)
       logResolutions(creature, resolutions, turn, log)
 
       // Fire onBasicAttack passives (venomous, predator_instinct)

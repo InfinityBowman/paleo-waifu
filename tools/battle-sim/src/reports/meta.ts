@@ -1,8 +1,13 @@
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import { createProgressBar } from '../report.ts'
-import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
-import type { CreatureRecord } from '../db.ts'
+import { ABILITY_NAME_MAP, ABILITY_TYPE_MAP } from './meta-types.ts'
+import { canonicalGenome, ensureFrontRow, genomeKey, getRows, resolveMembers } from './meta-utils.ts'
+import { collectBattleTelemetry, finalizeTelemetry } from './telemetry.ts'
+import { selectAndReproduce } from './genetics.ts'
+import { renderCsv, renderTerminal } from './output.ts'
+import { analyzeBattleActions, renderActionAnalysis } from './action-analysis.ts'
+import type { TelemetryResult } from './telemetry.ts'
 import type {
   CreatureSlot,
   GenerationSnapshot,
@@ -11,13 +16,8 @@ import type {
   MetaResult,
   MetaRunResult,
 } from './meta-types.ts'
-import { ABILITY_NAME_MAP, ABILITY_TYPE_MAP } from './meta-types.ts'
-import { canonicalGenome, ensureFrontRow, genomeKey, getRows, resolveMembers } from './meta-utils.ts'
-import { collectBattleTelemetry, finalizeTelemetry } from './telemetry.ts'
-import type { TelemetryResult } from './telemetry.ts'
-import { selectAndReproduce } from './genetics.ts'
-import { renderCsv, renderTerminal } from './output.ts'
-import { analyzeBattleActions, renderActionAnalysis } from './action-analysis.ts'
+import type { CreatureRecord } from '../db.ts'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 
 // Re-export public types
 export type {
@@ -125,6 +125,7 @@ function evaluateGeneration(
   damageScale?: number,
   defScaling?: number,
   collectTelemetry?: boolean,
+  basicAttackMultiplier?: number,
 ): { avgTurns: number; turnP10: number; turnP90: number; telemetry?: TelemetryResult } {
   const n = population.length
 
@@ -200,7 +201,7 @@ function evaluateGeneration(
           getRows(indB.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed, damageScale, defScaling })
+        const result = simulateBattle(teamA, teamB, { seed, damageScale, defScaling, basicAttackMultiplier })
         totalTurns += result.turns
         allTurns.push(result.turns)
         battleCount++
@@ -233,7 +234,7 @@ function evaluateGeneration(
           getRows(indA.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale, defScaling })
+        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale, defScaling, basicAttackMultiplier })
         totalTurns += result.turns
         allTurns.push(result.turns)
         battleCount++
@@ -341,8 +342,8 @@ function snapshotGeneration(
       rarityDistribution[m.rarity] = (rarityDistribution[m.rarity] ?? 0) + 1
       creatureFrequency[m.id] = (creatureFrequency[m.id] ?? 0) + 1
 
-      // Track abilities
-      const abilityIds = [m.active.templateId, m.passive.templateId]
+      // Track abilities (including basic attack)
+      const abilityIds = ['basic_attack', m.active.templateId, m.passive.templateId]
       for (const aid of abilityIds) {
         abilityPresence[aid] = (abilityPresence[aid] ?? 0) + 1
       }
@@ -590,6 +591,7 @@ export function runMetaReport(
       options.damageScale,
       options.defScaling,
       isFinalGen,
+      options.basicAttackMultiplier,
     )
 
     if (telemetry) finalTelemetry = telemetry
@@ -645,7 +647,7 @@ export function runMetaReport(
 
     // Action analysis on final generation
     log('\n  Analyzing battle actions from top teams...')
-    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale, options.defScaling)
+    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale, options.defScaling, options.basicAttackMultiplier)
     renderActionAnalysis(actionProfiles)
   }
 

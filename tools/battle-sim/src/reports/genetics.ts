@@ -1,7 +1,7 @@
 import { assignRow } from '../runner.ts'
+import { canonicalGenome, ensureFrontRow, genomeKey, resolveMembers } from './meta-utils.ts'
 import type { CreatureRecord } from '../db.ts'
 import type { CreatureSlot, Individual, TeamGenome } from './meta-types.ts'
-import { canonicalGenome, ensureFrontRow, genomeKey, resolveMembers } from './meta-utils.ts'
 
 export function mutate(
   parent: Individual,

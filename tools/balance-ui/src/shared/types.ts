@@ -142,6 +142,8 @@ export interface ConstantsOverride {
   defScalingConstant?: number
   /** Per-ability template overrides, e.g. { shield_wall: { effectOverrides: { 0: { percent: 20 } } } } */
   abilityOverrides?: Record<string, AbilityOverride>
+  /** Basic attack multiplier override (default 0.9). Controls damage = ATK * multiplier. */
+  basicAttackMultiplier?: number
 }
 
 export interface SimRequest {

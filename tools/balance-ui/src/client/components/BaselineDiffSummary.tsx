@@ -121,6 +121,14 @@ export function buildDiffLines(
     })
   }
 
+  // Basic attack multiplier
+  if (constants.basicAttackMultiplier !== undefined) {
+    lines.push({
+      text: `Basic ATK multiplier: ${constants.basicAttackMultiplier} (default 0.9)`,
+      type: constants.basicAttackMultiplier > 0.9 ? 'buff' : constants.basicAttackMultiplier < 0.9 ? 'nerf' : 'neutral',
+    })
+  }
+
   // Role modifiers
   if (constants.roleModifiers) {
     for (const [role, mods] of Object.entries(constants.roleModifiers)) {

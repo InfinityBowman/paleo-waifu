@@ -5,10 +5,10 @@ import {
   printSubheader,
   roleColor,
 } from '../report.ts'
-import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
-import type { Individual, TeamGenome } from './meta-types.ts'
 import { ABILITY_NAME_MAP } from './meta-types.ts'
 import { getRows } from './meta-utils.ts'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
+import type { Individual, TeamGenome } from './meta-types.ts'
 
 interface ActionStats {
   abilityId: string
@@ -32,6 +32,7 @@ export function analyzeBattleActions(
   templateMap?: Map<string, AbilityTemplate>,
   damageScale?: number,
   defScaling?: number,
+  basicAttackMultiplier?: number,
 ): Array<RoleActionProfile> {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topTeams = sorted.slice(0, Math.ceil(population.length / 4))
@@ -81,6 +82,7 @@ export function analyzeBattleActions(
             seed: baseSeed + (asSide === 'B' ? 1 : 0),
             damageScale,
             defScaling,
+            basicAttackMultiplier,
           })
 
           // Only analyze when the top team wins

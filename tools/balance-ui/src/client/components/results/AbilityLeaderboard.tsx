@@ -59,11 +59,12 @@ export function AbilityLeaderboard({
             </h4>
             <div className="flex flex-col gap-2.5">
               {items.map((a) => {
+                const isBasicAttack = a.templateId === 'basic_attack'
                 const barPct = (a.appearances / maxAppearances) * 100
                 const points = sparklines.get(a.templateId) ?? []
                 const info = abilityCreatureInfo.get(a.templateId)
-                const creatureCount = info?.count ?? 0
-                const roles = info?.roles ?? {}
+                const creatureCount = isBasicAttack ? 0 : (info?.count ?? 0)
+                const roles = isBasicAttack ? {} : (info?.roles ?? {})
                 const roleTotal = Object.values(roles).reduce((s, n) => s + n, 0)
                 const roleSegments = ROLE_ORDER
                   .filter((r) => roles[r])
@@ -77,7 +78,7 @@ export function AbilityLeaderboard({
                     <TooltipTrigger asChild>
                       <div className="group">
                         <div className="mb-0.5 flex items-center justify-between text-[11px]">
-                          <span className="flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors">
+                          <span className={`flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors ${isBasicAttack ? 'italic text-muted-foreground' : ''}`}>
                             {a.name}
                             {creatureCount > 0 && (
                               <span className="text-[9px] text-muted-foreground/70">
@@ -98,17 +99,28 @@ export function AbilityLeaderboard({
                           </div>
                         </div>
                         <div className="relative flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                          {roleSegments.map((seg) => (
+                          {isBasicAttack ? (
                             <div
-                              key={seg.role}
-                              className="h-full transition-all first:rounded-l-full last:rounded-r-full"
+                              className="h-full rounded-full transition-all"
                               style={{
-                                width: `${(seg.pct / 100) * barPct}%`,
-                                backgroundColor: seg.color,
-                                opacity: 0.5 + a.avgFitness * 0.5,
+                                width: `${barPct}%`,
+                                backgroundColor: 'oklch(0.55 0.05 290)',
+                                opacity: 0.6,
                               }}
                             />
-                          ))}
+                          ) : (
+                            roleSegments.map((seg) => (
+                              <div
+                                key={seg.role}
+                                className="h-full transition-all first:rounded-l-full last:rounded-r-full"
+                                style={{
+                                  width: `${(seg.pct / 100) * barPct}%`,
+                                  backgroundColor: seg.color,
+                                  opacity: 0.5 + a.avgFitness * 0.5,
+                                }}
+                              />
+                            ))
+                          )}
                         </div>
                       </div>
                     </TooltipTrigger>
