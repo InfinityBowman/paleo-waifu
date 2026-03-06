@@ -43,6 +43,8 @@ export interface GenerationSnapshot {
   topFitness: number
   avgFitness: number
   avgTurns: number
+  turnP10: number
+  turnP90: number
   topTeamNames: [string, string, string]
   topTeamRows: [Row, Row, Row]
   roleDistribution: Record<string, number>
@@ -51,6 +53,8 @@ export interface GenerationSnapshot {
   creatureFrequency: Record<string, number>
   synergyPresence: Record<string, number>
   formationDistribution: Record<string, number>
+  compDistribution: Record<string, number>
+  compWinRates: Record<string, number>
   uniqueGenomes: number
 }
 
@@ -71,6 +75,30 @@ export interface MetaResult {
   roleMetaShare: Record<string, number>
   synergyMetaShare: Record<string, number>
   formationMetaShare: Record<string, number>
+  roleHpCurves?: Record<
+    string,
+    { wins: Array<number>; losses: Array<number> }
+  >
+  roleContributions?: Record<
+    string,
+    {
+      avgDamageDealt: number
+      avgDamageTaken: number
+      avgHealingDone: number
+      avgShieldsApplied: number
+      avgDebuffsLanded: number
+    }
+  >
+  roleWinRates?: Record<string, number>
+  compMetaShare?: Record<string, number>
+  compWinRates?: Record<string, number>
+  abilityUsage?: Array<{
+    abilityId: string
+    name: string
+    uses: number
+    totalDamage: number
+    avgDamagePerUse: number
+  }>
 }
 
 export interface MetaRunResult {
@@ -110,6 +138,8 @@ export interface ConstantsOverride {
   /** Per-rarity uniform scaling, e.g. { common: -0.05 } = -5% all stats for commons */
   rarityModifiers?: Record<string, number>
   combatDamageScale?: number
+  /** DEF formula constant: damage *= K / (K + DEF). Lower = DEF stronger. Default 100. */
+  defScalingConstant?: number
   /** Per-ability template overrides, e.g. { shield_wall: { effectOverrides: { 0: { percent: 20 } } } } */
   abilityOverrides?: Record<string, AbilityOverride>
 }
@@ -126,6 +156,7 @@ export interface SimRequest {
     normalizeStats: boolean
     noActives: boolean
     noPassives: boolean
+    syntheticMode: boolean
   }
 }
 
@@ -146,6 +177,7 @@ export interface ConstantsSnapshot {
     Record<string, { hp: number; atk: number; def: number; spd: number }>
   >
   combatDamageScale: number
+  defScalingConstant: number
   activeTemplates: Array<AbilityTemplate>
   passiveTemplates: Array<AbilityTemplate>
 }
@@ -184,6 +216,7 @@ export interface RunSummary {
   normalizeStats: boolean
   noActives: boolean
   noPassives: boolean
+  syntheticMode: boolean
   /** Lightweight config for rendering baseline diff summaries */
   config: {
     options: SimRequest['options']

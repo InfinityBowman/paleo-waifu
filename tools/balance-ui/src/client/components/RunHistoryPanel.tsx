@@ -255,6 +255,14 @@ export function RunHistoryPanel({
                       no passives
                     </Badge>
                   )}
+                  {run.syntheticMode && (
+                    <Badge
+                      variant="secondary"
+                      className="text-[9px] px-1.5 py-0"
+                    >
+                      synthetic
+                    </Badge>
+                  )}
                   {run.patchCount > 0 && (
                     <Badge variant="default" className="text-[9px] px-1.5 py-0">
                       {run.patchCount} override{run.patchCount !== 1 ? 's' : ''}

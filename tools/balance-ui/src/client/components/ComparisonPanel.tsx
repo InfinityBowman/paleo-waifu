@@ -466,7 +466,7 @@ function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
                     RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
                   )}
                 />
-                <span className="max-w-[80px] truncate">{run.label}</span>
+                <span className="max-w-20 truncate">{run.label}</span>
               </div>
             </th>
           ))}
@@ -696,6 +696,10 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
       getValue: (r) => (r.config.options.noPassives ? 'Yes' : 'No'),
     },
     {
+      label: 'Synthetic Mode',
+      getValue: (r) => (r.config.options.syntheticMode ? 'Yes' : 'No'),
+    },
+    {
       label: 'Creature Patches',
       getValue: (r) =>
         String(
@@ -745,6 +749,13 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
           : 'default',
     },
     {
+      label: 'DEF Scaling',
+      getValue: (r) =>
+        r.config.constants.defScalingConstant !== undefined
+          ? String(r.config.constants.defScalingConstant)
+          : 'default',
+    },
+    {
       label: 'Ability Overrides',
       getValue: (r) => {
         const mods = r.config.constants.abilityOverrides
@@ -771,7 +782,7 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
                     RUN_COLOR_CLASSES[i % RUN_COLOR_CLASSES.length],
                   )}
                 />
-                <span className="max-w-[80px] truncate">{run.label}</span>
+                <span className="max-w-20 truncate">{run.label}</span>
               </div>
             </th>
           ))}

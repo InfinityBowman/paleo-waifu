@@ -58,7 +58,7 @@ export function App() {
   } | null>(null)
   const [simError, setSimError] = useState<string | null>(null)
   const [simOptions, setSimOptions] = useState({
-    population: 100,
+    population: 200,
     generations: 25,
     matchesPerTeam: 20,
     eliteRate: 0.1,
@@ -66,6 +66,7 @@ export function App() {
     normalizeStats: true,
     noActives: false,
     noPassives: false,
+    syntheticMode: false,
   })
 
   // Run history (IndexedDB)
@@ -210,6 +211,7 @@ export function App() {
     ).length +
     Object.keys(constantsOverride.rarityModifiers ?? {}).length +
     (constantsOverride.combatDamageScale !== undefined ? 1 : 0) +
+    (constantsOverride.defScalingConstant !== undefined ? 1 : 0) +
     Object.keys(constantsOverride.abilityOverrides ?? {}).length
 
   const patchCount =
@@ -264,6 +266,7 @@ export function App() {
               simState={simState}
               progress={simProgress}
               onRun={handleRunSim}
+              constants={constants}
             />
             <GlobalKnobsPanel
               constants={constants}

@@ -182,6 +182,7 @@ export function resolveEffect(
         effect,
         rng: ctx.rng,
         damageScale: ctx.damageScale,
+        defScaling: ctx.defScaling,
       })
 
       if (result.isDodged) {
@@ -232,7 +233,6 @@ export function resolveEffect(
         amount: finalDamage,
         isCrit: result.isCrit,
         isDodged: false,
-        isDietBonus: result.isDietBonus,
       })
 
       return resolutions

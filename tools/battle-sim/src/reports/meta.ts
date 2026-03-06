@@ -13,7 +13,7 @@ import {
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
-import type { AbilityTemplate, Row  } from '@paleo-waifu/shared/battle/types'
+import type { AbilityTemplate, BattleLogEvent, BattleResult, Row  } from '@paleo-waifu/shared/battle/types'
 import type { CreatureRecord } from '../db.ts'
 
 // ─── Ability Name Lookup ──────────────────────────────────────────
@@ -49,6 +49,8 @@ export interface GenerationSnapshot {
   topFitness: number
   avgFitness: number
   avgTurns: number
+  turnP10: number
+  turnP90: number
   topTeamNames: [string, string, string]
   topTeamRows: [Row, Row, Row]
   roleDistribution: Record<string, number>
@@ -57,6 +59,8 @@ export interface GenerationSnapshot {
   creatureFrequency: Record<string, number>
   synergyPresence: Record<string, number>
   formationDistribution: Record<string, number>
+  compDistribution: Record<string, number>
+  compWinRates: Record<string, number>
   uniqueGenomes: number
 }
 
@@ -72,6 +76,8 @@ export interface MetaOptions {
   templateMap?: Map<string, AbilityTemplate>
   /** Override for COMBAT_DAMAGE_SCALE (balance-ui tuning) */
   damageScale?: number
+  /** Override for DEF_SCALING_CONSTANT (balance-ui tuning) */
+  defScaling?: number
 }
 
 export interface MetaResult {
@@ -91,6 +97,30 @@ export interface MetaResult {
   roleMetaShare: Record<string, number>
   synergyMetaShare: Record<string, number>
   formationMetaShare: Record<string, number>
+  roleHpCurves?: Record<
+    string,
+    { wins: Array<number>; losses: Array<number> }
+  >
+  roleContributions?: Record<
+    string,
+    {
+      avgDamageDealt: number
+      avgDamageTaken: number
+      avgHealingDone: number
+      avgShieldsApplied: number
+      avgDebuffsLanded: number
+    }
+  >
+  roleWinRates?: Record<string, number>
+  compMetaShare?: Record<string, number>
+  compWinRates?: Record<string, number>
+  abilityUsage?: Array<{
+    abilityId: string
+    name: string
+    uses: number
+    totalDamage: number
+    avgDamagePerUse: number
+  }>
 }
 
 // ─── Genome Utilities ─────────────────────────────────────────────
@@ -212,6 +242,274 @@ function initializePopulation(
   return population
 }
 
+// ─── Telemetry Types ──────────────────────────────────────────────
+
+interface TelemetryResult {
+  roleHpCurves: Record<string, { wins: Array<number>; losses: Array<number> }>
+  roleContributions: Record<
+    string,
+    {
+      avgDamageDealt: number
+      avgDamageTaken: number
+      avgHealingDone: number
+      avgShieldsApplied: number
+      avgDebuffsLanded: number
+    }
+  >
+  roleWinRates: Record<string, number>
+  abilityUsage: Array<{
+    abilityId: string
+    name: string
+    uses: number
+    totalDamage: number
+    avgDamagePerUse: number
+  }>
+}
+
+const DEBUFF_KINDS = new Set(['poison', 'bleed', 'debuff', 'stun'])
+
+function collectBattleTelemetry(
+  result: BattleResult,
+  hpCurveAcc: Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>,
+  contribAcc: Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>,
+  roleWinAcc: Map<string, { wins: number; losses: number }>,
+  abilityAcc: Map<string, { name: string; uses: number; totalDamage: number }>,
+): void {
+  // Track role wins/losses
+  if (result.winner) {
+    const winTeam = result.winner === 'A' ? result.finalState.teamA : result.finalState.teamB
+    const loseTeam = result.winner === 'A' ? result.finalState.teamB : result.finalState.teamA
+    for (const c of winTeam) {
+      const acc = roleWinAcc.get(c.role) ?? { wins: 0, losses: 0 }
+      acc.wins++
+      roleWinAcc.set(c.role, acc)
+    }
+    for (const c of loseTeam) {
+      const acc = roleWinAcc.get(c.role) ?? { wins: 0, losses: 0 }
+      acc.losses++
+      roleWinAcc.set(c.role, acc)
+    }
+  }
+  // Build creature→role and creature→teamSide maps from finalState
+  const creatureRole = new Map<string, string>()
+  const creatureTeam = new Map<string, 'A' | 'B'>()
+  const creatureMaxHp = new Map<string, number>()
+
+  for (const c of result.finalState.teamA) {
+    creatureRole.set(c.id, c.role)
+    creatureTeam.set(c.id, 'A')
+    creatureMaxHp.set(c.id, c.maxHp)
+  }
+  for (const c of result.finalState.teamB) {
+    creatureRole.set(c.id, c.role)
+    creatureTeam.set(c.id, 'B')
+    creatureMaxHp.set(c.id, c.maxHp)
+  }
+
+  // Track current HP per creature for HP curve snapshots
+  const currentHp = new Map<string, number>()
+  for (const [id, maxHp] of creatureMaxHp) {
+    currentHp.set(id, maxHp)
+  }
+
+  // Determine outcome per creature based on winner
+  const winner = result.winner // 'A' | 'B' | null
+
+  // Track last acting creature for attributing shield events and damage to abilities
+  let lastActorId: string | null = null
+  const lastAbilityByCreature = new Map<string, string>()
+
+  // Walk log events
+  for (const event of result.log) {
+    switch (event.type) {
+      case 'creature_action': {
+        lastActorId = event.creatureId
+        lastAbilityByCreature.set(event.creatureId, event.abilityId)
+        // Track ability usage
+        const abilityEntry = abilityAcc.get(event.abilityId) ?? { name: event.abilityName, uses: 0, totalDamage: 0 }
+        abilityEntry.uses++
+        abilityAcc.set(event.abilityId, abilityEntry)
+        break
+      }
+
+      case 'damage': {
+        // Update HP tracking
+        const prevHp = currentHp.get(event.targetId) ?? 0
+        currentHp.set(event.targetId, Math.max(0, prevHp - event.amount))
+
+        // Contribution: damage dealt by source role
+        const sourceRole = creatureRole.get(event.sourceId)
+        if (sourceRole) {
+          const acc = contribAcc.get(sourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          acc.damageDealt += event.amount
+          contribAcc.set(sourceRole, acc)
+        }
+
+        // Contribution: damage taken by target role
+        const targetRole = creatureRole.get(event.targetId)
+        if (targetRole) {
+          const acc = contribAcc.get(targetRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          acc.damageTaken += event.amount
+          contribAcc.set(targetRole, acc)
+        }
+
+        // Attribute damage to the ability that caused it
+        const dmgAbilityId = lastAbilityByCreature.get(event.sourceId) ?? 'basic_attack'
+        const dmgAbilityEntry = abilityAcc.get(dmgAbilityId)
+        if (dmgAbilityEntry) {
+          dmgAbilityEntry.totalDamage += event.amount
+        }
+        break
+      }
+
+      case 'heal': {
+        currentHp.set(event.targetId, event.newHp)
+        // Contribution: healing done by source role
+        const healSourceRole = creatureRole.get(event.sourceId)
+        if (healSourceRole) {
+          const acc = contribAcc.get(healSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          acc.healingDone += event.amount
+          contribAcc.set(healSourceRole, acc)
+        }
+        break
+      }
+
+      case 'status_tick': {
+        currentHp.set(event.targetId, event.newHp)
+        break
+      }
+
+      case 'ko': {
+        currentHp.set(event.creatureId, 0)
+        break
+      }
+
+      case 'status_applied': {
+        const statusSourceRole = creatureRole.get(event.effect.sourceCreatureId)
+        if (statusSourceRole && DEBUFF_KINDS.has(event.effect.kind)) {
+          const acc = contribAcc.get(statusSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          acc.debuffsLanded++
+          contribAcc.set(statusSourceRole, acc)
+        }
+        break
+      }
+
+      case 'shield_absorbed': {
+        // absorbed === 0 means a shield was just applied (remaining = shield HP)
+        // Attribute to the last acting creature (the caster)
+        if (event.absorbed === 0 && event.remaining > 0 && lastActorId) {
+          const shieldSourceRole = creatureRole.get(lastActorId)
+          if (shieldSourceRole) {
+            const acc = contribAcc.get(shieldSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+            acc.shieldsApplied += event.remaining
+            contribAcc.set(shieldSourceRole, acc)
+          }
+        }
+        break
+      }
+
+      case 'turn_end': {
+        const turn = event.turn
+
+        // Snapshot HP% per creature, grouped by role and outcome
+        for (const [creatureId, hp] of currentHp) {
+          const role = creatureRole.get(creatureId)
+          const team = creatureTeam.get(creatureId)
+          const maxHp = creatureMaxHp.get(creatureId)
+          if (!role || !team || !maxHp) continue
+
+          const outcome = winner === null ? 'draw' : winner === team ? 'win' : 'loss'
+          if (outcome === 'draw') continue // skip draws for clarity
+
+          const key = `${role}-${outcome}`
+          const bucket = hpCurveAcc.get(key) ?? { turnSums: [], turnCounts: [] }
+
+          // Extend arrays if needed
+          while (bucket.turnSums.length <= turn) {
+            bucket.turnSums.push(0)
+            bucket.turnCounts.push(0)
+          }
+
+          bucket.turnSums[turn] += hp / maxHp
+          bucket.turnCounts[turn]++
+          hpCurveAcc.set(key, bucket)
+        }
+        break
+      }
+    }
+  }
+}
+
+function finalizeTelemetry(
+  hpCurveAcc: Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>,
+  contribAcc: Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>,
+  roleWinAcc: Map<string, { wins: number; losses: number }>,
+  abilityAcc: Map<string, { name: string; uses: number; totalDamage: number }>,
+  battleCount: number,
+): TelemetryResult {
+  // Build roleHpCurves
+  const roleHpCurves: Record<string, { wins: Array<number>; losses: Array<number> }> = {}
+
+  for (const [key, bucket] of hpCurveAcc) {
+    const [role, outcome] = key.split('-') as [string, string]
+    if (!(role in roleHpCurves)) {
+      roleHpCurves[role] = { wins: [], losses: [] }
+    }
+    const averaged = bucket.turnSums.map((sum, i) =>
+      bucket.turnCounts[i] > 0 ? sum / bucket.turnCounts[i] : 0,
+    )
+    if (outcome === 'win') {
+      roleHpCurves[role].wins = averaged
+    } else {
+      roleHpCurves[role].losses = averaged
+    }
+  }
+
+  // Build roleContributions (averaged per battle)
+  const roleContributions: Record<
+    string,
+    {
+      avgDamageDealt: number
+      avgDamageTaken: number
+      avgHealingDone: number
+      avgShieldsApplied: number
+      avgDebuffsLanded: number
+    }
+  > = {}
+
+  if (battleCount > 0) {
+    for (const [role, acc] of contribAcc) {
+      roleContributions[role] = {
+        avgDamageDealt: acc.damageDealt / battleCount,
+        avgDamageTaken: acc.damageTaken / battleCount,
+        avgHealingDone: acc.healingDone / battleCount,
+        avgShieldsApplied: acc.shieldsApplied / battleCount,
+        avgDebuffsLanded: acc.debuffsLanded / battleCount,
+      }
+    }
+  }
+
+  // Build roleWinRates
+  const roleWinRates: Record<string, number> = {}
+  for (const [role, acc] of roleWinAcc) {
+    const total = acc.wins + acc.losses
+    roleWinRates[role] = total > 0 ? acc.wins / total : 0.5
+  }
+
+  // Build abilityUsage sorted by uses descending
+  const abilityUsage = [...abilityAcc.entries()]
+    .map(([id, acc]) => ({
+      abilityId: id,
+      name: acc.name,
+      uses: acc.uses,
+      totalDamage: acc.totalDamage,
+      avgDamagePerUse: acc.uses > 0 ? acc.totalDamage / acc.uses : 0,
+    }))
+    .sort((a, b) => b.uses - a.uses)
+
+  return { roleHpCurves, roleContributions, roleWinRates, abilityUsage }
+}
+
 // ─── Evaluation (Swiss Pairing + Both-Sides Play) ────────────────
 
 function evaluateGeneration(
@@ -220,7 +518,9 @@ function evaluateGeneration(
   seedOffset: number,
   templateMap?: Map<string, AbilityTemplate>,
   damageScale?: number,
-): { avgTurns: number } {
+  defScaling?: number,
+  collectTelemetry?: boolean,
+): { avgTurns: number; turnP10: number; turnP90: number; telemetry?: TelemetryResult } {
   const n = population.length
 
   // Reset fitness for this generation
@@ -231,9 +531,24 @@ function evaluateGeneration(
     ind.draws = 0
   }
 
+  // Telemetry accumulators (only when collectTelemetry is true)
+  const hpCurveAcc = collectTelemetry
+    ? new Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>()
+    : null
+  const contribAcc = collectTelemetry
+    ? new Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>()
+    : null
+  const roleWinAcc = collectTelemetry
+    ? new Map<string, { wins: number; losses: number }>()
+    : null
+  const abilityAcc = collectTelemetry
+    ? new Map<string, { name: string; uses: number; totalDamage: number }>()
+    : null
+
   let battleIdx = 0
   let totalTurns = 0
   let battleCount = 0
+  const allTurns: Array<number> = []
 
   for (let round = 0; round < matchesPerTeam; round++) {
     // Build pairing order
@@ -280,8 +595,9 @@ function evaluateGeneration(
           getRows(indB.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed, damageScale })
+        const result = simulateBattle(teamA, teamB, { seed, damageScale, defScaling })
         totalTurns += result.turns
+        allTurns.push(result.turns)
         battleCount++
         if (result.winner === 'A') {
           indA.wins++
@@ -292,6 +608,9 @@ function evaluateGeneration(
         } else {
           indA.draws++
           indB.draws++
+        }
+        if (hpCurveAcc && contribAcc && roleWinAcc && abilityAcc) {
+          collectBattleTelemetry(result, hpCurveAcc, contribAcc, roleWinAcc, abilityAcc)
         }
       } catch {
         // Skip failed battles
@@ -309,8 +628,9 @@ function evaluateGeneration(
           getRows(indA.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale })
+        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale, defScaling })
         totalTurns += result.turns
+        allTurns.push(result.turns)
         battleCount++
         if (result.winner === 'A') {
           indB.wins++
@@ -321,6 +641,9 @@ function evaluateGeneration(
         } else {
           indB.draws++
           indA.draws++
+        }
+        if (hpCurveAcc && contribAcc && roleWinAcc && abilityAcc) {
+          collectBattleTelemetry(result, hpCurveAcc, contribAcc, roleWinAcc, abilityAcc)
         }
       } catch {
         // Skip failed battles
@@ -338,7 +661,22 @@ function evaluateGeneration(
     }
   }
 
-  return { avgTurns: battleCount > 0 ? totalTurns / battleCount : 0 }
+  // Compute percentiles for turn spread
+  allTurns.sort((a, b) => a - b)
+  const p10 = allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.1)] : 0
+  const p90 = allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.9)] : 0
+
+  const telemetry =
+    hpCurveAcc && contribAcc && roleWinAcc && abilityAcc
+      ? finalizeTelemetry(hpCurveAcc, contribAcc, roleWinAcc, abilityAcc, battleCount)
+      : undefined
+
+  return {
+    avgTurns: battleCount > 0 ? totalTurns / battleCount : 0,
+    turnP10: p10,
+    turnP90: p90,
+    telemetry,
+  }
 }
 
 // ─── Genetic Operators ────────────────────────────────────────────
@@ -520,6 +858,8 @@ function snapshotGeneration(
   population: Array<Individual>,
   generation: number,
   avgTurns: number,
+  turnP10: number,
+  turnP90: number,
 ): GenerationSnapshot {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topQuartile = sorted.slice(
@@ -533,6 +873,30 @@ function snapshotGeneration(
   const creatureFrequency: Record<string, number> = {}
   const synergyPresence: Record<string, number> = {}
   const formationDistribution: Record<string, number> = {}
+
+  // Track comp distribution and win rates across ALL teams
+  const compDistribution: Record<string, number> = {}
+  const compWinAcc: Record<string, { wins: number; total: number }> = {}
+  for (const ind of population) {
+    const roleCounts: Record<string, number> = {}
+    for (const m of ind.members) {
+      roleCounts[m.role] = (roleCounts[m.role] ?? 0) + 1
+    }
+    const compKey = Object.entries(roleCounts)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([role, count]) => `${role}×${count}`)
+      .join(' / ')
+    compDistribution[compKey] = (compDistribution[compKey] ?? 0) + 1
+    const acc = compWinAcc[compKey] ?? { wins: 0, total: 0 }
+    const total = ind.wins + ind.losses + ind.draws
+    acc.wins += ind.wins + ind.draws * 0.5
+    acc.total += total
+    compWinAcc[compKey] = acc
+  }
+  const compWinRates: Record<string, number> = {}
+  for (const [comp, acc] of Object.entries(compWinAcc)) {
+    compWinRates[comp] = acc.total > 0 ? acc.wins / acc.total : 0.5
+  }
 
   for (const ind of topQuartile) {
     // Track formation (e.g., "2F/1B", "1F/2B")
@@ -571,6 +935,8 @@ function snapshotGeneration(
     topFitness: topInd.fitness,
     avgFitness: totalFitness / population.length,
     avgTurns,
+    turnP10,
+    turnP90,
     topTeamNames: topInd.members.map((m) => m.name) as [string, string, string],
     topTeamRows: getRows(topInd.genome),
     roleDistribution,
@@ -579,6 +945,8 @@ function snapshotGeneration(
     creatureFrequency,
     synergyPresence,
     formationDistribution,
+    compDistribution,
+    compWinRates,
     uniqueGenomes,
   }
 }
@@ -700,6 +1068,36 @@ function buildFinalResult(
     formationMetaShare[form] = formationSum > 0 ? count / formationSum : 0
   }
 
+  // Comp meta share (from all teams, not just top quartile)
+  const compTotals: Record<string, number> = {}
+  let compSum = 0
+  for (const snap of snapshots) {
+    for (const [comp, count] of Object.entries(snap.compDistribution)) {
+      compTotals[comp] = (compTotals[comp] ?? 0) + count
+      compSum += count
+    }
+  }
+  const compMetaShare: Record<string, number> = {}
+  for (const [comp, count] of Object.entries(compTotals)) {
+    compMetaShare[comp] = compSum > 0 ? count / compSum : 0
+  }
+
+  // Comp win rates (weighted average across snapshots)
+  const compWinAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  for (const snap of snapshots) {
+    for (const [comp, wr] of Object.entries(snap.compWinRates)) {
+      const count = snap.compDistribution[comp] ?? 0
+      const acc = compWinAcc[comp] ?? { weightedWr: 0, weight: 0 }
+      acc.weightedWr += wr * count
+      acc.weight += count
+      compWinAcc[comp] = acc
+    }
+  }
+  const compWinRates: Record<string, number> = {}
+  for (const [comp, acc] of Object.entries(compWinAcc)) {
+    compWinRates[comp] = acc.weight > 0 ? acc.weightedWr / acc.weight : 0.5
+  }
+
   return {
     hallOfFame,
     creatureLeaderboard,
@@ -707,6 +1105,8 @@ function buildFinalResult(
     roleMetaShare,
     synergyMetaShare,
     formationMetaShare,
+    compMetaShare,
+    compWinRates,
   }
 }
 
@@ -1004,6 +1404,7 @@ function analyzeBattleActions(
   population: Array<Individual>,
   templateMap?: Map<string, AbilityTemplate>,
   damageScale?: number,
+  defScaling?: number,
 ): Array<RoleActionProfile> {
   const sorted = [...population].sort((a, b) => b.fitness - a.fitness)
   const topTeams = sorted.slice(0, Math.ceil(population.length / 4))
@@ -1052,6 +1453,7 @@ function analyzeBattleActions(
           const result = simulateBattle(teamA, teamB, {
             seed: baseSeed + (asSide === 'B' ? 1 : 0),
             damageScale,
+            defScaling,
           })
 
           // Only analyze when the top team wins
@@ -1209,6 +1611,7 @@ export function runMetaReport(
 
   const snapshots: Array<GenerationSnapshot> = []
   const allTimeBest = new Map<string, Individual>()
+  let finalTelemetry: TelemetryResult | undefined
 
   // Initialize population
   let population = initializePopulation(
@@ -1225,14 +1628,19 @@ export function runMetaReport(
   for (let gen = 1; gen <= options.generations; gen++) {
     const seedOffset = gen * options.population * options.matchesPerTeam * 2
 
-    // Evaluate
-    const { avgTurns } = evaluateGeneration(
+    // Evaluate (collect telemetry on final generation only)
+    const isFinalGen = gen === options.generations
+    const { avgTurns, turnP10, turnP90, telemetry } = evaluateGeneration(
       population,
       options.matchesPerTeam,
       seedOffset,
       options.templateMap,
       options.damageScale,
+      options.defScaling,
+      isFinalGen,
     )
+
+    if (telemetry) finalTelemetry = telemetry
 
     // Update all-time best
     for (const ind of population) {
@@ -1247,7 +1655,7 @@ export function runMetaReport(
     }
 
     // Snapshot
-    snapshots.push(snapshotGeneration(population, gen, avgTurns))
+    snapshots.push(snapshotGeneration(population, gen, avgTurns, turnP10, turnP90))
     options.onGeneration?.(gen, snapshots[snapshots.length - 1])
 
     // Reproduce (skip on last generation)
@@ -1270,6 +1678,14 @@ export function runMetaReport(
 
   const result = buildFinalResult(snapshots, allTimeBest, creatureIndex)
 
+  // Merge final-generation telemetry into result
+  if (finalTelemetry) {
+    result.roleHpCurves = finalTelemetry.roleHpCurves
+    result.roleContributions = finalTelemetry.roleContributions
+    result.roleWinRates = finalTelemetry.roleWinRates
+    result.abilityUsage = finalTelemetry.abilityUsage
+  }
+
   if (options.csv) {
     renderCsv(result, snapshots)
   } else {
@@ -1277,7 +1693,7 @@ export function runMetaReport(
 
     // Action analysis on final generation
     log('\n  Analyzing battle actions from top teams...')
-    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale)
+    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale, options.defScaling)
     renderActionAnalysis(actionProfiles)
   }
 

@@ -68,12 +68,18 @@ export function GlobalKnobsPanel({
     onChange({ ...overrides, combatDamageScale: value })
   }
 
+  function setDefScaling(value: number) {
+    onChange({ ...overrides, defScalingConstant: value })
+  }
+
   const getRoleStatMod = (role: string, stat: StatKey) =>
     overrides.roleModifiers?.[role]?.[stat] ?? 0
   const getRarityMod = (rarity: string) =>
     overrides.rarityModifiers?.[rarity] ?? 0
   const effectiveScale =
     overrides.combatDamageScale ?? constants.combatDamageScale
+  const effectiveDefScaling =
+    overrides.defScalingConstant ?? constants.defScalingConstant
 
   // Compute actual stat distributions per role from creature data
   const roleStats = useMemo(() => {
@@ -247,6 +253,22 @@ export function GlobalKnobsPanel({
                 'border-primary/50 text-primary',
             )}
           />
+        </div>
+        <div className="flex items-center gap-2 px-3 pb-3">
+          <label className="w-24 text-muted-foreground">DEF Scaling</label>
+          <NumericInput
+            step={10}
+            min={10}
+            max={200}
+            value={effectiveDefScaling}
+            onChange={setDefScaling}
+            className={cn(
+              'w-20 text-center text-xs px-2',
+              overrides.defScalingConstant !== undefined &&
+                'border-primary/50 text-primary',
+            )}
+          />
+          <span className="text-[9px] text-muted-foreground/60">lower = DEF stronger</span>
         </div>
       </Section>
 

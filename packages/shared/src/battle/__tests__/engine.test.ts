@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateDamage, getDietModifier } from '../damage'
+import { calculateDamage } from '../damage'
 import { createRng } from '../rng'
 import { applySynergies, calculateSynergies } from '../synergies'
 import { simulateBattle } from '../engine'
@@ -269,13 +269,6 @@ describe('Damage', () => {
 
     // Flat reduction subtracts 10% of DEF (3 points) from damage
     expect(r2.damage).toBeLessThan(r1.damage)
-  })
-
-  it('getDietModifier returns correct values', () => {
-    expect(getDietModifier('Carnivorous', 'Herbivorous')).toBe(1.15)
-    expect(getDietModifier('Herbivorous', 'Carnivorous')).toBe(0.85)
-    expect(getDietModifier('Carnivorous', 'Carnivorous')).toBe(1.0)
-    expect(getDietModifier('Omnivorous', 'Carnivorous')).toBe(1.15)
   })
 
   it('floors damage to minimum 1', () => {

@@ -20,6 +20,7 @@ function toSummary(run: SavedRun): RunSummary {
     ).length +
     Object.keys(run.config.constants.rarityModifiers ?? {}).length +
     (run.config.constants.combatDamageScale !== undefined ? 1 : 0) +
+    (run.config.constants.defScalingConstant !== undefined ? 1 : 0) +
     Object.keys(run.config.constants.abilityOverrides ?? {}).length
   const patchCount =
     run.config.creaturePatches.filter((p) => Object.keys(p).length > 1).length +
@@ -39,6 +40,7 @@ function toSummary(run: SavedRun): RunSummary {
     normalizeStats: run.config.options.normalizeStats,
     noActives: run.config.options.noActives,
     noPassives: run.config.options.noPassives,
+    syntheticMode: run.config.options.syntheticMode,
     config: run.config,
   }
 }
@@ -103,6 +105,7 @@ export function useRunHistory(): UseRunHistory {
       if (config.options.normalizeStats) parts.push('normalized')
       if (config.options.noActives) parts.push('no-actives')
       if (config.options.noPassives) parts.push('no-passives')
+      if (config.options.syntheticMode) parts.push('synthetic')
 
       const run: SavedRun = {
         id,

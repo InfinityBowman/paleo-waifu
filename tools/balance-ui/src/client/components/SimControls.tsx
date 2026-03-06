@@ -3,6 +3,8 @@ import { Button } from './ui/button'
 import { NumericInput } from './ui/numeric-input'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 
+import type { ConstantsSnapshot } from '../../shared/types.ts'
+
 type SimState = 'idle' | 'running' | 'done' | 'error'
 
 interface SimOptions {
@@ -14,6 +16,7 @@ interface SimOptions {
   normalizeStats: boolean
   noActives: boolean
   noPassives: boolean
+  syntheticMode: boolean
 }
 
 interface Props {
@@ -27,6 +30,7 @@ interface Props {
     avgFitness: number
   } | null
   onRun: () => void
+  constants?: ConstantsSnapshot | null
 }
 
 export function SimControls({
@@ -35,8 +39,15 @@ export function SimControls({
   simState,
   progress,
   onRun,
+  constants,
 }: Props) {
   const running = simState === 'running'
+
+  const syntheticCount = constants
+    ? Object.keys(constants.roleDistributions).length *
+      constants.activeTemplates.filter((t) => t.id !== 'basic_attack').length *
+      constants.passiveTemplates.filter((t) => t.id !== 'none').length
+    : 0
 
   function setOpt<TKey extends keyof SimOptions>(
     key: TKey,
@@ -171,8 +182,21 @@ export function SimControls({
             onChange={(v) => setOpt('noPassives', v)}
             disabled={running}
           />
+          <CheckboxRow
+            label="Synthetic Mode"
+            tooltip="Ignore seeded creatures. Generate all combinations of role stats × active × passive abilities with baseline stats."
+            checked={options.syntheticMode}
+            onChange={(v) => setOpt('syntheticMode', v)}
+            disabled={running}
+          />
         </div>
       </div>
+
+      {options.syntheticMode && syntheticCount > 0 && options.population < Math.ceil(syntheticCount / 2) && (
+        <div className="mb-2 rounded-md bg-warning/10 px-3 py-1.5 text-[10px] text-warning">
+          Synthetic mode generates {syntheticCount} creatures. Population should be {Math.ceil(syntheticCount / 2)}+ for adequate coverage.
+        </div>
+      )}
 
       <Button onClick={onRun} disabled={running} className="w-full" size="sm">
         {running ? (

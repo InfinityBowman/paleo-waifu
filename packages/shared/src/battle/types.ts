@@ -43,6 +43,7 @@ export type Effect =
 
 export type Trigger =
   | { type: 'onUse'; cooldown: number }
+  | { type: 'onBeforeAttack' }
   | { type: 'onBasicAttack' }
   | { type: 'onHit' }
   | { type: 'onKill' }
@@ -227,7 +228,6 @@ export type BattleLogEvent =
       amount: number
       isCrit: boolean
       isDodged: boolean
-      isDietBonus: boolean
     }
   | {
       type: 'heal'
@@ -319,7 +319,6 @@ export interface DamageCalcResult {
   damage: number
   isCrit: boolean
   isDodged: boolean
-  isDietBonus: boolean
 }
 
 export type EffectResolution =
@@ -329,7 +328,6 @@ export type EffectResolution =
       amount: number
       isCrit: boolean
       isDodged: boolean
-      isDietBonus: boolean
     }
   | { kind: 'heal'; targetId: string; amount: number; newHp: number }
   | {
@@ -358,6 +356,8 @@ export interface EffectContext {
   lastDamageDealt?: number
   /** Override for COMBAT_DAMAGE_SCALE (balance-ui tuning) */
   damageScale?: number
+  /** Override for DEF_SCALING_CONSTANT (balance-ui tuning) */
+  defScaling?: number
 }
 
 export interface SelectedAction {

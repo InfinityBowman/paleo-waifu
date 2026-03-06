@@ -77,12 +77,12 @@ export function BaselineDiffSummary({
 
 // ─── Line builder ───────────────────────────────────────────
 
-interface DiffLine {
+export interface DiffLine {
   text: string
   type: 'buff' | 'nerf' | 'neutral' | 'flag'
 }
 
-function buildDiffLines(
+export function buildDiffLines(
   constants: ConstantsOverride,
   creaturePatches: Array<CreatureOverridePatch>,
   options: SimRequest['options'],
@@ -101,12 +101,23 @@ function buildDiffLines(
   if (options.noPassives) {
     lines.push({ text: 'No passives ON', type: 'flag' })
   }
+  if (options.syntheticMode) {
+    lines.push({ text: 'Synthetic mode ON', type: 'flag' })
+  }
 
   // Combat damage scale
   if (constants.combatDamageScale !== undefined) {
     lines.push({
       text: `Damage scale: ${constants.combatDamageScale}`,
       type: constants.combatDamageScale > 0.6 ? 'buff' : 'nerf',
+    })
+  }
+
+  // DEF scaling constant
+  if (constants.defScalingConstant !== undefined) {
+    lines.push({
+      text: `DEF scaling: ${constants.defScalingConstant} (default 100)`,
+      type: constants.defScalingConstant < 100 ? 'buff' : constants.defScalingConstant > 100 ? 'nerf' : 'neutral',
     })
   }
 

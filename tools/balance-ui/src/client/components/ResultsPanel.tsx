@@ -1,23 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ChevronDown, Info, RotateCcw } from 'lucide-react'
-import {
-  Area,
-  AreaChart,
-  Bar,
-  BarChart,
-  CartesianGrid,
-  Cell,
-  Legend,
-  Line,
-  LineChart,
-  Pie,
-  PieChart,
-  Tooltip as RechartsTooltip,
-  ReferenceArea,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-} from 'recharts'
+import { useCallback, useMemo, useState } from 'react'
+import { Check, ChevronDown, ClipboardCopy, Eye, RotateCcw } from 'lucide-react'
 import { cn } from '../lib/utils'
 import {
   Card,
@@ -26,56 +8,42 @@ import {
   CardHeader,
   CardTitle,
 } from './ui/card'
-import { Badge } from './ui/badge'
 import { Button } from './ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { BaselineDiffSummary } from './BaselineDiffSummary'
-import type { AbilityTemplate, Effect } from '@paleo-waifu/shared/battle/types'
+import { buildTextSummary } from './results/buildTextSummary'
+import { SectionTooltip } from './results/SectionTooltip'
+import { CreatureLeaderboard } from './results/CreatureLeaderboard'
+import { AbilityLeaderboard } from './results/AbilityLeaderboard'
+import { AbilityUsageTable } from './results/AbilityUsageTable'
+import { HallOfFame } from './results/HallOfFame'
+import { SynergyBars } from './results/SynergyBars'
+import {
+  DiversityIndicator,
+  MetaBreadthIndicator,
+  TargetBandIndicator,
+  TurnsTargetIndicator,
+} from './results/indicators'
+import { RoleMetaChart } from './results/charts/RoleMetaChart'
+import { FitnessCurve } from './results/charts/FitnessCurve'
+import { MetricsChart } from './results/charts/MetricsChart'
+import { RoleWinRateChart } from './results/charts/RoleWinRateChart'
+import { CompArchetypeChart } from './results/charts/CompArchetypeChart'
+import { AbilityScatterChart } from './results/charts/AbilityScatterChart'
+import { RoleEvolutionChart } from './results/charts/RoleEvolutionChart'
+import { RoleHpCurvesChart } from './results/charts/RoleHpCurvesChart'
+import { RoleContributionsChart } from './results/charts/RoleContributionsChart'
+import { FormationChart } from './results/charts/FormationChart'
 import type {
   ConstantsOverride,
   ConstantsSnapshot,
   CreatureOverridePatch,
   CreatureRecord,
-  GenerationSnapshot,
-  MetaResult,
   MetaRunResult,
   SimRequest,
 } from '../../shared/types.ts'
 
 type SimState = 'idle' | 'running' | 'done' | 'error'
-
-const AVG_TURNS_TARGET_MIN = 7
-const AVG_TURNS_TARGET_MAX = 10
-
-const ROLE_ORDER = ['striker', 'tank', 'support', 'bruiser']
-
-const ROLE_COLORS: Record<string, string> = {
-  striker: 'bg-role-striker',
-  tank: 'bg-role-tank',
-  support: 'bg-role-support',
-  bruiser: 'bg-role-bruiser',
-}
-
-const ROLE_COLOR_VALUES: Record<string, string> = {
-  striker: 'oklch(0.65 0.2 25)',
-  tank: 'oklch(0.65 0.15 245)',
-  support: 'oklch(0.65 0.15 145)',
-  bruiser: 'oklch(0.75 0.15 75)',
-}
-
-const FORMATION_COLORS = [
-  'oklch(0.65 0.15 340)',
-  'oklch(0.65 0.15 245)',
-  'oklch(0.65 0.15 145)',
-  'oklch(0.75 0.15 75)',
-  'oklch(0.7 0.17 300)',
-  'oklch(0.7 0.1 200)',
-]
-
-function entries(obj: Record<string, number>): Array<[string, number]> {
-  return Object.entries(obj)
-}
 
 interface Props {
   result: MetaRunResult | null
@@ -107,6 +75,19 @@ export function ResultsPanel({
   onApplyConfig,
 }: Props) {
   const [baselineOpen, setBaselineOpen] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const summaryText = useMemo(() => {
+    if (!result) return ''
+    return buildTextSummary(result.result, result.snapshots, population, config, constants)
+  }, [result, population, config, constants])
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(summaryText)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }, [summaryText])
+
   if (simState === 'error' && error) {
     return (
       <div className="p-6">
@@ -131,6 +112,34 @@ export function ResultsPanel({
 
   return (
     <div className="flex flex-col gap-4 p-4">
+      {/* Copy Summary */}
+      <div className="flex items-center justify-end gap-1">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-7 w-7">
+              <Eye size={14} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent
+            side="bottom"
+            align="end"
+            className="w-125 max-h-100 overflow-y-auto p-3"
+          >
+            <pre className="text-[10px] leading-tight whitespace-pre-wrap font-mono text-muted-foreground">
+              {summaryText}
+            </pre>
+          </PopoverContent>
+        </Popover>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7"
+          onClick={handleCopy}
+        >
+          {copied ? <Check size={14} className="text-green-500" /> : <ClipboardCopy size={14} />}
+        </Button>
+      </div>
+
       {/* Changes from Baseline */}
       {config && (
         <Card className="py-1">
@@ -202,6 +211,77 @@ export function ResultsPanel({
           <TargetBandIndicator roleShares={meta.roleMetaShare} />
         </CardContent>
       </Card>
+
+      {/* Role Win Rate vs Presence */}
+      {meta.roleWinRates && Object.keys(meta.roleWinRates).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Role Win Rate vs Presence</CardTitle>
+              <SectionTooltip>
+                Compares how often a role appears in top teams (presence) vs how
+                often teams containing that role actually win (win rate). A role
+                with high presence but low win rate is a noob trap. High win rate
+                but low presence means it's undervalued.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Pick rate vs actual win rate per role
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RoleWinRateChart
+              roleShares={meta.roleMetaShare}
+              roleWinRates={meta.roleWinRates}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Team Comp Archetypes */}
+      {meta.compMetaShare && Object.keys(meta.compMetaShare).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Team Compositions</CardTitle>
+              <SectionTooltip>
+                Distribution of role combinations across all teams, with win
+                rates. High presence + high win rate = meta dominant. High win
+                rate + low presence = underexplored strong comp.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Presence and win rate per team archetype
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CompArchetypeChart compShares={meta.compMetaShare} compWinRates={meta.compWinRates} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Ability Pick Rate vs Win Rate Scatter */}
+      {meta.abilityLeaderboard.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Ability Balance Scatter</CardTitle>
+              <SectionTooltip>
+                Each dot is an ability. X = pick rate, Y = win rate. Top-right =
+                meta-defining (popular + strong). Top-left = sleeper OP (rare
+                but strong). Bottom-right = noob trap (popular but weak).
+                Bottom-left = dead ability.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Pick rate vs win rate per ability
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AbilityScatterChart leaderboard={meta.abilityLeaderboard} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Role Evolution */}
       {snapshots.length > 1 && (
@@ -289,21 +369,89 @@ export function ResultsPanel({
         </Card>
       )}
 
-      {/* Formation Distribution */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Formation Distribution</CardTitle>
-            <SectionTooltip>
-              How teams arrange creatures across front/back rows. Dominance of
-              one formation may indicate row mechanics need tuning.
-            </SectionTooltip>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <FormationChart formationShares={meta.formationMetaShare} />
-        </CardContent>
-      </Card>
+      {/* HP Curves (final gen telemetry) */}
+      {meta.roleHpCurves && Object.keys(meta.roleHpCurves).length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>HP Curves</CardTitle>
+              <SectionTooltip>
+                Average HP% per role at each turn of the final generation&apos;s
+                battles. Solid lines = wins, dashed = losses. Shows which roles
+                survive longest and how win/loss trajectories diverge.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Turn-by-turn HP% per role (final generation, wins vs losses)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <RoleHpCurvesChart roleHpCurves={meta.roleHpCurves} />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Role Contributions (final gen telemetry) */}
+      {meta.roleContributions &&
+        Object.keys(meta.roleContributions).length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Role Contributions</CardTitle>
+                <SectionTooltip>
+                  Average damage dealt, damage taken, healing done, shields applied,
+                  and debuffs landed per role per battle in the final generation.
+                  Shows whether strikers dominate damage, tanks absorb hits, and
+                  supports contribute through healing and shields.
+                </SectionTooltip>
+              </div>
+              <CardDescription>
+                Per-role averages from final generation battles
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RoleContributionsChart
+                roleContributions={meta.roleContributions}
+              />
+            </CardContent>
+          </Card>
+        )}
+
+      <div className="grid grid-cols-2 gap-4">
+        {/* Formation Distribution */}
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Formation Distribution</CardTitle>
+              <SectionTooltip>
+                How teams arrange creatures across front/back rows. Dominance of
+                one formation may indicate row mechanics need tuning.
+              </SectionTooltip>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <FormationChart formationShares={meta.formationMetaShare} />
+          </CardContent>
+        </Card>
+
+        {/* Synergy Meta Share */}
+        {Object.keys(meta.synergyMetaShare).length > 0 && (
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Synergy Presence</CardTitle>
+                <SectionTooltip>
+                  Type-based team synergies triggered by shared creature types.
+                  High presence suggests the synergy bonus may be too strong.
+                </SectionTooltip>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <SynergyBars synergyShares={meta.synergyMetaShare} />
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Top Creatures */}
       <Card>
@@ -340,6 +488,29 @@ export function ResultsPanel({
         </CardContent>
       </Card>
 
+      {/* Ability Usage (from final gen battles) */}
+      {meta.abilityUsage && meta.abilityUsage.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <div className="flex items-center gap-2">
+              <CardTitle>Ability Usage</CardTitle>
+              <SectionTooltip>
+                How often each ability (including basic attack) is actually used
+                in final generation battles, and how much damage it deals. Shows
+                whether abilities are firing or creatures are mostly basic
+                attacking.
+              </SectionTooltip>
+            </div>
+            <CardDescription>
+              Actual usage and damage from final generation battles
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="px-0">
+            <AbilityUsageTable abilityUsage={meta.abilityUsage} />
+          </CardContent>
+        </Card>
+      )}
+
       {/* Hall of Fame */}
       <Card>
         <CardHeader className="pb-2">
@@ -359,964 +530,6 @@ export function ResultsPanel({
         </CardContent>
       </Card>
 
-      {/* Synergy Meta Share */}
-      {Object.keys(meta.synergyMetaShare).length > 0 && (
-        <Card>
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <CardTitle>Synergy Presence</CardTitle>
-              <SectionTooltip>
-                Type-based team synergies triggered by shared creature types.
-                High presence suggests the synergy bonus may be too strong.
-              </SectionTooltip>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <SynergyBars synergyShares={meta.synergyMetaShare} />
-          </CardContent>
-        </Card>
-      )}
     </div>
-  )
-}
-
-function SectionTooltip({ children }: { children: React.ReactNode }) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Info
-          size={13}
-          className="text-muted-foreground/75 hover:text-muted-foreground transition-colors"
-        />
-      </TooltipTrigger>
-      <TooltipContent className="max-w-xs">{children}</TooltipContent>
-    </Tooltip>
-  )
-}
-
-function CreatureLeaderboard({
-  leaderboard,
-  constants,
-}: {
-  leaderboard: MetaResult['creatureLeaderboard']
-  constants?: ConstantsSnapshot | null
-}) {
-  const templateMap = useMemo(() => {
-    if (!constants) return new Map<string, AbilityTemplate>()
-    const map = new Map<string, AbilityTemplate>()
-    for (const t of [...constants.activeTemplates, ...constants.passiveTemplates]) {
-      map.set(t.id, t)
-    }
-    return map
-  }, [constants])
-
-  return (
-    <table className="w-full text-xs">
-      <thead>
-        <tr className="border-b border-border">
-          <th className="px-4 py-1.5 text-left text-muted-foreground">#</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">Name</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">Role</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">Active</th>
-          <th className="px-2 py-1.5 text-left text-muted-foreground">Passive</th>
-          <th className="px-2 py-1.5 text-right text-muted-foreground">
-            Appearances
-          </th>
-          <th className="px-4 py-1.5 text-right text-muted-foreground">
-            Avg Fitness
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {leaderboard.slice(0, 20).map((entry, i) => {
-          const activeTpl = templateMap.get(entry.creature.active.templateId)
-          const passiveTpl = templateMap.get(entry.creature.passive.templateId)
-          return (
-            <tr
-              key={entry.creature.id}
-              className="border-b border-border/20 hover:bg-muted/30 transition-colors"
-            >
-              <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
-              <td className="px-2 py-1.5 font-medium">
-                <span className={`text-rarity-${entry.creature.rarity}`}>
-                  {entry.creature.name}
-                </span>
-              </td>
-              <td className="px-2 py-1.5">
-                <span className={cn('capitalize', `text-role-${entry.creature.role}`)}>
-                  {entry.creature.role}
-                </span>
-              </td>
-              <td className="px-2 py-1.5">
-                <AbilityCell template={activeTpl} displayName={entry.creature.active.displayName} />
-              </td>
-              <td className="px-2 py-1.5">
-                <AbilityCell template={passiveTpl} displayName={entry.creature.passive.displayName} />
-              </td>
-              <td className="px-2 py-1.5 text-right">{entry.appearances}</td>
-              <td className="px-4 py-1.5 text-right font-mono">
-                {(entry.avgFitness * 100).toFixed(1)}%
-              </td>
-            </tr>
-          )
-        })}
-      </tbody>
-    </table>
-  )
-}
-
-function formatTarget(target: string): string {
-  switch (target) {
-    case 'self': return 'self'
-    case 'single_enemy': return 'single target'
-    case 'all_enemies': return 'AOE'
-    case 'lowest_hp_ally': return 'lowest HP ally'
-    case 'all_allies': return 'all allies'
-    default: return target
-  }
-}
-
-function formatEffect(e: Effect): string {
-  switch (e.type) {
-    case 'damage':
-      return `${e.multiplier}x ${e.scaling} dmg`
-    case 'heal':
-      return `heal ${e.percent}%`
-    case 'dot':
-      return `${e.dotKind} ${e.percent}% ${e.duration}t`
-    case 'buff':
-      return `+${e.percent}% ${e.stat} ${e.duration}t`
-    case 'debuff':
-      return `-${e.percent}% ${e.stat} ${e.duration}t`
-    case 'shield':
-      return `shield ${e.percent}% ${e.duration}t`
-    case 'stun':
-      return `stun ${e.duration}t`
-    case 'taunt':
-      return `taunt ${e.duration}t`
-    case 'lifesteal':
-      return `lifesteal ${e.percent}%`
-    case 'reflect':
-      return `reflect ${e.percent}% ${e.duration}t`
-    case 'damage_reduction':
-      return `dmg red ${e.percent}%`
-    case 'crit_reduction':
-      return `crit red ${e.percent}%`
-    case 'flat_reduction':
-      return `flat red ${e.scalingPercent}% def`
-    case 'dodge':
-      return `dodge ${e.basePercent}%`
-  }
-}
-
-function formatTrigger(template: AbilityTemplate): string {
-  const t = template.trigger
-  switch (t.type) {
-    case 'onUse': return `Active · cd: ${t.cooldown}t`
-    case 'onBasicAttack': return 'On basic attack'
-    case 'onHit': return 'On hit'
-    case 'onKill': return 'On kill'
-    case 'onEnemyKO': return 'On enemy KO'
-    case 'onAllyKO': return 'On ally KO'
-    case 'onTurnStart': return 'On turn start'
-    case 'onTurnEnd': return 'On turn end'
-    case 'onBattleStart': return 'On battle start'
-    case 'always': return 'Always active'
-    default: return (t as { type: string }).type
-  }
-}
-
-function AbilityCell({
-  template,
-  displayName,
-}: {
-  template?: AbilityTemplate
-  displayName: string
-}) {
-  if (!template) {
-    return <span className="text-muted-foreground">{displayName}</span>
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <button type="button" className="text-left text-muted-foreground hover:text-foreground transition-colors">
-          {displayName}
-        </button>
-      </PopoverTrigger>
-      <PopoverContent side="right" className="w-64 p-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium">{template.name}</span>
-          <div className="flex gap-0.5">
-            {template.roleAffinity.map((role) => (
-              <span
-                key={role}
-                className={cn('h-1.5 w-1.5 rounded-full', `bg-role-${role}`)}
-                title={role}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-1 text-[10px] text-muted-foreground">
-          {formatTrigger(template)} · {formatTarget(template.target)}
-        </div>
-
-        <p className="mt-1.5 text-[10px] text-muted-foreground/80">
-          {template.description}
-        </p>
-
-        <div className="mt-2 flex flex-col gap-1 border-t border-border/50 pt-2">
-          {template.effects.map((effect, i) => (
-            <div key={i} className="flex items-start gap-2 text-[10px]">
-              <span className="shrink-0 font-medium text-muted-foreground uppercase">
-                {effect.type}
-                {'stat' in effect && ` (${(effect as { stat: string }).stat})`}
-                {'dotKind' in effect && ` (${(effect as { dotKind: string }).dotKind})`}
-              </span>
-              <span className="font-mono text-foreground">
-                {formatEffect(effect)}
-              </span>
-            </div>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-function AbilityLeaderboard({
-  leaderboard,
-  snapshots,
-  creatures,
-}: {
-  leaderboard: MetaResult['abilityLeaderboard']
-  snapshots: Array<GenerationSnapshot>
-  creatures?: Array<CreatureRecord>
-}) {
-  // Build per-ability sparkline data from generation snapshots
-  const sparklines = useMemo(() => {
-    const map = new Map<string, Array<number>>()
-    for (const snap of snapshots) {
-      for (const [templateId, count] of Object.entries(snap.abilityPresence)) {
-        let arr = map.get(templateId)
-        if (!arr) {
-          arr = []
-          map.set(templateId, arr)
-        }
-        arr.push(count)
-      }
-    }
-    return map
-  }, [snapshots])
-
-  // Count unique creatures and role distribution per ability template
-  const abilityCreatureInfo = useMemo(() => {
-    if (!creatures) return new Map<string, { count: number; roles: Record<string, number> }>()
-    const map = new Map<string, { count: number; roles: Record<string, number> }>()
-    for (const c of creatures) {
-      for (const templateId of [c.active.templateId, c.passive.templateId]) {
-        const existing = map.get(templateId) ?? { count: 0, roles: {} }
-        existing.count++
-        existing.roles[c.role] = (existing.roles[c.role] ?? 0) + 1
-        map.set(templateId, existing)
-      }
-    }
-    return map
-  }, [creatures])
-
-  return (
-    <div className="grid grid-cols-2 gap-6">
-      {(['active', 'passive'] as const).map((type) => {
-        const items = leaderboard.filter((a) => a.abilityType === type)
-        const maxAppearances = Math.max(...items.map((a) => a.appearances), 1)
-
-        return (
-          <div key={type}>
-            <h4 className="mb-3 text-xs font-medium capitalize text-muted-foreground">
-              {type}
-            </h4>
-            <div className="flex flex-col gap-2.5">
-              {items.map((a) => {
-                const barPct = (a.appearances / maxAppearances) * 100
-                const points = sparklines.get(a.templateId) ?? []
-                const info = abilityCreatureInfo.get(a.templateId)
-                const creatureCount = info?.count ?? 0
-                const roles = info?.roles ?? {}
-                const roleTotal = Object.values(roles).reduce((s, n) => s + n, 0)
-                const roleSegments = ROLE_ORDER
-                  .filter((r) => roles[r])
-                  .map((r) => ({
-                    role: r,
-                    pct: (roles[r] / roleTotal) * 100,
-                    color: ROLE_COLOR_VALUES[r] ?? 'oklch(0.5 0 0)',
-                  }))
-                return (
-                  <Tooltip key={a.templateId}>
-                    <TooltipTrigger asChild>
-                      <div className="group">
-                        <div className="mb-0.5 flex items-center justify-between text-[11px]">
-                          <span className="flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors">
-                            {a.name}
-                            {creatureCount > 0 && (
-                              <span className="text-[9px] text-muted-foreground/70">
-                                {creatureCount}cr
-                              </span>
-                            )}
-                          </span>
-                          <div className="flex items-center gap-2">
-                            {points.length > 1 && (
-                              <Sparkline points={points} color="oklch(0.65 0.03 290)" />
-                            )}
-                            <span className="font-mono text-muted-foreground">
-                              {a.appearances}
-                              <span className="ml-1.5 text-foreground">
-                                {(a.avgFitness * 100).toFixed(1)}%
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                        <div className="relative flex h-2 w-full overflow-hidden rounded-full bg-muted">
-                          {roleSegments.map((seg) => (
-                            <div
-                              key={seg.role}
-                              className="h-full transition-all first:rounded-l-full last:rounded-r-full"
-                              style={{
-                                width: `${(seg.pct / 100) * barPct}%`,
-                                backgroundColor: seg.color,
-                                opacity: 0.5 + a.avgFitness * 0.5,
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">
-                      <div className="text-[10px]">
-                        <div>
-                          {a.name} ({type})
-                        </div>
-                        <div>Appearances: {a.appearances}</div>
-                        {creatureCount > 0 && (
-                          <div>
-                            Used by: {creatureCount} creature
-                            {creatureCount !== 1 ? 's' : ''}
-                            {roleSegments.length > 0 && (
-                              <span>
-                                {' '}({roleSegments.map((s) => `${s.role} ${Math.round(s.pct)}%`).join(', ')})
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <div>
-                          Avg Team Fitness: {(a.avgFitness * 100).toFixed(1)}%
-                        </div>
-                        {points.length > 1 && (
-                          <div>
-                            Trend: {points[0]} → {points[points.length - 1]}
-                            {points[points.length - 1] > points[0]
-                              ? ' (rising)'
-                              : points[points.length - 1] < points[0]
-                                ? ' (falling)'
-                                : ' (stable)'}
-                          </div>
-                        )}
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                )
-              })}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function Sparkline({
-  points,
-  color,
-  width = 40,
-  height = 14,
-}: {
-  points: Array<number>
-  color: string
-  width?: number
-  height?: number
-}) {
-  if (points.length < 2) return null
-  const min = Math.min(...points)
-  const max = Math.max(...points)
-  const range = max - min || 1
-  const pad = 1
-
-  const d = points
-    .map((v, i) => {
-      const x = pad + (i / (points.length - 1)) * (width - pad * 2)
-      const y = pad + (1 - (v - min) / range) * (height - pad * 2)
-      return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-    })
-    .join(' ')
-
-  return (
-    <svg width={width} height={height} className="shrink-0">
-      <path d={d} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function SynergyBars({ synergyShares }: { synergyShares: Record<string, number> }) {
-  const sorted = entries(synergyShares).sort(([, a], [, b]) => b - a)
-  const maxShare = Math.max(...sorted.map(([, s]) => s), 0.01)
-
-  return (
-    <div className="flex flex-col gap-2">
-      {sorted.map(([synergy, share]) => {
-        const barPct = (share / maxShare) * 100
-        return (
-          <div key={synergy}>
-            <div className="mb-0.5 flex items-center justify-between text-[11px]">
-              <span className="font-medium">{synergy}</span>
-              <span className="font-mono text-muted-foreground">
-                {(share * 100).toFixed(1)}%
-              </span>
-            </div>
-            <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${barPct}%`,
-                  backgroundColor: 'oklch(0.7 0.17 300)',
-                  opacity: 0.4 + share * 0.6,
-                }}
-              />
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'] }) {
-  return (
-    <div className="flex flex-col gap-2">
-      {hallOfFame.slice(0, 10).map((team, i) => (
-        <Tooltip key={i}>
-          <TooltipTrigger asChild>
-            <div className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/20 px-3 py-2 hover:bg-muted/40 transition-colors">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-medium text-muted-foreground w-6">
-                  #{i + 1}
-                </span>
-                <div className="flex gap-1.5">
-                  {team.members.map((m, j) => (
-                    <Badge key={j} variant="secondary" className="text-[10px]">
-                      {m.name}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span className="text-muted-foreground font-mono">
-                  {team.wins}W {team.losses}L {team.draws}D
-                </span>
-                <span className="font-medium text-primary font-mono">
-                  {(team.fitness * 100).toFixed(1)}%
-                </span>
-              </div>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <div className="space-y-1">
-              {team.members.map((m, j) => (
-                <div key={j}>
-                  {m.name} — {m.role} {m.rarity} ({m.hp}/{m.atk}/{m.def}/{m.spd}
-                  )
-                </div>
-              ))}
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      ))}
-    </div>
-  )
-}
-
-function TargetBandIndicator({
-  roleShares,
-}: {
-  roleShares: Record<string, number>
-}) {
-  const roles = entries(roleShares)
-  const allInBand = roles.every(([, share]) => share >= 0.15 && share <= 0.35)
-
-  return (
-    <div
-      className={cn(
-        'mt-3 rounded-lg px-3 py-2 text-[11px]',
-        allInBand
-          ? 'bg-success/10 text-success'
-          : 'bg-destructive/10 text-destructive',
-      )}
-    >
-      Target band: 15-35% per role.{' '}
-      {allInBand
-        ? 'All roles within target!'
-        : roles
-            .filter(([, s]) => s < 0.15 || s > 0.35)
-            .map(([r, s]) => `${r}: ${(s * 100).toFixed(1)}%`)
-            .join(', ') + ' out of band'}
-    </div>
-  )
-}
-
-function RoleMetaChart({ roleShares }: { roleShares: Record<string, number> }) {
-  const data = entries(roleShares)
-    .sort(([, a], [, b]) => b - a)
-    .map(([role, share]) => ({
-      role: role.charAt(0).toUpperCase() + role.slice(1),
-      share: Math.round(share * 1000) / 10,
-      fill: ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)',
-    }))
-
-  return (
-    <ResponsiveContainer width="100%" height={160}>
-      <BarChart
-        data={data}
-        layout="vertical"
-        margin={{ top: 0, right: 12, bottom: 0, left: 0 }}
-      >
-        <CartesianGrid
-          strokeDasharray="3 3"
-          stroke="oklch(1 0 0 / 4%)"
-          horizontal={false}
-        />
-        <XAxis
-          type="number"
-          domain={[0, 50]}
-          tickFormatter={(v: number) => `${v}%`}
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-        />
-        <YAxis
-          type="category"
-          dataKey="role"
-          width={60}
-          tick={{ fontSize: 11, fill: 'oklch(0.65 0.03 290)' }}
-        />
-        <RechartsTooltip
-          formatter={(value) => [`${value}%`, 'Meta Share']}
-          contentStyle={{
-            background: 'oklch(0.15 0.025 290)',
-            border: '1px solid oklch(1 0 0 / 8%)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
-        />
-        <Bar dataKey="share" radius={[0, 4, 4, 0]} barSize={20}>
-          {data.map((d, i) => (
-            <Cell key={i} fill={d.fill} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  )
-}
-
-function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
-  const data = snapshots.map((s) => ({
-    gen: s.generation,
-    top: Math.round(s.topFitness * 1000) / 10,
-    avg: Math.round(s.avgFitness * 1000) / 10,
-  }))
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
-        <XAxis
-          dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{
-            value: 'Generation',
-            position: 'insideBottom',
-            offset: -2,
-            fontSize: 10,
-            fill: 'oklch(0.65 0.03 290)',
-          }}
-        />
-        <YAxis
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          tickFormatter={(v: number) => `${v}%`}
-          domain={['dataMin - 2', 'dataMax + 2']}
-          width={40}
-        />
-        <RechartsTooltip
-          formatter={(value, name) => [
-            `${value}%`,
-            name === 'top' ? 'Top Fitness' : 'Avg Fitness',
-          ]}
-          contentStyle={{
-            background: 'oklch(0.15 0.025 290)',
-            border: '1px solid oklch(1 0 0 / 8%)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelFormatter={(label) => `Gen ${label}`}
-        />
-        <Legend
-          verticalAlign="top"
-          height={28}
-          formatter={(value: string) => (value === 'top' ? 'Top' : 'Avg')}
-          wrapperStyle={{ fontSize: 11 }}
-        />
-        <Line
-          type="monotone"
-          dataKey="top"
-          stroke={ROLE_COLOR_VALUES.striker}
-          strokeWidth={2}
-          dot={false}
-        />
-        <Line
-          type="monotone"
-          dataKey="avg"
-          stroke={ROLE_COLOR_VALUES.support}
-          strokeWidth={2}
-          dot={false}
-          opacity={0.7}
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  )
-}
-
-function MetricsChart({
-  snapshots,
-  population,
-  totalCreatures,
-}: {
-  snapshots: Array<GenerationSnapshot>
-  population: number
-  totalCreatures: number
-}) {
-  const data = snapshots.map((s) => ({
-    gen: s.generation,
-    avgTurns: Math.round(s.avgTurns * 10) / 10,
-    diversity: Math.min(
-      100,
-      Math.round((s.uniqueGenomes / population) * 1000) / 10,
-    ),
-    metaBreadth:
-      totalCreatures > 0
-        ? Math.round(
-            (Object.keys(s.creatureFrequency).length / totalCreatures) * 1000,
-          ) / 10
-        : 0,
-  }))
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
-        <XAxis
-          dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{
-            value: 'Generation',
-            position: 'insideBottom',
-            offset: -2,
-            fontSize: 10,
-            fill: 'oklch(0.65 0.03 290)',
-          }}
-        />
-        <YAxis
-          yAxisId="turns"
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          width={40}
-          label={{
-            value: 'Turns',
-            angle: -90,
-            position: 'insideLeft',
-            fontSize: 10,
-            fill: 'oklch(0.65 0.03 290)',
-          }}
-        />
-        <YAxis
-          yAxisId="diversity"
-          orientation="right"
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          tickFormatter={(v: number) => `${v}%`}
-          domain={[0, 100]}
-          width={40}
-        />
-        <RechartsTooltip
-          formatter={(value, name) => [
-            name === 'avgTurns' ? `${value} turns` : `${value}%`,
-            name === 'avgTurns'
-              ? 'Avg Turns'
-              : name === 'metaBreadth'
-                ? 'Meta Breadth'
-                : 'Diversity',
-          ]}
-          contentStyle={{
-            background: 'oklch(0.15 0.025 290)',
-            border: '1px solid oklch(1 0 0 / 8%)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelFormatter={(label) => `Gen ${label}`}
-        />
-        <Legend
-          verticalAlign="top"
-          height={28}
-          formatter={(value: string) =>
-            value === 'avgTurns'
-              ? 'Avg Turns'
-              : value === 'metaBreadth'
-                ? 'Meta Breadth'
-                : 'Diversity'
-          }
-          wrapperStyle={{ fontSize: 11 }}
-        />
-        <ReferenceArea
-          yAxisId="turns"
-          y1={AVG_TURNS_TARGET_MIN}
-          y2={AVG_TURNS_TARGET_MAX}
-          fill="oklch(0.65 0.15 145 / 8%)"
-          strokeDasharray="4 4"
-          stroke="oklch(0.65 0.15 145 / 25%)"
-        />
-        <Line
-          yAxisId="turns"
-          type="monotone"
-          dataKey="avgTurns"
-          stroke={ROLE_COLOR_VALUES.bruiser}
-          strokeWidth={2}
-          dot={false}
-        />
-        <Line
-          yAxisId="diversity"
-          type="monotone"
-          dataKey="diversity"
-          stroke={ROLE_COLOR_VALUES.tank}
-          strokeWidth={2}
-          dot={false}
-          opacity={0.7}
-        />
-        <Line
-          yAxisId="diversity"
-          type="monotone"
-          dataKey="metaBreadth"
-          stroke={ROLE_COLOR_VALUES.striker}
-          strokeWidth={2}
-          dot={false}
-          opacity={0.7}
-          strokeDasharray="4 3"
-        />
-      </LineChart>
-    </ResponsiveContainer>
-  )
-}
-
-function TurnsTargetIndicator({ avgTurns }: { avgTurns: number }) {
-  const inBand =
-    avgTurns >= AVG_TURNS_TARGET_MIN && avgTurns <= AVG_TURNS_TARGET_MAX
-
-  return (
-    <div
-      className={cn(
-        'mt-3 rounded-lg px-3 py-2 text-[11px]',
-        inBand
-          ? 'bg-success/10 text-success'
-          : 'bg-destructive/10 text-destructive',
-      )}
-    >
-      Target: {AVG_TURNS_TARGET_MIN}-{AVG_TURNS_TARGET_MAX} avg turns.{' '}
-      {inBand
-        ? `${avgTurns.toFixed(1)} turns — within target!`
-        : avgTurns < AVG_TURNS_TARGET_MIN
-          ? `${avgTurns.toFixed(1)} turns — too short (damage too high or HP too low)`
-          : `${avgTurns.toFixed(1)} turns — too long (damage too low or HP too high)`}
-    </div>
-  )
-}
-
-function DiversityIndicator({ diversity }: { diversity: number }) {
-  const healthy = diversity >= 30
-
-  return (
-    <div
-      className={cn(
-        'mt-2 rounded-lg px-3 py-2 text-[11px]',
-        healthy
-          ? 'bg-success/10 text-success'
-          : 'bg-warning/10 text-warning',
-      )}
-    >
-      <span className="font-medium">Diversity: {diversity.toFixed(0)}%</span>
-      <span className="ml-1.5 opacity-75">
-        — % of unique team compositions in the population.{' '}
-        {healthy
-          ? 'Healthy variety in team building.'
-          : 'Low diversity — meta is converging on a few dominant teams.'}
-      </span>
-    </div>
-  )
-}
-
-function MetaBreadthIndicator({ breadth }: { breadth: number }) {
-  const healthy = breadth >= 50
-
-  return (
-    <div
-      className={cn(
-        'mt-2 rounded-lg px-3 py-2 text-[11px]',
-        healthy
-          ? 'bg-success/10 text-success'
-          : 'bg-warning/10 text-warning',
-      )}
-    >
-      <span className="font-medium">Meta Breadth: {breadth.toFixed(0)}%</span>
-      <span className="ml-1.5 opacity-75">
-        — % of creatures appearing in top teams.{' '}
-        {healthy
-          ? 'Wide variety of creatures seeing play.'
-          : 'Narrow meta — few creatures dominate winning teams.'}
-      </span>
-    </div>
-  )
-}
-
-function RoleEvolutionChart({
-  snapshots,
-}: {
-  snapshots: Array<GenerationSnapshot>
-}) {
-  const data = snapshots.map((s) => {
-    const total = Object.values(s.roleDistribution).reduce((a, b) => a + b, 0)
-    const row: Record<string, number> = { gen: s.generation }
-    for (const role of ROLE_ORDER) {
-      row[role] =
-        total > 0
-          ? Math.round(((s.roleDistribution[role] ?? 0) / total) * 1000) / 10
-          : 0
-    }
-    return row
-  })
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <AreaChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
-        <XAxis
-          dataKey="gen"
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          label={{
-            value: 'Generation',
-            position: 'insideBottom',
-            offset: -2,
-            fontSize: 10,
-            fill: 'oklch(0.65 0.03 290)',
-          }}
-        />
-        <YAxis
-          tick={{ fontSize: 10, fill: 'oklch(0.65 0.03 290)' }}
-          tickFormatter={(v: number) => `${v}%`}
-          domain={[0, 100]}
-          width={40}
-        />
-        <RechartsTooltip
-          formatter={(value, name) => [
-            `${value}%`,
-            String(name).charAt(0).toUpperCase() + String(name).slice(1),
-          ]}
-          contentStyle={{
-            background: 'oklch(0.15 0.025 290)',
-            border: '1px solid oklch(1 0 0 / 8%)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelStyle={{ color: 'oklch(0.9 0.02 290)' }}
-          labelFormatter={(label) => `Gen ${label}`}
-        />
-        <Legend
-          verticalAlign="top"
-          height={28}
-          formatter={(value: string) =>
-            value.charAt(0).toUpperCase() + value.slice(1)
-          }
-          wrapperStyle={{ fontSize: 11 }}
-        />
-        {ROLE_ORDER.map((role) => (
-          <Area
-            key={role}
-            type="monotone"
-            dataKey={role}
-            stackId="1"
-            fill={ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)'}
-            stroke={ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)'}
-            fillOpacity={0.6}
-          />
-        ))}
-      </AreaChart>
-    </ResponsiveContainer>
-  )
-}
-
-function FormationChart({
-  formationShares,
-}: {
-  formationShares: Record<string, number>
-}) {
-  const data = entries(formationShares)
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, share]) => ({
-      name,
-      value: Math.round(share * 1000) / 10,
-    }))
-
-  return (
-    <ResponsiveContainer width="100%" height={200}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="value"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={75}
-          innerRadius={40}
-          paddingAngle={2}
-          label={({ name, value }) => `${name ?? ''} ${value}%`}
-          labelLine={{ stroke: 'oklch(0.65 0.03 290)' }}
-          fontSize={10}
-        >
-          {data.map((_, i) => (
-            <Cell
-              key={i}
-              fill={FORMATION_COLORS[i % FORMATION_COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <RechartsTooltip
-          formatter={(value) => [`${value}%`, 'Usage']}
-          contentStyle={{
-            background: 'oklch(0.15 0.025 290)',
-            border: '1px solid oklch(1 0 0 / 8%)',
-            borderRadius: 8,
-            fontSize: 12,
-          }}
-          itemStyle={{ color: 'oklch(0.9 0.02 290)' }}
-        />
-      </PieChart>
-    </ResponsiveContainer>
   )
 }

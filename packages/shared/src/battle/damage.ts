@@ -1,31 +1,10 @@
-import { COMBAT_DAMAGE_SCALE } from './constants'
+import { COMBAT_DAMAGE_SCALE, DEF_SCALING_CONSTANT } from './constants'
 import type {
   BattleCreature,
   DamageCalcResult,
   Effect,
   SeededRng,
 } from './types'
-
-// ─── Diet Effectiveness ────────────────────────────────────────────
-
-const DIET_ADVANTAGE: Partial<Record<string, Array<string>>> = {
-  Carnivorous: ['Herbivorous', 'Herbivorous/omnivorous'],
-  Herbivorous: ['Omnivorous'],
-  'Herbivorous/omnivorous': ['Omnivorous'],
-  Omnivorous: ['Carnivorous'],
-  Piscivorous: ['Carnivorous'],
-}
-
-export function getDietModifier(
-  attackerDiet: string,
-  defenderDiet: string,
-): number {
-  const advantages = DIET_ADVANTAGE[attackerDiet]
-  if (advantages && advantages.includes(defenderDiet)) return 1.15
-  const defAdvantages = DIET_ADVANTAGE[defenderDiet]
-  if (defAdvantages && defAdvantages.includes(attackerDiet)) return 0.85
-  return 1.0
-}
 
 // ─── Damage Calculation ────────────────────────────────────────────
 
@@ -35,12 +14,14 @@ export function calculateDamage({
   effect,
   rng,
   damageScale,
+  defScaling,
 }: {
   attacker: BattleCreature
   defender: BattleCreature
   effect: Effect & { type: 'damage' }
   rng: SeededRng
   damageScale?: number
+  defScaling?: number
 }): DamageCalcResult {
   const stat = effect.scaling === 'def' ? attacker.def : attacker.atk
 
@@ -56,8 +37,9 @@ export function calculateDamage({
     rawDamage *= 1 + critBonus
   }
 
-  // DEF mitigation: 100 / (100 + DEF)
-  rawDamage = rawDamage * (100 / (100 + defender.def))
+  // DEF mitigation: K / (K + DEF), where lower K makes DEF stronger
+  const defK = defScaling ?? DEF_SCALING_CONSTANT
+  rawDamage = rawDamage * (defK / (defK + defender.def))
 
   // Variance: +/- 10%
   rawDamage *= rng.nextFloat(0.9, 1.1)
@@ -74,11 +56,6 @@ export function calculateDamage({
     )
     rawDamage = Math.max(1, rawDamage - flatReduction)
   }
-
-  // Diet modifier
-  const dietMod = getDietModifier(attacker.diet, defender.diet)
-  rawDamage *= dietMod
-  const isDietBonus = dietMod !== 1.0
 
   // Global damage scaling
   rawDamage *= damageScale ?? COMBAT_DAMAGE_SCALE
@@ -103,6 +80,5 @@ export function calculateDamage({
     damage: finalDamage,
     isCrit,
     isDodged,
-    isDietBonus,
   }
 }

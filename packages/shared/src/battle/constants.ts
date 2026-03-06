@@ -3,6 +3,9 @@ import type { Ability, AbilityTemplate, Role } from './types'
 // ─── Combat Tuning ─────────────────────────────────────────────────
 // Global damage multiplier — scales ALL damage output to control battle length.
 export const COMBAT_DAMAGE_SCALE = 0.6
+// DEF formula constant: damage *= DEF_SCALING / (DEF_SCALING + def)
+// Lower values make DEF stronger. At 100 (default), DEF 60 = 62.5% through. At 80, DEF 60 = 57.1%.
+export const DEF_SCALING_CONSTANT = 100
 
 // ─── Rarity Base Stat Totals ────────────────────────────────────────
 
@@ -14,7 +17,7 @@ export const RARITY_BASE_TOTALS: Record<string, number> = {
   legendary: 280,
 }
 
-// ─── Role Stat Distributions (4 stats, no ABL) ─────────────────────
+// ─── Role Stat Distributions ─────────────────────
 
 export const ROLE_DISTRIBUTIONS: Record<
   Role,
@@ -319,8 +322,8 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   {
     id: 'predator_instinct',
     name: 'Predator Instinct',
-    trigger: { type: 'onBasicAttack' },
-    effects: [{ type: 'buff', stat: 'atk', percent: 20, duration: 1 }],
+    trigger: { type: 'onBeforeAttack' },
+    effects: [{ type: 'buff', stat: 'atk', percent: 20, duration: 2 }],
     target: 'self',
     condition: { type: 'target_hp_below', percent: 50 },
     description: '+20% ATK when attacking a target below 50% HP.',

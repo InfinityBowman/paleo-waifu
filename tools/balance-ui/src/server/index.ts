@@ -5,6 +5,7 @@ import {
   ACTIVE_ABILITY_TEMPLATES,
   ALL_ABILITY_TEMPLATES,
   COMBAT_DAMAGE_SCALE,
+  DEF_SCALING_CONSTANT,
   PASSIVE_ABILITY_TEMPLATES,
   RARITY_BASE_TOTALS,
   ROLE_DISTRIBUTIONS,
@@ -48,6 +49,7 @@ function getConstantsSnapshot(): ConstantsSnapshot {
       Object.entries(ROLE_DISTRIBUTIONS).map(([k, v]) => [k, { ...v }]),
     ),
     combatDamageScale: COMBAT_DAMAGE_SCALE,
+    defScalingConstant: DEF_SCALING_CONSTANT,
     activeTemplates: ACTIVE_ABILITY_TEMPLATES,
     passiveTemplates: PASSIVE_ABILITY_TEMPLATES,
   }
@@ -186,11 +188,54 @@ function buildTemplateMap(
   return map
 }
 
+// ─── Synthetic Creature Generator ────────────────────────────────
+
+function generateSyntheticCreatures(): Array<CreatureRecord> {
+  const BASELINE_TOTAL = 170 // "rare" equivalent
+  const roles = Object.keys(ROLE_DISTRIBUTIONS)
+  const actives = ACTIVE_ABILITY_TEMPLATES.filter((t) => t.id !== 'basic_attack')
+  const passives = PASSIVE_ABILITY_TEMPLATES.filter((t) => t.id !== 'none')
+  const creatures: Array<CreatureRecord> = []
+
+  for (const role of roles) {
+    const dist = ROLE_DISTRIBUTIONS[role as keyof typeof ROLE_DISTRIBUTIONS]
+    const hp = Math.round(BASELINE_TOTAL * dist.hp)
+    const atk = Math.round(BASELINE_TOTAL * dist.atk)
+    const def = Math.round(BASELINE_TOTAL * dist.def)
+    const spd = Math.round(BASELINE_TOTAL * dist.spd)
+
+    for (const active of actives) {
+      for (const passive of passives) {
+        const id = `syn-${role}-${active.id}-${passive.id}`
+        creatures.push({
+          id,
+          name: `${role}/${active.name}/${passive.name}`,
+          era: 'Synthetic',
+          diet: 'Omnivorous',
+          rarity: 'rare',
+          type: 'Synthetic',
+          role,
+          hp,
+          atk,
+          def,
+          spd,
+          active: { templateId: active.id, displayName: active.name },
+          passive: { templateId: passive.id, displayName: passive.name },
+        })
+      }
+    }
+  }
+
+  return creatures
+}
+
 // ─── Sim SSE Endpoint ────────────────────────────────────────────
 
 app.post('/api/sim', async (c) => {
   const body: SimRequest = await c.req.json()
-  const base = getCreatures()
+  const base = body.options.syntheticMode
+    ? generateSyntheticCreatures()
+    : getCreatures()
 
   // Normalize BEFORE applying overrides so role/rarity modifiers aren't erased
   let creatures = base
@@ -230,6 +275,10 @@ app.post('/api/sim', async (c) => {
     return c.json({ error: 'Need at least 3 enabled creatures' }, 400)
   }
 
+  if (body.options.syntheticMode) {
+    console.log(`Synthetic mode: ${creatures.length} virtual creatures`)
+  }
+
   const templateMap = buildTemplateMap(body.constants.abilityOverrides)
 
   const encoder = new TextEncoder()
@@ -248,6 +297,7 @@ app.post('/api/sim', async (c) => {
           csv: false,
           templateMap,
           damageScale: body.constants.combatDamageScale,
+          defScaling: body.constants.defScalingConstant,
           onGeneration: (gen, snap) => {
             send({
               type: 'generation',
