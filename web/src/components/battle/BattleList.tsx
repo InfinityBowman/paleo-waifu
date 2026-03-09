@@ -5,12 +5,14 @@ import { toast } from 'sonner'
 import { BattleTeamPicker } from './BattleTeamPicker'
 import type { TeamSlot } from './BattleTeamPicker'
 import type { BattleReadyCreature } from './BattleCreatureSlot'
+import { IconMagnifyingGlass } from '@/components/icons'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -238,26 +240,26 @@ export function BattleList({
 
   return (
     <Tabs defaultValue="challenge">
-      <TabsList className="w-full">
-        <TabsTrigger value="challenge" className="flex-1 gap-1">
+      <TabsList variant="glass" className="w-full">
+        <TabsTrigger value="challenge" className="flex-1 gap-1.5">
           <Swords className="h-4 w-4" />
           Challenge
           {outgoing.length > 0 && (
-            <span className="ml-1 rounded-full bg-amber-500/20 px-1.5 text-xs text-amber-400">
+            <span className="ml-1 rounded-full bg-amber-500/20 px-1.5 text-xs font-semibold text-amber-400">
               {outgoing.length}
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="incoming" className="flex-1 gap-1">
+        <TabsTrigger value="incoming" className="flex-1 gap-1.5">
           <Shield className="h-4 w-4" />
           Incoming
           {incoming.length > 0 && (
-            <span className="ml-1 rounded-full bg-red-500/20 px-1.5 text-xs text-red-400">
+            <span className="ml-1 rounded-full bg-red-500/20 px-1.5 text-xs font-semibold text-red-400">
               {incoming.length}
             </span>
           )}
         </TabsTrigger>
-        <TabsTrigger value="history" className="flex-1 gap-1">
+        <TabsTrigger value="history" className="flex-1 gap-1.5">
           <History className="h-4 w-4" />
           History
         </TabsTrigger>
@@ -266,16 +268,21 @@ export function BattleList({
       {/* ── Challenge Tab ────────────────────────────── */}
       <TabsContent value="challenge" className="space-y-6">
         {/* Opponent Search */}
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-sm font-semibold">Find Opponent</h3>
+        <div className="rounded-xl border border-border bg-card/50 p-5">
+          <h3 className="mb-3 font-display text-sm font-semibold">
+            Find Opponent
+          </h3>
           <div className="flex gap-2">
-            <Input
-              placeholder="Search by username..."
-              value={opponentSearch}
-              onChange={(e) => setOpponentSearch(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearchUsers()}
-              className="flex-1"
-            />
+            <div className="relative flex-1">
+              <IconMagnifyingGlass className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search by username..."
+                value={opponentSearch}
+                onChange={(e) => setOpponentSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchUsers()}
+                className="pl-9"
+              />
+            </div>
             <Button
               variant="outline"
               onClick={handleSearchUsers}
@@ -285,7 +292,7 @@ export function BattleList({
             </Button>
           </div>
           {searchResults.length > 0 && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-3 space-y-1 rounded-lg border border-border/50 bg-muted/10 p-1">
               {searchResults.map((u) => (
                 <button
                   key={u.id}
@@ -293,37 +300,44 @@ export function BattleList({
                     setSelectedOpponent(u)
                     setSearchResults([])
                   }}
-                  className={`flex w-full items-center gap-2 rounded px-3 py-2 text-sm transition-colors hover:bg-muted/40 ${
+                  className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
                     selectedOpponent?.id === u.id
-                      ? 'bg-amber-500/10 text-amber-400'
-                      : ''
+                      ? 'bg-primary/10 text-primary'
+                      : 'hover:bg-muted/30'
                   }`}
                 >
-                  {u.image && (
+                  {u.image ? (
                     <img
                       src={u.image}
                       alt=""
-                      className="h-6 w-6 rounded-full"
+                      className="h-7 w-7 rounded-full"
                     />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/30 text-xs">
+                      {u.name[0]}
+                    </div>
                   )}
-                  {u.name}
+                  <span className="font-medium">{u.name}</span>
                 </button>
               ))}
             </div>
           )}
           {selectedOpponent && (
-            <p className="mt-2 text-sm">
-              Challenging:{' '}
-              <span className="font-semibold text-amber-400">
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-primary/8 px-3 py-2 text-sm">
+              <Swords className="h-3.5 w-3.5 text-primary" />
+              <span className="text-muted-foreground">Challenging</span>
+              <span className="font-display font-semibold text-primary">
                 {selectedOpponent.name}
               </span>
-            </p>
+            </div>
           )}
         </div>
 
         {/* Team Picker */}
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="mb-3 text-sm font-semibold">Your Team</h3>
+        <div className="rounded-xl border border-border bg-card/50 p-5">
+          <h3 className="mb-3 font-display text-sm font-semibold">
+            Your Team
+          </h3>
           <BattleTeamPicker
             creatures={battleReadyCreatures}
             value={challengeTeam}
@@ -338,14 +352,17 @@ export function BattleList({
               loading === 'challenge'
             }
           >
+            <Swords className="mr-2 h-4 w-4" />
             {loading === 'challenge' ? 'Sending...' : 'Send Challenge'}
           </Button>
         </div>
 
         {/* Team Presets */}
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="rounded-xl border border-border bg-card/50 p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold">Team Presets</h3>
+            <h3 className="font-display text-sm font-semibold">
+              Team Presets
+            </h3>
             <Button
               variant="outline"
               size="sm"
@@ -361,7 +378,7 @@ export function BattleList({
             </Button>
           </div>
           {presets.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
+            <p className="py-4 text-center text-sm text-muted-foreground/60">
               Save a team preset to quickly load it for battles.
             </p>
           ) : (
@@ -369,11 +386,13 @@ export function BattleList({
               {presets.map((preset) => (
                 <div
                   key={preset.id}
-                  className="flex items-center justify-between rounded-lg border border-border px-3 py-2"
+                  className="flex items-center justify-between rounded-lg border border-border/50 bg-muted/10 px-4 py-2.5 transition-colors hover:bg-muted/20"
                 >
                   <div>
-                    <p className="text-sm font-medium">{preset.name}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="font-display text-sm font-medium">
+                      {preset.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground/60">
                       {preset.members.length} creatures
                     </p>
                   </div>
@@ -441,21 +460,23 @@ export function BattleList({
         {/* Outgoing Challenges */}
         {outgoing.length > 0 && (
           <div>
-            <h3 className="mb-2 text-sm font-semibold text-muted-foreground">
+            <h3 className="mb-2 font-display text-sm font-semibold text-muted-foreground">
               Pending Outgoing
             </h3>
             <div className="space-y-2">
               {outgoing.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+                  className="flex items-center justify-between rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3"
                 >
                   <div>
                     <p className="text-sm">
                       You challenged{' '}
-                      <span className="font-semibold">{c.defenderName}</span>
+                      <span className="font-display font-semibold">
+                        {c.defenderName}
+                      </span>
                     </p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground/60">
                       {c.createdAt
                         ? new Date(c.createdAt).toLocaleDateString()
                         : ''}
@@ -484,25 +505,41 @@ export function BattleList({
       {/* ── Incoming Tab ─────────────────────────────── */}
       <TabsContent value="incoming" className="space-y-3">
         {incoming.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No pending challenges
-          </p>
+          <div className="flex flex-col items-center py-12 text-muted-foreground/50">
+            <Shield className="mb-3 h-8 w-8" />
+            <p className="text-sm">No pending challenges</p>
+          </div>
         ) : (
           incoming.map((c) => (
             <div
               key={c.id}
-              className="flex items-center justify-between rounded-lg border border-border px-4 py-3"
+              className="flex items-center justify-between rounded-xl border border-red-500/20 bg-red-500/5 px-4 py-3"
             >
-              <div>
-                <p className="text-sm">
-                  <span className="font-semibold">{c.challengerName}</span>{' '}
-                  challenges you!
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {c.createdAt
-                    ? new Date(c.createdAt).toLocaleDateString()
-                    : ''}
-                </p>
+              <div className="flex items-center gap-3">
+                {c.challengerImage ? (
+                  <img
+                    src={c.challengerImage}
+                    alt=""
+                    className="h-8 w-8 rounded-full"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted/30 text-xs font-medium">
+                    {c.challengerName[0]}
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm">
+                    <span className="font-display font-semibold">
+                      {c.challengerName}
+                    </span>{' '}
+                    challenges you!
+                  </p>
+                  <p className="text-xs text-muted-foreground/60">
+                    {c.createdAt
+                      ? new Date(c.createdAt).toLocaleDateString()
+                      : ''}
+                  </p>
+                </div>
               </div>
               <div className="flex gap-2">
                 <Button
@@ -512,6 +549,7 @@ export function BattleList({
                     setAcceptTeam(EMPTY_TEAM)
                   }}
                 >
+                  <Swords className="mr-1.5 h-3.5 w-3.5" />
                   Accept
                 </Button>
                 <Button
@@ -536,26 +574,37 @@ export function BattleList({
       {/* ── History Tab ──────────────────────────────── */}
       <TabsContent value="history" className="space-y-2">
         {history.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No battle history yet
-          </p>
+          <div className="flex flex-col items-center py-12 text-muted-foreground/50">
+            <History className="mb-3 h-8 w-8" />
+            <p className="text-sm">No battle history yet</p>
+          </div>
         ) : (
           history.map((c) => {
             const iWon = c.winnerId === userId
             const isDraw = !c.winnerId && c.status === 'resolved'
             const opponentName =
               c.challengerId === userId ? c.defenderName : c.challengerName
+            const opponentImage =
+              c.challengerId === userId ? c.defenderImage : c.challengerImage
             return (
               <Link
                 key={c.id}
                 to="/battle/$id"
                 params={{ id: c.id }}
-                className="flex items-center justify-between rounded-lg border border-border px-4 py-3 transition-colors hover:bg-muted/20"
+                className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-all duration-200 hover:-translate-y-0.5 hover:bg-muted/10 ${
+                  c.status === 'resolved'
+                    ? iWon
+                      ? 'border-green-500/20 bg-green-500/5'
+                      : isDraw
+                        ? 'border-border bg-muted/5'
+                        : 'border-red-500/20 bg-red-500/5'
+                    : 'border-border bg-muted/5'
+                }`}
               >
                 <div className="flex items-center gap-3">
                   {c.status === 'resolved' && (
                     <span
-                      className={`text-xs font-bold ${
+                      className={`font-display text-xs font-bold ${
                         iWon
                           ? 'text-green-400'
                           : isDraw
@@ -567,13 +616,29 @@ export function BattleList({
                     </span>
                   )}
                   {c.status !== 'resolved' && (
-                    <span className="text-xs capitalize text-muted-foreground">
+                    <span className="text-xs capitalize text-muted-foreground/60">
                       {c.status}
                     </span>
                   )}
+                  {opponentImage ? (
+                    <img
+                      src={opponentImage}
+                      alt=""
+                      className="h-7 w-7 rounded-full"
+                    />
+                  ) : (
+                    <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/30 text-xs">
+                      {opponentName[0]}
+                    </div>
+                  )}
                   <div>
-                    <p className="text-sm">vs {opponentName}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-sm">
+                      vs{' '}
+                      <span className="font-display font-medium">
+                        {opponentName}
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground/60">
                       {c.resolvedAt
                         ? new Date(c.resolvedAt).toLocaleDateString()
                         : c.createdAt
@@ -600,7 +665,10 @@ export function BattleList({
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Pick Your Team</DialogTitle>
+            <DialogTitle className="font-display">Pick Your Team</DialogTitle>
+            <DialogDescription>
+              Choose 3 creatures to battle with
+            </DialogDescription>
           </DialogHeader>
           <BattleTeamPicker
             creatures={battleReadyCreatures}
@@ -609,17 +677,18 @@ export function BattleList({
           />
           {/* Quick-load from presets */}
           {presets.length > 0 && (
-            <div className="mt-2">
-              <p className="mb-1 text-xs text-muted-foreground">
-                Or load a preset:
+            <div className="rounded-lg border border-border/50 bg-muted/10 p-3">
+              <p className="mb-2 text-xs font-medium text-muted-foreground/60">
+                Quick load preset
               </p>
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-1.5">
                 {presets.map((p) => (
                   <Button
                     key={p.id}
                     variant="outline"
                     size="sm"
                     onClick={() => setAcceptTeam(loadPreset(p))}
+                    className="text-xs"
                   >
                     {p.name}
                   </Button>
@@ -628,7 +697,7 @@ export function BattleList({
             </div>
           )}
           <Button
-            className="mt-4 w-full"
+            className="mt-2 w-full"
             onClick={() =>
               acceptingChallengeId && handleAccept(acceptingChallengeId)
             }
@@ -637,6 +706,7 @@ export function BattleList({
               loading?.startsWith('accept:')
             }
           >
+            <Swords className="mr-2 h-4 w-4" />
             {loading?.startsWith('accept:')
               ? 'Battling...'
               : 'Accept & Battle!'}
@@ -658,9 +728,12 @@ export function BattleList({
       >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="font-display">
               {editingPreset ? 'Edit Preset' : 'New Preset'}
             </DialogTitle>
+            <DialogDescription>
+              Save a team composition for quick access
+            </DialogDescription>
           </DialogHeader>
           <div>
             <Input
@@ -685,7 +758,7 @@ export function BattleList({
             onChange={setPresetTeam}
           />
           <Button
-            className="mt-4 w-full"
+            className="mt-2 w-full"
             onClick={handleSavePreset}
             disabled={
               presetTeam.filter(Boolean).length !== 3 ||

@@ -1,3 +1,4 @@
+import { Sparkles } from 'lucide-react'
 import type { BattleReadyCreature } from './BattleCreatureSlot'
 
 interface SynergyPreviewProps {
@@ -94,9 +95,9 @@ export function SynergyPreview({ creatures }: SynergyPreviewProps) {
 
   if (synergies.length === 0) {
     return (
-      <div className="text-xs text-muted-foreground/50">
+      <p className="text-center text-xs italic text-muted-foreground/40">
         Add creatures to see synergies
-      </div>
+      </p>
     )
   }
 
@@ -105,10 +106,13 @@ export function SynergyPreview({ creatures }: SynergyPreviewProps) {
       {synergies.map((s) => (
         <div
           key={s.label}
-          className="rounded-md bg-amber-500/10 px-2 py-1 text-xs"
+          className="flex items-center gap-1.5 rounded-lg border border-amber-500/20 bg-amber-500/8 px-2.5 py-1.5 text-xs"
         >
-          <span className="font-semibold text-amber-400">{s.label}</span>
-          <span className="ml-1 text-muted-foreground">{s.description}</span>
+          <Sparkles className="h-3 w-3 shrink-0 text-amber-400" />
+          <span className="font-display font-semibold text-amber-300">
+            {s.label}
+          </span>
+          <span className="text-muted-foreground">{s.description}</span>
         </div>
       ))}
     </div>

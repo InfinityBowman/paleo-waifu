@@ -1,13 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, like, or } from 'drizzle-orm'
+import { desc, eq, inArray, like, or } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { createDb } from '@paleo-waifu/shared/db/client'
+import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
 import {
   battleChallenge,
   battleRating,
   battleTeamPreset,
   creature,
+  creatureAbility,
   creatureBattleStats,
   user,
   userCreature,
@@ -16,6 +18,8 @@ import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { expireStaleChallenges, getArenaTier } from '@/lib/battle'
 import { BattleList } from '@/components/battle/BattleList'
+
+const TEMPLATE_MAP = new Map(ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]))
 
 export const searchUsers = createServerFn({ method: 'GET' })
   .inputValidator((d: { query: string; excludeId: string }) => d)
@@ -138,6 +142,52 @@ const getBattleData = createServerFn({ method: 'GET' })
           .get(),
       ])
 
+    // Load abilities for battle-ready creatures
+    const creatureIds = [
+      ...new Set(battleReadyCreatures.map((c) => c.creatureId)),
+    ]
+    const abilities =
+      creatureIds.length > 0
+        ? await db
+            .select({
+              creatureId: creatureAbility.creatureId,
+              templateId: creatureAbility.templateId,
+              slot: creatureAbility.slot,
+              displayName: creatureAbility.displayName,
+            })
+            .from(creatureAbility)
+            .where(inArray(creatureAbility.creatureId, creatureIds))
+            .all()
+        : []
+
+    // Build ability lookup: creatureId → { active, passive }
+    const abilityMap = new Map<
+      string,
+      {
+        active?: { displayName: string; description: string; cooldown: number }
+        passive?: { displayName: string; description: string }
+      }
+    >()
+    for (const a of abilities) {
+      const template = TEMPLATE_MAP.get(a.templateId)
+      if (!template) continue
+      const entry = abilityMap.get(a.creatureId) ?? {}
+      if (a.slot === 'active') {
+        entry.active = {
+          displayName: a.displayName,
+          description: template.description,
+          cooldown:
+            template.trigger.type === 'onUse' ? template.trigger.cooldown : 1,
+        }
+      } else {
+        entry.passive = {
+          displayName: a.displayName,
+          description: template.description,
+        }
+      }
+      abilityMap.set(a.creatureId, entry)
+    }
+
     const incoming = challenges.filter(
       (c) => c.status === 'pending' && c.defenderId === userId,
     )
@@ -157,10 +207,15 @@ const getBattleData = createServerFn({ method: 'GET' })
           row: 'front' | 'back'
         }>,
       })),
-      battleReadyCreatures: battleReadyCreatures.map((c) => ({
-        ...c,
-        imageUrl: toCdnUrl(c.imageUrl),
-      })),
+      battleReadyCreatures: battleReadyCreatures.map((c) => {
+        const abs = abilityMap.get(c.creatureId)
+        return {
+          ...c,
+          imageUrl: toCdnUrl(c.imageUrl),
+          active: abs?.active ?? null,
+          passive: abs?.passive ?? null,
+        }
+      }),
       userId,
       myRating: myRating
         ? {
@@ -185,15 +240,24 @@ function BattlePage() {
     <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-400">
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold">Arena</h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Challenge other players to battle with your prehistoric team.
         </p>
-        <div className="mt-2 flex items-center gap-3 text-sm">
-          <span className="font-semibold">
-            {data.myRating.tier} — {data.myRating.rating} Rating
+        <div className="mt-3 inline-flex items-center gap-3 rounded-lg border border-border bg-card/50 px-4 py-2 text-sm">
+          <span className="font-display font-semibold text-primary">
+            {data.myRating.tier}
           </span>
+          <span className="text-muted-foreground/30">|</span>
+          <span className="font-medium">{data.myRating.rating} Rating</span>
+          <span className="text-muted-foreground/30">|</span>
           <span className="text-muted-foreground">
-            {data.myRating.wins}W / {data.myRating.losses}L
+            <span className="font-medium text-green-400">
+              {data.myRating.wins}W
+            </span>
+            {' / '}
+            <span className="font-medium text-red-400">
+              {data.myRating.losses}L
+            </span>
           </span>
         </div>
       </div>

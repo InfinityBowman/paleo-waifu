@@ -1,10 +1,16 @@
 import { useMemo, useState } from 'react'
+import { Shield, Zap } from 'lucide-react'
 import { BattleCreatureSlot } from './BattleCreatureSlot'
 import { SynergyPreview } from './SynergyPreview'
 import type { BattleReadyCreature } from './BattleCreatureSlot'
+import type { Rarity } from '@paleo-waifu/shared/types'
+import { IconFossil, IconMagnifyingGlass } from '@/components/icons'
+import { cn } from '@/lib/utils'
+import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -33,6 +39,13 @@ const DEFAULT_ROW_FOR_ROLE: Record<string, 'front' | 'back'> = {
   bruiser: 'front',
   striker: 'back',
   support: 'back',
+}
+
+const ROLE_COLOR: Record<string, string> = {
+  striker: 'text-red-400',
+  tank: 'text-blue-400',
+  support: 'text-green-400',
+  bruiser: 'text-orange-400',
 }
 
 export function BattleTeamPicker({
@@ -134,16 +147,26 @@ export function BattleTeamPicker({
       >
         <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Select Creature</DialogTitle>
+            <DialogTitle className="font-display">
+              Choose Your Creature
+            </DialogTitle>
+            <DialogDescription>
+              {filtered.length} creature{filtered.length !== 1 ? 's' : ''}{' '}
+              available
+            </DialogDescription>
           </DialogHeader>
 
+          {/* Filters */}
           <div className="flex gap-2">
-            <Input
-              placeholder="Search by name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="flex-1"
-            />
+            <div className="relative flex-1">
+              <IconMagnifyingGlass className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-8"
+              />
+            </div>
             <Select value={rarityFilter} onValueChange={setRarityFilter}>
               <SelectTrigger className="w-28">
                 <SelectValue placeholder="Rarity" />
@@ -171,37 +194,86 @@ export function BattleTeamPicker({
             </Select>
           </div>
 
+          {/* Grid */}
           {filtered.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">
-              No battle-ready creatures found
-            </p>
+            <div className="flex flex-col items-center py-10 text-muted-foreground">
+              <IconFossil className="mb-2 h-8 w-8 text-muted-foreground/20" />
+              <p className="text-sm">No creatures match your filters</p>
+            </div>
           ) : (
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {filtered.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => handleSelect(c)}
-                  className="rounded-lg border border-border bg-card p-2 text-left transition-colors hover:border-amber-500/50 hover:bg-muted/40"
-                >
-                  {c.imageUrl ? (
-                    <img
-                      src={c.imageUrl}
-                      alt={c.name}
-                      className="h-14 w-full rounded object-contain"
-                    />
-                  ) : (
-                    <div className="flex h-16 items-center justify-center rounded bg-muted/30">
-                      <span className="text-lg">🦴</span>
+              {filtered.map((c) => {
+                const rarity = c.rarity as Rarity
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => handleSelect(c)}
+                    className={cn(
+                      'group overflow-hidden rounded-xl border-2 text-left transition-all duration-200 hover:-translate-y-0.5 hover:scale-[1.02]',
+                      RARITY_BORDER[rarity],
+                      RARITY_BG[rarity],
+                    )}
+                  >
+                    {c.imageUrl ? (
+                      <img
+                        src={c.imageUrl}
+                        alt={c.name}
+                        className="h-16 w-full object-contain transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="flex h-16 items-center justify-center bg-muted/20">
+                        <IconFossil className="h-6 w-6 text-muted-foreground/20" />
+                      </div>
+                    )}
+                    <div className="p-2">
+                      <p className="truncate font-display text-xs font-bold">
+                        {c.name}
+                      </p>
+                      <div className="mt-0.5 flex items-center gap-1">
+                        <span
+                          className={cn(
+                            'font-display text-[9px] font-semibold uppercase',
+                            RARITY_COLORS[rarity],
+                          )}
+                        >
+                          {rarity}
+                        </span>
+                        <span className="text-muted-foreground/30">
+                          &middot;
+                        </span>
+                        <span
+                          className={cn(
+                            'text-[9px] font-semibold capitalize',
+                            ROLE_COLOR[c.role] ?? 'text-muted-foreground',
+                          )}
+                        >
+                          {c.role}
+                        </span>
+                      </div>
+                      {(c.active || c.passive) && (
+                        <div className="mt-1 space-y-0.5">
+                          {c.active && (
+                            <div className="flex items-center gap-1 text-[9px]">
+                              <Zap className="h-2 w-2 shrink-0 text-amber-400" />
+                              <span className="truncate text-amber-300/80">
+                                {c.active.displayName}
+                              </span>
+                            </div>
+                          )}
+                          {c.passive && (
+                            <div className="flex items-center gap-1 text-[9px]">
+                              <Shield className="h-2 w-2 shrink-0 text-purple-400" />
+                              <span className="truncate text-purple-300/80">
+                                {c.passive.displayName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                  )}
-                  <p className="mt-1 truncate text-xs font-semibold">
-                    {c.name}
-                  </p>
-                  <p className="text-[10px] capitalize text-muted-foreground">
-                    {c.role} &middot; {c.rarity}
-                  </p>
-                </button>
-              ))}
+                  </button>
+                )
+              })}
             </div>
           )}
         </DialogContent>
