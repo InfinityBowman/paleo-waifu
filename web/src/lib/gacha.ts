@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid'
 import {
   bannerPool,
   creature,
+  creatureBattleStats,
   currency,
   pityCounter,
   userCreature,
@@ -181,6 +182,7 @@ interface PoolCreature {
   description: string
   era: string
   imageAspectRatio: number | null
+  isBattleReady: boolean
 }
 
 /** Select a creature from pre-fetched pool data (no DB queries) */
@@ -218,6 +220,7 @@ export interface PullResult {
   description: string
   era: string
   isNew: boolean
+  isBattleReady: boolean
 }
 
 /** Execute a batch of gacha pulls with minimal D1 round-trips (~7 vs ~90 for 10-pull) */
@@ -270,9 +273,17 @@ export async function executePullBatch(
         description: creature.description,
         era: creature.era,
         imageAspectRatio: creature.imageAspectRatio,
+        isBattleReady:
+          sql<boolean>`${creatureBattleStats.creatureId} IS NOT NULL`.as(
+            'is_battle_ready',
+          ),
       })
       .from(bannerPool)
       .innerJoin(creature, eq(creature.id, bannerPool.creatureId))
+      .leftJoin(
+        creatureBattleStats,
+        eq(creatureBattleStats.creatureId, creature.id),
+      )
       .where(eq(bannerPool.bannerId, bannerId))
       .all(),
   ])
@@ -323,8 +334,16 @@ export async function executePullBatch(
           era: creature.era,
           rarity: creature.rarity,
           imageAspectRatio: creature.imageAspectRatio,
+          isBattleReady:
+            sql<boolean>`${creatureBattleStats.creatureId} IS NOT NULL`.as(
+              'is_battle_ready',
+            ),
         })
         .from(creature)
+        .leftJoin(
+          creatureBattleStats,
+          eq(creatureBattleStats.creatureId, creature.id),
+        )
         .where(eq(creature.rarity, rarity))
         .all()
       if (fallback.length === 0)
@@ -340,6 +359,7 @@ export async function executePullBatch(
         description: picked.description,
         era: picked.era,
         imageAspectRatio: picked.imageAspectRatio,
+        isBattleReady: picked.isBattleReady,
       })
     }
 
@@ -412,6 +432,7 @@ export async function executePullBatch(
       description: data.description,
       era: data.era,
       isNew,
+      isBattleReady: data.isBattleReady,
     }
   })
 }

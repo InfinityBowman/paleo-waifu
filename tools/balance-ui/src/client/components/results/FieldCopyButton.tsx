@@ -13,12 +13,15 @@ export function FieldCopyButton({ result }: Props) {
 
   const handleCopy = useCallback(() => {
     const text = buildFieldTextSummary(result)
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }).catch(() => {
-      // clipboard may be denied — silently ignore
-    })
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {
+        // clipboard may be denied — silently ignore
+      })
   }, [result])
 
   return (

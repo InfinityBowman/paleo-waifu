@@ -154,7 +154,8 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     trigger: { type: 'onUse', cooldown: 2 },
     effects: [{ type: 'debuff', stat: 'def', percent: 25, duration: 4 }],
     target: 'single_enemy',
-    description: "Shatters an enemy's armor, reducing defense by 25% for 4 turns.",
+    description:
+      "Shatters an enemy's armor, reducing defense by 25% for 4 turns.",
     roleAffinity: ['support', 'bruiser'],
   },
   // ── Heal ──
@@ -196,7 +197,8 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
       { type: 'shield', percent: 40, duration: 2 },
     ],
     target: 'self',
-    description: 'Draws all single-target attacks to self for 2 turns, boosts DEF by 40%, and grants a shield absorbing 30% max HP.',
+    description:
+      'Draws all single-target attacks to self for 2 turns, boosts DEF by 40%, and grants a shield absorbing 30% max HP.',
     roleAffinity: ['tank'],
   },
 ]
@@ -337,7 +339,8 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     trigger: { type: 'onTurnStart' },
     effects: [{ type: 'debuff', stat: 'atk', percent: 25, duration: 2 }],
     target: 'random_enemy',
-    description: 'At the start of each turn, weakens a random enemy\'s ATK by 25% for 2 turns.',
+    description:
+      "At the start of each turn, weakens a random enemy's ATK by 25% for 2 turns.",
     roleAffinity: ['support'],
   },
   // ── No passive ──

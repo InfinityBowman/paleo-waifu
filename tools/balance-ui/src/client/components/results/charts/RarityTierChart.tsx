@@ -36,23 +36,20 @@ export function RarityTierChart({ creatures }: Props) {
       byRarity.set(c.rarity, entry)
     }
 
-    return RARITY_ORDER
-      .filter((r) => byRarity.has(r))
-      .map((rarity) => {
-        const { winRates, count } = byRarity.get(rarity)!
-        const sorted = [...winRates].sort((a, b) => a - b)
-        const median =
-          sorted.length % 2 === 0
-            ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-            : sorted[Math.floor(sorted.length / 2)]
-        const min = sorted[0]
-        const max = sorted[sorted.length - 1]
-        const q1 = sorted[Math.floor(sorted.length * 0.25)]
-        const q3 = sorted[Math.floor(sorted.length * 0.75)]
-        const avg =
-          winRates.reduce((sum, v) => sum + v, 0) / winRates.length
-        return { rarity, count, median, min, max, q1, q3, avg }
-      })
+    return RARITY_ORDER.filter((r) => byRarity.has(r)).map((rarity) => {
+      const { winRates, count } = byRarity.get(rarity)!
+      const sorted = [...winRates].sort((a, b) => a - b)
+      const median =
+        sorted.length % 2 === 0
+          ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+          : sorted[Math.floor(sorted.length / 2)]
+      const min = sorted[0]
+      const max = sorted[sorted.length - 1]
+      const q1 = sorted[Math.floor(sorted.length * 0.25)]
+      const q3 = sorted[Math.floor(sorted.length * 0.75)]
+      const avg = winRates.reduce((sum, v) => sum + v, 0) / winRates.length
+      return { rarity, count, median, min, max, q1, q3, avg }
+    })
   }, [creatures])
 
   return (
@@ -87,12 +84,20 @@ export function RarityTierChart({ creatures }: Props) {
             contentStyle={TOOLTIP_CONTENT_STYLE}
             itemStyle={TOOLTIP_ITEM_STYLE}
             labelStyle={TOOLTIP_LABEL_STYLE}
-            formatter={((value: number, name: string) => [
-              `${(value * 100).toFixed(1)}%`,
-              name === 'avg' ? 'Average' : name === 'median' ? 'Median' : name,
-            ]) as any}
-            labelFormatter={((label: string) =>
-              `${label.charAt(0).toUpperCase() + label.slice(1)}`) as any}
+            formatter={
+              ((value: number, name: string) => [
+                `${(value * 100).toFixed(1)}%`,
+                name === 'avg'
+                  ? 'Average'
+                  : name === 'median'
+                    ? 'Median'
+                    : name,
+              ]) as any
+            }
+            labelFormatter={
+              ((label: string) =>
+                `${label.charAt(0).toUpperCase() + label.slice(1)}`) as any
+            }
           />
           <ReferenceLine
             y={0.5}

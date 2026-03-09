@@ -17,6 +17,7 @@ The marketplace is a flat chronological list with no way to narrow results. As t
 ### Wishlist Integration
 
 Schema exists (`wishlist` table with `userId + creatureId` unique index) but is completely disconnected from the trade flow — only used in admin analytics. Needs:
+
 - API endpoints for add/remove wishlist entries
 - UI to manage wishlist (profile or collection page)
 - Marketplace integration: highlight trades offering wishlisted creatures, filter to wishlist matches, "someone wants your creature" prompts

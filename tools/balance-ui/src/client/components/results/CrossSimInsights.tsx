@@ -9,7 +9,10 @@ import {
 } from '../ui/card'
 import { SectionTooltip } from './SectionTooltip'
 import { ROLE_COLOR_VALUES } from './constants'
-import type { CreatureFieldStats, MetaRunResult } from '../../../shared/types.ts'
+import type {
+  CreatureFieldStats,
+  MetaRunResult,
+} from '../../../shared/types.ts'
 
 interface Props {
   fieldCreatures: Array<CreatureFieldStats>
@@ -70,8 +73,8 @@ export function CrossSimInsights({ fieldCreatures, metaResult }: Props) {
           </SectionTooltip>
         </div>
         <CardDescription>
-          Meta presence vs field win rate — {insights.crossData.length} creatures
-          cross-referenced
+          Meta presence vs field win rate — {insights.crossData.length}{' '}
+          creatures cross-referenced
         </CardDescription>
       </CardHeader>
       <CardContent>

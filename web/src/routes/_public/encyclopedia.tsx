@@ -2,7 +2,12 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { and, asc, eq, gt, or, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { creature } from '@paleo-waifu/shared/db/schema'
+import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
+import {
+  creature,
+  creatureAbility,
+  creatureBattleStats,
+} from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { EncyclopediaGrid } from '@/components/encyclopedia/EncyclopediaGrid'
@@ -129,8 +134,16 @@ async function queryCreaturePage(
       rarity: creature.rarity,
       imageUrl: creature.imageUrl,
       imageAspectRatio: creature.imageAspectRatio,
+      isBattleReady:
+        sql<boolean>`${creatureBattleStats.creatureId} IS NOT NULL`.as(
+          'is_battle_ready',
+        ),
     })
     .from(creature)
+    .leftJoin(
+      creatureBattleStats,
+      eq(creatureBattleStats.creatureId, creature.id),
+    )
     .where(whereClause)
     .orderBy(...orderBy)
     .limit(PAGE_SIZE + 1)
@@ -197,21 +210,77 @@ const getFilterOptions = createServerFn({ method: 'GET' }).handler(async () => {
   }
 })
 
+const TEMPLATE_MAP = new Map(ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]))
+
 export const getCreatureDetails = createServerFn({ method: 'GET' })
   .inputValidator((id: string) => id)
   .handler(async ({ data: id }) => {
     const db = await createDb(getCfEnv().DB)
-    const rows = await db
-      .select({
-        description: creature.description,
-        period: creature.period,
-        sizeMeters: creature.sizeMeters,
-        weightKg: creature.weightKg,
-        funFacts: creature.funFacts,
-      })
-      .from(creature)
-      .where(eq(creature.id, id))
-    return rows[0] ?? null
+    const [details, stats, abilities] = await Promise.all([
+      db
+        .select({
+          description: creature.description,
+          period: creature.period,
+          sizeMeters: creature.sizeMeters,
+          weightKg: creature.weightKg,
+          funFacts: creature.funFacts,
+        })
+        .from(creature)
+        .where(eq(creature.id, id))
+        .get(),
+      db
+        .select()
+        .from(creatureBattleStats)
+        .where(eq(creatureBattleStats.creatureId, id))
+        .get(),
+      db
+        .select({
+          templateId: creatureAbility.templateId,
+          slot: creatureAbility.slot,
+          displayName: creatureAbility.displayName,
+        })
+        .from(creatureAbility)
+        .where(eq(creatureAbility.creatureId, id))
+        .all(),
+    ])
+
+    if (!details) return null
+
+    let battleStats = null
+    if (stats) {
+      let active = null
+      let passive = null
+      for (const a of abilities) {
+        const template = TEMPLATE_MAP.get(a.templateId)
+        if (!template) continue
+        if (a.slot === 'active') {
+          active = {
+            displayName: a.displayName,
+            description: template.description,
+            cooldown:
+              template.trigger.type === 'onUse'
+                ? template.trigger.cooldown
+                : 1,
+          }
+        } else {
+          passive = {
+            displayName: a.displayName,
+            description: template.description,
+          }
+        }
+      }
+      battleStats = {
+        role: stats.role,
+        hp: stats.hp,
+        atk: stats.atk,
+        def: stats.def,
+        spd: stats.spd,
+        active,
+        passive,
+      }
+    }
+
+    return { ...details, battleStats }
   })
 
 // ─── Route ───────────────────────────────────────────────────────────────────

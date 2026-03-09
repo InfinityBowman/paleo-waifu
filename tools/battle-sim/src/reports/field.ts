@@ -1,9 +1,14 @@
-import type { Row } from '@paleo-waifu/shared/battle/types'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
-import { assignRow, buildTeam, buildTeamWithRows, sampleTeam } from '../runner.ts'
+import {
+  assignRow,
+  buildTeam,
+  buildTeamWithRows,
+  sampleTeam,
+} from '../runner.ts'
 import { createProgressBar } from '../report.ts'
 import { ABILITY_NAME_MAP } from './meta-types.ts'
 import { detectSynergies } from './synergy.ts'
+import type { Row } from '@paleo-waifu/shared/battle/types'
 import type { CreatureRecord } from '../db.ts'
 import type {
   AbilityImpact,
@@ -386,7 +391,10 @@ function runTeamRoundRobin(
   const creatureTeamAgg = new Map<string, { wins: number; total: number }>()
 
   // Per-ability stats in team context
-  const abilityTeamAgg = new Map<string, { wins: number; total: number; creatures: Set<string> }>()
+  const abilityTeamAgg = new Map<
+    string,
+    { wins: number; total: number; creatures: Set<string> }
+  >()
 
   // Per-role stats in team context
   const roleTeamAgg = new Map<string, { wins: number; total: number }>()
@@ -413,8 +421,16 @@ function runTeamRoundRobin(
       const opp = teams[oppIdx]
 
       try {
-        const teamA = buildTeamWithRows(team.members, team.rows, options.templateMap)
-        const teamB = buildTeamWithRows(opp.members, opp.rows, options.templateMap)
+        const teamA = buildTeamWithRows(
+          team.members,
+          team.rows,
+          options.templateMap,
+        )
+        const teamB = buildTeamWithRows(
+          opp.members,
+          opp.rows,
+          options.templateMap,
+        )
         const result = simulateBattle(teamA, teamB, {
           seed: i * options.teamMatchCount + m,
           damageScale: options.damageScale,
@@ -432,7 +448,10 @@ function runTeamRoundRobin(
         }
 
         // Track per-creature participation
-        const sides: Array<{ members: [CreatureRecord, CreatureRecord, CreatureRecord]; side: 'A' | 'B' }> = [
+        const sides: Array<{
+          members: [CreatureRecord, CreatureRecord, CreatureRecord]
+          side: 'A' | 'B'
+        }> = [
           { members: team.members, side: 'A' },
           { members: opp.members, side: 'B' },
         ]
@@ -448,14 +467,22 @@ function runTeamRoundRobin(
             creatureTeamAgg.set(c.id, agg)
 
             // Per-ability (active)
-            const activeAgg = abilityTeamAgg.get(c.active.templateId) ?? { wins: 0, total: 0, creatures: new Set() }
+            const activeAgg = abilityTeamAgg.get(c.active.templateId) ?? {
+              wins: 0,
+              total: 0,
+              creatures: new Set(),
+            }
             activeAgg.total++
             activeAgg.wins += wv
             activeAgg.creatures.add(c.id)
             abilityTeamAgg.set(c.active.templateId, activeAgg)
 
             // Per-ability (passive)
-            const passiveAgg = abilityTeamAgg.get(c.passive.templateId) ?? { wins: 0, total: 0, creatures: new Set() }
+            const passiveAgg = abilityTeamAgg.get(c.passive.templateId) ?? {
+              wins: 0,
+              total: 0,
+              creatures: new Set(),
+            }
             passiveAgg.total++
             passiveAgg.wins += wv
             passiveAgg.creatures.add(c.id)
@@ -531,10 +558,8 @@ function runTeamRoundRobin(
     acc.count++
     formAgg[t.formation] = acc
   }
-  const formationWinRates: Record<
-    string,
-    { winRate: number; count: number }
-  > = {}
+  const formationWinRates: Record<string, { winRate: number; count: number }> =
+    {}
   for (const [form, acc] of Object.entries(formAgg)) {
     formationWinRates[form] = {
       winRate: acc.total > 0 ? acc.wins / acc.total : 0.5,
@@ -703,7 +728,8 @@ export function runFieldReport(
   const creatureTeamStats: Array<CreatureTeamStats> = creatures
     .map((c) => {
       const teamAgg = creatureTeamAgg.get(c.id)
-      const teamWinRate = teamAgg && teamAgg.total > 0 ? teamAgg.wins / teamAgg.total : 0.5
+      const teamWinRate =
+        teamAgg && teamAgg.total > 0 ? teamAgg.wins / teamAgg.total : 0.5
       const soloWinRate = soloIndex.get(c.id)?.winRate ?? 0.5
 
       // Find best/worst teammates from co-occurrence data
@@ -728,8 +754,10 @@ export function runFieldReport(
       }
 
       // Fallback if no teammates found
-      if (bestTeammate.id === '') bestTeammate = { id: '', name: '—', winRate: 0.5 }
-      if (worstTeammate.id === '') worstTeammate = { id: '', name: '—', winRate: 0.5 }
+      if (bestTeammate.id === '')
+        bestTeammate = { id: '', name: '—', winRate: 0.5 }
+      if (worstTeammate.id === '')
+        worstTeammate = { id: '', name: '—', winRate: 0.5 }
 
       return {
         id: c.id,

@@ -1,10 +1,5 @@
 import { useMemo } from 'react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SectionTooltip } from './SectionTooltip'
 import { ROLE_COLOR_VALUES, ROLE_ORDER } from './constants'
@@ -37,10 +32,10 @@ export function RoleMatchupHeatmap({ matchups }: Props) {
         <div className="flex items-center gap-2">
           <CardTitle>Role Matchup Matrix</CardTitle>
           <SectionTooltip>
-            Each cell shows how often the row role beats the column role.
-            Read as &ldquo;striker beats tank X% of the time.&rdquo;
-            Values near 50% mean an even matchup. Asymmetry reveals
-            rock-paper-scissors dynamics.
+            Each cell shows how often the row role beats the column role. Read
+            as &ldquo;striker beats tank X% of the time.&rdquo; Values near 50%
+            mean an even matchup. Asymmetry reveals rock-paper-scissors
+            dynamics.
           </SectionTooltip>
         </div>
       </CardHeader>
@@ -75,7 +70,10 @@ export function RoleMatchupHeatmap({ matchups }: Props) {
                   const m = matrix.get(`${attacker}-${defender}`)
                   if (!m) {
                     return (
-                      <td key={defender} className="px-2 py-1.5 text-center text-muted-foreground/50">
+                      <td
+                        key={defender}
+                        className="px-2 py-1.5 text-center text-muted-foreground/50"
+                      >
                         —
                       </td>
                     )

@@ -30,11 +30,11 @@ export function AbilityScatterChart({
   const actives = data.filter((d) => d.type === 'active')
   const passives = data.filter((d) => d.type !== 'active')
 
-  const avgPickRate = data.length > 0 ? data.reduce((s, d) => s + d.pickRate, 0) / data.length : 50
-  const maxAbs = Math.max(
-    ...data.map((d) => Math.abs(d.wrDiff)),
-    5,
-  )
+  const avgPickRate =
+    data.length > 0
+      ? data.reduce((s, d) => s + d.pickRate, 0) / data.length
+      : 50
+  const maxAbs = Math.max(...data.map((d) => Math.abs(d.wrDiff)), 5)
   const yBound = Math.ceil(maxAbs / 5) * 5
 
   return (
@@ -81,7 +81,9 @@ export function AbilityScatterChart({
               <div className="rounded-lg border border-border/50 bg-card px-3 py-2 text-xs shadow-md">
                 <div className="font-medium">{d.name}</div>
                 <div className="text-muted-foreground">
-                  {d.type} · Pick: {d.pickRate}% · WR diff: {d.wrDiff > 0 ? '+' : ''}{d.wrDiff}pp
+                  {d.type} · Pick: {d.pickRate}% · WR diff:{' '}
+                  {d.wrDiff > 0 ? '+' : ''}
+                  {d.wrDiff}pp
                 </div>
               </div>
             )
@@ -92,8 +94,16 @@ export function AbilityScatterChart({
           height={24}
           wrapperStyle={{ fontSize: 11 }}
         />
-        <ReferenceLine x={avgPickRate} stroke="oklch(1 0 0 / 10%)" strokeDasharray="4 4" />
-        <ReferenceLine y={0} stroke="oklch(1 0 0 / 15%)" strokeDasharray="4 4" />
+        <ReferenceLine
+          x={avgPickRate}
+          stroke="oklch(1 0 0 / 10%)"
+          strokeDasharray="4 4"
+        />
+        <ReferenceLine
+          y={0}
+          stroke="oklch(1 0 0 / 15%)"
+          strokeDasharray="4 4"
+        />
         <Scatter
           name="Active"
           data={actives}

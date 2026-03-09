@@ -28,6 +28,7 @@ interface CreatureGridItem {
   rarity: string
   imageUrl: string | null
   imageAspectRatio: number | null
+  isBattleReady: boolean
 }
 
 interface CreatureDetails {
@@ -36,6 +37,15 @@ interface CreatureDetails {
   sizeMeters: number | null
   weightKg: number | null
   funFacts: string | null
+  battleStats?: {
+    role: string
+    hp: number
+    atk: number
+    def: number
+    spd: number
+    active: { displayName: string; description: string; cooldown: number } | null
+    passive: { displayName: string; description: string } | null
+  } | null
 }
 
 interface Props {
@@ -147,7 +157,7 @@ export function EncyclopediaGrid({
         prefetchInFlight.current.add(id)
         getCreatureDetails({ data: id }).then((result) => {
           prefetchInFlight.current.delete(id)
-          prefetchCache.current.set(id, result)
+          if (result) prefetchCache.current.set(id, result)
         })
       }, 200)
     },
@@ -162,7 +172,7 @@ export function EncyclopediaGrid({
     } else {
       setSelectedDetails(null)
       getCreatureDetails({ data: id }).then((result) => {
-        prefetchCache.current.set(id, result)
+        if (result) prefetchCache.current.set(id, result)
         setSelectedDetails(result)
       })
     }

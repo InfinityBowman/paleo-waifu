@@ -56,6 +56,34 @@ const commands = [
     name: 'help',
     description: 'Show available commands',
   },
+  {
+    name: 'battle',
+    description: 'Challenge another player to a battle',
+    options: [
+      {
+        name: 'user',
+        description: 'The player to challenge',
+        type: 6, // USER
+        required: true,
+      },
+    ],
+  },
+  {
+    name: 'battles',
+    description: 'View your active challenges and recent battle history',
+  },
+  {
+    name: 'rating',
+    description: 'Check your arena rating and tier',
+    options: [
+      {
+        name: 'user',
+        description: "Check another player's rating",
+        type: 6, // USER
+        required: false,
+      },
+    ],
+  },
 ]
 
 async function register() {

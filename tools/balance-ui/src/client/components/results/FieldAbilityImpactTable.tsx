@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
 import { cn } from '../../lib/utils'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
 import { SectionTooltip } from './SectionTooltip'
 import { WinRateBadge } from './WinRateBadge'
@@ -17,8 +12,7 @@ interface Props {
 
 export function FieldAbilityImpactTable({ abilities }: Props) {
   const sorted = useMemo(
-    () =>
-      [...abilities].sort((a, b) => b.avgWinRate - a.avgWinRate),
+    () => [...abilities].sort((a, b) => b.avgWinRate - a.avgWinRate),
     [abilities],
   )
 
@@ -82,10 +76,7 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
                 >
                   <td className="px-4 py-1.5 font-medium">{a.name}</td>
                   <td className="px-2 py-1.5">
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] px-1.5 py-0"
-                    >
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0">
                       {a.abilityType}
                     </Badge>
                   </td>
@@ -112,7 +103,11 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
                         ? 'text-warning font-medium'
                         : 'text-muted-foreground',
                     )}
-                    title={lowSample ? 'Low creature count — may not be reliable' : undefined}
+                    title={
+                      lowSample
+                        ? 'Low creature count — may not be reliable'
+                        : undefined
+                    }
                   >
                     {a.creaturesWithAbility}
                     {lowSample && ' ⚠'}
@@ -126,7 +121,10 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
                           delta > 0 ? 'bg-success/60' : 'bg-destructive/60',
                         )}
                         style={{
-                          left: delta > 0 ? '50%' : `${50 - Math.min(barWidth, 50)}%`,
+                          left:
+                            delta > 0
+                              ? '50%'
+                              : `${50 - Math.min(barWidth, 50)}%`,
                           width: `${Math.min(barWidth, 50)}%`,
                         }}
                       />

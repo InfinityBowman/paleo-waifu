@@ -8,7 +8,6 @@ export function getUserRole(user: Record<string, unknown>): string | undefined {
   return (user as { role?: string }).role
 }
 
-
 export const getSession = createServerFn({ method: 'GET' }).handler(
   async () => {
     const request = getRequest()

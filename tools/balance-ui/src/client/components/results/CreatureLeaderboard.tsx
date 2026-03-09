@@ -35,7 +35,10 @@ export function CreatureLeaderboard({
   const templateMap = useMemo(() => {
     if (!constants) return new Map<string, AbilityTemplate>()
     const map = new Map<string, AbilityTemplate>()
-    for (const t of [...constants.activeTemplates, ...constants.passiveTemplates]) {
+    for (const t of [
+      ...constants.activeTemplates,
+      ...constants.passiveTemplates,
+    ]) {
       map.set(t.id, t)
     }
     return map
@@ -66,10 +69,18 @@ export function CreatureLeaderboard({
           <thead className="sticky top-0 bg-card z-10">
             <tr className="border-b border-border">
               <th className="px-4 py-1.5 text-left text-muted-foreground">#</th>
-              <th className="px-2 py-1.5 text-left text-muted-foreground">Name</th>
-              <th className="px-2 py-1.5 text-left text-muted-foreground">Role</th>
-              <th className="px-2 py-1.5 text-left text-muted-foreground">Active</th>
-              <th className="px-2 py-1.5 text-left text-muted-foreground">Passive</th>
+              <th className="px-2 py-1.5 text-left text-muted-foreground">
+                Name
+              </th>
+              <th className="px-2 py-1.5 text-left text-muted-foreground">
+                Role
+              </th>
+              <th className="px-2 py-1.5 text-left text-muted-foreground">
+                Active
+              </th>
+              <th className="px-2 py-1.5 text-left text-muted-foreground">
+                Passive
+              </th>
               <th className="px-2 py-1.5 text-right text-muted-foreground">
                 Appearances
               </th>
@@ -86,8 +97,12 @@ export function CreatureLeaderboard({
           </thead>
           <tbody>
             {displayed.map((entry, i) => {
-              const activeTpl = templateMap.get(entry.creature.active.templateId)
-              const passiveTpl = templateMap.get(entry.creature.passive.templateId)
+              const activeTpl = templateMap.get(
+                entry.creature.active.templateId,
+              )
+              const passiveTpl = templateMap.get(
+                entry.creature.passive.templateId,
+              )
               return (
                 <tr
                   key={entry.creature.id}
@@ -100,22 +115,41 @@ export function CreatureLeaderboard({
                     </span>
                   </td>
                   <td className="px-2 py-1.5">
-                    <span className={cn('capitalize', `text-role-${entry.creature.role}`)}>
+                    <span
+                      className={cn(
+                        'capitalize',
+                        `text-role-${entry.creature.role}`,
+                      )}
+                    >
                       {entry.creature.role}
                     </span>
                   </td>
                   <td className="px-2 py-1.5">
-                    <AbilityCell template={activeTpl} displayName={entry.creature.active.displayName} />
+                    <AbilityCell
+                      template={activeTpl}
+                      displayName={entry.creature.active.displayName}
+                    />
                   </td>
                   <td className="px-2 py-1.5">
-                    <AbilityCell template={passiveTpl} displayName={entry.creature.passive.displayName} />
+                    <AbilityCell
+                      template={passiveTpl}
+                      displayName={entry.creature.passive.displayName}
+                    />
                   </td>
-                  <td className="px-2 py-1.5 text-right">{entry.appearances}</td>
+                  <td className="px-2 py-1.5 text-right">
+                    {entry.appearances}
+                  </td>
                   <td className="px-2 py-1.5 text-right font-mono">
                     {(entry.winRate * 100).toFixed(1)}%
                   </td>
-                  <td className={cn('px-2 py-1.5 text-right font-mono', wrColor(entry.allTeamWinRate))}>
-                    {entry.allTeamWinRate > 0 ? '+' : ''}{(entry.allTeamWinRate * 100).toFixed(1)}pp
+                  <td
+                    className={cn(
+                      'px-2 py-1.5 text-right font-mono',
+                      wrColor(entry.allTeamWinRate),
+                    )}
+                  >
+                    {entry.allTeamWinRate > 0 ? '+' : ''}
+                    {(entry.allTeamWinRate * 100).toFixed(1)}pp
                   </td>
                   <td className="px-4 py-1.5 text-right font-mono">
                     {(entry.avgFitness * 100).toFixed(1)}%

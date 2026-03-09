@@ -10,12 +10,12 @@ import {
   RARITY_BASE_TOTALS,
   ROLE_DISTRIBUTIONS,
 } from '@paleo-waifu/shared/battle/constants'
+import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { loadCreatures } from '../../../battle-sim/src/db.ts'
 import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
 import { runFieldReport } from '../../../battle-sim/src/reports/field.ts'
-import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import { buildTeamWithRows } from '../../../battle-sim/src/runner.ts'
-import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
+import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import type {
   AbilityOverride,
   ConstantsOverride,
@@ -264,7 +264,9 @@ function prepareCreatures(body: {
 function generateSyntheticCreatures(): Array<CreatureRecord> {
   const BASELINE_TOTAL = 170 // "rare" equivalent
   const roles = Object.keys(ROLE_DISTRIBUTIONS)
-  const actives = ACTIVE_ABILITY_TEMPLATES.filter((t) => t.id !== 'basic_attack')
+  const actives = ACTIVE_ABILITY_TEMPLATES.filter(
+    (t) => t.id !== 'basic_attack',
+  )
   const passives = PASSIVE_ABILITY_TEMPLATES.filter((t) => t.id !== 'none')
   const creatures: Array<CreatureRecord> = []
 
@@ -434,8 +436,16 @@ app.post('/api/battle', async (c) => {
     return c.json({ error: 'One or more creatures not found' }, 400)
   }
 
-  const rowsA = body.teamA.map((s) => s.row) as ['front' | 'back', 'front' | 'back', 'front' | 'back']
-  const rowsB = body.teamB.map((s) => s.row) as ['front' | 'back', 'front' | 'back', 'front' | 'back']
+  const rowsA = body.teamA.map((s) => s.row) as [
+    'front' | 'back',
+    'front' | 'back',
+    'front' | 'back',
+  ]
+  const rowsB = body.teamB.map((s) => s.row) as [
+    'front' | 'back',
+    'front' | 'back',
+    'front' | 'back',
+  ]
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
@@ -454,7 +464,11 @@ app.post('/api/battle', async (c) => {
           const teamA = body.randomizeRows
             ? buildTeamWithRows(
                 teamAMembers,
-                rowsA.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as ['front' | 'back', 'front' | 'back', 'front' | 'back'],
+                rowsA.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as [
+                  'front' | 'back',
+                  'front' | 'back',
+                  'front' | 'back',
+                ],
                 templateMap,
               )
             : buildTeamWithRows(teamAMembers, rowsA, templateMap)
@@ -462,7 +476,11 @@ app.post('/api/battle', async (c) => {
           const teamB = body.randomizeRows
             ? buildTeamWithRows(
                 teamBMembers,
-                rowsB.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as ['front' | 'back', 'front' | 'back', 'front' | 'back'],
+                rowsB.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as [
+                  'front' | 'back',
+                  'front' | 'back',
+                  'front' | 'back',
+                ],
                 templateMap,
               )
             : buildTeamWithRows(teamBMembers, rowsB, templateMap)
@@ -488,7 +506,12 @@ app.post('/api/battle', async (c) => {
           else draws++
           totalTurns += result.turns
 
-          send({ type: 'trial', trial: i, total: body.trials, winner: result.winner })
+          send({
+            type: 'trial',
+            trial: i,
+            total: body.trials,
+            winner: result.winner,
+          })
         }
 
         const total = trials.length || 1

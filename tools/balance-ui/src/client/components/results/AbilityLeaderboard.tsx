@@ -33,10 +33,18 @@ export function AbilityLeaderboard({
   }, [snapshots])
 
   const abilityCreatureInfo = useMemo(() => {
-    if (!creatures) return new Map<string, { count: number; roles: Record<string, number> }>()
-    const map = new Map<string, { count: number; roles: Record<string, number> }>()
+    if (!creatures)
+      return new Map<string, { count: number; roles: Record<string, number> }>()
+    const map = new Map<
+      string,
+      { count: number; roles: Record<string, number> }
+    >()
     for (const c of creatures) {
-      for (const templateId of ['basic_attack', c.active.templateId, c.passive.templateId]) {
+      for (const templateId of [
+        'basic_attack',
+        c.active.templateId,
+        c.passive.templateId,
+      ]) {
         const existing = map.get(templateId) ?? { count: 0, roles: {} }
         existing.count++
         existing.roles[c.role] = (existing.roles[c.role] ?? 0) + 1
@@ -65,20 +73,25 @@ export function AbilityLeaderboard({
                 const info = abilityCreatureInfo.get(a.templateId)
                 const creatureCount = info?.count ?? 0
                 const roles = info?.roles ?? {}
-                const roleTotal = Object.values(roles).reduce((s, n) => s + n, 0)
-                const roleSegments = ROLE_ORDER
-                  .filter((r) => roles[r])
-                  .map((r) => ({
+                const roleTotal = Object.values(roles).reduce(
+                  (s, n) => s + n,
+                  0,
+                )
+                const roleSegments = ROLE_ORDER.filter((r) => roles[r]).map(
+                  (r) => ({
                     role: r,
                     pct: (roles[r] / roleTotal) * 100,
                     color: ROLE_COLOR_VALUES[r] ?? 'oklch(0.5 0 0)',
-                  }))
+                  }),
+                )
                 return (
                   <Tooltip key={a.templateId}>
                     <TooltipTrigger asChild>
                       <div className="group">
                         <div className="mb-0.5 flex items-center justify-between text-[11px]">
-                          <span className={`flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors ${isBasicAttack ? 'italic text-muted-foreground' : ''}`}>
+                          <span
+                            className={`flex items-center gap-1.5 font-medium group-hover:text-primary transition-colors ${isBasicAttack ? 'italic text-muted-foreground' : ''}`}
+                          >
                             {a.name}
                             {creatureCount > 0 && (
                               <span className="text-[9px] text-muted-foreground/70">
@@ -88,12 +101,18 @@ export function AbilityLeaderboard({
                           </span>
                           <div className="flex items-center gap-2">
                             {points.length > 1 && (
-                              <Sparkline points={points} color="oklch(0.65 0.03 290)" />
+                              <Sparkline
+                                points={points}
+                                color="oklch(0.65 0.03 290)"
+                              />
                             )}
                             <span className="font-mono text-muted-foreground">
                               {a.appearances}
-                              <span className={`ml-1.5 ${a.allTeamWinRate < -0.02 ? 'text-red-400' : a.allTeamWinRate > 0.02 ? 'text-green-400' : 'text-foreground'}`}>
-                                {a.allTeamWinRate > 0 ? '+' : ''}{(a.allTeamWinRate * 100).toFixed(1)}pp
+                              <span
+                                className={`ml-1.5 ${a.allTeamWinRate < -0.02 ? 'text-red-400' : a.allTeamWinRate > 0.02 ? 'text-green-400' : 'text-foreground'}`}
+                              >
+                                {a.allTeamWinRate > 0 ? '+' : ''}
+                                {(a.allTeamWinRate * 100).toFixed(1)}pp
                               </span>
                             </span>
                           </div>
@@ -125,16 +144,23 @@ export function AbilityLeaderboard({
                             {creatureCount !== 1 ? 's' : ''}
                             {roleSegments.length > 0 && (
                               <span>
-                                {' '}({roleSegments.map((s) => `${s.role} ${Math.round(s.pct)}%`).join(', ')})
+                                {' '}
+                                (
+                                {roleSegments
+                                  .map((s) => `${s.role} ${Math.round(s.pct)}%`)
+                                  .join(', ')}
+                                )
                               </span>
                             )}
                           </div>
                         )}
                         <div>
-                          WR Diff: {a.allTeamWinRate > 0 ? '+' : ''}{(a.allTeamWinRate * 100).toFixed(1)}pp
+                          WR Diff: {a.allTeamWinRate > 0 ? '+' : ''}
+                          {(a.allTeamWinRate * 100).toFixed(1)}pp
                         </div>
                         <div>
-                          Top-Quartile Fitness: {(a.avgFitness * 100).toFixed(1)}%
+                          Top-Quartile Fitness:{' '}
+                          {(a.avgFitness * 100).toFixed(1)}%
                         </div>
                         {points.length > 1 && (
                           <div>

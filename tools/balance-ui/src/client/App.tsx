@@ -50,7 +50,14 @@ export function App() {
   )
   const [tab, setTab] = useState(() => {
     const hash = window.location.hash.slice(1)
-    const valid = ['creatures', 'abilities', 'results', 'history', 'compare', 'battle']
+    const valid = [
+      'creatures',
+      'abilities',
+      'results',
+      'history',
+      'compare',
+      'battle',
+    ]
     return valid.includes(hash) ? hash : 'creatures'
   })
 
@@ -142,8 +149,10 @@ export function App() {
       // Show the most recent one
       const latest =
         metaRun && fieldRun
-          ? metaRun.createdAt > fieldRun.createdAt ? metaRun : fieldRun
-          : metaRun ?? fieldRun
+          ? metaRun.createdAt > fieldRun.createdAt
+            ? metaRun
+            : fieldRun
+          : (metaRun ?? fieldRun)
       if (latest) {
         setActiveResultType(latest.simType)
         setSimState('done')
@@ -163,7 +172,9 @@ export function App() {
       const next = new Map(prev)
       const existing = next.get(patch.id) ?? { id: patch.id }
       const merged = { ...existing, ...patch }
-      for (const key of Object.keys(merged) as Array<keyof CreatureOverridePatch>) {
+      for (const key of Object.keys(merged) as Array<
+        keyof CreatureOverridePatch
+      >) {
         if (merged[key] === undefined) delete merged[key]
       }
       if (Object.keys(merged).length <= 1) {

@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
 import { cn } from '../../lib/utils'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
 import { SectionTooltip } from './SectionTooltip'
 import { WinRateBadge } from './WinRateBadge'
@@ -31,9 +26,9 @@ export function TeamAbilityImpactTable({ abilities }: Props) {
         <div className="flex items-center gap-2">
           <CardTitle>Ability Impact (3v3)</CardTitle>
           <SectionTooltip>
-            Win rate of teams containing creatures with each ability.
-            Measured from 3v3 team battles — reflects how abilities contribute
-            to team success. Low sample counts are less reliable.
+            Win rate of teams containing creatures with each ability. Measured
+            from 3v3 team battles — reflects how abilities contribute to team
+            success. Low sample counts are less reliable.
           </SectionTooltip>
           {outlierCount > 0 && (
             <Badge variant="destructive" className="text-[9px]">
@@ -83,10 +78,7 @@ export function TeamAbilityImpactTable({ abilities }: Props) {
                 >
                   <td className="px-4 py-1.5 font-medium">{a.name}</td>
                   <td className="px-2 py-1.5">
-                    <Badge
-                      variant="outline"
-                      className="text-[9px] px-1.5 py-0"
-                    >
+                    <Badge variant="outline" className="text-[9px] px-1.5 py-0">
                       {a.abilityType}
                     </Badge>
                   </td>
@@ -113,7 +105,11 @@ export function TeamAbilityImpactTable({ abilities }: Props) {
                         ? 'text-warning font-medium'
                         : 'text-muted-foreground',
                     )}
-                    title={lowSample ? 'Low creature count — may not be reliable' : undefined}
+                    title={
+                      lowSample
+                        ? 'Low creature count — may not be reliable'
+                        : undefined
+                    }
                   >
                     {a.creaturesWithAbility}
                     {lowSample && ' ⚠'}
@@ -130,7 +126,10 @@ export function TeamAbilityImpactTable({ abilities }: Props) {
                           delta > 0 ? 'bg-success/60' : 'bg-destructive/60',
                         )}
                         style={{
-                          left: delta > 0 ? '50%' : `${50 - Math.min(barWidth, 50)}%`,
+                          left:
+                            delta > 0
+                              ? '50%'
+                              : `${50 - Math.min(barWidth, 50)}%`,
                           width: `${Math.min(barWidth, 50)}%`,
                         }}
                       />

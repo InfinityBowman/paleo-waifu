@@ -1,10 +1,6 @@
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { buildTeamWithRows } from '../runner.ts'
-import {
-  printRankedList,
-  printSubheader,
-  roleColor,
-} from '../report.ts'
+import { printRankedList, printSubheader, roleColor } from '../report.ts'
 import { ABILITY_NAME_MAP } from './meta-types.ts'
 import { getRows } from './meta-utils.ts'
 import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'

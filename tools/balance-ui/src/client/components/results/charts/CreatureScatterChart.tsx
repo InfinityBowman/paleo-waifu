@@ -27,20 +27,18 @@ export function CreatureScatterChart({
     role: c.creature.role,
   }))
 
-  const avgPresence = data.length > 0 ? data.reduce((s, d) => s + d.presence, 0) / data.length : 50
-  const maxAbs = Math.max(
-    ...data.map((d) => Math.abs(d.wrDiff)),
-    5,
-  )
+  const avgPresence =
+    data.length > 0
+      ? data.reduce((s, d) => s + d.presence, 0) / data.length
+      : 50
+  const maxAbs = Math.max(...data.map((d) => Math.abs(d.wrDiff)), 5)
   const yBound = Math.ceil(maxAbs / 5) * 5
 
-  const byRole = ROLE_ORDER
-    .map((role) => ({
-      role,
-      data: data.filter((d) => d.role === role),
-      color: ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)',
-    }))
-    .filter((g) => g.data.length > 0)
+  const byRole = ROLE_ORDER.map((role) => ({
+    role,
+    data: data.filter((d) => d.role === role),
+    color: ROLE_COLOR_VALUES[role] ?? 'oklch(0.5 0 0)',
+  })).filter((g) => g.data.length > 0)
 
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -86,7 +84,9 @@ export function CreatureScatterChart({
               <div className="rounded-lg border border-border/50 bg-card px-3 py-2 text-xs shadow-md">
                 <div className="font-medium">{d.name}</div>
                 <div className="text-muted-foreground">
-                  {d.role} · Presence: {d.presence}% · WR diff: {d.wrDiff > 0 ? '+' : ''}{d.wrDiff}pp
+                  {d.role} · Presence: {d.presence}% · WR diff:{' '}
+                  {d.wrDiff > 0 ? '+' : ''}
+                  {d.wrDiff}pp
                 </div>
               </div>
             )
@@ -97,8 +97,16 @@ export function CreatureScatterChart({
           height={24}
           wrapperStyle={{ fontSize: 11 }}
         />
-        <ReferenceLine x={avgPresence} stroke="oklch(1 0 0 / 10%)" strokeDasharray="4 4" />
-        <ReferenceLine y={0} stroke="oklch(1 0 0 / 15%)" strokeDasharray="4 4" />
+        <ReferenceLine
+          x={avgPresence}
+          stroke="oklch(1 0 0 / 10%)"
+          strokeDasharray="4 4"
+        />
+        <ReferenceLine
+          y={0}
+          stroke="oklch(1 0 0 / 15%)"
+          strokeDasharray="4 4"
+        />
         {byRole.map((group) => (
           <Scatter
             key={group.role}

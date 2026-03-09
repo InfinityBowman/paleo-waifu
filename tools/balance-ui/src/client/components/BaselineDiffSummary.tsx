@@ -123,7 +123,12 @@ export function buildDiffLines(
   if (constants.defScalingConstant !== undefined) {
     lines.push({
       text: `DEF scaling: ${constants.defScalingConstant} (default 100)`,
-      type: constants.defScalingConstant < 100 ? 'buff' : constants.defScalingConstant > 100 ? 'nerf' : 'neutral',
+      type:
+        constants.defScalingConstant < 100
+          ? 'buff'
+          : constants.defScalingConstant > 100
+            ? 'nerf'
+            : 'neutral',
     })
   }
 
@@ -131,7 +136,12 @@ export function buildDiffLines(
   if (constants.basicAttackMultiplier !== undefined) {
     lines.push({
       text: `Basic ATK multiplier: ${constants.basicAttackMultiplier} (default 0.9)`,
-      type: constants.basicAttackMultiplier > 0.9 ? 'buff' : constants.basicAttackMultiplier < 0.9 ? 'nerf' : 'neutral',
+      type:
+        constants.basicAttackMultiplier > 0.9
+          ? 'buff'
+          : constants.basicAttackMultiplier < 0.9
+            ? 'nerf'
+            : 'neutral',
     })
   }
 

@@ -1,10 +1,5 @@
 import { cn } from '../../lib/utils'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { SectionTooltip } from './SectionTooltip'
 import type { BalanceScorecard } from '../../../shared/types.ts'
@@ -20,8 +15,9 @@ export function FieldScorecardCard({ scorecard }: Props) {
         <div className="flex items-center gap-2">
           <CardTitle>Balance Scorecard</CardTitle>
           <SectionTooltip>
-            Single-glance health metrics. Green = healthy, amber = needs attention.
-            Gini near 0 means equal win rates. Higher 45-55% coverage is better.
+            Single-glance health metrics. Green = healthy, amber = needs
+            attention. Gini near 0 means equal win rates. Higher 45-55% coverage
+            is better.
           </SectionTooltip>
         </div>
       </CardHeader>

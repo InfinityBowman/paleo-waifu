@@ -49,8 +49,8 @@ export function FieldCompWinRates({ compWinRates }: Props) {
           <CardTitle>Team Composition Win Rates</CardTitle>
           <SectionTooltip>
             Win rates by role composition (e.g. striker×2 / tank×1). Shows which
-            team archetypes perform best in random matchups. Higher sample counts
-            are more reliable.
+            team archetypes perform best in random matchups. Higher sample
+            counts are more reliable.
           </SectionTooltip>
         </div>
         <CardDescription>
@@ -58,7 +58,10 @@ export function FieldCompWinRates({ compWinRates }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={Math.max(data.length * 28, 120)}>
+        <ResponsiveContainer
+          width="100%"
+          height={Math.max(data.length * 28, 120)}
+        >
           <BarChart
             data={data}
             layout="vertical"
@@ -83,14 +86,29 @@ export function FieldCompWinRates({ compWinRates }: Props) {
             <RechartsTooltip
               contentStyle={TOOLTIP_CONTENT_STYLE}
               itemStyle={TOOLTIP_ITEM_STYLE}
-              formatter={((value: number, _: string, entry: { payload: { count: number } }) =>
-                [`${(value * 100).toFixed(1)}% (${entry.payload.count} teams)`, 'Win Rate']
-              ) as any}
+              formatter={
+                ((
+                  value: number,
+                  _: string,
+                  entry: { payload: { count: number } },
+                ) => [
+                  `${(value * 100).toFixed(1)}% (${entry.payload.count} teams)`,
+                  'Win Rate',
+                ]) as any
+              }
             />
-            <ReferenceLine x={0.5} stroke="oklch(1 0 0 / 0.15)" strokeDasharray="3 3" />
+            <ReferenceLine
+              x={0.5}
+              stroke="oklch(1 0 0 / 0.15)"
+              strokeDasharray="3 3"
+            />
             <Bar dataKey="winRate" radius={[0, 3, 3, 0]} maxBarSize={20}>
               {data.map((d) => (
-                <Cell key={d.comp} fill={getBarColor(d.comp)} fillOpacity={0.7} />
+                <Cell
+                  key={d.comp}
+                  fill={getBarColor(d.comp)}
+                  fillOpacity={0.7}
+                />
               ))}
             </Bar>
           </BarChart>

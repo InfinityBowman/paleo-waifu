@@ -4,12 +4,18 @@ import type { AbilityTemplate, Effect } from '@paleo-waifu/shared/battle/types'
 
 function formatTarget(target: string): string {
   switch (target) {
-    case 'self': return 'self'
-    case 'single_enemy': return 'single target'
-    case 'all_enemies': return 'AOE'
-    case 'lowest_hp_ally': return 'lowest HP ally'
-    case 'all_allies': return 'all allies'
-    default: return target
+    case 'self':
+      return 'self'
+    case 'single_enemy':
+      return 'single target'
+    case 'all_enemies':
+      return 'AOE'
+    case 'lowest_hp_ally':
+      return 'lowest HP ally'
+    case 'all_allies':
+      return 'all allies'
+    default:
+      return target
   }
 }
 
@@ -49,17 +55,28 @@ function formatEffect(e: Effect): string {
 function formatTrigger(template: AbilityTemplate): string {
   const t = template.trigger
   switch (t.type) {
-    case 'onUse': return `Active · cd: ${t.cooldown}t`
-    case 'onBasicAttack': return 'On basic attack'
-    case 'onHit': return 'On hit'
-    case 'onKill': return 'On kill'
-    case 'onEnemyKO': return 'On enemy KO'
-    case 'onAllyKO': return 'On ally KO'
-    case 'onTurnStart': return 'On turn start'
-    case 'onTurnEnd': return 'On turn end'
-    case 'onBattleStart': return 'On battle start'
-    case 'always': return 'Always active'
-    default: return (t as { type: string }).type
+    case 'onUse':
+      return `Active · cd: ${t.cooldown}t`
+    case 'onBasicAttack':
+      return 'On basic attack'
+    case 'onHit':
+      return 'On hit'
+    case 'onKill':
+      return 'On kill'
+    case 'onEnemyKO':
+      return 'On enemy KO'
+    case 'onAllyKO':
+      return 'On ally KO'
+    case 'onTurnStart':
+      return 'On turn start'
+    case 'onTurnEnd':
+      return 'On turn end'
+    case 'onBattleStart':
+      return 'On battle start'
+    case 'always':
+      return 'Always active'
+    default:
+      return (t as { type: string }).type
   }
 }
 
@@ -77,7 +94,10 @@ export function AbilityCell({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button type="button" className="text-left text-muted-foreground hover:text-foreground transition-colors">
+        <button
+          type="button"
+          className="text-left text-muted-foreground hover:text-foreground transition-colors"
+        >
           {displayName}
         </button>
       </PopoverTrigger>
@@ -109,7 +129,8 @@ export function AbilityCell({
               <span className="shrink-0 font-medium text-muted-foreground uppercase">
                 {effect.type}
                 {'stat' in effect && ` (${(effect as { stat: string }).stat})`}
-                {'dotKind' in effect && ` (${(effect as { dotKind: string }).dotKind})`}
+                {'dotKind' in effect &&
+                  ` (${(effect as { dotKind: string }).dotKind})`}
               </span>
               <span className="font-mono text-foreground">
                 {formatEffect(effect)}

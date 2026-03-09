@@ -56,8 +56,7 @@ function toSummary(run: SavedRun): RunSummary {
       trialsPerPair: fieldRun.config.options.trialsPerPair,
       creatureCount: fieldRun.result.result.creatureStats.length,
       giniCoefficient: fieldRun.result.result.scorecard.giniCoefficient,
-      percentWithin45to55:
-        fieldRun.result.result.scorecard.percentWithin45to55,
+      percentWithin45to55: fieldRun.result.result.scorecard.percentWithin45to55,
       config: fieldRun.config,
     }
   }
@@ -106,7 +105,9 @@ export interface UseRunHistory {
   ) => Promise<string>
   getRun: (id: string) => Promise<SavedRun | undefined>
   getLatestRun: () => Promise<SavedRun | undefined>
-  getLatestRunByType: (simType: 'meta' | 'field') => Promise<SavedRun | undefined>
+  getLatestRunByType: (
+    simType: 'meta' | 'field',
+  ) => Promise<SavedRun | undefined>
   deleteRun: (id: string) => Promise<void>
   updateLabel: (id: string, label: string) => Promise<void>
   toggleStar: (id: string) => Promise<void>

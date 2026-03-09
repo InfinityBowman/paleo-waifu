@@ -1,5 +1,5 @@
-import {  openDB } from 'idb'
-import type {IDBPDatabase} from 'idb';
+import { openDB } from 'idb'
+import type { IDBPDatabase } from 'idb'
 import type { RunHistoryDB } from '../../shared/types.ts'
 
 let dbPromise: Promise<IDBPDatabase<RunHistoryDB>> | null = null

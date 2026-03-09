@@ -54,6 +54,7 @@ CHALLENGE CREATED (challenger picks preset)
 ```
 
 Limits:
+
 - Max 3 active outgoing challenges per player
 - Max 5 pending incoming challenges per player
 - Cannot challenge yourself

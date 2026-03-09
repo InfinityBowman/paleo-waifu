@@ -80,7 +80,14 @@ export function ResultsPanel({
 
   const summaryText = useMemo(() => {
     if (!result) return ''
-    return buildTextSummary(result.result, result.snapshots, population, config, constants, creatures?.length)
+    return buildTextSummary(
+      result.result,
+      result.snapshots,
+      population,
+      config,
+      constants,
+      creatures?.length,
+    )
   }, [result, population, config, constants])
 
   const handleCopy = useCallback(() => {
@@ -137,7 +144,11 @@ export function ResultsPanel({
           className="h-7 w-7"
           onClick={handleCopy}
         >
-          {copied ? <Check size={14} className="text-green-500" /> : <ClipboardCopy size={14} />}
+          {copied ? (
+            <Check size={14} className="text-green-500" />
+          ) : (
+            <ClipboardCopy size={14} />
+          )}
         </Button>
       </div>
 
@@ -148,11 +159,15 @@ export function ResultsPanel({
             role="button"
             tabIndex={0}
             onClick={() => setBaselineOpen((v) => !v)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setBaselineOpen((v) => !v) }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setBaselineOpen((v) => !v)
+            }}
             className="flex items-center justify-between px-4 py-1.5"
           >
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Changes from Baseline</span>
+              <span className="text-sm font-semibold">
+                Changes from Baseline
+              </span>
               <ChevronDown
                 size={14}
                 className={cn(
@@ -222,8 +237,8 @@ export function ResultsPanel({
               <SectionTooltip>
                 Compares how often a role appears in top teams (presence) vs how
                 often teams containing that role actually win (win rate). A role
-                with high presence but low win rate is a noob trap. High win rate
-                but low presence means it's undervalued.
+                with high presence but low win rate is a noob trap. High win
+                rate but low presence means it's undervalued.
               </SectionTooltip>
             </div>
             <CardDescription>
@@ -256,7 +271,10 @@ export function ResultsPanel({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <CompArchetypeChart compShares={meta.compMetaShare} compWinRates={meta.compWinRates} />
+            <CompArchetypeChart
+              compShares={meta.compMetaShare}
+              compWinRates={meta.compWinRates}
+            />
           </CardContent>
         </Card>
       )}
@@ -268,11 +286,10 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Ability Balance Scatter</CardTitle>
               <SectionTooltip>
-                Each dot is an ability. X = pick rate, Y = win rate
-                differential (WR of teams with ability minus WR of teams
-                without). Above 0 = having it helps, below 0 = having it
-                hurts. Top-right = meta-defining, top-left = sleeper OP,
-                bottom-right = noob trap.
+                Each dot is an ability. X = pick rate, Y = win rate differential
+                (WR of teams with ability minus WR of teams without). Above 0 =
+                having it helps, below 0 = having it hurts. Top-right =
+                meta-defining, top-left = sleeper OP, bottom-right = noob trap.
               </SectionTooltip>
             </div>
             <CardDescription>
@@ -337,8 +354,8 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Fitness Progression</CardTitle>
               <SectionTooltip>
-                Fitness = (wins + draws × 0.5) / total matches — essentially
-                a win rate from 0 to 1. Shows how the best and average team
+                Fitness = (wins + draws × 0.5) / total matches — essentially a
+                win rate from 0 to 1. Shows how the best and average team
                 fitness evolve across generations. Converging lines suggest a
                 stable meta.
               </SectionTooltip>
@@ -360,10 +377,10 @@ export function ResultsPanel({
             <div className="flex items-center gap-2">
               <CardTitle>Battle Health</CardTitle>
               <SectionTooltip>
-                Avg turns per battle, population diversity (unique genomes),
-                and meta breadth (% of creatures in top teams) over
-                generations. Falling diversity signals convergence. Low meta
-                breadth means few creatures dominate.
+                Avg turns per battle, population diversity (unique genomes), and
+                meta breadth (% of creatures in top teams) over generations.
+                Falling diversity signals convergence. Low meta breadth means
+                few creatures dominate.
               </SectionTooltip>
             </div>
             <CardDescription>
@@ -386,7 +403,8 @@ export function ResultsPanel({
             <MetaBreadthIndicator
               breadth={
                 (creatures?.length ?? 0) > 0
-                  ? (Object.keys(snapshots.at(-1)?.creatureFrequency ?? {}).length /
+                  ? (Object.keys(snapshots.at(-1)?.creatureFrequency ?? {})
+                      .length /
                       (creatures?.length ?? 1)) *
                     100
                   : 0
@@ -426,10 +444,11 @@ export function ResultsPanel({
               <div className="flex items-center gap-2">
                 <CardTitle>Role Contributions</CardTitle>
                 <SectionTooltip>
-                  Average damage dealt, damage taken, healing done, shields applied,
-                  and debuffs landed per role per battle in the final generation.
-                  Shows whether strikers dominate damage, tanks absorb hits, and
-                  supports contribute through healing and shields.
+                  Average damage dealt, damage taken, healing done, shields
+                  applied, and debuffs landed per role per battle in the final
+                  generation. Shows whether strikers dominate damage, tanks
+                  absorb hits, and supports contribute through healing and
+                  shields.
                 </SectionTooltip>
               </div>
               <CardDescription>
@@ -487,8 +506,8 @@ export function ResultsPanel({
             <CardTitle>Top Creatures</CardTitle>
             <SectionTooltip>
               Creatures most frequently appearing in top-performing teams,
-              ranked by number of appearances and average team fitness.
-              Fitness = (wins + draws × 0.5) / total matches.
+              ranked by number of appearances and average team fitness. Fitness
+              = (wins + draws × 0.5) / total matches.
             </SectionTooltip>
           </div>
           <CardDescription>
@@ -496,7 +515,10 @@ export function ResultsPanel({
           </CardDescription>
         </CardHeader>
         <CardContent className="px-0">
-          <CreatureLeaderboard leaderboard={meta.creatureLeaderboard} constants={constants} />
+          <CreatureLeaderboard
+            leaderboard={meta.creatureLeaderboard}
+            constants={constants}
+          />
         </CardContent>
       </Card>
 
@@ -507,14 +529,17 @@ export function ResultsPanel({
             <CardTitle>Ability Presence</CardTitle>
             <SectionTooltip>
               Which active and passive abilities appear most in winning teams,
-              with average team fitness. Fitness = (wins + draws × 0.5) /
-              total matches. High concentration may indicate an ability is
-              overtuned.
+              with average team fitness. Fitness = (wins + draws × 0.5) / total
+              matches. High concentration may indicate an ability is overtuned.
             </SectionTooltip>
           </div>
         </CardHeader>
         <CardContent>
-          <AbilityLeaderboard leaderboard={meta.abilityLeaderboard} snapshots={snapshots} creatures={creatures} />
+          <AbilityLeaderboard
+            leaderboard={meta.abilityLeaderboard}
+            snapshots={snapshots}
+            creatures={creatures}
+          />
         </CardContent>
       </Card>
 
@@ -560,7 +585,6 @@ export function ResultsPanel({
           <HallOfFame hallOfFame={meta.hallOfFame} />
         </CardContent>
       </Card>
-
     </div>
   )
 }

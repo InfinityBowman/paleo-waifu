@@ -117,8 +117,12 @@ export function BattlePanel({
   function randomizeAllRows() {
     const randomRow = (): 'front' | 'back' =>
       Math.random() < 0.5 ? 'front' : 'back'
-    setTeamA((prev) => prev.map((s) => ({ ...s, row: randomRow() })) as TeamState)
-    setTeamB((prev) => prev.map((s) => ({ ...s, row: randomRow() })) as TeamState)
+    setTeamA(
+      (prev) => prev.map((s) => ({ ...s, row: randomRow() })) as TeamState,
+    )
+    setTeamB(
+      (prev) => prev.map((s) => ({ ...s, row: randomRow() })) as TeamState,
+    )
   }
 
   async function handleRun() {
@@ -132,11 +136,19 @@ export function BattlePanel({
       teamA: teamA.map((s) => ({
         creatureId: s.creatureId,
         row: s.row,
-      })) as [TeamBattleCreatureSlot, TeamBattleCreatureSlot, TeamBattleCreatureSlot],
+      })) as [
+        TeamBattleCreatureSlot,
+        TeamBattleCreatureSlot,
+        TeamBattleCreatureSlot,
+      ],
       teamB: teamB.map((s) => ({
         creatureId: s.creatureId,
         row: s.row,
-      })) as [TeamBattleCreatureSlot, TeamBattleCreatureSlot, TeamBattleCreatureSlot],
+      })) as [
+        TeamBattleCreatureSlot,
+        TeamBattleCreatureSlot,
+        TeamBattleCreatureSlot,
+      ],
       trials,
       randomizeRows,
       creaturePatches: [...patches.values()],
@@ -295,12 +307,10 @@ function TeamPicker({
                 <SelectContent>
                   {roles.map((role) => {
                     const group = creaturesByRole[role]
-                    if (!group?.length) return null
+                    if (!group.length) return null
                     return (
                       <SelectGroup key={role}>
-                        <SelectLabel className="capitalize">
-                          {role}
-                        </SelectLabel>
+                        <SelectLabel className="capitalize">{role}</SelectLabel>
                         {group.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
                             {c.name}
@@ -404,9 +414,7 @@ function BattleResults({
                 )}
               />
               <span className="text-sm font-medium">
-                {winner === 'draw'
-                  ? 'Draw!'
-                  : `Team ${winner} wins`}
+                {winner === 'draw' ? 'Draw!' : `Team ${winner} wins`}
               </span>
             </div>
             <span className="text-xs text-muted-foreground">
@@ -441,7 +449,9 @@ function BattleResults({
           <div className="flex items-center justify-between text-[10px] text-muted-foreground">
             <span>A: {teamANames}</span>
             {result.draws > 0 && (
-              <span>{result.draws} draw{result.draws !== 1 ? 's' : ''}</span>
+              <span>
+                {result.draws} draw{result.draws !== 1 ? 's' : ''}
+              </span>
             )}
             <span>B: {teamBNames}</span>
           </div>
@@ -479,9 +489,7 @@ function BattleResults({
               >
                 {trial.winner ? `Team ${trial.winner}` : 'Draw'}
               </Badge>
-              <span className="text-muted-foreground">
-                {trial.turns} turns
-              </span>
+              <span className="text-muted-foreground">{trial.turns} turns</span>
               <span className="ml-auto text-muted-foreground font-mono">
                 <span className="text-blue-400">
                   {trial.teamAHpPercent.toFixed(0)}%

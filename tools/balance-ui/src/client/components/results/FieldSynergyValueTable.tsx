@@ -1,11 +1,6 @@
 import { useMemo } from 'react'
 import { cn } from '../../lib/utils'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '../ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { SectionTooltip } from './SectionTooltip'
 import { pct } from './constants'
 import type { SynergyImpact } from '../../../shared/types.ts'
@@ -37,8 +32,9 @@ export function FieldSynergyValueTable({ synergies }: Props) {
           <CardTitle>Synergy Value</CardTitle>
           <SectionTooltip>
             Measured win rate delta for teams with vs without each synergy type.
-            Positive delta = synergy helps, negative = synergy hurts or is noise.
-            Low sample counts (&lt;30) may not be statistically significant.
+            Positive delta = synergy helps, negative = synergy hurts or is
+            noise. Low sample counts (&lt;30) may not be statistically
+            significant.
           </SectionTooltip>
         </div>
       </CardHeader>
@@ -58,9 +54,7 @@ export function FieldSynergyValueTable({ synergies }: Props) {
               <th className="px-2 py-1.5 text-right text-muted-foreground">
                 Delta
               </th>
-              <th className="px-2 py-1.5 text-muted-foreground">
-                Impact
-              </th>
+              <th className="px-2 py-1.5 text-muted-foreground">Impact</th>
               <th className="px-2 py-1.5 text-right text-muted-foreground">
                 Sample
               </th>
@@ -108,7 +102,10 @@ export function FieldSynergyValueTable({ synergies }: Props) {
                           s.delta > 0 ? 'bg-success/60' : 'bg-destructive/60',
                         )}
                         style={{
-                          left: s.delta > 0 ? '50%' : `${50 - Math.min(barWidth, 50)}%`,
+                          left:
+                            s.delta > 0
+                              ? '50%'
+                              : `${50 - Math.min(barWidth, 50)}%`,
                           width: `${Math.min(barWidth, 50)}%`,
                         }}
                       />
@@ -121,7 +118,11 @@ export function FieldSynergyValueTable({ synergies }: Props) {
                         ? 'text-warning font-medium'
                         : 'text-muted-foreground',
                     )}
-                    title={lowSample ? 'Low sample size — may not be statistically significant' : undefined}
+                    title={
+                      lowSample
+                        ? 'Low sample size — may not be statistically significant'
+                        : undefined
+                    }
                   >
                     {s.sampleSize}
                     {lowSample && ' ⚠'}

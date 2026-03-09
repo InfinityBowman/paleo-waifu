@@ -18,7 +18,12 @@ import {
   CardTitle,
 } from '../ui/card'
 import { SectionTooltip } from './SectionTooltip'
-import { ROLE_COLOR_VALUES, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE } from './constants'
+import {
+  ROLE_COLOR_VALUES,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+} from './constants'
 import type { TeamRoleMatchup } from '../../../shared/types.ts'
 
 interface Props {
@@ -46,9 +51,9 @@ export function TeamRoleContribution({ roles }: Props) {
         <div className="flex items-center gap-2">
           <CardTitle>Role Contribution (3v3)</CardTitle>
           <SectionTooltip>
-            Average team win rate when a role is present on the team.
-            Roles near 50% are balanced; higher means the role contributes
-            more to team success in 3v3 battles.
+            Average team win rate when a role is present on the team. Roles near
+            50% are balanced; higher means the role contributes more to team
+            success in 3v3 battles.
           </SectionTooltip>
         </div>
         <CardDescription>

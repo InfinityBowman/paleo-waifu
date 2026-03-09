@@ -9,7 +9,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { ROLE_COLOR_VALUES, ROLE_ORDER, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE } from '../constants'
+import {
+  ROLE_COLOR_VALUES,
+  ROLE_ORDER,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+} from '../constants'
 
 export function RoleHpCurvesChart({
   roleHpCurves,
@@ -39,7 +45,9 @@ export function RoleHpCurvesChart({
   }, [roleHpCurves])
 
   const roles = Object.keys(roleHpCurves).sort(
-    (a, b) => (ROLE_ORDER.indexOf(a) === -1 ? 99 : ROLE_ORDER.indexOf(a)) - (ROLE_ORDER.indexOf(b) === -1 ? 99 : ROLE_ORDER.indexOf(b)),
+    (a, b) =>
+      (ROLE_ORDER.indexOf(a) === -1 ? 99 : ROLE_ORDER.indexOf(a)) -
+      (ROLE_ORDER.indexOf(b) === -1 ? 99 : ROLE_ORDER.indexOf(b)),
   )
 
   return (

@@ -2,12 +2,21 @@ import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import { createProgressBar } from '../report.ts'
 import { ABILITY_NAME_MAP, ABILITY_TYPE_MAP } from './meta-types.ts'
-import { canonicalGenome, ensureMixedRows, genomeKey, getRows, resolveMembers } from './meta-utils.ts'
+import {
+  canonicalGenome,
+  ensureMixedRows,
+  genomeKey,
+  getRows,
+  resolveMembers,
+} from './meta-utils.ts'
 import { detectSynergies } from './synergy.ts'
 import { collectBattleTelemetry, finalizeTelemetry } from './telemetry.ts'
 import { selectAndReproduce } from './genetics.ts'
 import { renderCsv, renderTerminal } from './output.ts'
-import { analyzeBattleActions, renderActionAnalysis } from './action-analysis.ts'
+import {
+  analyzeBattleActions,
+  renderActionAnalysis,
+} from './action-analysis.ts'
 import type { TelemetryResult } from './telemetry.ts'
 import type {
   CreatureSlot,
@@ -87,7 +96,12 @@ function evaluateGeneration(
   defScaling?: number,
   collectTelemetry?: boolean,
   basicAttackMultiplier?: number,
-): { avgTurns: number; turnP10: number; turnP90: number; telemetry?: TelemetryResult } {
+): {
+  avgTurns: number
+  turnP10: number
+  turnP90: number
+  telemetry?: TelemetryResult
+} {
   const n = population.length
 
   // Reset fitness for this generation
@@ -103,7 +117,16 @@ function evaluateGeneration(
     ? new Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>()
     : null
   const contribAcc = collectTelemetry
-    ? new Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>()
+    ? new Map<
+        string,
+        {
+          damageDealt: number
+          damageTaken: number
+          healingDone: number
+          shieldsApplied: number
+          debuffsLanded: number
+        }
+      >()
     : null
   const roleWinAcc = collectTelemetry
     ? new Map<string, { wins: number; losses: number }>()
@@ -162,7 +185,12 @@ function evaluateGeneration(
           getRows(indB.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed, damageScale, defScaling, basicAttackMultiplier })
+        const result = simulateBattle(teamA, teamB, {
+          seed,
+          damageScale,
+          defScaling,
+          basicAttackMultiplier,
+        })
         totalTurns += result.turns
         allTurns.push(result.turns)
         battleCount++
@@ -177,7 +205,13 @@ function evaluateGeneration(
           indB.draws++
         }
         if (hpCurveAcc && contribAcc && roleWinAcc && abilityAcc) {
-          collectBattleTelemetry(result, hpCurveAcc, contribAcc, roleWinAcc, abilityAcc)
+          collectBattleTelemetry(
+            result,
+            hpCurveAcc,
+            contribAcc,
+            roleWinAcc,
+            abilityAcc,
+          )
         }
       } catch {
         // Skip failed battles
@@ -195,7 +229,12 @@ function evaluateGeneration(
           getRows(indA.genome),
           templateMap,
         )
-        const result = simulateBattle(teamA, teamB, { seed: seed + 1, damageScale, defScaling, basicAttackMultiplier })
+        const result = simulateBattle(teamA, teamB, {
+          seed: seed + 1,
+          damageScale,
+          defScaling,
+          basicAttackMultiplier,
+        })
         totalTurns += result.turns
         allTurns.push(result.turns)
         battleCount++
@@ -210,7 +249,13 @@ function evaluateGeneration(
           indA.draws++
         }
         if (hpCurveAcc && contribAcc && roleWinAcc && abilityAcc) {
-          collectBattleTelemetry(result, hpCurveAcc, contribAcc, roleWinAcc, abilityAcc)
+          collectBattleTelemetry(
+            result,
+            hpCurveAcc,
+            contribAcc,
+            roleWinAcc,
+            abilityAcc,
+          )
         }
       } catch {
         // Skip failed battles
@@ -230,12 +275,20 @@ function evaluateGeneration(
 
   // Compute percentiles for turn spread
   allTurns.sort((a, b) => a - b)
-  const p10 = allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.1)] : 0
-  const p90 = allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.9)] : 0
+  const p10 =
+    allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.1)] : 0
+  const p90 =
+    allTurns.length > 0 ? allTurns[Math.floor(allTurns.length * 0.9)] : 0
 
   const telemetry =
     hpCurveAcc && contribAcc && roleWinAcc && abilityAcc
-      ? finalizeTelemetry(hpCurveAcc, contribAcc, roleWinAcc, abilityAcc, battleCount)
+      ? finalizeTelemetry(
+          hpCurveAcc,
+          contribAcc,
+          roleWinAcc,
+          abilityAcc,
+          battleCount,
+        )
       : undefined
 
   return {
@@ -306,7 +359,11 @@ function snapshotGeneration(
       creatureWinAcc[m.id] = cAcc
 
       // Per-ability tracking (all teams)
-      const abilityIds = ['basic_attack', m.active.templateId, m.passive.templateId]
+      const abilityIds = [
+        'basic_attack',
+        m.active.templateId,
+        m.passive.templateId,
+      ]
       for (const aid of abilityIds) {
         abilityPresenceAll[aid] = (abilityPresenceAll[aid] ?? 0) + 1
         const aAcc = abilityWinAcc[aid] ?? { wins: 0, total: 0 }
@@ -362,7 +419,11 @@ function snapshotGeneration(
       creatureFitnessSum[m.id] = (creatureFitnessSum[m.id] ?? 0) + ind.fitness
 
       // Track abilities (including basic attack)
-      const abilityIds = ['basic_attack', m.active.templateId, m.passive.templateId]
+      const abilityIds = [
+        'basic_attack',
+        m.active.templateId,
+        m.passive.templateId,
+      ]
       for (const aid of abilityIds) {
         abilityPresence[aid] = (abilityPresence[aid] ?? 0) + 1
         abilityFitnessSum[aid] = (abilityFitnessSum[aid] ?? 0) + ind.fitness
@@ -419,8 +480,9 @@ function buildFinalResult(
   creatureIndex: Map<string, CreatureRecord>,
 ): MetaResult {
   // Hall of fame: all unique teams by peak fitness (UI handles display limit)
-  const hallOfFame = [...allTimeBest.values()]
-    .sort((a, b) => b.fitness - a.fitness)
+  const hallOfFame = [...allTimeBest.values()].sort(
+    (a, b) => b.fitness - a.fitness,
+  )
 
   // Creature leaderboard: aggregate appearances and avg fitness from top-quartile snapshots
   const creatureAgg = new Map<
@@ -440,7 +502,8 @@ function buildFinalResult(
   }
 
   // Aggregate per-creature all-team win rates (weighted avg across snapshots)
-  const creatureWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  const creatureWrAcc: Record<string, { weightedWr: number; weight: number }> =
+    {}
   for (const snap of snapshots) {
     for (const [id, wr] of Object.entries(snap.creatureWinRateAll)) {
       const count = snap.creaturePresenceAll[id] ?? 0
@@ -456,7 +519,10 @@ function buildFinalResult(
   }
 
   // Aggregate absolute creature win rates (weighted avg across snapshots)
-  const creatureAbsWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  const creatureAbsWrAcc: Record<
+    string,
+    { weightedWr: number; weight: number }
+  > = {}
   for (const snap of snapshots) {
     for (const [id, wr] of Object.entries(snap.creatureAbsWinRate)) {
       const count = snap.creaturePresenceAll[id] ?? 0
@@ -503,7 +569,8 @@ function buildFinalResult(
   }
 
   // Aggregate per-ability all-team win rates (weighted avg across snapshots)
-  const abilityWrAcc: Record<string, { weightedWr: number; weight: number }> = {}
+  const abilityWrAcc: Record<string, { weightedWr: number; weight: number }> =
+    {}
   for (const snap of snapshots) {
     for (const [id, wr] of Object.entries(snap.abilityWinRateAll)) {
       const count = snap.abilityPresenceAll[id] ?? 0
@@ -687,7 +754,9 @@ export function runMetaReport(
     }
 
     // Snapshot
-    snapshots.push(snapshotGeneration(population, gen, avgTurns, turnP10, turnP90))
+    snapshots.push(
+      snapshotGeneration(population, gen, avgTurns, turnP10, turnP90),
+    )
     options.onGeneration?.(gen, snapshots[snapshots.length - 1])
 
     // Reproduce (skip on last generation)
@@ -725,7 +794,13 @@ export function runMetaReport(
 
     // Action analysis on final generation
     log('\n  Analyzing battle actions from top teams...')
-    const actionProfiles = analyzeBattleActions(population, options.templateMap, options.damageScale, options.defScaling, options.basicAttackMultiplier)
+    const actionProfiles = analyzeBattleActions(
+      population,
+      options.templateMap,
+      options.damageScale,
+      options.defScaling,
+      options.basicAttackMultiplier,
+    )
     renderActionAnalysis(actionProfiles)
   }
 

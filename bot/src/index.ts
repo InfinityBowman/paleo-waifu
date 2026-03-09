@@ -8,8 +8,12 @@ import {
   verifySignature,
 } from './lib/discord'
 import { resolveDiscordUser } from './lib/auth'
+import { parseChallengeAction } from './lib/battle-helpers'
 import { BANNED_MESSAGE, UNLINKED_MESSAGE } from './lib/constants'
 import { handleBalance } from './commands/balance'
+import { handleBattle } from './commands/battle'
+import { handleBattles } from './commands/battles'
+import { handleRating } from './commands/rating'
 import { handlePity } from './commands/pity'
 import { handleDaily } from './commands/daily'
 import { handleHelp } from './commands/help'
@@ -19,6 +23,9 @@ import {
 } from './commands/leaderboard'
 import { handleLevel } from './commands/level'
 import { handlePull } from './commands/pull'
+import { handleBattleAccept } from './components/battle-accept'
+import { handleBattleDecline } from './components/battle-decline'
+import { handleDefenderPreset } from './components/battle-defender-preset'
 import { awardXp } from './lib/xp'
 import type { Interaction } from './lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
@@ -62,7 +69,12 @@ export default {
       return jsonResponse({ type: InteractionResponseType.PONG })
     }
 
-    // Only handle application commands
+    // Handle MESSAGE_COMPONENT (buttons, select menus)
+    if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
+      return handleComponent(interaction, env, ctx)
+    }
+
+    // Handle APPLICATION_COMMAND
     if (interaction.type !== InteractionType.APPLICATION_COMMAND) {
       return new Response('Unknown interaction type', { status: 400 })
     }
@@ -131,6 +143,66 @@ async function handleXpRequest(request: Request, env: Env): Promise<Response> {
   return jsonResponse(result)
 }
 
+async function handleComponent(
+  interaction: Interaction,
+  env: Env,
+  ctx: ExecutionContext,
+): Promise<Response> {
+  const customId = interaction.data?.custom_id
+  if (!customId) {
+    return ephemeralResponse('Invalid component interaction.')
+  }
+
+  // Resolve the user
+  const discordUser = getInteractionUser(interaction)
+  const db = await createDb(env.DB)
+  const appUser = await resolveDiscordUser(db, discordUser.id)
+
+  if (!appUser) {
+    return ephemeralResponse(UNLINKED_MESSAGE)
+  }
+
+  if (appUser.banned) {
+    return ephemeralResponse(BANNED_MESSAGE)
+  }
+
+  // Parse custom_id: "battle_accept:challengeId", "battle_decline:challengeId", etc.
+  const parsed = parseChallengeAction(customId)
+  if (!parsed) {
+    return ephemeralResponse('Unknown component interaction.')
+  }
+
+  const { action, challengeId } = parsed
+
+  switch (action) {
+    case 'battle_accept':
+      return handleBattleAccept(interaction, db, appUser, challengeId, env, ctx)
+
+    case 'battle_decline':
+      return handleBattleDecline(interaction, db, appUser, challengeId, env)
+
+    case 'battle_defender_preset': {
+      // Select menu — get the selected value
+      const presetId = interaction.data?.values?.[0]
+      if (!presetId) {
+        return ephemeralResponse('No preset selected.')
+      }
+      return handleDefenderPreset(
+        interaction,
+        db,
+        appUser,
+        challengeId,
+        presetId,
+        env,
+        ctx,
+      )
+    }
+
+    default:
+      return ephemeralResponse('Unknown battle action.')
+  }
+}
+
 function routeCommand(
   name: string,
   interaction: Interaction,
@@ -147,6 +219,12 @@ function routeCommand(
       return handlePity(db, appUser)
     case 'level':
       return handleLevel(interaction, db, appUser)
+    case 'rating':
+      return handleRating(interaction, db, appUser)
+
+    // Immediate but with DB queries
+    case 'battles':
+      return handleBattles(db, appUser)
 
     // Deferred commands — return type 5 immediately, do work in waitUntil
     case 'daily':
@@ -155,6 +233,8 @@ function routeCommand(
       return handlePull(interaction, db, appUser, env, ctx, 1)
     case 'pull10':
       return handlePull(interaction, db, appUser, env, ctx, 10)
+    case 'battle':
+      return handleBattle(interaction, db, appUser, env, ctx)
 
     default:
       return ephemeralResponse(`Unknown command: ${name}`)

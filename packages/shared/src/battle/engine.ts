@@ -27,7 +27,12 @@ const MAX_TURNS = 30
 export function simulateBattle(
   teamA: BattleTeam,
   teamB: BattleTeam,
-  options: { seed: number; damageScale?: number; defScaling?: number; basicAttackMultiplier?: number },
+  options: {
+    seed: number
+    damageScale?: number
+    defScaling?: number
+    basicAttackMultiplier?: number
+  },
 ): BattleResult {
   const rng = createRng(options.seed)
   const ds = options.damageScale
@@ -59,7 +64,17 @@ export function simulateBattle(
 
   // 3. Fire onBattleStart triggers (e.g., territorial)
   for (const c of [...creaturesA, ...creaturesB]) {
-    fireAndLog('onBattleStart', c, creaturesA, creaturesB, rng, 0, log, ds, defS)
+    fireAndLog(
+      'onBattleStart',
+      c,
+      creaturesA,
+      creaturesB,
+      rng,
+      0,
+      log,
+      ds,
+      defS,
+    )
   }
 
   // 4. Synergies
@@ -159,7 +174,15 @@ export function simulateBattle(
 
       // Fire onBeforeAttack passives (predator_instinct)
       if (targets.length > 0) {
-        const beforeCtx = makeCtx(creature, allies, enemies, rng, turn, ds, defS)
+        const beforeCtx = makeCtx(
+          creature,
+          allies,
+          enemies,
+          rng,
+          turn,
+          ds,
+          defS,
+        )
         beforeCtx.triggerAttackTarget = targets[0]
         const beforeRes = fireTrigger('onBeforeAttack', creature, beforeCtx)
         if (beforeRes.length > 0) {
@@ -178,7 +201,10 @@ export function simulateBattle(
       // Patch basic attack multiplier if overridden
       const resolvedAbility =
         ability.id === 'basic_attack' && bam != null
-          ? { ...ability, effects: [{ ...ability.effects[0], multiplier: bam }] }
+          ? {
+              ...ability,
+              effects: [{ ...ability.effects[0], multiplier: bam }],
+            }
           : ability
 
       // Resolve ability effects
@@ -189,7 +215,15 @@ export function simulateBattle(
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
       if (ability.id === 'basic_attack' && targets.length > 0) {
-        const attackCtx = makeCtx(creature, allies, enemies, rng, turn, ds, defS)
+        const attackCtx = makeCtx(
+          creature,
+          allies,
+          enemies,
+          rng,
+          turn,
+          ds,
+          defS,
+        )
         attackCtx.triggerAttackTarget = targets[0]
         const attackRes = fireTrigger('onBasicAttack', creature, attackCtx)
         if (attackRes.length > 0) {
@@ -206,7 +240,17 @@ export function simulateBattle(
       }
 
       // Handle KOs from damage
-      processNewKOs(creature, creaturesA, creaturesB, koLogged, turn, log, rng, ds, defS)
+      processNewKOs(
+        creature,
+        creaturesA,
+        creaturesB,
+        koLogged,
+        turn,
+        log,
+        rng,
+        ds,
+        defS,
+      )
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
@@ -215,13 +259,33 @@ export function simulateBattle(
       tickAndLog(creature, turn, log)
 
       // Handle KOs from DoT
-      processNewKOs(creature, creaturesA, creaturesB, koLogged, turn, log, rng, ds, defS)
+      processNewKOs(
+        creature,
+        creaturesA,
+        creaturesB,
+        koLogged,
+        turn,
+        log,
+        rng,
+        ds,
+        defS,
+      )
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
 
       // Fire onTurnEnd passives (regenerative)
-      fireAndLog('onTurnEnd', creature, creaturesA, creaturesB, rng, turn, log, ds, defS)
+      fireAndLog(
+        'onTurnEnd',
+        creature,
+        creaturesA,
+        creaturesB,
+        rng,
+        turn,
+        log,
+        ds,
+        defS,
+      )
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
@@ -335,7 +399,15 @@ function fireAndLog(
 ): void {
   const allies = creature.teamSide === 'A' ? creaturesA : creaturesB
   const enemies = creature.teamSide === 'A' ? creaturesB : creaturesA
-  const ctx = makeCtx(creature, allies, enemies, rng, turn, damageScale, defScaling)
+  const ctx = makeCtx(
+    creature,
+    allies,
+    enemies,
+    rng,
+    turn,
+    damageScale,
+    defScaling,
+  )
   const resolutions = fireTrigger(triggerKind, creature, ctx)
   if (resolutions.length > 0) {
     log.push({
@@ -375,21 +447,51 @@ function processNewKOs(
 
       // onKill for the attacker
       if (attacker.isAlive && attacker.id !== c.id) {
-        fireAndLog('onKill', attacker, creaturesA, creaturesB, rng, turn, log, damageScale, defScaling)
+        fireAndLog(
+          'onKill',
+          attacker,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+          damageScale,
+          defScaling,
+        )
       }
 
       // onEnemyKO for opponents of the dead creature
       const opponents = c.teamSide === 'A' ? creaturesB : creaturesA
       for (const opp of opponents) {
         if (!opp.isAlive) continue
-        fireAndLog('onEnemyKO', opp, creaturesA, creaturesB, rng, turn, log, damageScale, defScaling)
+        fireAndLog(
+          'onEnemyKO',
+          opp,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+          damageScale,
+          defScaling,
+        )
       }
 
       // onAllyKO for allies of the dead creature
       const deadAllies = c.teamSide === 'A' ? creaturesA : creaturesB
       for (const ally of deadAllies) {
         if (!ally.isAlive || ally.id === c.id) continue
-        fireAndLog('onAllyKO', ally, creaturesA, creaturesB, rng, turn, log, damageScale, defScaling)
+        fireAndLog(
+          'onAllyKO',
+          ally,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+          damageScale,
+          defScaling,
+        )
       }
     }
   }

@@ -96,9 +96,7 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
     )
   }
 
-  const metaRuns = runs.filter(
-    (r): r is MetaSavedRun => r.simType === 'meta',
-  )
+  const metaRuns = runs.filter((r): r is MetaSavedRun => r.simType === 'meta')
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -140,8 +138,8 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
               <div className="flex items-center gap-2">
                 <CardTitle>Fitness Progression</CardTitle>
                 <SectionTooltip>
-                  Overlaid fitness curves from all selected runs. Solid lines are
-                  top fitness, dashed lines are average.
+                  Overlaid fitness curves from all selected runs. Solid lines
+                  are top fitness, dashed lines are average.
                 </SectionTooltip>
               </div>
               <CardDescription>
@@ -159,9 +157,9 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
               <div className="flex items-center gap-2">
                 <CardTitle>Battle Health</CardTitle>
                 <SectionTooltip>
-                  Average turns per battle (solid) and population diversity (dashed)
-                  overlaid across runs. Green band shows the healthy 7-10 turns
-                  target.
+                  Average turns per battle (solid) and population diversity
+                  (dashed) overlaid across runs. Green band shows the healthy
+                  7-10 turns target.
                 </SectionTooltip>
               </div>
               <CardDescription>
@@ -179,8 +177,8 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
               <div className="flex items-center gap-2">
                 <CardTitle>Role Meta Share</CardTitle>
                 <SectionTooltip>
-                  Final role distribution for each run. Delta columns show change
-                  relative to the first selected run.
+                  Final role distribution for each run. Delta columns show
+                  change relative to the first selected run.
                 </SectionTooltip>
               </div>
             </CardHeader>
@@ -195,8 +193,8 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
               <div className="flex items-center gap-2">
                 <CardTitle>Creature Leaderboard</CardTitle>
                 <SectionTooltip>
-                  Top 15 creatures by appearances across runs. Rank changes shown
-                  relative to the first run.
+                  Top 15 creatures by appearances across runs. Rank changes
+                  shown relative to the first run.
                 </SectionTooltip>
               </div>
             </CardHeader>

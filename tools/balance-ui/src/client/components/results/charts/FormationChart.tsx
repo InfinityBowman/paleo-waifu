@@ -5,7 +5,12 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { FORMATION_COLORS, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, entries } from '../constants'
+import {
+  FORMATION_COLORS,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  entries,
+} from '../constants'
 
 export function FormationChart({
   formationShares,

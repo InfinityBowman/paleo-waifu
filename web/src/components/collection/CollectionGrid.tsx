@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { CreatureModal } from './CreatureModal'
+import type { BattleStatsData } from '@/components/shared/BattleStatsPanel'
 import { IconMagnifyingGlass } from '@/components/icons'
-import { useMasonryColumns } from '@/hooks/useMasonryColumns'
 import { CreatureCard } from '@/components/shared/CreatureCard'
-import { Input } from '@/components/ui/input'
+import { useMasonryColumns } from '@/hooks/useMasonryColumns'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -26,6 +27,8 @@ interface CollectionItem {
   description: string
   isFavorite: boolean | null
   isLocked: boolean | null
+  isBattleReady: boolean
+  battleStats?: BattleStatsData | null
 }
 
 export function CollectionGrid({
@@ -36,6 +39,7 @@ export function CollectionGrid({
   const [search, setSearch] = useState('')
   const [rarityFilter, setRarityFilter] = useState<string>('all')
   const [eraFilter, setEraFilter] = useState<string>('all')
+  const [battleFilter, setBattleFilter] = useState<string>('all')
   const [selected, setSelected] = useState<CollectionItem | null>(null)
 
   const eras = useMemo(
@@ -51,9 +55,10 @@ export function CollectionGrid({
           return false
         if (rarityFilter !== 'all' && c.rarity !== rarityFilter) return false
         if (eraFilter !== 'all' && c.era !== eraFilter) return false
+        if (battleFilter === 'battle' && !c.isBattleReady) return false
         return true
       }),
-    [collection, search, rarityFilter, eraFilter],
+    [collection, search, rarityFilter, eraFilter, battleFilter],
   )
 
   const { containerRef, columns } = useMasonryColumns(filtered)
@@ -95,6 +100,15 @@ export function CollectionGrid({
                 {e}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={battleFilter} onValueChange={setBattleFilter}>
+          <SelectTrigger className="w-full sm:w-38">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent position="popper">
+            <SelectItem value="all">All Creatures</SelectItem>
+            <SelectItem value="battle">Battle Ready</SelectItem>
           </SelectContent>
         </Select>
       </div>

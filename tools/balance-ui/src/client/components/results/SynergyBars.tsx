@@ -1,6 +1,10 @@
 import { entries } from './constants'
 
-export function SynergyBars({ synergyShares }: { synergyShares: Record<string, number> }) {
+export function SynergyBars({
+  synergyShares,
+}: {
+  synergyShares: Record<string, number>
+}) {
   const sorted = entries(synergyShares).sort(([, a], [, b]) => b - a)
   const maxShare = Math.max(...sorted.map(([, s]) => s), 0.01)
 

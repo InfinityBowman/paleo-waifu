@@ -99,10 +99,7 @@ export interface MetaResult {
   roleMetaShare: Record<string, number>
   synergyMetaShare: Record<string, number>
   formationMetaShare: Record<string, number>
-  roleHpCurves?: Record<
-    string,
-    { wins: Array<number>; losses: Array<number> }
-  >
+  roleHpCurves?: Record<string, { wins: Array<number>; losses: Array<number> }>
   roleContributions?: Record<
     string,
     {

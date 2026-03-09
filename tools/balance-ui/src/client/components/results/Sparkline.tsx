@@ -25,7 +25,14 @@ export function Sparkline({
 
   return (
     <svg width={width} height={height} className="shrink-0">
-      <path d={d} fill="none" stroke={color} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={d}
+        fill="none"
+        stroke={color}
+        strokeWidth={1.5}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   )
 }

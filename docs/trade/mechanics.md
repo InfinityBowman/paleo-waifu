@@ -50,6 +50,7 @@ The offerer picks a winning proposal. Executed as a single `db.batch()`:
 ### 4. Cancel
 
 Offerer cancels their listing. Batch operation:
+
 - Sets `trade_offer.status = 'cancelled'`
 - Unlocks offerer's creature
 - Cancels all pending proposals and unlocks their creatures
@@ -57,6 +58,7 @@ Offerer cancels their listing. Batch operation:
 ### 5. Withdraw
 
 Proposer withdraws their own proposal:
+
 - Sets `trade_proposal.status = 'withdrawn'`
 - Unlocks proposer's creature
 
@@ -81,13 +83,13 @@ Trades only actually expire when someone visits the trade page. A stale trade wi
 
 ## Limits
 
-| Limit | Value | Enforcement |
-|-------|-------|-------------|
-| Open trades per user | 5 | Checked on create after creature lock |
-| Trade expiry | 7 days | `expiresAt` column, lazy cleanup on page load |
-| Proposals per user per trade | 1 | Unique index `(tradeId, proposerId)` + pre-check |
-| Self-proposals | Blocked | Explicit check in `propose` action |
-| Page size | 20 | Cursor-based pagination, keyset on `createdAt` |
+| Limit                        | Value   | Enforcement                                      |
+| ---------------------------- | ------- | ------------------------------------------------ |
+| Open trades per user         | 5       | Checked on create after creature lock            |
+| Trade expiry                 | 7 days  | `expiresAt` column, lazy cleanup on page load    |
+| Proposals per user per trade | 1       | Unique index `(tradeId, proposerId)` + pre-check |
+| Self-proposals               | Blocked | Explicit check in `propose` action               |
+| Page size                    | 20      | Cursor-based pagination, keyset on `createdAt`   |
 
 ## Status Values
 
@@ -105,10 +107,10 @@ Two tabs in the trade page (`TradeList.tsx`):
 
 ## Key Files
 
-| File | Purpose |
-|------|---------|
-| `packages/shared/src/db/schema.ts` | Table definitions |
-| `web/src/routes/api/trade.ts` | All mutations: create, cancel, propose, confirm, withdraw |
-| `web/src/routes/_app/trade.tsx` | Server functions (data loading, expiry), route loader |
-| `web/src/components/trade/TradeList.tsx` | Entire trade UI |
-| `web/src/components/shared/CreaturePickerModal.tsx` | Creature selector for trades and proposals |
+| File                                                | Purpose                                                   |
+| --------------------------------------------------- | --------------------------------------------------------- |
+| `packages/shared/src/db/schema.ts`                  | Table definitions                                         |
+| `web/src/routes/api/trade.ts`                       | All mutations: create, cancel, propose, confirm, withdraw |
+| `web/src/routes/_app/trade.tsx`                     | Server functions (data loading, expiry), route loader     |
+| `web/src/components/trade/TradeList.tsx`            | Entire trade UI                                           |
+| `web/src/components/shared/CreaturePickerModal.tsx` | Creature selector for trades and proposals                |

@@ -11,6 +11,8 @@ export enum InteractionResponseType {
   PONG = 1,
   CHANNEL_MESSAGE_WITH_SOURCE = 4,
   DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE = 5,
+  DEFERRED_UPDATE_MESSAGE = 6,
+  UPDATE_MESSAGE = 7,
 }
 
 export enum ApplicationCommandOptionType {
@@ -31,6 +33,9 @@ export interface InteractionData {
   id: string
   name: string
   options?: Array<InteractionOption>
+  custom_id?: string
+  component_type?: number
+  values?: Array<string>
 }
 
 export interface InteractionUser {
@@ -50,8 +55,10 @@ export interface Interaction {
   token: string
   type: InteractionType
   data?: InteractionData
+  message?: { id: string; channel_id: string }
   member?: InteractionMember
   user?: InteractionUser
+  channel_id?: string
   application_id: string
 }
 
@@ -65,11 +72,40 @@ export interface Embed {
   footer?: { text: string }
 }
 
+export interface ActionRow {
+  type: 1
+  components: Array<Button | SelectMenu>
+}
+
+export interface Button {
+  type: 2
+  style: 1 | 2 | 3 | 4 | 5 // primary, secondary, success, danger, link
+  label: string
+  custom_id?: string
+  url?: string
+  disabled?: boolean
+}
+
+export interface SelectMenu {
+  type: 3
+  custom_id: string
+  placeholder?: string
+  options: Array<{
+    label: string
+    value: string
+    description?: string
+    default?: boolean
+  }>
+  min_values?: number
+  max_values?: number
+}
+
 export interface InteractionResponse {
   type: InteractionResponseType
   data?: {
     content?: string
     embeds?: Array<Embed>
+    components?: Array<ActionRow>
     flags?: number
   }
 }
@@ -119,11 +155,96 @@ export function deferredResponse(ephemeral = false): Response {
   })
 }
 
+/** Defer a component interaction update (shows loading state on the message) */
+export function deferredUpdateResponse(): Response {
+  return jsonResponse({ type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE })
+}
+
+/** Update the original message in-place (for component interactions) */
+export function updateMessageResponse(body: {
+  content?: string
+  embeds?: Array<Embed>
+  components?: Array<ActionRow>
+}): Response {
+  return jsonResponse({
+    type: InteractionResponseType.UPDATE_MESSAGE,
+    data: body,
+  })
+}
+
+/** Respond to an interaction with components */
+export function immediateResponseWithComponents(
+  content: string,
+  components: Array<ActionRow>,
+  options?: { ephemeral?: boolean; embeds?: Array<Embed> },
+): Response {
+  return jsonResponse({
+    type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+    data: {
+      content,
+      embeds: options?.embeds,
+      components,
+      flags: options?.ephemeral ? MessageFlags.EPHEMERAL : undefined,
+    },
+  })
+}
+
+/** Send a follow-up message to an interaction */
+export async function sendFollowup(
+  applicationId: string,
+  interactionToken: string,
+  body: {
+    content?: string
+    embeds?: Array<Embed>
+    components?: Array<ActionRow>
+    flags?: number
+  },
+): Promise<void> {
+  const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}`
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    console.error(`Failed to send followup: ${res.status}`, await res.text())
+  }
+}
+
+/** Edit a specific channel message by ID */
+export async function editChannelMessage(
+  channelId: string,
+  messageId: string,
+  botToken: string,
+  body: {
+    content?: string
+    embeds?: Array<Embed>
+    components?: Array<ActionRow>
+  },
+): Promise<void> {
+  const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`
+  const res = await fetch(url, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bot ${botToken}`,
+    },
+    body: JSON.stringify(body),
+  })
+  if (!res.ok) {
+    console.error(`Failed to edit message: ${res.status}`, await res.text())
+  }
+}
+
 /** Edit the deferred response via Discord REST API */
 export async function editDeferredResponse(
   applicationId: string,
   interactionToken: string,
-  body: { content?: string; embeds?: Array<Embed> },
+  body: {
+    content?: string
+    embeds?: Array<Embed>
+    components?: Array<ActionRow>
+  },
 ): Promise<void> {
   const url = `https://discord.com/api/v10/webhooks/${applicationId}/${interactionToken}/messages/@original`
   const res = await fetch(url, {

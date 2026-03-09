@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Input } from './input'
 
-interface NumericInputProps
-  extends Omit<React.ComponentProps<typeof Input>, 'value' | 'onChange' | 'type'> {
+interface NumericInputProps extends Omit<
+  React.ComponentProps<typeof Input>,
+  'value' | 'onChange' | 'type'
+> {
   value: number
   onChange: (value: number) => void
   step?: number

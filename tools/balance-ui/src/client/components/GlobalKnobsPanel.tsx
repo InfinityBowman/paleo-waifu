@@ -104,7 +104,9 @@ export function GlobalKnobsPanel({
         const vals = group.map((c) => {
           if (!normalizeStats) return c[stat]
           const total = c.hp + c.atk + c.def + c.spd
-          return total > 0 ? Math.round(c[stat] * (TARGET_TOTAL / total)) : c[stat]
+          return total > 0
+            ? Math.round(c[stat] * (TARGET_TOTAL / total))
+            : c[stat]
         })
         stats[stat] = {
           min: Math.min(...vals),
@@ -219,7 +221,9 @@ export function GlobalKnobsPanel({
                           min={-50}
                           max={100}
                           value={displayVal}
-                          onChange={(pct) => setRoleStatMod(role, stat, pct / 100)}
+                          onChange={(pct) =>
+                            setRoleStatMod(role, stat, pct / 100)
+                          }
                           className={cn(
                             'w-16 text-center text-xs h-7 px-2',
                             mod !== 0 && 'border-primary/50 text-primary',
@@ -272,7 +276,9 @@ export function GlobalKnobsPanel({
                 'border-primary/50 text-primary',
             )}
           />
-          <span className="text-[9px] text-muted-foreground/60">lower = DEF stronger</span>
+          <span className="text-[9px] text-muted-foreground/60">
+            lower = DEF stronger
+          </span>
         </div>
         <div className="flex items-center gap-2 px-3 pb-3">
           <label className="w-24 text-muted-foreground">Basic ATK</label>
@@ -289,7 +295,9 @@ export function GlobalKnobsPanel({
                 'border-primary/50 text-primary',
             )}
           />
-          <span className="text-[9px] text-muted-foreground/60">default 0.9</span>
+          <span className="text-[9px] text-muted-foreground/60">
+            default 0.9
+          </span>
         </div>
       </Section>
 

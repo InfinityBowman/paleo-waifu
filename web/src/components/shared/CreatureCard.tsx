@@ -1,3 +1,4 @@
+import { Swords } from 'lucide-react'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
@@ -14,6 +15,7 @@ export interface CreatureCardData {
   diet?: string
   isNew?: boolean
   isFavorite?: boolean | null
+  isBattleReady?: boolean
 }
 
 export function CreatureCard({
@@ -84,6 +86,9 @@ export function CreatureCard({
               <IconSparkles className="mr-0.5 h-2.5 w-2.5" />
               NEW
             </Badge>
+          )}
+          {creature.isBattleReady && (
+            <Swords className="h-3 w-3 text-amber-400" />
           )}
         </div>
         <div className="font-display text-sm font-bold leading-tight">

@@ -352,7 +352,15 @@ function AbilityRow({
 
             {/* Effects */}
             {template.effects.map((effect, effectIdx) => {
-              const params = TUNABLE_PARAMS[effect.type] as Array<{ key: string; label: string; step: number; min: number; max: number }> | undefined
+              const params = TUNABLE_PARAMS[effect.type] as
+                | Array<{
+                    key: string
+                    label: string
+                    step: number
+                    min: number
+                    max: number
+                  }>
+                | undefined
               if (!params || params.length === 0) return null
 
               return (

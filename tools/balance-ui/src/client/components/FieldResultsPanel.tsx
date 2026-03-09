@@ -76,14 +76,18 @@ export function FieldResultsPanel({
   }, [result])
 
   const handleCopy = useCallback(() => {
-    navigator.clipboard.writeText(summaryText).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }).catch(() => {})
+    navigator.clipboard
+      .writeText(summaryText)
+      .then(() => {
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      })
+      .catch(() => {})
   }, [summaryText])
 
   const creatureAbilities = useMemo(() => {
-    if (!creatures) return new Map<string, { active: string; passive: string }>()
+    if (!creatures)
+      return new Map<string, { active: string; passive: string }>()
     const map = new Map<string, { active: string; passive: string }>()
     for (const c of creatures) {
       map.set(c.id, {
@@ -95,9 +99,10 @@ export function FieldResultsPanel({
   }, [creatures])
 
   const teamWinRates = useMemo(
-    () => (result?.result.creatureTeamStats ?? [])
-      .filter((c) => c.teamTotal > 0)
-      .map((c) => ({ winRate: c.teamWinRate })),
+    () =>
+      (result?.result.creatureTeamStats ?? [])
+        .filter((c) => c.teamTotal > 0)
+        .map((c) => ({ winRate: c.teamWinRate })),
     [result],
   )
 
@@ -121,8 +126,18 @@ export function FieldResultsPanel({
     )
   }
 
-  const { creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates, creatureTeamStats, scorecard, teamAbilityImpact, teamRoleMatchup } =
-    result.result
+  const {
+    creatureStats,
+    roleMatchupMatrix,
+    abilityImpact,
+    synergyImpact,
+    compWinRates,
+    formationWinRates,
+    creatureTeamStats,
+    scorecard,
+    teamAbilityImpact,
+    teamRoleMatchup,
+  } = result.result
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -150,7 +165,11 @@ export function FieldResultsPanel({
           className="h-7 w-7"
           onClick={handleCopy}
         >
-          {copied ? <Check size={14} className="text-green-500" /> : <ClipboardCopy size={14} />}
+          {copied ? (
+            <Check size={14} className="text-green-500" />
+          ) : (
+            <ClipboardCopy size={14} />
+          )}
         </Button>
       </div>
 
@@ -161,11 +180,15 @@ export function FieldResultsPanel({
             role="button"
             tabIndex={0}
             onClick={() => setBaselineOpen((v) => !v)}
-            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setBaselineOpen((v) => !v) }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') setBaselineOpen((v) => !v)
+            }}
             className="flex items-center justify-between px-4 py-1.5"
           >
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold">Changes from Baseline</span>
+              <span className="text-sm font-semibold">
+                Changes from Baseline
+              </span>
               <ChevronDown
                 size={14}
                 className={cn(
@@ -215,7 +238,8 @@ export function FieldResultsPanel({
             <CardTitle>Team Win Rate Distribution</CardTitle>
             <SectionTooltip>
               Histogram of creature team win rates in 5% buckets. A healthy game
-              has most creatures clustered around 50%. Wide spread indicates imbalance.
+              has most creatures clustered around 50%. Wide spread indicates
+              imbalance.
             </SectionTooltip>
           </div>
           <CardDescription>
@@ -227,15 +251,19 @@ export function FieldResultsPanel({
         </CardContent>
       </Card>
 
-      <CreatureTeamRanking creatures={creatureTeamStats} creatureAbilities={creatureAbilities} />
+      <CreatureTeamRanking
+        creatures={creatureTeamStats}
+        creatureAbilities={creatureAbilities}
+      />
 
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
             <CardTitle>Solo vs Team Performance</CardTitle>
             <SectionTooltip>
-              Each dot is a creature. X = 1v1 solo win rate, Y = 3v3 team win rate.
-              Dots above the diagonal benefit from teams; dots below are weaker in teams.
+              Each dot is a creature. X = 1v1 solo win rate, Y = 3v3 team win
+              rate. Dots above the diagonal benefit from teams; dots below are
+              weaker in teams.
             </SectionTooltip>
           </div>
           <CardDescription>
@@ -268,7 +296,9 @@ export function FieldResultsPanel({
           role="button"
           tabIndex={0}
           onClick={() => setSoloOpen((v) => !v)}
-          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSoloOpen((v) => !v) }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') setSoloOpen((v) => !v)
+          }}
           className="flex cursor-pointer items-center gap-3"
         >
           <div className="h-px flex-1 bg-border" />
@@ -292,7 +322,10 @@ export function FieldResultsPanel({
       </div>
 
       {metaResult && (
-        <CrossSimInsights fieldCreatures={creatureStats} metaResult={metaResult} />
+        <CrossSimInsights
+          fieldCreatures={creatureStats}
+          metaResult={metaResult}
+        />
       )}
     </div>
   )

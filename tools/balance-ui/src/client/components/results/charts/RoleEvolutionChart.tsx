@@ -8,7 +8,13 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { ROLE_COLOR_VALUES, ROLE_ORDER, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE } from '../constants'
+import {
+  ROLE_COLOR_VALUES,
+  ROLE_ORDER,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+} from '../constants'
 import type { GenerationSnapshot } from '../../../../shared/types.ts'
 
 export function RoleEvolutionChart({

@@ -89,9 +89,7 @@ export function CreaturePowerRanking({ creatures }: Props) {
                     isOutlier && 'bg-destructive/5',
                   )}
                 >
-                  <td className="px-4 py-1.5 text-muted-foreground">
-                    {i + 1}
-                  </td>
+                  <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
                   <td className="px-2 py-1.5 font-medium">{c.name}</td>
                   <td className="px-2 py-1.5">
                     <span

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import type { Rarity } from '@paleo-waifu/shared/types'
+import type { BattleStatsData } from '@/components/shared/BattleStatsPanel'
 import { IconFossil, IconRoundStar, IconSparkles } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import {
@@ -15,6 +16,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
+import { BattleStatsPanel } from '@/components/shared/BattleStatsPanel'
 
 interface Creature {
   id?: string
@@ -30,6 +32,7 @@ interface Creature {
   weightKg?: number | null
   funFacts?: string | null
   isFavorite?: boolean | null
+  battleStats?: BattleStatsData | null
 }
 
 const RARITY_IMAGE_GRADIENT: Record<string, string> = {
@@ -238,6 +241,10 @@ export function CreatureModal({
               <div className="h-4 w-5/6 animate-pulse rounded bg-muted/50" />
               <div className="h-4 w-4/6 animate-pulse rounded bg-muted/50" />
             </div>
+          )}
+
+          {creature.battleStats && (
+            <BattleStatsPanel stats={creature.battleStats} />
           )}
         </div>
       </DialogContent>

@@ -51,7 +51,10 @@ export function FieldFormationWinRates({ formationWinRates }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={Math.max(data.length * 36, 80)}>
+        <ResponsiveContainer
+          width="100%"
+          height={Math.max(data.length * 36, 80)}
+        >
           <BarChart
             data={data}
             layout="vertical"
@@ -76,11 +79,22 @@ export function FieldFormationWinRates({ formationWinRates }: Props) {
             <RechartsTooltip
               contentStyle={TOOLTIP_CONTENT_STYLE}
               itemStyle={TOOLTIP_ITEM_STYLE}
-              formatter={((value: number, _: string, entry: { payload: { count: number } }) =>
-                [`${(value * 100).toFixed(1)}% (${entry.payload.count} teams)`, 'Win Rate']
-              ) as any}
+              formatter={
+                ((
+                  value: number,
+                  _: string,
+                  entry: { payload: { count: number } },
+                ) => [
+                  `${(value * 100).toFixed(1)}% (${entry.payload.count} teams)`,
+                  'Win Rate',
+                ]) as any
+              }
             />
-            <ReferenceLine x={0.5} stroke="oklch(1 0 0 / 0.15)" strokeDasharray="3 3" />
+            <ReferenceLine
+              x={0.5}
+              stroke="oklch(1 0 0 / 0.15)"
+              strokeDasharray="3 3"
+            />
             <Bar dataKey="winRate" radius={[0, 4, 4, 0]} maxBarSize={24}>
               {data.map((d, i) => (
                 <Cell

@@ -116,7 +116,7 @@ Not all 600+ creatures launch with battle data. Roll out in tight, curated waves
 | ----------- | --------- | ---------------------------------------------------------------------- | --------------------- |
 | **Wave 1**  | 40        | Hand-curated: iconic creatures, complete data, even role/rarity spread | Launch                |
 | **Wave 2**  | 40-60     | LLM-assisted ability assignment with human review                      | 2-4 weeks post-launch |
-| **Wave 3**  | 60-80     | LLM-assisted, light review                                            | Ongoing (~monthly)    |
+| **Wave 3**  | 60-80     | LLM-assisted, light review                                             | Ongoing (~monthly)    |
 | **Wave 4+** | Remainder | Bulk assignment as data is enriched                                    | Ongoing               |
 
 ### Wave 1 Composition (40 creatures)

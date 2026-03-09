@@ -43,15 +43,11 @@ export function AbilityUsageTable({
                   key={a.abilityId}
                   className={`border-b border-border/20 hover:bg-muted/30 transition-colors ${isBasicAttack ? 'bg-muted/10' : ''}`}
                 >
-                  <td className="px-4 py-1.5 text-muted-foreground">
-                    {i + 1}
-                  </td>
+                  <td className="px-4 py-1.5 text-muted-foreground">{i + 1}</td>
                   <td className="px-2 py-1.5 font-medium">
                     <span
                       className={
-                        isBasicAttack
-                          ? 'text-muted-foreground italic'
-                          : ''
+                        isBasicAttack ? 'text-muted-foreground italic' : ''
                       }
                     >
                       {a.name}

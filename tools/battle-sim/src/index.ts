@@ -257,18 +257,24 @@ function main(): void {
           log(chalk.bold('\n  FIELD SIM RESULTS'))
           log(`  Creatures: ${creatureStats.length}`)
           log(`  Gini coefficient: ${scorecard.giniCoefficient.toFixed(4)}`)
-          log(`  Win rate spread: ${(scorecard.minWinRate * 100).toFixed(1)}% – ${(scorecard.maxWinRate * 100).toFixed(1)}%`)
+          log(
+            `  Win rate spread: ${(scorecard.minWinRate * 100).toFixed(1)}% – ${(scorecard.maxWinRate * 100).toFixed(1)}%`,
+          )
           log(`  Within 45-55%: ${scorecard.percentWithin45to55.toFixed(1)}%`)
           log(`  Within 40-60%: ${scorecard.percentWithin40to60.toFixed(1)}%`)
           log(`  Role WR variance: ${scorecard.roleWinRateVariance.toFixed(6)}`)
           log('')
           log(chalk.bold('  Top 5:'))
           for (const c of creatureStats.slice(0, 5)) {
-            log(`    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`)
+            log(
+              `    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`,
+            )
           }
           log(chalk.bold('  Bottom 5:'))
           for (const c of creatureStats.slice(-5).reverse()) {
-            log(`    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`)
+            log(
+              `    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`,
+            )
           }
         }
         break

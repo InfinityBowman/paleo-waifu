@@ -1,5 +1,9 @@
 import { cn } from '../../lib/utils'
-import { AVG_TURNS_TARGET_MAX, AVG_TURNS_TARGET_MIN, entries } from './constants'
+import {
+  AVG_TURNS_TARGET_MAX,
+  AVG_TURNS_TARGET_MIN,
+  entries,
+} from './constants'
 
 export function TargetBandIndicator({
   roleShares,
@@ -59,9 +63,7 @@ export function DiversityIndicator({ diversity }: { diversity: number }) {
     <div
       className={cn(
         'mt-2 rounded-lg px-3 py-2 text-[11px]',
-        healthy
-          ? 'bg-success/10 text-success'
-          : 'bg-warning/10 text-warning',
+        healthy ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
       )}
     >
       <span className="font-medium">Diversity: {diversity.toFixed(0)}%</span>
@@ -82,9 +84,7 @@ export function MetaBreadthIndicator({ breadth }: { breadth: number }) {
     <div
       className={cn(
         'mt-2 rounded-lg px-3 py-2 text-[11px]',
-        healthy
-          ? 'bg-success/10 text-success'
-          : 'bg-warning/10 text-warning',
+        healthy ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning',
       )}
     >
       <span className="font-medium">Meta Breadth: {breadth.toFixed(0)}%</span>

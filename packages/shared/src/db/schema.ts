@@ -360,6 +360,8 @@ export const battleChallenge = sqliteTable(
     defenderTeam: text('defender_team'), // JSON, null until accepted
     result: text('result'), // JSON battle log, null until resolved
     winnerId: text('winner_id').references(() => user.id),
+    discordMessageId: text('discord_message_id'),
+    discordChannelId: text('discord_channel_id'),
     createdAt: integer('created_at', { mode: 'timestamp' }).default(
       sql`(unixepoch())`,
     ),
@@ -376,10 +378,29 @@ export const battleRating = sqliteTable('battle_rating', {
   userId: text('user_id')
     .primaryKey()
     .references(() => user.id),
-  rating: integer('rating').notNull().default(1000),
+  rating: integer('rating').notNull().default(0),
   wins: integer('wins').notNull().default(0),
   losses: integer('losses').notNull().default(0),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
     sql`(unixepoch())`,
   ),
 })
+
+export const battleTeamPreset = sqliteTable(
+  'battle_team_preset',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    name: text('name').notNull(),
+    members: text('members').notNull(), // JSON: [{userCreatureId, creatureId, row}]
+    createdAt: integer('created_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
+      sql`(unixepoch())`,
+    ),
+  },
+  (table) => [index('btp_user_id_idx').on(table.userId)],
+)

@@ -26,15 +26,29 @@ const DEBUFF_KINDS = new Set(['poison', 'bleed', 'debuff', 'stun'])
 
 export function collectBattleTelemetry(
   result: BattleResult,
-  hpCurveAcc: Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>,
-  contribAcc: Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>,
+  hpCurveAcc: Map<
+    string,
+    { turnSums: Array<number>; turnCounts: Array<number> }
+  >,
+  contribAcc: Map<
+    string,
+    {
+      damageDealt: number
+      damageTaken: number
+      healingDone: number
+      shieldsApplied: number
+      debuffsLanded: number
+    }
+  >,
   roleWinAcc: Map<string, { wins: number; losses: number }>,
   abilityAcc: Map<string, { name: string; uses: number; totalDamage: number }>,
 ): void {
   // Track role wins/losses
   if (result.winner) {
-    const winTeam = result.winner === 'A' ? result.finalState.teamA : result.finalState.teamB
-    const loseTeam = result.winner === 'A' ? result.finalState.teamB : result.finalState.teamA
+    const winTeam =
+      result.winner === 'A' ? result.finalState.teamA : result.finalState.teamB
+    const loseTeam =
+      result.winner === 'A' ? result.finalState.teamB : result.finalState.teamA
     for (const c of winTeam) {
       const acc = roleWinAcc.get(c.role) ?? { wins: 0, losses: 0 }
       acc.wins++
@@ -82,7 +96,11 @@ export function collectBattleTelemetry(
         lastActorId = event.creatureId
         lastAbilityByCreature.set(event.creatureId, event.abilityId)
         // Track ability usage
-        const abilityEntry = abilityAcc.get(event.abilityId) ?? { name: event.abilityName, uses: 0, totalDamage: 0 }
+        const abilityEntry = abilityAcc.get(event.abilityId) ?? {
+          name: event.abilityName,
+          uses: 0,
+          totalDamage: 0,
+        }
         abilityEntry.uses++
         abilityAcc.set(event.abilityId, abilityEntry)
         break
@@ -96,7 +114,13 @@ export function collectBattleTelemetry(
         // Contribution: damage dealt by source role
         const sourceRole = creatureRole.get(event.sourceId)
         if (sourceRole) {
-          const acc = contribAcc.get(sourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          const acc = contribAcc.get(sourceRole) ?? {
+            damageDealt: 0,
+            damageTaken: 0,
+            healingDone: 0,
+            shieldsApplied: 0,
+            debuffsLanded: 0,
+          }
           acc.damageDealt += event.amount
           contribAcc.set(sourceRole, acc)
         }
@@ -104,13 +128,20 @@ export function collectBattleTelemetry(
         // Contribution: damage taken by target role
         const targetRole = creatureRole.get(event.targetId)
         if (targetRole) {
-          const acc = contribAcc.get(targetRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          const acc = contribAcc.get(targetRole) ?? {
+            damageDealt: 0,
+            damageTaken: 0,
+            healingDone: 0,
+            shieldsApplied: 0,
+            debuffsLanded: 0,
+          }
           acc.damageTaken += event.amount
           contribAcc.set(targetRole, acc)
         }
 
         // Attribute damage to the ability that caused it
-        const dmgAbilityId = lastAbilityByCreature.get(event.sourceId) ?? 'basic_attack'
+        const dmgAbilityId =
+          lastAbilityByCreature.get(event.sourceId) ?? 'basic_attack'
         const dmgAbilityEntry = abilityAcc.get(dmgAbilityId)
         if (dmgAbilityEntry) {
           dmgAbilityEntry.totalDamage += event.amount
@@ -123,7 +154,13 @@ export function collectBattleTelemetry(
         // Contribution: healing done by source role
         const healSourceRole = creatureRole.get(event.sourceId)
         if (healSourceRole) {
-          const acc = contribAcc.get(healSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          const acc = contribAcc.get(healSourceRole) ?? {
+            damageDealt: 0,
+            damageTaken: 0,
+            healingDone: 0,
+            shieldsApplied: 0,
+            debuffsLanded: 0,
+          }
           acc.healingDone += event.amount
           contribAcc.set(healSourceRole, acc)
         }
@@ -143,7 +180,13 @@ export function collectBattleTelemetry(
       case 'status_applied': {
         const statusSourceRole = creatureRole.get(event.effect.sourceCreatureId)
         if (statusSourceRole && DEBUFF_KINDS.has(event.effect.kind)) {
-          const acc = contribAcc.get(statusSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+          const acc = contribAcc.get(statusSourceRole) ?? {
+            damageDealt: 0,
+            damageTaken: 0,
+            healingDone: 0,
+            shieldsApplied: 0,
+            debuffsLanded: 0,
+          }
           acc.debuffsLanded++
           contribAcc.set(statusSourceRole, acc)
         }
@@ -156,7 +199,13 @@ export function collectBattleTelemetry(
         if (event.absorbed === 0 && event.remaining > 0 && lastActorId) {
           const shieldSourceRole = creatureRole.get(lastActorId)
           if (shieldSourceRole) {
-            const acc = contribAcc.get(shieldSourceRole) ?? { damageDealt: 0, damageTaken: 0, healingDone: 0, shieldsApplied: 0, debuffsLanded: 0 }
+            const acc = contribAcc.get(shieldSourceRole) ?? {
+              damageDealt: 0,
+              damageTaken: 0,
+              healingDone: 0,
+              shieldsApplied: 0,
+              debuffsLanded: 0,
+            }
             acc.shieldsApplied += event.remaining
             contribAcc.set(shieldSourceRole, acc)
           }
@@ -174,7 +223,8 @@ export function collectBattleTelemetry(
           const maxHp = creatureMaxHp.get(creatureId)
           if (!role || !team || !maxHp) continue
 
-          const outcome = winner === null ? 'draw' : winner === team ? 'win' : 'loss'
+          const outcome =
+            winner === null ? 'draw' : winner === team ? 'win' : 'loss'
           if (outcome === 'draw') continue // skip draws for clarity
 
           const key = `${role}-${outcome}`
@@ -197,14 +247,29 @@ export function collectBattleTelemetry(
 }
 
 export function finalizeTelemetry(
-  hpCurveAcc: Map<string, { turnSums: Array<number>; turnCounts: Array<number> }>,
-  contribAcc: Map<string, { damageDealt: number; damageTaken: number; healingDone: number; shieldsApplied: number; debuffsLanded: number }>,
+  hpCurveAcc: Map<
+    string,
+    { turnSums: Array<number>; turnCounts: Array<number> }
+  >,
+  contribAcc: Map<
+    string,
+    {
+      damageDealt: number
+      damageTaken: number
+      healingDone: number
+      shieldsApplied: number
+      debuffsLanded: number
+    }
+  >,
   roleWinAcc: Map<string, { wins: number; losses: number }>,
   abilityAcc: Map<string, { name: string; uses: number; totalDamage: number }>,
   battleCount: number,
 ): TelemetryResult {
   // Build roleHpCurves
-  const roleHpCurves: Record<string, { wins: Array<number>; losses: Array<number> }> = {}
+  const roleHpCurves: Record<
+    string,
+    { wins: Array<number>; losses: Array<number> }
+  > = {}
 
   for (const [key, bucket] of hpCurveAcc) {
     const [role, outcome] = key.split('-') as [string, string]

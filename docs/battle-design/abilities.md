@@ -36,7 +36,7 @@ Effects are the atomic units of what an ability does. An ability can have multip
 | **reflect**          | `percent`, `duration`                             | Reflect `percent`% of damage taken back to attacker for `duration` turns.                                     |
 | **damage_reduction** | `percent`                                         | Permanently reduce all incoming damage by `percent`%.                                                         |
 | **crit_reduction**   | `percent`                                         | Reduce incoming crit bonus by `percent`%.                                                                     |
-| **flat_reduction**   | `scalingStat: def`, `scalingPercent`               | Reduce incoming damage by a flat amount equal to `scalingPercent`% of DEF.                                    |
+| **flat_reduction**   | `scalingStat: def`, `scalingPercent`              | Reduce incoming damage by a flat amount equal to `scalingPercent`% of DEF.                                    |
 | **dodge**            | `basePercent`                                     | Chance to dodge attacks entirely. Scales with SPD ratio, capped 3-40%.                                        |
 
 ---
@@ -45,19 +45,19 @@ Effects are the atomic units of what an ability does. An ability can have multip
 
 Triggers define when the engine fires an ability's effects.
 
-| Trigger              | Parameters   | Description                                                                           |
-| -------------------- | ------------ | ------------------------------------------------------------------------------------- |
-| **onUse**            | `cooldown`   | Active ability. Creature chooses to use it on their turn. Goes on cooldown after use. |
-| **onBeforeAttack**   | --           | Fires after target selection, before attack resolves. Used for conditional self-buffs. |
-| **onBasicAttack**    | --           | Fires after a basic attack resolves. Used for on-hit effects like poison.             |
-| **onHit**            | --           | Fires whenever this creature takes damage.                                            |
-| **onKill**           | --           | Fires when this creature KOs an enemy.                                                |
-| **onEnemyKO**        | --           | Fires when any enemy is KO'd (regardless of who killed them).                         |
-| **onAllyKO**         | --           | Fires when an ally is KO'd.                                                           |
-| **onTurnStart**      | --           | Fires at the start of this creature's turn.                                           |
-| **onTurnEnd**        | --           | Fires at the end of this creature's turn.                                             |
-| **onBattleStart**    | `condition?` | Fires once at battle setup. Optional condition gates activation.                      |
-| **always**           | --           | Permanent modifier, applied at battle start and recalculated dynamically each turn.   |
+| Trigger            | Parameters   | Description                                                                            |
+| ------------------ | ------------ | -------------------------------------------------------------------------------------- |
+| **onUse**          | `cooldown`   | Active ability. Creature chooses to use it on their turn. Goes on cooldown after use.  |
+| **onBeforeAttack** | --           | Fires after target selection, before attack resolves. Used for conditional self-buffs. |
+| **onBasicAttack**  | --           | Fires after a basic attack resolves. Used for on-hit effects like poison.              |
+| **onHit**          | --           | Fires whenever this creature takes damage.                                             |
+| **onKill**         | --           | Fires when this creature KOs an enemy.                                                 |
+| **onEnemyKO**      | --           | Fires when any enemy is KO'd (regardless of who killed them).                          |
+| **onAllyKO**       | --           | Fires when an ally is KO'd.                                                            |
+| **onTurnStart**    | --           | Fires at the start of this creature's turn.                                            |
+| **onTurnEnd**      | --           | Fires at the end of this creature's turn.                                              |
+| **onBattleStart**  | `condition?` | Fires once at battle setup. Optional condition gates activation.                       |
+| **always**         | --           | Permanent modifier, applied at battle start and recalculated dynamically each turn.    |
 
 ### Trigger Timing Details
 
@@ -107,7 +107,7 @@ Each creature gets exactly 1 active ability from this pool, plus a creature-spec
 | **Crushing Jaw**   | onUse(cd:3) | damage(1.3x ATK)                         | single_enemy | Striker          |
 | **Venom Strike**   | onUse(cd:2) | damage(0.7x ATK), dot(poison 5%/turn 3t) | single_enemy | Striker          |
 | **Feeding Frenzy** | onUse(cd:3) | damage(1.0x ATK), lifesteal(25%)         | single_enemy | Striker, Bruiser |
-| **Headbutt**       | onUse(cd:3) | damage(0.8x ATK), stun(1t)              | single_enemy | Bruiser, Tank    |
+| **Headbutt**       | onUse(cd:3) | damage(0.8x ATK), stun(1t)               | single_enemy | Bruiser, Tank    |
 
 ### AoE (2)
 
@@ -139,10 +139,10 @@ Each creature gets exactly 1 active ability from this pool, plus a creature-spec
 
 ### Utility (2)
 
-| Name            | Trigger     | Effects                          | Target         | Role Affinity |
-| --------------- | ----------- | -------------------------------- | -------------- | ------------- |
-| **Shield Wall** | onUse(cd:2) | shield(25% 2t)                   | lowest_hp_ally | Tank          |
-| **Taunt**       | onUse(cd:1) | taunt(2t), buff(DEF +25% 2t)     | self           | Tank          |
+| Name            | Trigger     | Effects                      | Target         | Role Affinity |
+| --------------- | ----------- | ---------------------------- | -------------- | ------------- |
+| **Shield Wall** | onUse(cd:2) | shield(25% 2t)               | lowest_hp_ally | Tank          |
+| **Taunt**       | onUse(cd:1) | taunt(2t), buff(DEF +25% 2t) | self           | Tank          |
 
 ---
 
@@ -152,42 +152,42 @@ Each creature gets exactly 1 passive ability.
 
 ### Defensive (4)
 
-| Name               | Trigger      | Effects                                              | Target | Condition | Role Affinity |
-| ------------------ | ------------ | ---------------------------------------------------- | ------ | --------- | ------------- |
-| **Thick Hide**     | always       | damage_reduction(15%)                                | self   | --        | Tank          |
-| **Spiked Plates**  | onBattleStart| reflect(20%, permanent)                              | self   | --        | Tank          |
-| **Ironclad**       | always       | flat_reduction(10% of DEF)                           | self   | --        | Tank, Bruiser |
-| **Evasive**        | always       | dodge(base 10%, scales with SPD ratio, capped 3-40%) | self   | --        | Striker       |
+| Name              | Trigger       | Effects                                              | Target | Condition | Role Affinity |
+| ----------------- | ------------- | ---------------------------------------------------- | ------ | --------- | ------------- |
+| **Thick Hide**    | always        | damage_reduction(15%)                                | self   | --        | Tank          |
+| **Spiked Plates** | onBattleStart | reflect(20%, permanent)                              | self   | --        | Tank          |
+| **Ironclad**      | always        | flat_reduction(10% of DEF)                           | self   | --        | Tank, Bruiser |
+| **Evasive**       | always        | dodge(base 10%, scales with SPD ratio, capped 3-40%) | self   | --        | Striker       |
 
 ### Offensive (4)
 
-| Name                  | Trigger         | Effects                        | Target        | Condition            | Role Affinity |
-| --------------------- | --------------- | ------------------------------ | ------------- | -------------------- | ------------- |
-| **Predator Instinct** | onBeforeAttack  | buff(ATK +20% 2t)             | self          | target_hp_below(50%) | Striker       |
-| **Venomous**          | onBasicAttack   | dot(poison 3%/turn 2t)         | attack_target | --                   | Striker       |
-| **Territorial**       | onBattleStart   | buff(ATK +10%), buff(DEF +10%) | self          | in_row(front)        | Bruiser       |
-| **Pack Hunter**       | always          | buff(ATK +10%)                 | self          | per_ally_alive       | Striker       |
+| Name                  | Trigger        | Effects                        | Target        | Condition            | Role Affinity |
+| --------------------- | -------------- | ------------------------------ | ------------- | -------------------- | ------------- |
+| **Predator Instinct** | onBeforeAttack | buff(ATK +20% 2t)              | self          | target_hp_below(50%) | Striker       |
+| **Venomous**          | onBasicAttack  | dot(poison 3%/turn 2t)         | attack_target | --                   | Striker       |
+| **Territorial**       | onBattleStart  | buff(ATK +10%), buff(DEF +10%) | self          | in_row(front)        | Bruiser       |
+| **Pack Hunter**       | always         | buff(ATK +10%)                 | self          | per_ally_alive       | Striker       |
 
 ### Sustain (3)
 
-| Name             | Trigger   | Effects   | Target     | Condition | Role Affinity |
-| ---------------- | --------- | --------- | ---------- | --------- | ------------- |
-| **Regenerative** | onTurnEnd | heal(3%)  | self       | --        | Tank, Support |
-| **Scavenger**    | onEnemyKO | heal(15%) | self       | --        | Bruiser       |
-| **Soothing Aura**| onTurnEnd | heal(2%)  | all_allies | --        | Support       |
+| Name              | Trigger   | Effects   | Target     | Condition | Role Affinity |
+| ----------------- | --------- | --------- | ---------- | --------- | ------------- |
+| **Regenerative**  | onTurnEnd | heal(3%)  | self       | --        | Tank, Support |
+| **Scavenger**     | onEnemyKO | heal(15%) | self       | --        | Bruiser       |
+| **Soothing Aura** | onTurnEnd | heal(2%)  | all_allies | --        | Support       |
 
 ### Support (2)
 
-| Name                     | Trigger       | Effects             | Target     | Condition | Role Affinity |
-| ------------------------ | ------------- | ------------------- | ---------- | --------- | ------------- |
-| **Fortifying Presence**  | onBattleStart | buff(DEF +10%)      | all_allies | --        | Support       |
-| **Weakening Strikes**    | onBasicAttack | debuff(ATK -15% 2t) | attack_target | --     | Support       |
+| Name                    | Trigger       | Effects             | Target        | Condition | Role Affinity |
+| ----------------------- | ------------- | ------------------- | ------------- | --------- | ------------- |
+| **Fortifying Presence** | onBattleStart | buff(DEF +10%)      | all_allies    | --        | Support       |
+| **Weakening Strikes**   | onBasicAttack | debuff(ATK -15% 2t) | attack_target | --        | Support       |
 
 ### None
 
-| Name     | Trigger | Effects | Target | Role Affinity              |
-| -------- | ------- | ------- | ------ | -------------------------- |
-| **None** | always  | (none)  | self   | All roles (fallback)       |
+| Name     | Trigger | Effects | Target | Role Affinity        |
+| -------- | ------- | ------- | ------ | -------------------- |
+| **None** | always  | (none)  | self   | All roles (fallback) |
 
 ---
 

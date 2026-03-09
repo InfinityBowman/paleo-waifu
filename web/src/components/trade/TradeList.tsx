@@ -354,9 +354,7 @@ export function TradeList({
                             <button
                               className="font-display block font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
                               onClick={() =>
-                                openCreaturePreview(
-                                  trade.offeredCreatureBaseId,
-                                )
+                                openCreaturePreview(trade.offeredCreatureBaseId)
                               }
                             >
                               {trade.offeredCreatureName}

@@ -60,10 +60,32 @@ export function WinRateDistributionChart({ creatures }: Props) {
           contentStyle={TOOLTIP_CONTENT_STYLE}
           itemStyle={TOOLTIP_ITEM_STYLE}
           labelStyle={TOOLTIP_LABEL_STYLE}
-          formatter={((value: number) => [`${value} creatures`, 'Count']) as any}
+          formatter={
+            ((value: number) => [`${value} creatures`, 'Count']) as any
+          }
         />
-        <ReferenceLine x="45%" stroke="oklch(0.65 0.15 145 / 40%)" strokeDasharray="4 4" label={{ value: '45%', position: 'top', fontSize: 9, fill: 'oklch(0.65 0.15 145)' }} />
-        <ReferenceLine x="55%" stroke="oklch(0.65 0.15 145 / 40%)" strokeDasharray="4 4" label={{ value: '55%', position: 'top', fontSize: 9, fill: 'oklch(0.65 0.15 145)' }} />
+        <ReferenceLine
+          x="45%"
+          stroke="oklch(0.65 0.15 145 / 40%)"
+          strokeDasharray="4 4"
+          label={{
+            value: '45%',
+            position: 'top',
+            fontSize: 9,
+            fill: 'oklch(0.65 0.15 145)',
+          }}
+        />
+        <ReferenceLine
+          x="55%"
+          stroke="oklch(0.65 0.15 145 / 40%)"
+          strokeDasharray="4 4"
+          label={{
+            value: '55%',
+            position: 'top',
+            fontSize: 9,
+            fill: 'oklch(0.65 0.15 145)',
+          }}
+        />
         <Bar dataKey="count" radius={[3, 3, 0, 0]}>
           {buckets.map((b, i) => (
             <Cell

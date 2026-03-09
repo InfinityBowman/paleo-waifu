@@ -1,5 +1,13 @@
 import { useState } from 'react'
-import { Eye, GitCompareArrows, Pencil, RotateCcw, Star, Trash2, X } from 'lucide-react'
+import {
+  Eye,
+  GitCompareArrows,
+  Pencil,
+  RotateCcw,
+  Star,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { cn } from '../lib/utils'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -235,20 +243,32 @@ export function RunHistoryPanel({
                   </Badge>
                   {run.simType === 'meta' && (
                     <>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1.5 py-0"
+                      >
                         pop {run.population}
                       </Badge>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1.5 py-0"
+                      >
                         gen {run.generations}
                       </Badge>
                     </>
                   )}
                   {run.simType === 'field' && (
                     <>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1.5 py-0"
+                      >
                         {run.trialsPerPair} trials
                       </Badge>
-                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                      <Badge
+                        variant="outline"
+                        className="text-[9px] px-1.5 py-0"
+                      >
                         {run.creatureCount} creatures
                       </Badge>
                     </>

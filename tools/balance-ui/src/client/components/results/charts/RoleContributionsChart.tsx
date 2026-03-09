@@ -9,12 +9,17 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { ROLE_ORDER, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE } from '../constants'
+import {
+  ROLE_ORDER,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+} from '../constants'
 
 const STAT_COLORS = {
-  'Damage Dealt': 'oklch(0.65 0.2 25)',    // red-orange
-  'Damage Taken': 'oklch(0.55 0.12 290)',   // muted purple
-  'Healing Done': 'oklch(0.65 0.18 145)',   // green
+  'Damage Dealt': 'oklch(0.65 0.2 25)', // red-orange
+  'Damage Taken': 'oklch(0.55 0.12 290)', // muted purple
+  'Healing Done': 'oklch(0.65 0.18 145)', // green
   'Shields Applied': 'oklch(0.7 0.15 210)', // cyan-blue
   'Debuffs Landed': 'oklch(0.65 0.17 330)', // magenta
 }
@@ -37,7 +42,8 @@ export function RoleContributionsChart({
     return Object.entries(roleContributions)
       .sort(
         ([a], [b]) =>
-          (ROLE_ORDER.indexOf(a) === -1 ? 99 : ROLE_ORDER.indexOf(a)) - (ROLE_ORDER.indexOf(b) === -1 ? 99 : ROLE_ORDER.indexOf(b)),
+          (ROLE_ORDER.indexOf(a) === -1 ? 99 : ROLE_ORDER.indexOf(a)) -
+          (ROLE_ORDER.indexOf(b) === -1 ? 99 : ROLE_ORDER.indexOf(b)),
       )
       .map(([role, stats]) => ({
         role: role.charAt(0).toUpperCase() + role.slice(1),
@@ -51,10 +57,7 @@ export function RoleContributionsChart({
 
   return (
     <ResponsiveContainer width="100%" height={240}>
-      <BarChart
-        data={data}
-        margin={{ top: 5, right: 12, bottom: 5, left: 0 }}
-      >
+      <BarChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           dataKey="role"

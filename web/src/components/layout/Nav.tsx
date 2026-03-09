@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
-import { LogOut, Menu, Shield } from 'lucide-react'
+import { LogOut, Menu, Shield, Swords } from 'lucide-react'
 import type { BadgeData } from '@/lib/badges'
 import {
   IconBookshelf,
@@ -125,6 +125,13 @@ export function Nav() {
                     Trade
                     {badges && badges.incomingProposals > 0 && (
                       <CountBadge count={badges.incomingProposals} />
+                    )}
+                  </Link>
+                  <Link to="/battle" className={NAV_LINK_CLASS}>
+                    <Swords className="h-4 w-4" />
+                    Battle
+                    {badges && badges.incomingChallenges > 0 && (
+                      <CountBadge count={badges.incomingChallenges} />
                     )}
                   </Link>
                 </>
@@ -259,6 +266,17 @@ export function Nav() {
                           <CountBadge count={badges.incomingProposals} />
                         )}
                       </Link>
+                      <Link
+                        to="/battle"
+                        className={MOBILE_NAV_LINK_CLASS}
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <Swords className="h-4 w-4" />
+                        Battle
+                        {badges && badges.incomingChallenges > 0 && (
+                          <CountBadge count={badges.incomingChallenges} />
+                        )}
+                      </Link>
                     </>
                   )}
                 </nav>
@@ -286,8 +304,7 @@ export function Nav() {
                         </Avatar>
                         {session.user.name}
                       </Link>
-                      {(session.user as { role?: string }).role ===
-                        'admin' && (
+                      {(session.user as { role?: string }).role === 'admin' && (
                         <Link
                           to="/admin"
                           className={MOBILE_NAV_LINK_CLASS}

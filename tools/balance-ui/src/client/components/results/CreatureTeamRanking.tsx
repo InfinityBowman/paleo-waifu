@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
-import { ChevronDown, ChevronRight, Swords, Shield } from 'lucide-react'
+import { ChevronDown, ChevronRight, Shield, Swords } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import {
   Card,
@@ -50,16 +50,22 @@ export function CreatureTeamRanking({ creatures, creatureAbilities }: Props) {
           <SectionTooltip>
             How each creature performs in random 3v3 teams compared to their 1v1
             solo win rate. Positive delta = creature benefits from team context.
-            Negative delta = creature is weaker in teams than solo.
-            Click a creature name to see their abilities.
+            Negative delta = creature is weaker in teams than solo. Click a
+            creature name to see their abilities.
           </SectionTooltip>
           {teamCarried > 0 && (
-            <Badge variant="outline" className="text-[9px] text-success border-success/30">
+            <Badge
+              variant="outline"
+              className="text-[9px] text-success border-success/30"
+            >
               {teamCarried} team-boosted
             </Badge>
           )}
           {soloCarry > 0 && (
-            <Badge variant="outline" className="text-[9px] text-warning border-warning/30">
+            <Badge
+              variant="outline"
+              className="text-[9px] text-warning border-warning/30"
+            >
               {soloCarry} solo-reliant
             </Badge>
           )}
@@ -71,10 +77,10 @@ export function CreatureTeamRanking({ creatures, creatureAbilities }: Props) {
       <CardContent className="px-0">
         <div className="flex items-center gap-2 px-4 pb-2">
           <span className="text-[10px] text-muted-foreground">Sort:</span>
-          {([
+          {[
             { mode: 'teamWr' as const, label: 'Team Win Rate' },
             { mode: 'delta' as const, label: 'Team Δ (biggest boost)' },
-          ]).map(({ mode, label }) => (
+          ].map(({ mode, label }) => (
             <button
               key={mode}
               type="button"
@@ -208,19 +214,30 @@ export function CreatureTeamRanking({ creatures, creatureAbilities }: Props) {
                     </td>
                   </tr>
                   {isExpanded && abilities && (
-                    <tr key={`${c.id}-abilities`} className="border-b border-border/20 bg-muted/20">
+                    <tr
+                      key={`${c.id}-abilities`}
+                      className="border-b border-border/20 bg-muted/20"
+                    >
                       <td />
                       <td colSpan={8} className="px-2 py-2">
                         <div className="flex items-center gap-4 text-[11px]">
                           <span className="inline-flex items-center gap-1.5">
                             <Swords size={11} className="text-amber-400" />
-                            <span className="text-muted-foreground">Active:</span>
-                            <span className="font-medium">{abilities.active}</span>
+                            <span className="text-muted-foreground">
+                              Active:
+                            </span>
+                            <span className="font-medium">
+                              {abilities.active}
+                            </span>
                           </span>
                           <span className="inline-flex items-center gap-1.5">
                             <Shield size={11} className="text-sky-400" />
-                            <span className="text-muted-foreground">Passive:</span>
-                            <span className="font-medium">{abilities.passive}</span>
+                            <span className="text-muted-foreground">
+                              Passive:
+                            </span>
+                            <span className="font-medium">
+                              {abilities.passive}
+                            </span>
                           </span>
                         </div>
                       </td>

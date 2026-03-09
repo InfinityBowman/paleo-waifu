@@ -13,6 +13,10 @@ const HELP_TEXT = [
   '\uD83C\uDFC6 `/leaderboard-xp` - Top 10 players by XP level',
   '\uD83D\uDCDA `/leaderboard-collection` - Top 10 by species collected',
   '',
+  '\u2694\uFE0F `/battle @user` - Challenge a player to battle',
+  '\uD83D\uDCCB `/battles` - View active challenges & history',
+  '\uD83C\uDFC5 `/rating` - Check your arena rating',
+  '',
   `Play on the web: ${APP_URL}`,
 ].join('\n')
 

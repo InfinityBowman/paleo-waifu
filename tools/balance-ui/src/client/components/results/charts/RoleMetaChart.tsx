@@ -8,9 +8,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { ROLE_COLOR_VALUES, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE, entries } from '../constants'
+import {
+  ROLE_COLOR_VALUES,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+  entries,
+} from '../constants'
 
-export function RoleMetaChart({ roleShares }: { roleShares: Record<string, number> }) {
+export function RoleMetaChart({
+  roleShares,
+}: {
+  roleShares: Record<string, number>
+}) {
   const data = entries(roleShares)
     .sort(([, a], [, b]) => b - a)
     .map(([role, share]) => ({

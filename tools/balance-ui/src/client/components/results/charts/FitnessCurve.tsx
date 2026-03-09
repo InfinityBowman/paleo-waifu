@@ -8,10 +8,19 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { ROLE_COLOR_VALUES, TOOLTIP_CONTENT_STYLE, TOOLTIP_ITEM_STYLE, TOOLTIP_LABEL_STYLE } from '../constants'
+import {
+  ROLE_COLOR_VALUES,
+  TOOLTIP_CONTENT_STYLE,
+  TOOLTIP_ITEM_STYLE,
+  TOOLTIP_LABEL_STYLE,
+} from '../constants'
 import type { GenerationSnapshot } from '../../../../shared/types.ts'
 
-export function FitnessCurve({ snapshots }: { snapshots: Array<GenerationSnapshot> }) {
+export function FitnessCurve({
+  snapshots,
+}: {
+  snapshots: Array<GenerationSnapshot>
+}) {
   const data = snapshots.map((s) => ({
     gen: s.generation,
     top: Math.round(s.topFitness * 1000) / 10,

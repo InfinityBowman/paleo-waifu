@@ -9,7 +9,11 @@ import {
   writeCsvHeader,
   writeCsvRow,
 } from '../report.ts'
-import type { GenerationSnapshot, MetaOptions, MetaResult } from './meta-types.ts'
+import type {
+  GenerationSnapshot,
+  MetaOptions,
+  MetaResult,
+} from './meta-types.ts'
 
 export function renderTerminal(
   result: MetaResult,
@@ -85,13 +89,15 @@ export function renderTerminal(
       { header: 'Rows' },
       { header: 'Peak Fitness' },
     ],
-    result.hallOfFame.slice(0, 10).map((ind) => [
-      ind.members.map((m) => m.name).join(', '),
-      ind.members.map((m) => rarityColor(m.rarity)).join(', '),
-      ind.members.map((m) => roleColor(m.role)).join(', '),
-      ind.genome.map((s) => (s.row === 'front' ? 'F' : 'B')).join('/'),
-      winRateColor(ind.fitness),
-    ]),
+    result.hallOfFame
+      .slice(0, 10)
+      .map((ind) => [
+        ind.members.map((m) => m.name).join(', '),
+        ind.members.map((m) => rarityColor(m.rarity)).join(', '),
+        ind.members.map((m) => roleColor(m.role)).join(', '),
+        ind.genome.map((s) => (s.row === 'front' ? 'F' : 'B')).join('/'),
+        winRateColor(ind.fitness),
+      ]),
   )
 
   // Role distribution
@@ -139,7 +145,11 @@ export function renderTerminal(
 
   printRankedList(
     [{ header: 'Ability' }, { header: 'Appearances' }, { header: 'All WR' }],
-    activeAbilities.map((a) => [a.name, String(a.appearances), winRateColor(a.allTeamWinRate)]),
+    activeAbilities.map((a) => [
+      a.name,
+      String(a.appearances),
+      winRateColor(a.allTeamWinRate),
+    ]),
   )
 
   printSubheader('META ABILITY PRESENCE (passive)')
@@ -149,7 +159,11 @@ export function renderTerminal(
 
   printRankedList(
     [{ header: 'Passive' }, { header: 'Appearances' }, { header: 'All WR' }],
-    passiveAbilities.map((a) => [a.name, String(a.appearances), winRateColor(a.allTeamWinRate)]),
+    passiveAbilities.map((a) => [
+      a.name,
+      String(a.appearances),
+      winRateColor(a.allTeamWinRate),
+    ]),
   )
 
   // Synergy presence

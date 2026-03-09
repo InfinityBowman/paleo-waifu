@@ -50,7 +50,10 @@ export function MetricsChart({
 
   return (
     <ResponsiveContainer width="100%" height={200}>
-      <ComposedChart data={data} margin={{ top: 5, right: 12, bottom: 5, left: 0 }}>
+      <ComposedChart
+        data={data}
+        margin={{ top: 5, right: 12, bottom: 5, left: 0 }}
+      >
         <CartesianGrid strokeDasharray="3 3" stroke="oklch(1 0 0 / 4%)" />
         <XAxis
           dataKey="gen"
