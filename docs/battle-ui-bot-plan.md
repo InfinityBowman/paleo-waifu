@@ -94,14 +94,17 @@ UNIQUE(user_id, name)
 
 ### Web App
 
-- [ ] `/battle` route with 3 tabs (Challenge, Incoming, History)
-- [ ] Team preset CRUD (create, edit, delete presets)
-- [ ] Inline team picker component with synergy preview
-- [ ] Challenge creation flow (search opponent → pick preset → send)
-- [ ] Incoming challenges with accept/decline
-- [ ] Battle history with W/L and replay links
-- [ ] `/battle/$id` replay page (text-based log, creature cards, key moments)
-- [ ] Battle stats on profile page (rating, tier badge, W/L record)
+- [x] `/battle` route with 3 tabs (Challenge, Incoming, History)
+- [x] Team preset CRUD (create, edit, delete presets)
+- [x] Inline team picker component with synergy preview
+- [x] Challenge creation flow (search opponent → pick preset → send)
+- [x] Incoming challenges with accept/decline
+- [x] Battle history with W/L and replay links
+- [x] Battle-ready indicators (swords badge on cards, filter in collection/encyclopedia/gacha)
+- [x] Battle stats inspection in CreatureModal (role, stat bars, abilities with popovers)
+- [x] Arena UI polish (glass tabs, rarity-styled cards, ability popovers, rating card)
+- [x] `/battle/$id` replay page (player badges, rarity-styled teams, KO overlays, turn-grouped log, event icons)
+- [x] Battle stats on profile page (rating, tier badge, W/L record, win rate)
 
 ### Discord Bot
 
@@ -115,11 +118,11 @@ UNIQUE(user_id, name)
 
 ### Backend (shared)
 
-- [ ] `battle_team_preset` DB table + migration
-- [ ] Challenge creation logic (validation, limits)
-- [ ] Challenge accept → battle resolution → rating update pipeline
-- [ ] Challenge decline/cancel/expire logic
-- [ ] Server functions for all battle operations
+- [x] `battle_team_preset` DB table + migration
+- [x] Challenge creation logic (validation, limits)
+- [x] Challenge accept → battle resolution → rating update pipeline
+- [x] Challenge decline/cancel/expire logic
+- [x] Server functions for all battle operations
 
 ---
 

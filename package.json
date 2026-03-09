@@ -23,6 +23,8 @@
     "bot:register": "cd bot && pnpm register",
     "bot:register:prod": "cd bot && pnpm register:prod",
     "bot:typecheck": "cd bot && pnpm typecheck",
+    "bot:test": "cd bot && pnpm test",
+    "bot:test:watch": "cd bot && pnpm test:watch",
     "gateway:dev": "cd gateway && pnpm dev",
     "gateway:build": "cd gateway && pnpm build",
     "gateway:typecheck": "cd gateway && pnpm typecheck",

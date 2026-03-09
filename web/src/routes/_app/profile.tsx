@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { count, eq, sql } from 'drizzle-orm'
-import { Dices } from 'lucide-react'
+import { Dices, Swords } from 'lucide-react'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
+  battleRating,
   creature,
   currency,
   tradeHistory,
@@ -12,6 +13,7 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import { calcXpProgress, xpToNextLevel } from '@paleo-waifu/shared/xp'
 import { getCfEnv } from '@/lib/env'
+import { getArenaTier } from '@/lib/battle'
 import { countDistinctSpecies } from '@/lib/queries'
 import {
   IconArchiveResearch,
@@ -35,6 +37,7 @@ const getProfileData = createServerFn({ method: 'GET' })
       totalSpeciesCount,
       tradeCount,
       xpRow,
+      ratingRow,
     ] = await Promise.all([
       db.select().from(currency).where(eq(currency.userId, userId)).get(),
       db
@@ -56,8 +59,14 @@ const getProfileData = createServerFn({ method: 'GET' })
         .from(userXp)
         .where(eq(userXp.userId, userId))
         .get(),
+      db
+        .select()
+        .from(battleRating)
+        .where(eq(battleRating.userId, userId))
+        .get(),
     ])
 
+    const rating = ratingRow?.rating ?? 0
     return {
       fossils: currencyRow?.fossils ?? 0,
       totalPulls: totalCreatures?.count ?? 0,
@@ -66,6 +75,10 @@ const getProfileData = createServerFn({ method: 'GET' })
       tradeCount: tradeCount?.count ?? 0,
       xp: xpRow?.xp ?? 0,
       level: xpRow?.level ?? 0,
+      arenaRating: rating,
+      arenaTier: getArenaTier(rating),
+      arenaWins: ratingRow?.wins ?? 0,
+      arenaLosses: ratingRow?.losses ?? 0,
     }
   })
 
@@ -83,6 +96,10 @@ function ProfilePage() {
     tradeCount,
     xp,
     level,
+    arenaRating,
+    arenaTier,
+    arenaWins,
+    arenaLosses,
   } = Route.useLoaderData()
   const { session } = Route.useRouteContext()
   const user = session.user
@@ -130,6 +147,46 @@ function ProfilePage() {
               className="h-full rounded-full bg-gradient-to-r from-primary to-rarity-epic/80 transition-all duration-500"
               style={{ width: `${xpProgress}%` }}
             />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card size="sm" className="group mb-6 transition-shadow hover:shadow-md">
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Swords className="h-4 w-4" />
+                Arena
+              </div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="font-display text-2xl font-bold">
+                  {arenaTier}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  {arenaRating} Rating
+                </span>
+              </div>
+              <div className="mt-0.5 text-xs text-muted-foreground">
+                <span className="font-medium text-green-400">
+                  {arenaWins}W
+                </span>
+                {' / '}
+                <span className="font-medium text-red-400">
+                  {arenaLosses}L
+                </span>
+                {arenaWins + arenaLosses > 0 && (
+                  <span className="ml-1.5">
+                    &middot;{' '}
+                    {Math.round(
+                      (arenaWins / (arenaWins + arenaLosses)) * 100,
+                    )}
+                    % win rate
+                  </span>
+                )}
+              </div>
+            </div>
+            <Swords className="h-10 w-10 text-muted-foreground/10 transition-colors group-hover:text-muted-foreground/20" />
           </div>
         </CardContent>
       </Card>

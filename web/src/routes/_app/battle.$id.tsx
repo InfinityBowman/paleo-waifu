@@ -12,6 +12,7 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import type { BattleResult } from '@paleo-waifu/shared/battle/types'
+import { IconFossil } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { getArenaTier } from '@/lib/battle'
@@ -176,15 +177,16 @@ function BattleReplayPage() {
   if (!data) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-16 text-center">
+        <IconFossil className="mx-auto mb-4 h-12 w-12 text-muted-foreground/20" />
         <h1 className="font-display text-2xl font-bold">Battle Not Found</h1>
-        <p className="mt-2 text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           This battle doesn&apos;t exist or has been removed.
         </p>
         <Link
           to="/battle"
-          className="mt-4 inline-block text-amber-400 hover:underline"
+          className="mt-4 inline-block text-sm text-primary hover:underline"
         >
-          Back to Arena
+          &larr; Back to Arena
         </Link>
       </div>
     )
@@ -194,7 +196,7 @@ function BattleReplayPage() {
     <div className="mx-auto max-w-4xl px-4 py-8">
       <Link
         to="/battle"
-        className="mb-4 inline-block text-sm text-muted-foreground hover:text-amber-400"
+        className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
       >
         &larr; Back to Arena
       </Link>

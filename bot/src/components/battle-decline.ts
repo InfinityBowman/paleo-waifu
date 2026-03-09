@@ -1,8 +1,7 @@
 import { and, eq } from 'drizzle-orm'
 import { battleChallenge, user } from '@paleo-waifu/shared/db/schema'
 import {
-  MessageFlags,
-  sendFollowup,
+  ephemeralResponse,
   updateMessageResponse,
 } from '../lib/discord'
 import { declinedEmbed } from '../lib/battle-embeds'
@@ -12,11 +11,11 @@ import type { AppUser } from '../lib/auth'
 
 /** Handle the Decline button press on a challenge embed */
 export async function handleBattleDecline(
-  interaction: Interaction,
+  _interaction: Interaction,
   db: Database,
   appUser: AppUser,
   challengeId: string,
-  env: { DISCORD_APPLICATION_ID: string },
+  _env: { DISCORD_APPLICATION_ID: string },
 ): Promise<Response> {
   // Verify the challenge exists and this user is the defender
   const challenge = await db
@@ -36,27 +35,13 @@ export async function handleBattleDecline(
     .get()
 
   if (!challenge) {
-    await sendFollowup(env.DISCORD_APPLICATION_ID, interaction.token, {
-      content: 'This challenge is no longer active.',
-      flags: MessageFlags.EPHEMERAL,
-    })
-    // Still update the message to remove buttons
-    return updateMessageResponse({
-      content: 'This challenge is no longer active.',
-      embeds: [],
-      components: [],
-    })
+    return ephemeralResponse('This challenge is no longer active.')
   }
 
   if (challenge.defenderId !== appUser.id) {
-    await sendFollowup(env.DISCORD_APPLICATION_ID, interaction.token, {
-      content: 'Only the challenged player can decline this battle.',
-      flags: MessageFlags.EPHEMERAL,
-    })
-    // Return a no-op update (keep the original message)
-    return updateMessageResponse({
-      content: interaction.message?.id ? undefined : '',
-    })
+    return ephemeralResponse(
+      'Only the challenged player can decline this battle.',
+    )
   }
 
   // Update challenge status
