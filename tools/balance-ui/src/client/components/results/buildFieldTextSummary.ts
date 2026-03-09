@@ -1,10 +1,9 @@
-import { RARITY_ORDER, ROLE_ORDER } from './constants'
-import { pct } from './constants'
+import { ROLE_ORDER, pct } from './constants'
 import type { FieldResult } from '../../../shared/types.ts'
 
 export function buildFieldTextSummary(result: FieldResult): string {
   const lines: Array<string> = []
-  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact } = result
+  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates } = result
 
   lines.push('=== Field Sim Summary ===')
   lines.push(`Creatures: ${creatureStats.length}`)
@@ -17,6 +16,7 @@ export function buildFieldTextSummary(result: FieldResult): string {
   lines.push(`  Within 45-55%: ${scorecard.percentWithin45to55.toFixed(0)}%`)
   lines.push(`  Within 40-60%: ${scorecard.percentWithin40to60.toFixed(0)}%`)
   lines.push(`  Role WR Variance: ${scorecard.roleWinRateVariance.toFixed(4)}`)
+  lines.push(`  Strongest: ${pct(scorecard.maxWinRate)} | Weakest: ${pct(scorecard.minWinRate)}`)
 
   // Role Matchup Matrix
   lines.push('')
@@ -81,24 +81,23 @@ export function buildFieldTextSummary(result: FieldResult): string {
     }
   }
 
-  // Rarity breakdown
-  const byRarity = new Map<string, Array<number>>()
-  for (const c of creatureStats) {
-    const arr = byRarity.get(c.rarity) ?? []
-    arr.push(c.winRate)
-    byRarity.set(c.rarity, arr)
-  }
-  if (byRarity.size > 1) {
+  // Composition Win Rates
+  const compEntries = Object.entries(compWinRates).sort(([, a], [, b]) => b.winRate - a.winRate)
+  if (compEntries.length > 0) {
     lines.push('')
-    lines.push('--- Rarity Tier Balance ---')
-    for (const rarity of RARITY_ORDER) {
-      const rates = byRarity.get(rarity)
-      if (!rates) continue
-      const avg = rates.reduce((s, v) => s + v, 0) / rates.length
-      const rarSorted = [...rates].sort((a, b) => a - b)
-      const min = rarSorted[0]
-      const max = rarSorted[rarSorted.length - 1]
-      lines.push(`  ${rarity}: n=${rates.length} avg=${pct(avg)} range=${pct(min)}-${pct(max)}`)
+    lines.push('--- Team Composition Win Rates ---')
+    for (const [comp, { winRate, count }] of compEntries) {
+      lines.push(`  ${comp}: ${pct(winRate)} WR (${count} teams)`)
+    }
+  }
+
+  // Formation Win Rates
+  const formEntries = Object.entries(formationWinRates).sort(([, a], [, b]) => b.winRate - a.winRate)
+  if (formEntries.length > 0) {
+    lines.push('')
+    lines.push('--- Formation Win Rates ---')
+    for (const [formation, { winRate, count }] of formEntries) {
+      lines.push(`  ${formation}: ${pct(winRate)} WR (${count} teams)`)
     }
   }
 

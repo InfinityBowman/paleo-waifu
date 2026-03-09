@@ -19,7 +19,8 @@ import { RoleMatchupHeatmap } from './results/RoleMatchupHeatmap'
 import { CreaturePowerRanking } from './results/CreaturePowerRanking'
 import { FieldAbilityImpactTable } from './results/FieldAbilityImpactTable'
 import { FieldSynergyValueTable } from './results/FieldSynergyValueTable'
-import { RarityTierChart } from './results/charts/RarityTierChart'
+import { FieldCompWinRates } from './results/FieldCompWinRates'
+import { FieldFormationWinRates } from './results/FieldFormationWinRates'
 import { CrossSimInsights } from './results/CrossSimInsights'
 import type { SimState } from './results/constants'
 import type {
@@ -93,7 +94,7 @@ export function FieldResultsPanel({
     )
   }
 
-  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact } =
+  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates } =
     result.result
 
   return (
@@ -207,22 +208,8 @@ export function FieldResultsPanel({
         <FieldSynergyValueTable synergies={synergyImpact} />
       )}
 
-      {/* Rarity Tier Balance */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Rarity Tier Balance</CardTitle>
-            <SectionTooltip>
-              Win rate statistics per rarity tier. With normalized stats, all
-              tiers should have similar median win rates. Without normalization,
-              higher rarities should trend higher.
-            </SectionTooltip>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <RarityTierChart creatures={creatureStats} />
-        </CardContent>
-      </Card>
+      <FieldCompWinRates compWinRates={compWinRates} />
+      <FieldFormationWinRates formationWinRates={formationWinRates} />
 
       {metaResult && (
         <CrossSimInsights fieldCreatures={creatureStats} metaResult={metaResult} />

@@ -37,6 +37,7 @@ function toSummary(run: SavedRun): RunSummary {
   const patchCount = computePatchCount(run.config)
 
   // Backwards compat: old runs don't have simType
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- old runs lack simType
   const simType = run.simType ?? ('meta' as const)
 
   if (simType === 'field') {
@@ -233,6 +234,7 @@ export function useRunHistory(): UseRunHistory {
     const db = await getDb()
     const all = await db.getAllFromIndex('runs', 'by-created')
     // Backwards compat: old runs don't have simType, default to 'meta'
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- old runs lack simType
     return all.filter((r) => (r.simType ?? 'meta') === simType).at(-1)
   }, [])
 

@@ -22,6 +22,10 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
     [abilities],
   )
 
+  const outlierCount = sorted.filter(
+    (a) => a.avgWinRate > 0.55 || a.avgWinRate < 0.45,
+  ).length
+
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -29,8 +33,15 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
           <CardTitle>Ability Impact</CardTitle>
           <SectionTooltip>
             Average win rate of creatures with each ability. Abilities far from
-            50% may be over/underpowered. Controlled by creature count.
+            50% may be over/underpowered. Note: this measures correlation, not
+            causation — strong creatures can inflate an ability's average.
+            Abilities with few creatures (&lt;5) are less reliable.
           </SectionTooltip>
+          {outlierCount > 0 && (
+            <Badge variant="destructive" className="text-[9px]">
+              {outlierCount} outlier{outlierCount !== 1 ? 's' : ''}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="px-0">
@@ -47,6 +58,9 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
                 Avg Win Rate
               </th>
               <th className="px-2 py-1.5 text-right text-muted-foreground">
+                Delta
+              </th>
+              <th className="px-2 py-1.5 text-right text-muted-foreground">
                 Creatures
               </th>
               <th className="px-2 py-1.5 text-muted-foreground">Impact</th>
@@ -56,10 +70,15 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
             {sorted.map((a) => {
               const delta = a.avgWinRate - 0.5
               const barWidth = Math.abs(delta) * 200
+              const lowSample = a.creaturesWithAbility < 5
+              const isOutlier = a.avgWinRate > 0.55 || a.avgWinRate < 0.45
               return (
                 <tr
                   key={a.templateId}
-                  className="border-b border-border/20"
+                  className={cn(
+                    'border-b border-border/20',
+                    isOutlier && 'bg-destructive/5',
+                  )}
                 >
                   <td className="px-4 py-1.5 font-medium">{a.name}</td>
                   <td className="px-2 py-1.5">
@@ -73,8 +92,30 @@ export function FieldAbilityImpactTable({ abilities }: Props) {
                   <td className="px-2 py-1.5 text-right font-mono">
                     <WinRateBadge wr={a.avgWinRate} />
                   </td>
-                  <td className="px-2 py-1.5 text-right text-muted-foreground">
+                  <td
+                    className={cn(
+                      'px-2 py-1.5 text-right font-mono',
+                      delta > 0.02
+                        ? 'text-success'
+                        : delta < -0.02
+                          ? 'text-destructive'
+                          : 'text-muted-foreground',
+                    )}
+                  >
+                    {delta > 0 ? '+' : ''}
+                    {(delta * 100).toFixed(1)}pp
+                  </td>
+                  <td
+                    className={cn(
+                      'px-2 py-1.5 text-right',
+                      lowSample
+                        ? 'text-warning font-medium'
+                        : 'text-muted-foreground',
+                    )}
+                    title={lowSample ? 'Low creature count — may not be reliable' : undefined}
+                  >
                     {a.creaturesWithAbility}
+                    {lowSample && ' ⚠'}
                   </td>
                   <td className="px-2 py-1.5">
                     <div className="relative flex h-3 items-center">

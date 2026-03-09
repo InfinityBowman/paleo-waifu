@@ -48,8 +48,8 @@ function resolveAbility(
 
 // ─── Row Assignment ───────────────────────────────────────────────
 
-export function assignRow(role: string): 'front' | 'back' {
-  return role === 'tank' || role === 'bruiser' ? 'front' : 'back'
+export function assignRow(_role: string): 'front' | 'back' {
+  return Math.random() < 0.5 ? 'front' : 'back'
 }
 
 // ─── Team Building ────────────────────────────────────────────────
@@ -89,10 +89,15 @@ export function buildTeam(
     BattleTeamMember,
   ]
 
-  // Ensure at least one front-row member
+  // Ensure at least one member in each row
   const hasFront = teamMembers.some((m) => m.row === 'front')
+  const hasBack = teamMembers.some((m) => m.row === 'back')
   if (!hasFront) {
-    teamMembers[0].row = 'front'
+    const idx = Math.floor(Math.random() * 3)
+    teamMembers[idx].row = 'front'
+  } else if (!hasBack) {
+    const idx = Math.floor(Math.random() * 3)
+    teamMembers[idx].row = 'back'
   }
 
   return { members: teamMembers }
