@@ -235,7 +235,7 @@ export function Hero() {
         </div>
 
         {/* Description */}
-        <p className="animate-drift-in drift-d2 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/65 sm:text-base">
+        <p className="animate-drift-in drift-d2 mt-8 max-w-md text-center text-sm leading-relaxed font-light text-lavender-light/80 sm:text-base">
           Collect{' '}
           <span className="text-primary/80">600+ prehistoric companions</span>{' '}
           from across the ages. Pull, discover, and trade. Each fossil holds a
@@ -273,7 +273,7 @@ export function Hero() {
               Summon Now
             </button>
           )}
-          <span className="font-hand text-[11px] text-lavender/45">
+          <span className="font-hand text-[11px] text-lavender/60">
             &#10022; 1 Fossil = Single Pull &middot; 10 Fossils = Multi Pull
             &#10022;
           </span>
@@ -317,15 +317,15 @@ export function Hero() {
         <div className="mx-auto max-w-4xl">
           <div className="grid gap-12 md:grid-cols-2 md:items-center">
             <div>
-              <p className="mb-4 font-hand text-xs tracking-widest text-rarity-uncommon/55">
+              <p className="mb-4 font-hand text-xs tracking-widest text-rarity-uncommon/70">
                 ~ about this world ~
               </p>
               <h2 className="mb-6 font-display text-3xl leading-relaxed font-light text-heading sm:text-4xl">
                 Creatures of
                 <br />
-                <span className="italic text-lavender/75">forgotten time</span>
+                <span className="italic text-lavender/85">forgotten time</span>
               </h2>
-              <p className="text-sm leading-[1.9] font-light text-lavender-light/55">
+              <p className="text-sm leading-[1.9] font-light text-lavender-light/70">
                 Deep beneath stone and sediment, they slept for millions of
                 years. Now they stir, reimagined as fun companions, ready to
                 walk beside you. Over six hundred species across fourteen
@@ -372,11 +372,11 @@ export function Hero() {
                     >
                       {era.era}
                     </h3>
-                    <span className="font-hand text-[10px] text-lavender-light/40">
+                    <span className="font-hand text-[10px] text-lavender-light/60">
                       {era.period}
                     </span>
                   </div>
-                  <p className="mt-1.5 text-xs font-light text-lavender-light/50">
+                  <p className="mt-1.5 text-xs font-light text-lavender-light/65">
                     {era.desc}
                   </p>
                 </div>
@@ -390,7 +390,7 @@ export function Hero() {
       <section className="relative z-20 px-5 py-20 sm:px-8">
         <div className="mx-auto max-w-3xl">
           <div className="mb-12 text-center">
-            <p className="mb-3 font-hand text-xs text-lavender/50">
+            <p className="mb-3 font-hand text-xs text-lavender/65">
               ~ five kinds of wonder ~
             </p>
             <h2 className="font-display text-3xl font-light text-heading sm:text-4xl">
@@ -405,40 +405,40 @@ export function Hero() {
                 stars: 1,
                 rate: '50%',
                 cssVar: '--color-rarity-common',
-                opacity: 0.6,
-                glowOpacity: 0.04,
+                opacity: 0.8,
+                glowOpacity: 0.06,
               },
               {
                 name: 'Uncommon',
                 stars: 2,
                 rate: '30%',
                 cssVar: '--color-rarity-uncommon',
-                opacity: 0.6,
-                glowOpacity: 0.04,
+                opacity: 0.8,
+                glowOpacity: 0.06,
               },
               {
                 name: 'Rare',
                 stars: 3,
                 rate: '15%',
                 cssVar: '--color-rarity-rare',
-                opacity: 0.7,
-                glowOpacity: 0.05,
+                opacity: 0.85,
+                glowOpacity: 0.07,
               },
               {
                 name: 'Epic',
                 stars: 4,
                 rate: '4%',
                 cssVar: '--color-rarity-epic',
-                opacity: 0.75,
-                glowOpacity: 0.05,
+                opacity: 0.9,
+                glowOpacity: 0.08,
               },
               {
                 name: 'Legendary',
                 stars: 5,
                 rate: '1%',
                 cssVar: '--color-rarity-legendary',
-                opacity: 0.85,
-                glowOpacity: 0.06,
+                opacity: 0.95,
+                glowOpacity: 0.1,
               },
             ].map((r, i) => {
               const color = `color-mix(in oklch, var(${r.cssVar}) ${Math.round(r.opacity * 100)}%, transparent)`
@@ -477,7 +477,7 @@ export function Hero() {
                       <span
                         key={s}
                         style={{
-                          color: 'oklch(1 0 0 / 0.06)',
+                          color: 'oklch(1 0 0 / 0.15)',
                           fontSize: 10,
                         }}
                       >
@@ -488,10 +488,10 @@ export function Hero() {
                   <div
                     className="h-px flex-1"
                     style={{
-                      background: `color-mix(in oklch, var(${r.cssVar}) 8%, transparent)`,
+                      background: `color-mix(in oklch, var(${r.cssVar}) 15%, transparent)`,
                     }}
                   />
-                  <span className="text-xs font-light text-lavender-light/45">
+                  <span className="text-xs font-light text-lavender-light/70">
                     {r.rate}
                   </span>
                 </div>
@@ -499,7 +499,7 @@ export function Hero() {
             })}
           </div>
 
-          <p className="mt-8 text-center font-hand text-xs italic text-lavender/45">
+          <p className="mt-8 text-center font-hand text-xs italic text-lavender/60">
             A legendary spirit is guaranteed to appear within 90 encounters...
           </p>
         </div>
@@ -515,21 +515,21 @@ export function Hero() {
                 title: 'New Player Bonus',
                 desc: '20 free Fossils to begin your journey. Login daily for 3 more.',
                 cssVar: '--color-primary',
-                opacity: 0.7,
+                opacity: 0.85,
               },
               {
                 icon: IconFloatingCrystal,
                 title: 'Pity System',
                 desc: 'Boosted rates at 50 pulls. Guaranteed Legendary at 90.',
                 cssVar: '--color-rarity-epic',
-                opacity: 0.7,
+                opacity: 0.85,
               },
               {
                 icon: IconCardExchange,
                 title: 'Trading Post',
                 desc: 'Trade duplicates with other collectors to complete your album.',
                 cssVar: '--color-rarity-legendary',
-                opacity: 0.7,
+                opacity: 0.85,
               },
             ].map((feature, i) => {
               const accent = `color-mix(in oklch, var(${feature.cssVar}) ${Math.round(feature.opacity * 100)}%, transparent)`
@@ -550,7 +550,7 @@ export function Hero() {
                   >
                     {feature.title}
                   </h3>
-                  <p className="mt-2 text-xs leading-relaxed font-light text-lavender-light/50">
+                  <p className="mt-2 text-xs leading-relaxed font-light text-lavender-light/65">
                     {feature.desc}
                   </p>
                 </div>
@@ -562,32 +562,32 @@ export function Hero() {
 
       {/* ═══ STATS ═══ */}
       <section className="relative z-20 px-5 py-12">
-        <div className="mx-auto max-w-2xl rounded-2xl border border-white/3 bg-white/1.5 px-8 py-8">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-white/6 bg-white/3 px-8 py-8">
           <div className="flex flex-wrap items-center justify-around gap-8">
             {[
               {
                 val: '600+',
                 label: 'creatures',
                 cssVar: '--color-primary',
-                opacity: 0.6,
+                opacity: 0.8,
               },
               {
                 val: '5',
                 label: 'rarities',
                 cssVar: '--color-rarity-epic',
-                opacity: 0.6,
+                opacity: 0.8,
               },
               {
                 val: '14',
                 label: 'periods',
                 cssVar: '--color-rarity-uncommon',
-                opacity: 0.6,
+                opacity: 0.8,
               },
               {
                 val: '\u221E',
                 label: 'trades',
                 cssVar: '--color-rarity-legendary',
-                opacity: 0.6,
+                opacity: 0.8,
               },
             ].map((s) => {
               const color = `color-mix(in oklch, var(${s.cssVar}) ${Math.round(s.opacity * 100)}%, transparent)`
@@ -599,7 +599,7 @@ export function Hero() {
                   >
                     {s.val}
                   </div>
-                  <p className="mt-1 font-hand text-[10px] text-lavender-light/40">
+                  <p className="mt-1 font-hand text-[10px] text-lavender-light/60">
                     {s.label}
                   </p>
                 </div>
