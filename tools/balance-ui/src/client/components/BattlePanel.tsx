@@ -24,13 +24,6 @@ import type {
   TeamBattleResult,
 } from '../../shared/types.ts'
 
-const ROLE_COLORS: Record<string, string> = {
-  striker: 'text-red-400',
-  tank: 'text-blue-400',
-  support: 'text-green-400',
-  bruiser: 'text-amber-400',
-}
-
 interface SlotState {
   creatureId: string
   row: 'front' | 'back'
@@ -310,10 +303,6 @@ function TeamPicker({
                         </SelectLabel>
                         {group.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
-                            <span className={cn('capitalize', ROLE_COLORS[c.role])}>
-                              {c.role[0]}
-                            </span>
-                            {' '}
                             {c.name}
                           </SelectItem>
                         ))}

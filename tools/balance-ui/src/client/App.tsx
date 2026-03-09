@@ -576,7 +576,14 @@ export function App() {
               />
             </TabsContent>
 
-            <TabsContent value="battle" className="min-h-0 overflow-y-auto">
+            <TabsContent
+              value="battle"
+              forceMount
+              className={cn(
+                'min-h-0 overflow-y-auto',
+                tab !== 'battle' && 'hidden',
+              )}
+            >
               <BattlePanel
                 creatures={creatures}
                 patches={patches}
