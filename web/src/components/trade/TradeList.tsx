@@ -11,6 +11,8 @@ import {
 } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
+import { CreatureModal } from '@/components/collection/CreatureModal'
+import { getCreaturePreview, loadMoreOpenTrades } from '@/routes/_app/trade'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -26,13 +28,13 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { CreaturePickerModal } from '@/components/shared/CreaturePickerModal'
-import { loadMoreOpenTrades } from '@/routes/_app/trade'
 
 interface TradeItem {
   id: string
   offererId: string
   offererName: string
   offererImage: string | null
+  offeredCreatureBaseId: string
   offeredCreatureName: string
   offeredCreatureRarity: string
   offeredCreatureImage: string | null
@@ -47,8 +49,10 @@ interface MyProposalItem {
   createdAt: Date | null
   tradeOwnerName: string | null
   tradeOwnerImage: string | null
+  tradeCreatureBaseId: string
   tradeCreatureName: string
   tradeCreatureRarity: string
+  proposerCreatureBaseId: string
   proposerCreatureName: string
   proposerCreatureRarity: string
 }
@@ -61,8 +65,10 @@ interface IncomingProposalItem {
   createdAt: Date | null
   proposerName: string | null
   proposerImage: string | null
+  proposerCreatureBaseId: string
   proposerCreatureName: string
   proposerCreatureRarity: string
+  tradeCreatureBaseId: string
   tradeCreatureName: string
   tradeCreatureRarity: string
 }
@@ -104,6 +110,18 @@ export function TradeList({
   const [proposePickerTradeId, setProposePickerTradeId] = useState<
     string | null
   >(null)
+
+  // Creature preview modal
+  const [previewCreature, setPreviewCreature] = useState<Awaited<
+    ReturnType<typeof getCreaturePreview>
+  > | null>(null)
+  const [previewOpen, setPreviewOpen] = useState(false)
+
+  const openCreaturePreview = async (creatureBaseId: string) => {
+    setPreviewOpen(true)
+    const data = await getCreaturePreview({ data: creatureBaseId })
+    setPreviewCreature(data)
+  }
 
   // Pagination state
   const [extraTrades, setExtraTrades] = useState<Array<TradeItem>>([])
@@ -333,9 +351,16 @@ export function TradeList({
                             >
                               {rarity}
                             </span>
-                            <div className="font-display font-bold">
+                            <button
+                              className="font-display block font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
+                              onClick={() =>
+                                openCreaturePreview(
+                                  trade.offeredCreatureBaseId,
+                                )
+                              }
+                            >
                               {trade.offeredCreatureName}
-                            </div>
+                            </button>
                           </div>
                           <IconCardExchange className="h-4 w-4 text-muted-foreground" />
                           <div className="flex-1 text-right text-sm text-muted-foreground">
@@ -440,9 +465,16 @@ export function TradeList({
                             >
                               {tradeRarity}
                             </span>
-                            <div className="font-display font-bold">
+                            <button
+                              className="font-display block font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
+                              onClick={() =>
+                                openCreaturePreview(
+                                  proposal.tradeCreatureBaseId,
+                                )
+                              }
+                            >
                               {proposal.tradeCreatureName}
-                            </div>
+                            </button>
                             <div className="text-xs text-muted-foreground">
                               Your creature
                             </div>
@@ -457,9 +489,16 @@ export function TradeList({
                             >
                               {proposerRarity}
                             </span>
-                            <div className="font-display font-bold">
+                            <button
+                              className="font-display block ml-auto font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
+                              onClick={() =>
+                                openCreaturePreview(
+                                  proposal.proposerCreatureBaseId,
+                                )
+                              }
+                            >
                               {proposal.proposerCreatureName}
-                            </div>
+                            </button>
                             <div className="text-xs text-muted-foreground">
                               from {proposal.proposerName}
                             </div>
@@ -533,9 +572,16 @@ export function TradeList({
                             >
                               {myRarity}
                             </span>
-                            <div className="font-display font-bold">
+                            <button
+                              className="font-display block font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
+                              onClick={() =>
+                                openCreaturePreview(
+                                  proposal.proposerCreatureBaseId,
+                                )
+                              }
+                            >
                               {proposal.proposerCreatureName}
-                            </div>
+                            </button>
                             <div className="text-xs text-muted-foreground">
                               Your offer
                             </div>
@@ -550,9 +596,16 @@ export function TradeList({
                             >
                               {tradeRarity}
                             </span>
-                            <div className="font-display font-bold">
+                            <button
+                              className="font-display block ml-auto font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
+                              onClick={() =>
+                                openCreaturePreview(
+                                  proposal.tradeCreatureBaseId,
+                                )
+                              }
+                            >
                               {proposal.tradeCreatureName}
-                            </div>
+                            </button>
                           </div>
                         </div>
 
@@ -618,6 +671,15 @@ export function TradeList({
           if (!proposePickerTradeId) return
           handlePropose(proposePickerTradeId, c.id)
           setProposePickerTradeId(null)
+        }}
+      />
+
+      <CreatureModal
+        creature={previewCreature}
+        open={previewOpen}
+        onOpenChange={(open) => {
+          setPreviewOpen(open)
+          if (!open) setPreviewCreature(null)
         }}
       />
     </div>

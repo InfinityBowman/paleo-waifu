@@ -13,7 +13,7 @@ from collections import defaultdict
 from d1_client import D1Client
 
 # ─── Role Mapping (hard-coded per creature) ──────────────────────────
-
+ 
 CREATURE_ROLES: dict[str, str] = {
     # ── STRIKERS ──
     "Coelophysis":      "striker",

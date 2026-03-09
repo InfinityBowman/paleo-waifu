@@ -80,7 +80,7 @@ export function CreatureScatterChart({
         <ZAxis range={[40, 40]} />
         <RechartsTooltip
           content={({ payload }) => {
-            if (!payload?.[0]) return null
+            if (!payload?.[0]) return null // eslint-disable-line @typescript-eslint/no-unnecessary-condition
             const d = payload[0].payload as (typeof data)[number]
             return (
               <div className="rounded-lg border border-border/50 bg-card px-3 py-2 text-xs shadow-md">

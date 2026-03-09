@@ -14,6 +14,31 @@ import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { TradeList } from '@/components/trade/TradeList'
 
+export const getCreaturePreview = createServerFn({ method: 'GET' })
+  .inputValidator((id: string) => id)
+  .handler(async ({ data: id }) => {
+    const db = await createDb(getCfEnv().DB)
+    const rows = await db
+      .select({
+        name: creature.name,
+        scientificName: creature.scientificName,
+        rarity: creature.rarity,
+        era: creature.era,
+        diet: creature.diet,
+        imageUrl: creature.imageUrl,
+        description: creature.description,
+        period: creature.period,
+        sizeMeters: creature.sizeMeters,
+        weightKg: creature.weightKg,
+        funFacts: creature.funFacts,
+      })
+      .from(creature)
+      .where(eq(creature.id, id))
+    if (rows.length === 0) return null
+    const row = rows[0]
+    return { ...row, imageUrl: toCdnUrl(row.imageUrl) }
+  })
+
 const PAGE_SIZE = 20
 
 async function expireStaleTradesIfAny(
@@ -121,6 +146,7 @@ const getTradeData = createServerFn({ method: 'GET' })
             offererId: tradeOffer.offererId,
             offererName: user.name,
             offererImage: user.image,
+            offeredCreatureBaseId: creature.id,
             offeredCreatureName: creature.name,
             offeredCreatureRarity: creature.rarity,
             offeredCreatureImage: creature.imageUrl,
@@ -149,9 +175,11 @@ const getTradeData = createServerFn({ method: 'GET' })
             // Trade info
             tradeOwnerName: tradeOwner.name,
             tradeOwnerImage: tradeOwner.image,
+            tradeCreatureBaseId: tradeCreature.id,
             tradeCreatureName: tradeCreature.name,
             tradeCreatureRarity: tradeCreature.rarity,
             // My proposed creature
+            proposerCreatureBaseId: proposerCreature.id,
             proposerCreatureName: proposerCreature.name,
             proposerCreatureRarity: proposerCreature.rarity,
           })
@@ -187,9 +215,11 @@ const getTradeData = createServerFn({ method: 'GET' })
             // Proposer info
             proposerName: proposerUser.name,
             proposerImage: proposerUser.image,
+            proposerCreatureBaseId: proposerCreature.id,
             proposerCreatureName: proposerCreature.name,
             proposerCreatureRarity: proposerCreature.rarity,
             // My trade creature
+            tradeCreatureBaseId: tradeCreature.id,
             tradeCreatureName: tradeCreature.name,
             tradeCreatureRarity: tradeCreature.rarity,
           })
@@ -277,6 +307,7 @@ export const loadMoreOpenTrades = createServerFn({ method: 'GET' })
         offererId: tradeOffer.offererId,
         offererName: user.name,
         offererImage: user.image,
+        offeredCreatureBaseId: creature.id,
         offeredCreatureName: creature.name,
         offeredCreatureRarity: creature.rarity,
         offeredCreatureImage: creature.imageUrl,

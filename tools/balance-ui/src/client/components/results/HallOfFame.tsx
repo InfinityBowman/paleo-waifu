@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Badge } from '../ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import type { MetaResult } from '../../../shared/types.ts'
 import { ROLE_COLOR_VALUES } from './constants'
+import type { MetaResult } from '../../../shared/types.ts'
 
 export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'] }) {
   const [showAll, setShowAll] = useState(false)
