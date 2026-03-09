@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, GitCompareArrows, Pencil, Star, Trash2, X } from 'lucide-react'
+import { Eye, GitCompareArrows, Pencil, RotateCcw, Star, Trash2, X } from 'lucide-react'
 import { cn } from '../lib/utils'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
@@ -39,6 +39,7 @@ interface Props {
   onRename: (id: string, label: string) => Promise<void>
   onToggleStar: (id: string) => Promise<void>
   onViewRun: (id: string) => void
+  onApplyConfig: (run: RunSummary) => void
   onCompare: () => void
   onClearAll: () => Promise<void>
 }
@@ -52,6 +53,7 @@ export function RunHistoryPanel({
   onRename,
   onToggleStar,
   onViewRun,
+  onApplyConfig,
   onCompare,
   onClearAll,
 }: Props) {
@@ -290,8 +292,8 @@ export function RunHistoryPanel({
                   )}
                 </div>
 
-                {/* Baseline diff summary (meta only — field has different config shape) */}
-                {run.patchCount > 0 && run.simType === 'meta' && (
+                {/* Baseline diff summary */}
+                {run.patchCount > 0 && (
                   <BaselineDiffSummary
                     constants={run.config.constants}
                     creaturePatches={run.config.creaturePatches}
@@ -391,6 +393,19 @@ export function RunHistoryPanel({
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>View Results</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      onClick={() => onApplyConfig(run)}
+                    >
+                      <RotateCcw size={12} className="text-muted-foreground" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Apply Overrides to Editor</TooltipContent>
                 </Tooltip>
 
                 {isConfirmingDelete ? (

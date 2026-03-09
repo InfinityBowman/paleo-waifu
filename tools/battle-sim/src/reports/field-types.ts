@@ -58,6 +58,47 @@ export interface AbilityImpact {
 
 // ─── Team Round-Robin Results ────────────────────────────────────
 
+export interface CreatureTeamStats {
+  id: string
+  name: string
+  role: string
+  rarity: string
+  /** Win rate when this creature is on a team */
+  teamWinRate: number
+  teamWins: number
+  teamTotal: number
+  /** 1v1 win rate for comparison (from creature round-robin) */
+  soloWinRate: number
+  /** teamWinRate - soloWinRate: positive = better in teams, negative = worse */
+  teamDelta: number
+  /** Best teammate (highest win rate when on the same team) */
+  bestTeammate: { id: string; name: string; winRate: number }
+  /** Worst teammate (lowest win rate when on the same team) */
+  worstTeammate: { id: string; name: string; winRate: number }
+}
+
+/** Ability impact measured from 3v3 team battles */
+export interface TeamAbilityImpact {
+  templateId: string
+  name: string
+  abilityType: 'active' | 'passive'
+  /** Win rate of teams containing creatures with this ability */
+  teamWinRate: number
+  /** Number of unique creatures that have this ability */
+  creaturesWithAbility: number
+  /** Total team appearances */
+  sampleSize: number
+}
+
+/** Role matchup measured from 3v3 team battles */
+export interface TeamRoleMatchup {
+  role: string
+  /** Win rate of teams containing this role */
+  winRate: number
+  /** Total team battles involving this role */
+  sampleSize: number
+}
+
 export interface SynergyImpact {
   synergy: string
   avgWinRate: number
@@ -85,9 +126,14 @@ export interface FieldResult {
   roleMatchupMatrix: Array<RoleMatchup>
   abilityImpact: Array<AbilityImpact>
   synergyImpact: Array<SynergyImpact>
+  creatureTeamStats: Array<CreatureTeamStats>
   compWinRates: Record<string, { winRate: number; count: number }>
   formationWinRates: Record<string, { winRate: number; count: number }>
   scorecard: BalanceScorecard
+  /** Ability impact from 3v3 team battles */
+  teamAbilityImpact: Array<TeamAbilityImpact>
+  /** Role contribution from 3v3 team battles */
+  teamRoleMatchup: Array<TeamRoleMatchup>
 }
 
 export interface FieldRunResult {

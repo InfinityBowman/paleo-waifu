@@ -322,9 +322,13 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'fortifying_presence',
     name: 'Fortifying Presence',
     trigger: { type: 'onBattleStart' },
-    effects: [{ type: 'buff', stat: 'def', percent: 25, duration: 999 }],
+    effects: [
+      { type: 'buff', stat: 'def', percent: 25, duration: 999 },
+      { type: 'shield', percent: 15, duration: 3 },
+    ],
     target: 'all_allies',
-    description: 'All allies gain +25% DEF at the start of battle.',
+    description:
+      'All allies gain +25% DEF and a shield absorbing 15% max HP for 3 turns at the start of battle.',
     roleAffinity: ['support'],
   },
   {

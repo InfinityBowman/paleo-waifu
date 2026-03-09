@@ -18,15 +18,20 @@ import { WinRateDistributionChart } from './results/charts/WinRateDistributionCh
 import { RoleMatchupHeatmap } from './results/RoleMatchupHeatmap'
 import { CreaturePowerRanking } from './results/CreaturePowerRanking'
 import { FieldAbilityImpactTable } from './results/FieldAbilityImpactTable'
+import { TeamAbilityImpactTable } from './results/TeamAbilityImpactTable'
+import { TeamRoleContribution } from './results/TeamRoleContribution'
 import { FieldSynergyValueTable } from './results/FieldSynergyValueTable'
 import { FieldCompWinRates } from './results/FieldCompWinRates'
 import { FieldFormationWinRates } from './results/FieldFormationWinRates'
+import { CreatureTeamRanking } from './results/CreatureTeamRanking'
+import { SoloVsTeamScatter } from './results/charts/SoloVsTeamScatter'
 import { CrossSimInsights } from './results/CrossSimInsights'
 import type { SimState } from './results/constants'
 import type {
   ConstantsOverride,
   ConstantsSnapshot,
   CreatureOverridePatch,
+  CreatureRecord,
   FieldRunResult,
   FieldSimRequest,
   MetaRunResult,
@@ -42,6 +47,7 @@ interface Props {
     constants: ConstantsOverride
     creaturePatches: Array<CreatureOverridePatch>
   } | null
+  creatures?: Array<CreatureRecord>
   constants?: ConstantsSnapshot | null
   onApplyConfig?: (config: {
     options: FieldSimRequest['options']
@@ -57,9 +63,11 @@ export function FieldResultsPanel({
   metaResult,
   config,
   constants,
+  creatures,
   onApplyConfig,
 }: Props) {
   const [baselineOpen, setBaselineOpen] = useState(false)
+  const [soloOpen, setSoloOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
   const summaryText = useMemo(() => {
@@ -73,6 +81,25 @@ export function FieldResultsPanel({
       setTimeout(() => setCopied(false), 2000)
     }).catch(() => {})
   }, [summaryText])
+
+  const creatureAbilities = useMemo(() => {
+    if (!creatures) return new Map<string, { active: string; passive: string }>()
+    const map = new Map<string, { active: string; passive: string }>()
+    for (const c of creatures) {
+      map.set(c.id, {
+        active: c.active.displayName,
+        passive: c.passive.displayName,
+      })
+    }
+    return map
+  }, [creatures])
+
+  const teamWinRates = useMemo(
+    () => (result?.result.creatureTeamStats ?? [])
+      .filter((c) => c.teamTotal > 0)
+      .map((c) => ({ winRate: c.teamWinRate })),
+    [result],
+  )
 
   if (simState === 'error' && error) {
     return (
@@ -94,7 +121,7 @@ export function FieldResultsPanel({
     )
   }
 
-  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates } =
+  const { creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates, creatureTeamStats, scorecard, teamAbilityImpact, teamRoleMatchup } =
     result.result
 
   return (
@@ -179,30 +206,54 @@ export function FieldResultsPanel({
         </Card>
       )}
 
+      {/* ── 3v3 Team Results (primary view) ── */}
       <FieldScorecardCard scorecard={scorecard} />
 
-      {/* Win Rate Distribution */}
       <Card>
         <CardHeader className="pb-2">
           <div className="flex items-center gap-2">
-            <CardTitle>Win Rate Distribution</CardTitle>
+            <CardTitle>Team Win Rate Distribution</CardTitle>
             <SectionTooltip>
-              Histogram of creature win rates in 5% buckets. A healthy game has
-              most creatures clustered around 50%. Wide spread indicates imbalance.
+              Histogram of creature team win rates in 5% buckets. A healthy game
+              has most creatures clustered around 50%. Wide spread indicates imbalance.
             </SectionTooltip>
           </div>
           <CardDescription>
-            {creatureStats.length} creatures across 5% win rate buckets
+            {teamWinRates.length} creatures across 5% team win rate buckets
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <WinRateDistributionChart creatures={creatureStats} />
+          <WinRateDistributionChart creatures={teamWinRates} />
         </CardContent>
       </Card>
 
-      <RoleMatchupHeatmap matchups={roleMatchupMatrix} />
-      <CreaturePowerRanking creatures={creatureStats} />
-      <FieldAbilityImpactTable abilities={abilityImpact} />
+      <CreatureTeamRanking creatures={creatureTeamStats} creatureAbilities={creatureAbilities} />
+
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <CardTitle>Solo vs Team Performance</CardTitle>
+            <SectionTooltip>
+              Each dot is a creature. X = 1v1 solo win rate, Y = 3v3 team win rate.
+              Dots above the diagonal benefit from teams; dots below are weaker in teams.
+            </SectionTooltip>
+          </div>
+          <CardDescription>
+            Comparing 1v1 solo WR to 3v3 team WR per creature
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SoloVsTeamScatter creatures={creatureTeamStats} />
+        </CardContent>
+      </Card>
+
+      {teamAbilityImpact.length > 0 && (
+        <TeamAbilityImpactTable abilities={teamAbilityImpact} />
+      )}
+
+      {teamRoleMatchup.length > 0 && (
+        <TeamRoleContribution roles={teamRoleMatchup} />
+      )}
 
       {synergyImpact.length > 0 && (
         <FieldSynergyValueTable synergies={synergyImpact} />
@@ -210,6 +261,35 @@ export function FieldResultsPanel({
 
       <FieldCompWinRates compWinRates={compWinRates} />
       <FieldFormationWinRates formationWinRates={formationWinRates} />
+
+      {/* ── 1v1 Details (collapsed) ── */}
+      <div className="mt-4">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setSoloOpen((v) => !v)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSoloOpen((v) => !v) }}
+          className="flex cursor-pointer items-center gap-3"
+        >
+          <div className="h-px flex-1 bg-border" />
+          <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            1v1 Solo Details
+            <ChevronDown
+              size={12}
+              className={cn('transition-transform', soloOpen && 'rotate-180')}
+            />
+          </span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
+        {soloOpen && (
+          <div className="mt-4 flex flex-col gap-4">
+            <RoleMatchupHeatmap matchups={roleMatchupMatrix} />
+            <CreaturePowerRanking creatures={creatureStats} />
+            <FieldAbilityImpactTable abilities={abilityImpact} />
+          </div>
+        )}
+      </div>
 
       {metaResult && (
         <CrossSimInsights fieldCreatures={creatureStats} metaResult={metaResult} />

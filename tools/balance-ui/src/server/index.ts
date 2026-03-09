@@ -14,6 +14,8 @@ import { loadCreatures } from '../../../battle-sim/src/db.ts'
 import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
 import { runFieldReport } from '../../../battle-sim/src/reports/field.ts'
 import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
+import { buildTeamWithRows } from '../../../battle-sim/src/runner.ts'
+import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import type {
   AbilityOverride,
   ConstantsOverride,
@@ -24,6 +26,9 @@ import type {
   FieldSimRequest,
   SimProgressEvent,
   SimRequest,
+  TeamBattleProgressEvent,
+  TeamBattleRequest,
+  TeamBattleResult,
 } from '../shared/types.ts'
 
 const app = new Hono()
@@ -385,6 +390,120 @@ app.post('/api/field-sim', async (c) => {
           },
         })
         send({ type: 'done', result: fieldResult })
+      } catch (err) {
+        send({
+          type: 'error',
+          message: err instanceof Error ? err.message : String(err),
+        })
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
+})
+
+// ─── Team Battle Endpoint ────────────────────────────────────────
+
+app.post('/api/battle', async (c) => {
+  const body: TeamBattleRequest = await c.req.json()
+  const { creatures, templateMap } = prepareCreatures(body)
+
+  const creatureMap = new Map(creatures.map((cr) => [cr.id, cr]))
+
+  // Resolve team members
+  const resolveTeam = (
+    slots: TeamBattleRequest['teamA'],
+  ): [CreatureRecord, CreatureRecord, CreatureRecord] | null => {
+    const members = slots.map((s) => creatureMap.get(s.creatureId))
+    if (members.some((m) => !m)) return null
+    return members as [CreatureRecord, CreatureRecord, CreatureRecord]
+  }
+
+  const teamAMembers = resolveTeam(body.teamA)
+  const teamBMembers = resolveTeam(body.teamB)
+
+  if (!teamAMembers || !teamBMembers) {
+    return c.json({ error: 'One or more creatures not found' }, 400)
+  }
+
+  const rowsA = body.teamA.map((s) => s.row) as ['front' | 'back', 'front' | 'back', 'front' | 'back']
+  const rowsB = body.teamB.map((s) => s.row) as ['front' | 'back', 'front' | 'back', 'front' | 'back']
+
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      const send = (event: TeamBattleProgressEvent) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
+
+      try {
+        const trials: TeamBattleResult['trials'] = []
+        let winsA = 0
+        let winsB = 0
+        let draws = 0
+        let totalTurns = 0
+
+        for (let i = 1; i <= body.trials; i++) {
+          const teamA = body.randomizeRows
+            ? buildTeamWithRows(
+                teamAMembers,
+                rowsA.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as ['front' | 'back', 'front' | 'back', 'front' | 'back'],
+                templateMap,
+              )
+            : buildTeamWithRows(teamAMembers, rowsA, templateMap)
+
+          const teamB = body.randomizeRows
+            ? buildTeamWithRows(
+                teamBMembers,
+                rowsB.map(() => (Math.random() < 0.5 ? 'front' : 'back')) as ['front' | 'back', 'front' | 'back', 'front' | 'back'],
+                templateMap,
+              )
+            : buildTeamWithRows(teamBMembers, rowsB, templateMap)
+
+          const result = simulateBattle(teamA, teamB, {
+            seed: i,
+            damageScale: body.constants.combatDamageScale,
+            defScaling: body.constants.defScalingConstant,
+            basicAttackMultiplier: body.constants.basicAttackMultiplier,
+          })
+
+          const trial = {
+            trial: i,
+            winner: result.winner,
+            turns: result.turns,
+            teamAHpPercent: result.teamAHpPercent,
+            teamBHpPercent: result.teamBHpPercent,
+          }
+          trials.push(trial)
+
+          if (result.winner === 'A') winsA++
+          else if (result.winner === 'B') winsB++
+          else draws++
+          totalTurns += result.turns
+
+          send({ type: 'trial', trial: i, total: body.trials, winner: result.winner })
+        }
+
+        const total = trials.length || 1
+        send({
+          type: 'done',
+          result: {
+            trials,
+            winsA,
+            winsB,
+            draws,
+            winRateA: winsA / total,
+            winRateB: winsB / total,
+            avgTurns: totalTurns / total,
+          },
+        })
       } catch (err) {
         send({
           type: 'error',

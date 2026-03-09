@@ -1,5 +1,6 @@
+import type { Row } from '@paleo-waifu/shared/battle/types'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
-import { assignRow, buildTeam, sampleTeam } from '../runner.ts'
+import { assignRow, buildTeam, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import { createProgressBar } from '../report.ts'
 import { ABILITY_NAME_MAP } from './meta-types.ts'
 import { detectSynergies } from './synergy.ts'
@@ -8,11 +9,14 @@ import type {
   AbilityImpact,
   BalanceScorecard,
   CreatureFieldStats,
+  CreatureTeamStats,
   FieldOptions,
   FieldResult,
   FieldRunResult,
   RoleMatchup,
   SynergyImpact,
+  TeamAbilityImpact,
+  TeamRoleMatchup,
 } from './field-types.ts'
 
 // Re-export public types
@@ -20,11 +24,14 @@ export type {
   AbilityImpact,
   BalanceScorecard,
   CreatureFieldStats,
+  CreatureTeamStats,
   FieldOptions,
   FieldResult,
   FieldRunResult,
   RoleMatchup,
   SynergyImpact,
+  TeamAbilityImpact,
+  TeamRoleMatchup,
 } from './field-types.ts'
 
 // ─── Utility ─────────────────────────────────────────────────────
@@ -42,12 +49,23 @@ function compString(
     .join(' / ')
 }
 
-function formationString(
+function assignTeamRows(
   members: [CreatureRecord, CreatureRecord, CreatureRecord],
-): string {
-  const frontCount = members.filter(
-    (m) => assignRow(m.role) === 'front',
-  ).length
+): [Row, Row, Row] {
+  const rows = members.map((m) => assignRow(m.role)) as [Row, Row, Row]
+  // Ensure at least one front and one back
+  const hasFront = rows.some((r) => r === 'front')
+  const hasBack = rows.some((r) => r === 'back')
+  if (!hasFront) {
+    rows[Math.floor(Math.random() * 3)] = 'front'
+  } else if (!hasBack) {
+    rows[Math.floor(Math.random() * 3)] = 'back'
+  }
+  return rows
+}
+
+function formationFromRows(rows: [Row, Row, Row]): string {
+  const frontCount = rows.filter((r) => r === 'front').length
   return `${frontCount}F/${3 - frontCount}B`
 }
 
@@ -319,16 +337,30 @@ function runTeamRoundRobin(
   options: FieldOptions,
 ): {
   synergyImpact: Array<SynergyImpact>
+  creatureTeamStats: Map<string, { wins: number; total: number }>
   compWinRates: Record<string, { winRate: number; count: number }>
   formationWinRates: Record<string, { winRate: number; count: number }>
+  teamAbilityImpact: Array<TeamAbilityImpact>
+  teamRoleMatchup: Array<TeamRoleMatchup>
+  /** Per-creature pair co-occurrence: Map<"id1:id2", {wins, total}> */
+  teammatePairs: Map<string, { wins: number; total: number }>
 } {
   if (creatures.length < 3) {
-    return { synergyImpact: [], compWinRates: {}, formationWinRates: {} }
+    return {
+      synergyImpact: [],
+      creatureTeamStats: new Map(),
+      compWinRates: {},
+      formationWinRates: {},
+      teamAbilityImpact: [],
+      teamRoleMatchup: [],
+      teammatePairs: new Map(),
+    }
   }
 
   // Sample random teams
   const teams: Array<{
     members: [CreatureRecord, CreatureRecord, CreatureRecord]
+    rows: [Row, Row, Row]
     comp: string
     formation: string
     synergies: Array<string>
@@ -338,14 +370,32 @@ function runTeamRoundRobin(
 
   for (let i = 0; i < options.teamSampleSize; i++) {
     const members = sampleTeam(creatures)
+    const rows = assignTeamRows(members)
     teams.push({
       members,
+      rows,
       comp: compString(members),
-      formation: formationString(members),
+      formation: formationFromRows(rows),
       synergies: detectSynergies(members),
       wins: 0,
       total: 0,
     })
+  }
+
+  // Per-creature stats in team context
+  const creatureTeamAgg = new Map<string, { wins: number; total: number }>()
+
+  // Per-ability stats in team context
+  const abilityTeamAgg = new Map<string, { wins: number; total: number; creatures: Set<string> }>()
+
+  // Per-role stats in team context
+  const roleTeamAgg = new Map<string, { wins: number; total: number }>()
+
+  // Per-creature-pair co-occurrence stats (teammate synergy)
+  const teammatePairs = new Map<string, { wins: number; total: number }>()
+
+  function pairKey(a: string, b: string): string {
+    return a < b ? `${a}:${b}` : `${b}:${a}`
   }
 
   const bar = options.csv
@@ -363,8 +413,8 @@ function runTeamRoundRobin(
       const opp = teams[oppIdx]
 
       try {
-        const teamA = buildTeam(team.members, options.templateMap)
-        const teamB = buildTeam(opp.members, options.templateMap)
+        const teamA = buildTeamWithRows(team.members, team.rows, options.templateMap)
+        const teamB = buildTeamWithRows(opp.members, opp.rows, options.templateMap)
         const result = simulateBattle(teamA, teamB, {
           seed: i * options.teamMatchCount + m,
           damageScale: options.damageScale,
@@ -374,6 +424,62 @@ function runTeamRoundRobin(
 
         team.total++
         opp.total++
+
+        const winValue = (side: 'A' | 'B') => {
+          if (result.winner === side) return 1
+          if (result.winner === null) return 0.5
+          return 0
+        }
+
+        // Track per-creature participation
+        const sides: Array<{ members: [CreatureRecord, CreatureRecord, CreatureRecord]; side: 'A' | 'B' }> = [
+          { members: team.members, side: 'A' },
+          { members: opp.members, side: 'B' },
+        ]
+
+        for (const { members, side } of sides) {
+          const wv = winValue(side)
+
+          for (const c of members) {
+            // Per-creature
+            const agg = creatureTeamAgg.get(c.id) ?? { wins: 0, total: 0 }
+            agg.total++
+            agg.wins += wv
+            creatureTeamAgg.set(c.id, agg)
+
+            // Per-ability (active)
+            const activeAgg = abilityTeamAgg.get(c.active.templateId) ?? { wins: 0, total: 0, creatures: new Set() }
+            activeAgg.total++
+            activeAgg.wins += wv
+            activeAgg.creatures.add(c.id)
+            abilityTeamAgg.set(c.active.templateId, activeAgg)
+
+            // Per-ability (passive)
+            const passiveAgg = abilityTeamAgg.get(c.passive.templateId) ?? { wins: 0, total: 0, creatures: new Set() }
+            passiveAgg.total++
+            passiveAgg.wins += wv
+            passiveAgg.creatures.add(c.id)
+            abilityTeamAgg.set(c.passive.templateId, passiveAgg)
+
+            // Per-role
+            const rAgg = roleTeamAgg.get(c.role) ?? { wins: 0, total: 0 }
+            rAgg.total++
+            rAgg.wins += wv
+            roleTeamAgg.set(c.role, rAgg)
+          }
+
+          // Per-teammate-pair co-occurrence
+          for (let a = 0; a < members.length; a++) {
+            for (let b = a + 1; b < members.length; b++) {
+              const key = pairKey(members[a].id, members[b].id)
+              const pAgg = teammatePairs.get(key) ?? { wins: 0, total: 0 }
+              pAgg.total++
+              pAgg.wins += wv
+              teammatePairs.set(key, pAgg)
+            }
+          }
+        }
+
         if (result.winner === 'A') {
           team.wins++
         } else if (result.winner === 'B') {
@@ -472,15 +578,52 @@ function runTeamRoundRobin(
   }
   synergyImpact.sort((a, b) => b.delta - a.delta)
 
-  return { synergyImpact, compWinRates, formationWinRates }
+  // Build team ability impact
+  const teamAbilityImpact: Array<TeamAbilityImpact> = []
+  for (const [id, agg] of abilityTeamAgg) {
+    // Determine if active or passive by checking which creatures have it
+    const creature = creatures.find((c) => c.active.templateId === id)
+    const abilityType: 'active' | 'passive' = creature ? 'active' : 'passive'
+
+    teamAbilityImpact.push({
+      templateId: id,
+      name: ABILITY_NAME_MAP.get(id) ?? id,
+      abilityType,
+      teamWinRate: agg.total > 0 ? agg.wins / agg.total : 0.5,
+      creaturesWithAbility: agg.creatures.size,
+      sampleSize: agg.total,
+    })
+  }
+  teamAbilityImpact.sort((a, b) => b.teamWinRate - a.teamWinRate)
+
+  // Build team role matchup
+  const teamRoleMatchup: Array<TeamRoleMatchup> = []
+  for (const [role, agg] of roleTeamAgg) {
+    teamRoleMatchup.push({
+      role,
+      winRate: agg.total > 0 ? agg.wins / agg.total : 0.5,
+      sampleSize: agg.total,
+    })
+  }
+  teamRoleMatchup.sort((a, b) => b.winRate - a.winRate)
+
+  return {
+    synergyImpact,
+    creatureTeamStats: creatureTeamAgg,
+    compWinRates,
+    formationWinRates,
+    teamAbilityImpact,
+    teamRoleMatchup,
+    teammatePairs,
+  }
 }
 
-// ─── Balance Scorecard ───────────────────────────────────────────
+// ─── Balance Scorecard (from team win rates) ─────────────────────
 
 function computeScorecard(
-  creatureStats: Array<CreatureFieldStats>,
+  creatureTeamStats: Array<CreatureTeamStats>,
 ): BalanceScorecard {
-  const winRates = creatureStats.map((c) => c.winRate)
+  const winRates = creatureTeamStats.map((c) => c.teamWinRate)
   const n = winRates.length
 
   if (n === 0) {
@@ -500,11 +643,11 @@ function computeScorecard(
   const within45to55 = winRates.filter((r) => r >= 0.45 && r <= 0.55).length
   const within40to60 = winRates.filter((r) => r >= 0.4 && r <= 0.6).length
 
-  // Role win rate variance: how much do average WRs differ across roles?
+  // Role win rate variance: how much do average team WRs differ across roles?
   const roleWrs = new Map<string, Array<number>>()
-  for (const cs of creatureStats) {
+  for (const cs of creatureTeamStats) {
     if (!roleWrs.has(cs.role)) roleWrs.set(cs.role, [])
-    roleWrs.get(cs.role)!.push(cs.winRate)
+    roleWrs.get(cs.role)!.push(cs.teamWinRate)
   }
   const roleAvgs: Array<number> = []
   for (const rates of roleWrs.values()) {
@@ -544,10 +687,68 @@ export function runFieldReport(
   const { creatureStats, roleMatchupMatrix, abilityImpact } =
     runCreatureRoundRobin(creatures, options)
 
-  const { synergyImpact, compWinRates, formationWinRates } =
-    runTeamRoundRobin(creatures, options)
+  const {
+    synergyImpact,
+    creatureTeamStats: creatureTeamAgg,
+    compWinRates,
+    formationWinRates,
+    teamAbilityImpact,
+    teamRoleMatchup,
+    teammatePairs,
+  } = runTeamRoundRobin(creatures, options)
 
-  const scorecard = computeScorecard(creatureStats)
+  // Build creature team stats with 1v1 comparison and best/worst teammates
+  const creatureIndex = new Map(creatures.map((c) => [c.id, c]))
+  const soloIndex = new Map(creatureStats.map((c) => [c.id, c]))
+  const creatureTeamStats: Array<CreatureTeamStats> = creatures
+    .map((c) => {
+      const teamAgg = creatureTeamAgg.get(c.id)
+      const teamWinRate = teamAgg && teamAgg.total > 0 ? teamAgg.wins / teamAgg.total : 0.5
+      const soloWinRate = soloIndex.get(c.id)?.winRate ?? 0.5
+
+      // Find best/worst teammates from co-occurrence data
+      let bestTeammate = { id: '', name: '', winRate: -Infinity }
+      let worstTeammate = { id: '', name: '', winRate: Infinity }
+
+      for (const [key, agg] of teammatePairs) {
+        const [idA, idB] = key.split(':')
+        const partnerId = idA === c.id ? idB : idB === c.id ? idA : null
+        if (!partnerId || agg.total < 3) continue
+
+        const wr = agg.wins / agg.total
+        const partner = creatureIndex.get(partnerId)
+        if (!partner) continue
+
+        if (wr > bestTeammate.winRate) {
+          bestTeammate = { id: partnerId, name: partner.name, winRate: wr }
+        }
+        if (wr < worstTeammate.winRate) {
+          worstTeammate = { id: partnerId, name: partner.name, winRate: wr }
+        }
+      }
+
+      // Fallback if no teammates found
+      if (bestTeammate.id === '') bestTeammate = { id: '', name: '—', winRate: 0.5 }
+      if (worstTeammate.id === '') worstTeammate = { id: '', name: '—', winRate: 0.5 }
+
+      return {
+        id: c.id,
+        name: c.name,
+        role: c.role,
+        rarity: c.rarity,
+        teamWinRate,
+        teamWins: teamAgg?.wins ?? 0,
+        teamTotal: teamAgg?.total ?? 0,
+        soloWinRate,
+        teamDelta: teamWinRate - soloWinRate,
+        bestTeammate,
+        worstTeammate,
+      }
+    })
+    .sort((a, b) => b.teamWinRate - a.teamWinRate)
+
+  // Scorecard computed from team win rates
+  const scorecard = computeScorecard(creatureTeamStats)
 
   return {
     result: {
@@ -555,9 +756,12 @@ export function runFieldReport(
       roleMatchupMatrix,
       abilityImpact,
       synergyImpact,
+      creatureTeamStats,
       compWinRates,
       formationWinRates,
       scorecard,
+      teamAbilityImpact,
+      teamRoleMatchup,
     },
   }
 }

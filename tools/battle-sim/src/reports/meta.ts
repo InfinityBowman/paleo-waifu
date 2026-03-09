@@ -2,7 +2,7 @@ import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import { assignRow, buildTeamWithRows, sampleTeam } from '../runner.ts'
 import { createProgressBar } from '../report.ts'
 import { ABILITY_NAME_MAP, ABILITY_TYPE_MAP } from './meta-types.ts'
-import { canonicalGenome, ensureFrontRow, genomeKey, getRows, resolveMembers } from './meta-utils.ts'
+import { canonicalGenome, ensureMixedRows, genomeKey, getRows, resolveMembers } from './meta-utils.ts'
 import { detectSynergies } from './synergy.ts'
 import { collectBattleTelemetry, finalizeTelemetry } from './telemetry.ts'
 import { selectAndReproduce } from './genetics.ts'
@@ -55,7 +55,7 @@ function initializePopulation(
       slots[flipIdx].row = slots[flipIdx].row === 'front' ? 'back' : 'front'
     }
 
-    ensureFrontRow(slots)
+    ensureMixedRows(slots)
     const genome = canonicalGenome(slots)
     const key = genomeKey(genome)
 

@@ -28,6 +28,9 @@ export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'
                       style={{ color: ROLE_COLOR_VALUES[m.role] }}
                     >
                       {m.name}
+                      <span className="ml-0.5 text-[8px] opacity-50">
+                        {team.genome[j].row === 'front' ? 'F' : 'B'}
+                      </span>
                     </Badge>
                   ))}
                 </div>
@@ -46,8 +49,7 @@ export function HallOfFame({ hallOfFame }: { hallOfFame: MetaResult['hallOfFame'
             <div className="space-y-1">
               {team.members.map((m, j) => (
                 <div key={j}>
-                  {m.name} — {m.role} {m.rarity} ({m.hp}/{m.atk}/{m.def}/{m.spd}
-                  )
+                  {m.name} — {m.role} {m.rarity} ({m.hp}/{m.atk}/{m.def}/{m.spd}) · {team.genome[j].row}
                 </div>
               ))}
             </div>

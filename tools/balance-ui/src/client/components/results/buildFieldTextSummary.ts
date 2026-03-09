@@ -1,16 +1,16 @@
-import { ROLE_ORDER, pct } from './constants'
+import { pct } from './constants'
 import type { FieldResult } from '../../../shared/types.ts'
 
 export function buildFieldTextSummary(result: FieldResult): string {
   const lines: Array<string> = []
-  const { scorecard, creatureStats, roleMatchupMatrix, abilityImpact, synergyImpact, compWinRates, formationWinRates } = result
+  const { scorecard, creatureStats, synergyImpact, compWinRates, formationWinRates, creatureTeamStats, teamAbilityImpact, teamRoleMatchup } = result
 
   lines.push('=== Field Sim Summary ===')
   lines.push(`Creatures: ${creatureStats.length}`)
-  lines.push('')
 
-  // Scorecard
-  lines.push('--- Balance Scorecard ---')
+  // Scorecard (from team win rates)
+  lines.push('')
+  lines.push('--- Balance Scorecard (3v3) ---')
   lines.push(`  Gini Coefficient: ${scorecard.giniCoefficient.toFixed(3)}`)
   lines.push(`  Win Rate Spread: ${pct(scorecard.winRateSpread)} (${pct(scorecard.minWinRate)} - ${pct(scorecard.maxWinRate)})`)
   lines.push(`  Within 45-55%: ${scorecard.percentWithin45to55.toFixed(0)}%`)
@@ -18,57 +18,63 @@ export function buildFieldTextSummary(result: FieldResult): string {
   lines.push(`  Role WR Variance: ${scorecard.roleWinRateVariance.toFixed(4)}`)
   lines.push(`  Strongest: ${pct(scorecard.maxWinRate)} | Weakest: ${pct(scorecard.minWinRate)}`)
 
-  // Role Matchup Matrix
-  lines.push('')
-  lines.push('--- Role Matchup Matrix ---')
-  const roles = ROLE_ORDER
-  const matrixMap = new Map(roleMatchupMatrix.map((m) => [`${m.attacker}-${m.defender}`, m]))
-  lines.push(`  ${''.padEnd(10)} ${roles.map((r) => r.padEnd(10)).join(' ')}`)
-  for (const attacker of roles) {
-    const row = roles.map((defender) => {
-      const m = matrixMap.get(`${attacker}-${defender}`)
-      return m ? `${pct(m.winRate)}`.padEnd(10) : '—'.padEnd(10)
-    })
-    lines.push(`  ${attacker.padEnd(10)} ${row.join(' ')}`)
-  }
-
-  // Top/Bottom creatures
-  const sorted = [...creatureStats].sort((a, b) => b.winRate - a.winRate)
-  lines.push('')
-  lines.push('--- Top 10 Creatures ---')
-  for (const c of sorted.slice(0, 10)) {
-    lines.push(`  ${c.name} (${c.role}) — ${pct(c.winRate)} WR (${c.wins}/${c.total})`)
-  }
-
-  if (sorted.length > 10) {
-    const bottomCount = Math.min(10, sorted.length - 10)
-    const bottom = sorted.slice(-bottomCount).reverse()
+  // Creature Team Performance
+  if (creatureTeamStats.length > 0) {
+    const teamSorted = [...creatureTeamStats].sort((a, b) => b.teamWinRate - a.teamWinRate)
     lines.push('')
-    lines.push(`--- Bottom ${bottomCount} Creatures ---`)
-    for (const c of bottom) {
-      lines.push(`  ${c.name} (${c.role}) — ${pct(c.winRate)} WR (${c.wins}/${c.total})`)
+    lines.push('--- Top 10 Team Performers ---')
+    for (const c of teamSorted.slice(0, 10)) {
+      const delta = c.teamDelta > 0 ? `+${(c.teamDelta * 100).toFixed(1)}` : (c.teamDelta * 100).toFixed(1)
+      lines.push(`  ${c.name} (${c.role}) — Team: ${pct(c.teamWinRate)} | Solo: ${pct(c.soloWinRate)} | Δ: ${delta}pp`)
+    }
+
+    if (teamSorted.length > 10) {
+      const bottomCount = Math.min(10, teamSorted.length - 10)
+      const bottom = teamSorted.slice(-bottomCount).reverse()
+      lines.push('')
+      lines.push(`--- Bottom ${bottomCount} Team Performers ---`)
+      for (const c of bottom) {
+        const delta = c.teamDelta > 0 ? `+${(c.teamDelta * 100).toFixed(1)}` : (c.teamDelta * 100).toFixed(1)
+        lines.push(`  ${c.name} (${c.role}) — Team: ${pct(c.teamWinRate)} | Solo: ${pct(c.soloWinRate)} | Δ: ${delta}pp`)
+      }
+    }
+
+    // Biggest team boosted / solo reliant
+    const byDelta = [...creatureTeamStats].sort((a, b) => b.teamDelta - a.teamDelta)
+    const boosted = byDelta.filter((c) => c.teamDelta > 0.03)
+    const reliant = byDelta.filter((c) => c.teamDelta < -0.03)
+    if (boosted.length > 0 || reliant.length > 0) {
+      lines.push('')
+      lines.push('--- Team Effect Outliers ---')
+      if (boosted.length > 0) {
+        lines.push(`  Team-boosted (${boosted.length}): ${boosted.slice(0, 5).map((c) => `${c.name} (+${(c.teamDelta * 100).toFixed(1)}pp)`).join(', ')}`)
+      }
+      if (reliant.length > 0) {
+        lines.push(`  Solo-reliant (${reliant.length}): ${reliant.slice(0, 5).map((c) => `${c.name} (${(c.teamDelta * 100).toFixed(1)}pp)`).join(', ')}`)
+      }
     }
   }
 
-  // Outliers
-  const outliers = sorted.filter((c) => c.winRate > 0.6 || c.winRate < 0.4)
-  if (outliers.length > 0) {
+  // Team Ability Impact
+  if (teamAbilityImpact.length > 0) {
+    const sortedAbilities = [...teamAbilityImpact].sort((a, b) => b.teamWinRate - a.teamWinRate)
     lines.push('')
-    lines.push(`--- Outliers (${outliers.length}) ---`)
-    for (const c of outliers) {
-      const best = c.bestMatchup.opponentName || '—'
-      const worst = c.worstMatchup.opponentName || '—'
-      lines.push(`  ${c.name} (${c.role}) — ${pct(c.winRate)} WR | best: ${best} ${(c.bestMatchup.winRate * 100).toFixed(0)}% | worst: ${worst} ${(c.worstMatchup.winRate * 100).toFixed(0)}%`)
+    lines.push('--- Ability Impact (3v3) ---')
+    for (const a of sortedAbilities) {
+      const delta = a.teamWinRate - 0.5
+      lines.push(`  ${a.name} (${a.abilityType}) — ${pct(a.teamWinRate)} team WR (${delta > 0 ? '+' : ''}${(delta * 100).toFixed(1)}pp) | ${a.creaturesWithAbility} creatures | ${a.sampleSize} games`)
     }
   }
 
-  // Ability Impact
-  const sortedAbilities = [...abilityImpact].sort((a, b) => b.avgWinRate - a.avgWinRate)
-  lines.push('')
-  lines.push('--- Ability Impact ---')
-  for (const a of sortedAbilities) {
-    const delta = a.avgWinRate - 0.5
-    lines.push(`  ${a.name} (${a.abilityType}) — ${pct(a.avgWinRate)} avg WR (${delta > 0 ? '+' : ''}${(delta * 100).toFixed(1)}pp) | ${a.creaturesWithAbility} creatures`)
+  // Team Role Contribution
+  if (teamRoleMatchup.length > 0) {
+    const sortedRoles = [...teamRoleMatchup].sort((a, b) => b.winRate - a.winRate)
+    lines.push('')
+    lines.push('--- Role Contribution (3v3) ---')
+    for (const r of sortedRoles) {
+      const delta = r.winRate - 0.5
+      lines.push(`  ${r.role}: ${pct(r.winRate)} team WR (${delta > 0 ? '+' : ''}${(delta * 100).toFixed(1)}pp) | ${r.sampleSize} games`)
+    }
   }
 
   // Synergy

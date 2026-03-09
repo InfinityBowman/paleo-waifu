@@ -11,6 +11,7 @@ import { FieldResultsPanel } from './components/FieldResultsPanel'
 import { RunHistoryPanel } from './components/RunHistoryPanel'
 import { ComparisonPanel } from './components/ComparisonPanel'
 import { AbilitiesPanel } from './components/AbilitiesPanel'
+import { BattlePanel } from './components/BattlePanel'
 import { Button } from './components/ui/button'
 import { Badge } from './components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './components/ui/tabs'
@@ -24,6 +25,7 @@ import type {
   FieldSimProgressEvent,
   FieldSimRequest,
   MetaRunResult,
+  RunSummary,
   SimProgressEvent,
   SimRequest,
   SimType,
@@ -48,7 +50,7 @@ export function App() {
   )
   const [tab, setTab] = useState(() => {
     const hash = window.location.hash.slice(1)
-    const valid = ['creatures', 'abilities', 'results', 'history', 'compare']
+    const valid = ['creatures', 'abilities', 'results', 'history', 'compare', 'battle']
     return valid.includes(hash) ? hash : 'creatures'
   })
 
@@ -315,6 +317,14 @@ export function App() {
     setSimType('field')
   }
 
+  function handleApplyRunConfig(run: RunSummary) {
+    if (run.simType === 'meta') {
+      handleApplyConfig(run.config)
+    } else {
+      handleApplyFieldConfig(run.config)
+    }
+  }
+
   function handleSelectToggle(id: string) {
     setSelectedRunIds((prev) =>
       prev.includes(id)
@@ -460,6 +470,7 @@ export function App() {
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="battle">Battle</TabsTrigger>
               <TabsTrigger
                 value="compare"
                 disabled={selectedRunIds.length < 2}
@@ -532,6 +543,7 @@ export function App() {
                   metaResult={metaResult}
                   config={fieldConfig}
                   constants={constants}
+                  creatures={creatures}
                   onApplyConfig={handleApplyFieldConfig}
                 />
               ) : (
@@ -558,8 +570,18 @@ export function App() {
                 onRename={history.updateLabel}
                 onToggleStar={history.toggleStar}
                 onViewRun={handleViewRun}
+                onApplyConfig={handleApplyRunConfig}
                 onCompare={handleCompare}
                 onClearAll={history.clearAll}
+              />
+            </TabsContent>
+
+            <TabsContent value="battle" className="min-h-0 overflow-y-auto">
+              <BattlePanel
+                creatures={creatures}
+                patches={patches}
+                constantsOverride={constantsOverride}
+                sharedOptions={sharedOptions}
               />
             </TabsContent>
 

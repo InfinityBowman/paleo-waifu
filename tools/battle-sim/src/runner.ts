@@ -146,8 +146,11 @@ export function buildTeamWithRows(
   }) as [BattleTeamMember, BattleTeamMember, BattleTeamMember]
 
   const hasFront = teamMembers.some((m) => m.row === 'front')
+  const hasBack = teamMembers.some((m) => m.row === 'back')
   if (!hasFront) {
     teamMembers[0].row = 'front'
+  } else if (!hasBack) {
+    teamMembers[teamMembers.length - 1].row = 'back'
   }
 
   return { members: teamMembers }

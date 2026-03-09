@@ -15,10 +15,9 @@ import {
   TOOLTIP_ITEM_STYLE,
   TOOLTIP_LABEL_STYLE,
 } from '../constants'
-import type { CreatureFieldStats } from '../../../../shared/types.ts'
 
 interface Props {
-  creatures: Array<CreatureFieldStats>
+  creatures: Array<{ winRate: number }>
 }
 
 export function WinRateDistributionChart({ creatures }: Props) {

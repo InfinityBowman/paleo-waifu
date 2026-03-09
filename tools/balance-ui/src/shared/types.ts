@@ -147,6 +147,35 @@ export interface AbilityImpact {
   creaturesWithAbility: number
 }
 
+export interface CreatureTeamStats {
+  id: string
+  name: string
+  role: string
+  rarity: string
+  teamWinRate: number
+  teamWins: number
+  teamTotal: number
+  soloWinRate: number
+  teamDelta: number
+  bestTeammate: { id: string; name: string; winRate: number }
+  worstTeammate: { id: string; name: string; winRate: number }
+}
+
+export interface TeamAbilityImpact {
+  templateId: string
+  name: string
+  abilityType: 'active' | 'passive'
+  teamWinRate: number
+  creaturesWithAbility: number
+  sampleSize: number
+}
+
+export interface TeamRoleMatchup {
+  role: string
+  winRate: number
+  sampleSize: number
+}
+
 export interface SynergyImpact {
   synergy: string
   avgWinRate: number
@@ -170,9 +199,12 @@ export interface FieldResult {
   roleMatchupMatrix: Array<RoleMatchup>
   abilityImpact: Array<AbilityImpact>
   synergyImpact: Array<SynergyImpact>
+  creatureTeamStats: Array<CreatureTeamStats>
   compWinRates: Record<string, { winRate: number; count: number }>
   formationWinRates: Record<string, { winRate: number; count: number }>
   scorecard: BalanceScorecard
+  teamAbilityImpact: Array<TeamAbilityImpact>
+  teamRoleMatchup: Array<TeamRoleMatchup>
 }
 
 export interface FieldRunResult {
@@ -268,6 +300,51 @@ export type FieldSimProgressEvent =
       total: number
     }
   | { type: 'done'; result: FieldRunResult }
+  | { type: 'error'; message: string }
+
+// ─── Team Battle Types ──────────────────────────────────────
+
+export interface TeamBattleCreatureSlot {
+  creatureId: string
+  row: 'front' | 'back'
+}
+
+export interface TeamBattleRequest {
+  teamA: [TeamBattleCreatureSlot, TeamBattleCreatureSlot, TeamBattleCreatureSlot]
+  teamB: [TeamBattleCreatureSlot, TeamBattleCreatureSlot, TeamBattleCreatureSlot]
+  trials: number
+  randomizeRows: boolean
+  creaturePatches: Array<CreatureOverridePatch>
+  constants: ConstantsOverride
+  options: {
+    normalizeStats: boolean
+    noActives: boolean
+    noPassives: boolean
+    syntheticMode: boolean
+  }
+}
+
+export interface TeamBattleTrialResult {
+  trial: number
+  winner: 'A' | 'B' | null
+  turns: number
+  teamAHpPercent: number
+  teamBHpPercent: number
+}
+
+export interface TeamBattleResult {
+  trials: Array<TeamBattleTrialResult>
+  winsA: number
+  winsB: number
+  draws: number
+  winRateA: number
+  winRateB: number
+  avgTurns: number
+}
+
+export type TeamBattleProgressEvent =
+  | { type: 'trial'; trial: number; total: number; winner: 'A' | 'B' | null }
+  | { type: 'done'; result: TeamBattleResult }
   | { type: 'error'; message: string }
 
 export interface ConstantsSnapshot {

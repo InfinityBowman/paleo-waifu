@@ -1,5 +1,5 @@
 import { assignRow } from '../runner.ts'
-import { canonicalGenome, ensureFrontRow, genomeKey, resolveMembers } from './meta-utils.ts'
+import { canonicalGenome, ensureMixedRows, genomeKey, resolveMembers } from './meta-utils.ts'
 import type { CreatureRecord } from '../db.ts'
 import type { CreatureSlot, Individual, TeamGenome } from './meta-types.ts'
 
@@ -36,7 +36,7 @@ export function mutate(
     }
   }
 
-  ensureFrontRow(newSlots)
+  ensureMixedRows(newSlots)
   const genome = canonicalGenome(newSlots)
   return {
     genome,
@@ -89,7 +89,7 @@ export function crossover(
     return mutate(parentA, creatures, creatureIndex, generation)
   }
 
-  ensureFrontRow(childSlots)
+  ensureMixedRows(childSlots)
   const genome = canonicalGenome(
     childSlots as [CreatureSlot, CreatureSlot, CreatureSlot],
   )

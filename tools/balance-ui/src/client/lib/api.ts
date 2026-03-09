@@ -4,6 +4,8 @@ import type {
   FieldSimRequest,
   SimProgressEvent,
   SimRequest,
+  TeamBattleProgressEvent,
+  TeamBattleRequest,
 } from '../../shared/types.ts'
 
 export async function fetchCreatures(): Promise<CreaturesResponse> {
@@ -66,4 +68,11 @@ export async function runFieldSim(
   onProgress: (event: FieldSimProgressEvent) => void,
 ): Promise<void> {
   return streamSSE('/api/field-sim', request, onProgress)
+}
+
+export async function runTeamBattle(
+  request: TeamBattleRequest,
+  onProgress: (event: TeamBattleProgressEvent) => void,
+): Promise<void> {
+  return streamSSE('/api/battle', request, onProgress)
 }
