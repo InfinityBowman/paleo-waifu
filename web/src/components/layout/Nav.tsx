@@ -127,12 +127,6 @@ export function Nav() {
                       <CountBadge count={badges.incomingProposals} />
                     )}
                   </Link>
-                  {(session.user as { role?: string }).role === 'admin' && (
-                    <Link to="/admin" className={NAV_LINK_CLASS}>
-                      <Shield className="h-4 w-4" />
-                      Admin
-                    </Link>
-                  )}
                 </>
               )}
             </nav>
@@ -171,6 +165,14 @@ export function Nav() {
                         Profile
                       </Link>
                     </DropdownMenuItem>
+                    {(session.user as { role?: string }).role === 'admin' && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin">
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       variant="destructive"
@@ -257,16 +259,6 @@ export function Nav() {
                           <CountBadge count={badges.incomingProposals} />
                         )}
                       </Link>
-                      {(session.user as { role?: string }).role === 'admin' && (
-                        <Link
-                          to="/admin"
-                          className={MOBILE_NAV_LINK_CLASS}
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <Shield className="h-4 w-4" />
-                          Admin
-                        </Link>
-                      )}
                     </>
                   )}
                 </nav>
@@ -294,6 +286,17 @@ export function Nav() {
                         </Avatar>
                         {session.user.name}
                       </Link>
+                      {(session.user as { role?: string }).role ===
+                        'admin' && (
+                        <Link
+                          to="/admin"
+                          className={MOBILE_NAV_LINK_CLASS}
+                          onClick={() => setMobileOpen(false)}
+                        >
+                          <Shield className="h-4 w-4" />
+                          Admin
+                        </Link>
+                      )}
                       <button
                         onClick={() => {
                           signOut()
