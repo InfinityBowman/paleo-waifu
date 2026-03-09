@@ -2,14 +2,20 @@ import { cn } from '../lib/utils'
 import type {
   ConstantsOverride,
   CreatureOverridePatch,
-  SimRequest,
 } from '../../shared/types.ts'
 import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
+
+interface IsolationFlags {
+  normalizeStats: boolean
+  noActives: boolean
+  noPassives: boolean
+  syntheticMode: boolean
+}
 
 interface Props {
   constants: ConstantsOverride
   creaturePatches: Array<CreatureOverridePatch>
-  options: SimRequest['options']
+  options: IsolationFlags
   /** Ability templates for name resolution */
   activeTemplates?: Array<AbilityTemplate>
   passiveTemplates?: Array<AbilityTemplate>
@@ -85,7 +91,7 @@ export interface DiffLine {
 export function buildDiffLines(
   constants: ConstantsOverride,
   creaturePatches: Array<CreatureOverridePatch>,
-  options: SimRequest['options'],
+  options: IsolationFlags,
   templates: Array<AbilityTemplate>,
 ): Array<DiffLine> {
   const lines: Array<DiffLine> = []

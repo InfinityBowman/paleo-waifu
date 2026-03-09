@@ -61,11 +61,14 @@ export function RunHistoryPanel({
   const [confirmClearAll, setConfirmClearAll] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'fitness'>('date')
 
-  const sorted = [...runs].sort((a, b) =>
-    sortBy === 'fitness'
-      ? b.topFitness - a.topFitness
-      : b.createdAt - a.createdAt,
-  )
+  const sorted = [...runs].sort((a, b) => {
+    if (sortBy === 'fitness') {
+      const aFit = a.simType === 'meta' ? a.topFitness : 0
+      const bFit = b.simType === 'meta' ? b.topFitness : 0
+      return bFit - aFit
+    }
+    return b.createdAt - a.createdAt
+  })
 
   function startEdit(run: RunSummary) {
     setEditingId(run.id)
@@ -226,11 +229,28 @@ export function RunHistoryPanel({
                 {/* Config badges */}
                 <div className="mb-2 flex flex-wrap gap-1">
                   <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                    pop {run.population}
+                    {run.simType === 'field' ? 'field' : 'meta'}
                   </Badge>
-                  <Badge variant="outline" className="text-[9px] px-1.5 py-0">
-                    gen {run.generations}
-                  </Badge>
+                  {run.simType === 'meta' && (
+                    <>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                        pop {run.population}
+                      </Badge>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                        gen {run.generations}
+                      </Badge>
+                    </>
+                  )}
+                  {run.simType === 'field' && (
+                    <>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                        {run.trialsPerPair} trials
+                      </Badge>
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+                        {run.creatureCount} creatures
+                      </Badge>
+                    </>
+                  )}
                   {run.normalizeStats && (
                     <Badge
                       variant="secondary"
@@ -270,8 +290,8 @@ export function RunHistoryPanel({
                   )}
                 </div>
 
-                {/* Baseline diff summary */}
-                {run.patchCount > 0 && (
+                {/* Baseline diff summary (meta only — field has different config shape) */}
+                {run.patchCount > 0 && run.simType === 'meta' && (
                   <BaselineDiffSummary
                     constants={run.config.constants}
                     creaturePatches={run.config.creaturePatches}
@@ -285,23 +305,41 @@ export function RunHistoryPanel({
 
                 {/* Stats row */}
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                    <span>
-                      Top{' '}
-                      <span className="font-mono text-foreground">
-                        {(run.topFitness * 100).toFixed(1)}%
+                  {run.simType === 'meta' && (
+                    <>
+                      <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                        <span>
+                          Top{' '}
+                          <span className="font-mono text-foreground">
+                            {(run.topFitness * 100).toFixed(1)}%
+                          </span>
+                        </span>
+                        <span>
+                          Turns{' '}
+                          <span className="font-mono text-foreground">
+                            {run.avgTurns.toFixed(1)}
+                          </span>
+                        </span>
+                      </div>
+                      <MiniRoleBar roleShares={run.roleMetaShare} />
+                    </>
+                  )}
+                  {run.simType === 'field' && (
+                    <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+                      <span>
+                        Gini{' '}
+                        <span className="font-mono text-foreground">
+                          {run.giniCoefficient.toFixed(3)}
+                        </span>
                       </span>
-                    </span>
-                    <span>
-                      Turns{' '}
-                      <span className="font-mono text-foreground">
-                        {run.avgTurns.toFixed(1)}
+                      <span>
+                        45-55%{' '}
+                        <span className="font-mono text-foreground">
+                          {run.percentWithin45to55.toFixed(0)}%
+                        </span>
                       </span>
-                    </span>
-                  </div>
-
-                  {/* Mini role share bar */}
-                  <MiniRoleBar roleShares={run.roleMetaShare} />
+                    </div>
+                  )}
                 </div>
               </div>
 

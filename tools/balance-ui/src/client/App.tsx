@@ -1,11 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { RefreshCw } from 'lucide-react'
-import { fetchCreatures, reloadCreatures, runSim } from './lib/api'
+import { cn } from './lib/utils'
+import { fetchCreatures, reloadCreatures, runFieldSim, runSim } from './lib/api'
 import { useRunHistory } from './hooks/useRunHistory'
 import { CreatureTable } from './components/CreatureTable'
 import { GlobalKnobsPanel } from './components/GlobalKnobsPanel'
 import { SimControls } from './components/SimControls'
 import { ResultsPanel } from './components/ResultsPanel'
+import { FieldResultsPanel } from './components/FieldResultsPanel'
 import { RunHistoryPanel } from './components/RunHistoryPanel'
 import { ComparisonPanel } from './components/ComparisonPanel'
 import { AbilitiesPanel } from './components/AbilitiesPanel'
@@ -18,12 +20,22 @@ import type {
   ConstantsSnapshot,
   CreatureOverridePatch,
   CreatureRecord,
+  FieldRunResult,
+  FieldSimProgressEvent,
+  FieldSimRequest,
   MetaRunResult,
   SimProgressEvent,
   SimRequest,
+  SimType,
 } from '../shared/types.ts'
-
-type SimState = 'idle' | 'running' | 'done' | 'error'
+import type {
+  FieldProgress,
+  FieldSimOptions,
+  MetaProgress,
+  MetaSimOptions,
+  SharedSimOptions,
+} from './components/SimControls'
+import type { SimState } from './components/results/constants'
 
 export function App() {
   const [creatures, setCreatures] = useState<Array<CreatureRecord>>([])
@@ -43,31 +55,54 @@ export function App() {
   useEffect(() => {
     window.location.hash = tab
   }, [tab])
+
+  // ─── Sim Type ───────────────────────────────────────────────
+  const [simType, setSimType] = useState<SimType>('meta')
+
+  // ─── Sim State (shared — only one sim runs at a time) ──────
   const [simState, setSimState] = useState<SimState>('idle')
-  const [simProgress, setSimProgress] = useState<{
-    generation: number
-    total: number
-    topFitness: number
-    avgFitness: number
-  } | null>(null)
-  const [simResult, setSimResult] = useState<MetaRunResult | null>(null)
-  const [simConfig, setSimConfig] = useState<{
+  const [simError, setSimError] = useState<string | null>(null)
+
+  // ─── Meta Sim State ─────────────────────────────────────────
+  const [metaProgress, setMetaProgress] = useState<MetaProgress | null>(null)
+  const [metaResult, setMetaResult] = useState<MetaRunResult | null>(null)
+  const [metaConfig, setMetaConfig] = useState<{
     options: SimRequest['options']
     constants: ConstantsOverride
     creaturePatches: Array<CreatureOverridePatch>
   } | null>(null)
-  const [simError, setSimError] = useState<string | null>(null)
-  const [simOptions, setSimOptions] = useState({
+  const [metaOptions, setMetaOptions] = useState<MetaSimOptions>({
     population: 200,
     generations: 25,
     matchesPerTeam: 20,
     eliteRate: 0.1,
     mutationRate: 0.8,
+  })
+
+  // ─── Field Sim State ────────────────────────────────────────
+  const [fieldProgress, setFieldProgress] = useState<FieldProgress | null>(null)
+  const [fieldResult, setFieldResult] = useState<FieldRunResult | null>(null)
+  const [fieldConfig, setFieldConfig] = useState<{
+    options: FieldSimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  } | null>(null)
+  const [fieldOptions, setFieldOptions] = useState<FieldSimOptions>({
+    trialsPerPair: 20,
+    teamSampleSize: 500,
+    teamMatchCount: 50,
+  })
+
+  // ─── Shared Isolation Options ───────────────────────────────
+  const [sharedOptions, setSharedOptions] = useState<SharedSimOptions>({
     normalizeStats: true,
     noActives: false,
     noPassives: false,
     syntheticMode: false,
   })
+
+  // Track which sim type produced the current "results" tab view
+  const [activeResultType, setActiveResultType] = useState<SimType>('meta')
 
   // Run history (IndexedDB)
   const history = useRunHistory()
@@ -83,15 +118,34 @@ export function App() {
     load()
   }, [load])
 
-  // Auto-restore latest run on mount
+  // Auto-restore latest run of each type on mount
+  const hasAutoRestored = useRef(false)
   useEffect(() => {
-    if (history.loading) return
-    if (simResult) return // already have a result
-    history.getLatestRun().then((run) => {
-      if (!run) return
-      setSimResult(run.result)
-      setSimConfig(run.config)
-      setSimState('done')
+    if (history.loading || hasAutoRestored.current) return
+    hasAutoRestored.current = true
+
+    Promise.all([
+      history.getLatestRunByType('meta'),
+      history.getLatestRunByType('field'),
+    ]).then(([metaRun, fieldRun]) => {
+      if (metaRun && metaRun.simType === 'meta') {
+        setMetaResult(metaRun.result)
+        setMetaConfig(metaRun.config)
+      }
+      if (fieldRun && fieldRun.simType === 'field') {
+        setFieldResult(fieldRun.result)
+        setFieldConfig(fieldRun.config)
+      }
+
+      // Show the most recent one
+      const latest =
+        metaRun && fieldRun
+          ? metaRun.createdAt > fieldRun.createdAt ? metaRun : fieldRun
+          : metaRun ?? fieldRun
+      if (latest) {
+        setActiveResultType(latest.simType)
+        setSimState('done')
+      }
     })
   }, [history.loading])
 
@@ -107,11 +161,9 @@ export function App() {
       const next = new Map(prev)
       const existing = next.get(patch.id) ?? { id: patch.id }
       const merged = { ...existing, ...patch }
-      // Remove keys set to undefined so they don't inflate patchCount
       for (const key of Object.keys(merged) as Array<keyof CreatureOverridePatch>) {
         if (merged[key] === undefined) delete merged[key]
       }
-      // If only 'id' remains, remove the patch entirely
       if (Object.keys(merged).length <= 1) {
         next.delete(patch.id)
       } else {
@@ -122,33 +174,79 @@ export function App() {
   }
 
   async function handleRunSim() {
+    if (simType === 'meta') {
+      await handleRunMetaSim()
+    } else {
+      await handleRunFieldSim()
+    }
+  }
+
+  async function handleRunMetaSim() {
     setSimState('running')
-    setSimProgress(null)
-    setSimResult(null)
+    setMetaProgress(null)
+    setMetaResult(null)
     setSimError(null)
 
     const config = {
       creaturePatches: [...patches.values()],
       constants: constantsOverride,
-      options: simOptions,
+      options: { ...metaOptions, ...sharedOptions },
     }
 
     try {
       await runSim(config, (event: SimProgressEvent) => {
         if (event.type === 'generation') {
-          setSimProgress({
+          setMetaProgress({
             generation: event.generation,
             total: event.total,
             topFitness: event.topFitness,
             avgFitness: event.avgFitness,
           })
         } else if (event.type === 'done') {
-          setSimResult(event.result)
-          setSimConfig(config)
+          setMetaResult(event.result)
+          setMetaConfig(config)
+          setActiveResultType('meta')
           setSimState('done')
           setTab('results')
-          // Auto-save to IndexedDB
-          history.saveRun(config, event.result)
+          history.saveMetaRun(config, event.result)
+        } else {
+          setSimError(event.message)
+          setSimState('error')
+        }
+      })
+    } catch (err) {
+      setSimError(err instanceof Error ? err.message : String(err))
+      setSimState('error')
+    }
+  }
+
+  async function handleRunFieldSim() {
+    setSimState('running')
+    setFieldProgress(null)
+    setFieldResult(null)
+    setSimError(null)
+
+    const config = {
+      creaturePatches: [...patches.values()],
+      constants: constantsOverride,
+      options: { ...fieldOptions, ...sharedOptions },
+    }
+
+    try {
+      await runFieldSim(config, (event: FieldSimProgressEvent) => {
+        if (event.type === 'progress') {
+          setFieldProgress({
+            phase: event.phase,
+            completed: event.completed,
+            total: event.total,
+          })
+        } else if (event.type === 'done') {
+          setFieldResult(event.result)
+          setFieldConfig(config)
+          setActiveResultType('field')
+          setSimState('done')
+          setTab('results')
+          history.saveFieldRun(config, event.result)
         } else {
           setSimError(event.message)
           setSimState('error')
@@ -170,13 +268,51 @@ export function App() {
     constants: ConstantsOverride
     creaturePatches: Array<CreatureOverridePatch>
   }) {
-    setSimOptions(cfg.options)
+    setMetaOptions({
+      population: cfg.options.population,
+      generations: cfg.options.generations,
+      matchesPerTeam: cfg.options.matchesPerTeam,
+      eliteRate: cfg.options.eliteRate,
+      mutationRate: cfg.options.mutationRate,
+    })
+    setSharedOptions({
+      normalizeStats: cfg.options.normalizeStats,
+      noActives: cfg.options.noActives,
+      noPassives: cfg.options.noPassives,
+      syntheticMode: cfg.options.syntheticMode,
+    })
     setConstantsOverride(cfg.constants)
     const next = new Map<string, CreatureOverridePatch>()
     for (const p of cfg.creaturePatches) {
       next.set(p.id, p)
     }
     setPatches(next)
+    setSimType('meta')
+  }
+
+  function handleApplyFieldConfig(cfg: {
+    options: FieldSimRequest['options']
+    constants: ConstantsOverride
+    creaturePatches: Array<CreatureOverridePatch>
+  }) {
+    setFieldOptions({
+      trialsPerPair: cfg.options.trialsPerPair,
+      teamSampleSize: cfg.options.teamSampleSize,
+      teamMatchCount: cfg.options.teamMatchCount,
+    })
+    setSharedOptions({
+      normalizeStats: cfg.options.normalizeStats,
+      noActives: cfg.options.noActives,
+      noPassives: cfg.options.noPassives,
+      syntheticMode: cfg.options.syntheticMode,
+    })
+    setConstantsOverride(cfg.constants)
+    const next = new Map<string, CreatureOverridePatch>()
+    for (const p of cfg.creaturePatches) {
+      next.set(p.id, p)
+    }
+    setPatches(next)
+    setSimType('field')
   }
 
   function handleSelectToggle(id: string) {
@@ -192,8 +328,15 @@ export function App() {
   async function handleViewRun(id: string) {
     const run = await history.getRun(id)
     if (!run) return
-    setSimResult(run.result)
-    setSimConfig(run.config)
+    if (run.simType === 'field') {
+      setFieldResult(run.result)
+      setFieldConfig(run.config)
+      setActiveResultType('field')
+    } else {
+      setMetaResult(run.result)
+      setMetaConfig(run.config)
+      setActiveResultType('meta')
+    }
     setSimState('done')
     setSimError(null)
     setTab('results')
@@ -212,11 +355,14 @@ export function App() {
     Object.keys(constantsOverride.rarityModifiers ?? {}).length +
     (constantsOverride.combatDamageScale !== undefined ? 1 : 0) +
     (constantsOverride.defScalingConstant !== undefined ? 1 : 0) +
+    (constantsOverride.basicAttackMultiplier !== undefined ? 1 : 0) +
     Object.keys(constantsOverride.abilityOverrides ?? {}).length
 
   const patchCount =
     [...patches.values()].filter((p) => Object.keys(p).length > 1).length +
     constantsOverrideCount
+
+  const hasResult = activeResultType === 'meta' ? !!metaResult : !!fieldResult
 
   if (!constants) {
     return (
@@ -261,10 +407,17 @@ export function App() {
           {/* Left sidebar */}
           <aside className="flex w-80 shrink-0 flex-col overflow-y-auto border-r border-border">
             <SimControls
-              options={simOptions}
-              onOptionsChange={setSimOptions}
+              simType={simType}
+              onSimTypeChange={setSimType}
+              metaOptions={metaOptions}
+              onMetaOptionsChange={setMetaOptions}
+              fieldOptions={fieldOptions}
+              onFieldOptionsChange={setFieldOptions}
+              sharedOptions={sharedOptions}
+              onSharedOptionsChange={setSharedOptions}
               simState={simState}
-              progress={simProgress}
+              metaProgress={metaProgress}
+              fieldProgress={fieldProgress}
               onRun={handleRunSim}
               constants={constants}
             />
@@ -273,7 +426,7 @@ export function App() {
               creatures={creatures}
               overrides={constantsOverride}
               onChange={setConstantsOverride}
-              normalizeStats={simOptions.normalizeStats}
+              normalizeStats={sharedOptions.normalizeStats}
             />
           </aside>
 
@@ -295,7 +448,7 @@ export function App() {
               </TabsTrigger>
               <TabsTrigger value="results" className="gap-1.5">
                 Results
-                {simResult && (
+                {hasResult && (
                   <span className="inline-block h-1.5 w-1.5 rounded-full bg-success" />
                 )}
               </TabsTrigger>
@@ -321,6 +474,38 @@ export function App() {
               </TabsTrigger>
             </TabsList>
 
+            {/* Meta / Field result toggle — outside scroll container */}
+            {tab === 'results' && (metaResult || fieldResult) && (
+              <div className="flex items-center gap-1 border-b border-border px-4 py-2">
+                <div className="flex rounded-md border border-border text-xs">
+                  <button
+                    onClick={() => setActiveResultType('meta')}
+                    className={cn(
+                      'px-3 py-1 transition-colors',
+                      activeResultType === 'meta'
+                        ? 'bg-primary text-primary-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground',
+                      !metaResult && 'opacity-40 pointer-events-none',
+                    )}
+                  >
+                    Meta Sim
+                  </button>
+                  <button
+                    onClick={() => setActiveResultType('field')}
+                    className={cn(
+                      'px-3 py-1 transition-colors',
+                      activeResultType === 'field'
+                        ? 'bg-primary text-primary-foreground font-medium'
+                        : 'text-muted-foreground hover:text-foreground',
+                      !fieldResult && 'opacity-40 pointer-events-none',
+                    )}
+                  >
+                    Field Sim
+                  </button>
+                </div>
+              </div>
+            )}
+
             <TabsContent value="creatures" className="min-h-0 overflow-y-auto">
               <CreatureTable
                 creatures={creatures}
@@ -339,16 +524,28 @@ export function App() {
             </TabsContent>
 
             <TabsContent value="results" className="min-h-0 overflow-y-auto">
-              <ResultsPanel
-                result={simResult}
-                error={simError}
-                simState={simState}
-                population={simOptions.population}
-                config={simConfig}
-                constants={constants}
-                creatures={creatures}
-                onApplyConfig={handleApplyConfig}
-              />
+              {activeResultType === 'field' ? (
+                <FieldResultsPanel
+                  result={fieldResult}
+                  error={simError}
+                  simState={simState}
+                  metaResult={metaResult}
+                  config={fieldConfig}
+                  constants={constants}
+                  onApplyConfig={handleApplyFieldConfig}
+                />
+              ) : (
+                <ResultsPanel
+                  result={metaResult}
+                  error={simError}
+                  simState={simState}
+                  population={metaOptions.population}
+                  config={metaConfig}
+                  constants={constants}
+                  creatures={creatures}
+                  onApplyConfig={handleApplyConfig}
+                />
+              )}
             </TabsContent>
 
             <TabsContent value="history" className="min-h-0 overflow-y-auto">

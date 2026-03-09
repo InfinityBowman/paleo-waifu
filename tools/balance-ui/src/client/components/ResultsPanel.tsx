@@ -44,7 +44,7 @@ import type {
   SimRequest,
 } from '../../shared/types.ts'
 
-type SimState = 'idle' | 'running' | 'done' | 'error'
+import type { SimState } from './results/constants'
 
 interface Props {
   result: MetaRunResult | null

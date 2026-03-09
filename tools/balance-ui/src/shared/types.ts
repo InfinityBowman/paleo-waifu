@@ -59,6 +59,7 @@ export interface GenerationSnapshot {
   compWinRates: Record<string, number>
   creaturePresenceAll: Record<string, number>
   creatureWinRateAll: Record<string, number>
+  creatureAbsWinRate: Record<string, number>
   abilityPresenceAll: Record<string, number>
   abilityWinRateAll: Record<string, number>
   uniqueGenomes: number
@@ -117,6 +118,67 @@ export interface MetaRunResult {
   snapshots: Array<GenerationSnapshot>
 }
 
+// ─── Field Report Result Types (mirrors battle-sim/src/reports/field.ts) ──
+
+export interface CreatureFieldStats {
+  id: string
+  name: string
+  role: string
+  rarity: string
+  winRate: number
+  wins: number
+  total: number
+  bestMatchup: { opponentId: string; opponentName: string; winRate: number }
+  worstMatchup: { opponentId: string; opponentName: string; winRate: number }
+}
+
+export interface RoleMatchup {
+  attacker: string
+  defender: string
+  winRate: number
+  sampleSize: number
+}
+
+export interface AbilityImpact {
+  templateId: string
+  name: string
+  abilityType: 'active' | 'passive'
+  avgWinRate: number
+  creaturesWithAbility: number
+}
+
+export interface SynergyImpact {
+  synergy: string
+  avgWinRate: number
+  avgWinRateWithout: number
+  delta: number
+  sampleSize: number
+}
+
+export interface BalanceScorecard {
+  giniCoefficient: number
+  maxWinRate: number
+  minWinRate: number
+  winRateSpread: number
+  roleWinRateVariance: number
+  percentWithin45to55: number
+  percentWithin40to60: number
+}
+
+export interface FieldResult {
+  creatureStats: Array<CreatureFieldStats>
+  roleMatchupMatrix: Array<RoleMatchup>
+  abilityImpact: Array<AbilityImpact>
+  synergyImpact: Array<SynergyImpact>
+  compWinRates: Record<string, { winRate: number; count: number }>
+  formationWinRates: Record<string, { winRate: number; count: number }>
+  scorecard: BalanceScorecard
+}
+
+export interface FieldRunResult {
+  result: FieldResult
+}
+
 // ─── Override / Patch Types ──────────────────────────────────────
 
 export interface CreatureOverridePatch {
@@ -173,6 +235,20 @@ export interface SimRequest {
   }
 }
 
+export interface FieldSimRequest {
+  creaturePatches: Array<CreatureOverridePatch>
+  constants: ConstantsOverride
+  options: {
+    trialsPerPair: number
+    teamSampleSize: number
+    teamMatchCount: number
+    normalizeStats: boolean
+    noActives: boolean
+    noPassives: boolean
+    syntheticMode: boolean
+  }
+}
+
 export type SimProgressEvent =
   | {
       type: 'generation'
@@ -182,6 +258,16 @@ export type SimProgressEvent =
       avgFitness: number
     }
   | { type: 'done'; result: MetaRunResult }
+  | { type: 'error'; message: string }
+
+export type FieldSimProgressEvent =
+  | {
+      type: 'progress'
+      phase: 'creature-roundrobin' | 'team-roundrobin'
+      completed: number
+      total: number
+    }
+  | { type: 'done'; result: FieldRunResult }
   | { type: 'error'; message: string }
 
 export interface ConstantsSnapshot {
@@ -200,43 +286,77 @@ export interface CreaturesResponse {
   constants: ConstantsSnapshot
 }
 
+// ─── Sim Type ────────────────────────────────────────────────
+
+export type SimType = 'meta' | 'field'
+
 // ─── Run History (IndexedDB) ────────────────────────────────
 
-export interface SavedRun {
+export interface SavedRunBase {
   id: string
   label: string
   starred: boolean
   createdAt: number
-  config: {
-    options: SimRequest['options']
-    constants: ConstantsOverride
-    creaturePatches: Array<CreatureOverridePatch>
-  }
-  result: MetaRunResult
 }
 
-export interface RunSummary {
+export type SavedRun =
+  | (SavedRunBase & {
+      simType: 'meta'
+      config: {
+        options: SimRequest['options']
+        constants: ConstantsOverride
+        creaturePatches: Array<CreatureOverridePatch>
+      }
+      result: MetaRunResult
+    })
+  | (SavedRunBase & {
+      simType: 'field'
+      config: {
+        options: FieldSimRequest['options']
+        constants: ConstantsOverride
+        creaturePatches: Array<CreatureOverridePatch>
+      }
+      result: FieldRunResult
+    })
+
+export interface RunSummaryBase {
   id: string
   label: string
   starred: boolean
   createdAt: number
-  population: number
-  generations: number
-  topFitness: number
-  avgTurns: number
-  roleMetaShare: Record<string, number>
   patchCount: number
   normalizeStats: boolean
   noActives: boolean
   noPassives: boolean
   syntheticMode: boolean
-  /** Lightweight config for rendering baseline diff summaries */
-  config: {
-    options: SimRequest['options']
-    constants: ConstantsOverride
-    creaturePatches: Array<CreatureOverridePatch>
-  }
 }
+
+export type RunSummary =
+  | (RunSummaryBase & {
+      simType: 'meta'
+      population: number
+      generations: number
+      topFitness: number
+      avgTurns: number
+      roleMetaShare: Record<string, number>
+      config: {
+        options: SimRequest['options']
+        constants: ConstantsOverride
+        creaturePatches: Array<CreatureOverridePatch>
+      }
+    })
+  | (RunSummaryBase & {
+      simType: 'field'
+      trialsPerPair: number
+      creatureCount: number
+      giniCoefficient: number
+      percentWithin45to55: number
+      config: {
+        options: FieldSimRequest['options']
+        constants: ConstantsOverride
+        creaturePatches: Array<CreatureOverridePatch>
+      }
+    })
 
 export interface RunHistoryDB extends DBSchema {
   runs: {

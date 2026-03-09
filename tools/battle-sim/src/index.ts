@@ -6,6 +6,7 @@ import { runRoleReport } from './reports/role.ts'
 import { runCreatureReport } from './reports/creature.ts'
 import { runAbilityReport } from './reports/ability.ts'
 import { runMetaReport } from './reports/meta.ts'
+import { runFieldReport } from './reports/field.ts'
 import type { CreatureRecord } from './db.ts'
 
 // ─── CLI Argument Parsing ─────────────────────────────────────────
@@ -18,6 +19,7 @@ type Command =
   | 'creature'
   | 'ability'
   | 'meta'
+  | 'field'
 
 const COMMANDS = new Set<Command>([
   'all',
@@ -27,6 +29,7 @@ const COMMANDS = new Set<Command>([
   'creature',
   'ability',
   'meta',
+  'field',
 ])
 
 interface SimArgs {
@@ -241,11 +244,40 @@ function main(): void {
           csv: args.csv,
         })
         break
+      case 'field': {
+        const result = runFieldReport(creatures, {
+          trialsPerPair: trials ?? 10,
+          teamSampleSize: 500,
+          teamMatchCount: 50,
+          csv: args.csv,
+        })
+        // Print summary for sanity checking
+        if (!args.csv) {
+          const { scorecard, creatureStats } = result.result
+          log(chalk.bold('\n  FIELD SIM RESULTS'))
+          log(`  Creatures: ${creatureStats.length}`)
+          log(`  Gini coefficient: ${scorecard.giniCoefficient.toFixed(4)}`)
+          log(`  Win rate spread: ${(scorecard.minWinRate * 100).toFixed(1)}% – ${(scorecard.maxWinRate * 100).toFixed(1)}%`)
+          log(`  Within 45-55%: ${scorecard.percentWithin45to55.toFixed(1)}%`)
+          log(`  Within 40-60%: ${scorecard.percentWithin40to60.toFixed(1)}%`)
+          log(`  Role WR variance: ${scorecard.roleWinRateVariance.toFixed(6)}`)
+          log('')
+          log(chalk.bold('  Top 5:'))
+          for (const c of creatureStats.slice(0, 5)) {
+            log(`    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`)
+          }
+          log(chalk.bold('  Bottom 5:'))
+          for (const c of creatureStats.slice(-5).reverse()) {
+            log(`    ${c.name} (${c.role}/${c.rarity}): ${(c.winRate * 100).toFixed(1)}%`)
+          }
+        }
+        break
+      }
     }
   }
 
   if (args.command === 'all') {
-    // Run all reports except creature (requires a name)
+    // Run all reports except creature (requires a name), meta, and field (compute-heavy, run explicitly)
     const reports: Array<Command> = ['role', 'matchup', 'team', 'ability']
     for (const report of reports) {
       run(report)

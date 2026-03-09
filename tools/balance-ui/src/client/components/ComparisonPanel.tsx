@@ -23,6 +23,8 @@ import { Badge } from './ui/badge'
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip'
 import type { SavedRun } from '../../shared/types.ts'
 
+type MetaSavedRun = Extract<SavedRun, { simType: 'meta' }>
+
 const ROLE_ORDER = ['striker', 'tank', 'support', 'bruiser']
 
 const RUN_COLORS = [
@@ -94,6 +96,10 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
     )
   }
 
+  const metaRuns = runs.filter(
+    (r): r is MetaSavedRun => r.simType === 'meta',
+  )
+
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Run Legend */}
@@ -110,6 +116,9 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
               )}
             />
             <span className="text-xs font-medium">{run.label}</span>
+            <Badge variant="outline" className="text-[9px] px-1.5 py-0">
+              {run.simType}
+            </Badge>
             <span className="text-[10px] text-muted-foreground">
               {new Date(run.createdAt).toLocaleString(undefined, {
                 month: 'short',
@@ -122,76 +131,88 @@ export function ComparisonPanel({ runIds, getRun }: Props) {
         ))}
       </div>
 
-      {/* Fitness Overlay */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Fitness Progression</CardTitle>
-            <SectionTooltip>
-              Overlaid fitness curves from all selected runs. Solid lines are
-              top fitness, dashed lines are average.
-            </SectionTooltip>
-          </div>
-          <CardDescription>
-            Top (solid) and average (dashed) fitness
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <FitnessOverlay runs={runs} />
-        </CardContent>
-      </Card>
+      {/* Meta-specific charts (only shown when 2+ meta runs selected) */}
+      {metaRuns.length >= 2 ? (
+        <>
+          {/* Fitness Overlay */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Fitness Progression</CardTitle>
+                <SectionTooltip>
+                  Overlaid fitness curves from all selected runs. Solid lines are
+                  top fitness, dashed lines are average.
+                </SectionTooltip>
+              </div>
+              <CardDescription>
+                Top (solid) and average (dashed) fitness
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FitnessOverlay runs={metaRuns} />
+            </CardContent>
+          </Card>
 
-      {/* Turns + Diversity Overlay */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Battle Health</CardTitle>
-            <SectionTooltip>
-              Average turns per battle (solid) and population diversity (dashed)
-              overlaid across runs. Green band shows the healthy 7-10 turns
-              target.
-            </SectionTooltip>
-          </div>
-          <CardDescription>
-            Avg turns (solid) and diversity (dashed)
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <TurnsDiversityOverlay runs={runs} />
-        </CardContent>
-      </Card>
+          {/* Turns + Diversity Overlay */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Battle Health</CardTitle>
+                <SectionTooltip>
+                  Average turns per battle (solid) and population diversity (dashed)
+                  overlaid across runs. Green band shows the healthy 7-10 turns
+                  target.
+                </SectionTooltip>
+              </div>
+              <CardDescription>
+                Avg turns (solid) and diversity (dashed)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <TurnsDiversityOverlay runs={metaRuns} />
+            </CardContent>
+          </Card>
 
-      {/* Role Meta Share Delta */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Role Meta Share</CardTitle>
-            <SectionTooltip>
-              Final role distribution for each run. Delta columns show change
-              relative to the first selected run.
-            </SectionTooltip>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <RoleDeltaTable runs={runs} />
-        </CardContent>
-      </Card>
+          {/* Role Meta Share Delta */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Role Meta Share</CardTitle>
+                <SectionTooltip>
+                  Final role distribution for each run. Delta columns show change
+                  relative to the first selected run.
+                </SectionTooltip>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <RoleDeltaTable runs={metaRuns} />
+            </CardContent>
+          </Card>
 
-      {/* Creature Leaderboard Delta */}
-      <Card>
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2">
-            <CardTitle>Creature Leaderboard</CardTitle>
-            <SectionTooltip>
-              Top 15 creatures by appearances across runs. Rank changes shown
-              relative to the first run.
-            </SectionTooltip>
-          </div>
-        </CardHeader>
-        <CardContent className="px-0">
-          <CreatureDelta runs={runs} />
-        </CardContent>
-      </Card>
+          {/* Creature Leaderboard Delta */}
+          <Card>
+            <CardHeader className="pb-2">
+              <div className="flex items-center gap-2">
+                <CardTitle>Creature Leaderboard</CardTitle>
+                <SectionTooltip>
+                  Top 15 creatures by appearances across runs. Rank changes shown
+                  relative to the first run.
+                </SectionTooltip>
+              </div>
+            </CardHeader>
+            <CardContent className="px-0">
+              <CreatureDelta runs={metaRuns} />
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <Card>
+          <CardContent className="py-6 text-center text-sm text-muted-foreground">
+            Select at least 2 meta sim runs to see fitness, battle health, and
+            role share charts. Field sim comparison coming soon.
+          </CardContent>
+        </Card>
+      )}
 
       {/* Config Diff */}
       <Card>
@@ -232,7 +253,7 @@ function SectionTooltip({ children }: { children: React.ReactNode }) {
 
 // ─── Charts ──────────────────────────────────────────────────
 
-function FitnessOverlay({ runs }: { runs: Array<SavedRun> }) {
+function FitnessOverlay({ runs }: { runs: Array<MetaSavedRun> }) {
   // Build merged data from all runs' snapshots
   const allGens = new Set<number>()
   for (const run of runs) {
@@ -324,7 +345,7 @@ function FitnessOverlay({ runs }: { runs: Array<SavedRun> }) {
   )
 }
 
-function TurnsDiversityOverlay({ runs }: { runs: Array<SavedRun> }) {
+function TurnsDiversityOverlay({ runs }: { runs: Array<MetaSavedRun> }) {
   const allGens = new Set<number>()
   for (const run of runs) {
     for (const snap of run.result.snapshots) {
@@ -446,7 +467,7 @@ function TurnsDiversityOverlay({ runs }: { runs: Array<SavedRun> }) {
 
 // ─── Tables ──────────────────────────────────────────────────
 
-function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
+function RoleDeltaTable({ runs }: { runs: Array<MetaSavedRun> }) {
   const baseline = runs[0].result.result.roleMetaShare
 
   return (
@@ -518,7 +539,7 @@ function RoleDeltaTable({ runs }: { runs: Array<SavedRun> }) {
   )
 }
 
-function CreatureDelta({ runs }: { runs: Array<SavedRun> }) {
+function CreatureDelta({ runs }: { runs: Array<MetaSavedRun> }) {
   // Build rank maps from each run's creature leaderboard
   const rankMaps = runs.map((run) => {
     const map = new Map<
@@ -664,24 +685,48 @@ function ConfigDiff({ runs }: { runs: Array<SavedRun> }) {
     getValue: (run: SavedRun) => string
   }> = [
     {
+      label: 'Sim Type',
+      getValue: (r) => r.simType,
+    },
+    {
       label: 'Population',
-      getValue: (r) => String(r.config.options.population),
+      getValue: (r) =>
+        r.simType === 'meta' ? String(r.config.options.population) : '—',
     },
     {
       label: 'Generations',
-      getValue: (r) => String(r.config.options.generations),
+      getValue: (r) =>
+        r.simType === 'meta' ? String(r.config.options.generations) : '—',
     },
     {
       label: 'Matches/Team',
-      getValue: (r) => String(r.config.options.matchesPerTeam),
+      getValue: (r) =>
+        r.simType === 'meta' ? String(r.config.options.matchesPerTeam) : '—',
     },
     {
       label: 'Elite Rate',
-      getValue: (r) => String(r.config.options.eliteRate),
+      getValue: (r) =>
+        r.simType === 'meta' ? String(r.config.options.eliteRate) : '—',
     },
     {
       label: 'Mutation Rate',
-      getValue: (r) => String(r.config.options.mutationRate),
+      getValue: (r) =>
+        r.simType === 'meta' ? String(r.config.options.mutationRate) : '—',
+    },
+    {
+      label: 'Trials/Pair',
+      getValue: (r) =>
+        r.simType === 'field' ? String(r.config.options.trialsPerPair) : '—',
+    },
+    {
+      label: 'Team Sample Size',
+      getValue: (r) =>
+        r.simType === 'field' ? String(r.config.options.teamSampleSize) : '—',
+    },
+    {
+      label: 'Team Match Count',
+      getValue: (r) =>
+        r.simType === 'field' ? String(r.config.options.teamMatchCount) : '—',
     },
     {
       label: 'Normalize Stats',

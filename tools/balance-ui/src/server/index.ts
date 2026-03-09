@@ -12,11 +12,16 @@ import {
 } from '@paleo-waifu/shared/battle/constants'
 import { loadCreatures } from '../../../battle-sim/src/db.ts'
 import { runMetaReport } from '../../../battle-sim/src/reports/meta.ts'
+import { runFieldReport } from '../../../battle-sim/src/reports/field.ts'
 import type { AbilityTemplate } from '@paleo-waifu/shared/battle/types'
 import type {
   AbilityOverride,
+  ConstantsOverride,
   ConstantsSnapshot,
+  CreatureOverridePatch,
   CreatureRecord,
+  FieldSimProgressEvent,
+  FieldSimRequest,
   SimProgressEvent,
   SimRequest,
 } from '../shared/types.ts'
@@ -72,7 +77,7 @@ app.get('/api/creatures/reload', (c) => {
 
 function applyOverrides(
   base: Array<CreatureRecord>,
-  request: SimRequest,
+  request: Pick<SimRequest, 'creaturePatches' | 'constants'>,
 ): Array<CreatureRecord> {
   const patchMap = new Map(request.creaturePatches.map((p) => [p.id, p]))
   const { roleModifiers, rarityModifiers } = request.constants
@@ -188,6 +193,67 @@ function buildTemplateMap(
   return map
 }
 
+// ─── Shared Override Pipeline ────────────────────────────────────
+
+function prepareCreatures(body: {
+  creaturePatches: Array<CreatureOverridePatch>
+  constants: ConstantsOverride
+  options: {
+    normalizeStats: boolean
+    noActives: boolean
+    noPassives: boolean
+    syntheticMode: boolean
+  }
+}): {
+  creatures: Array<CreatureRecord>
+  templateMap: Map<string, AbilityTemplate> | undefined
+} {
+  const base = body.options.syntheticMode
+    ? generateSyntheticCreatures()
+    : getCreatures()
+
+  let creatures = base
+  if (body.options.normalizeStats) {
+    const TARGET_TOTAL = 170
+    creatures = creatures.map((cr) => {
+      const total = cr.hp + cr.atk + cr.def + cr.spd
+      if (total === 0) return cr
+      const scale = TARGET_TOTAL / total
+      return {
+        ...cr,
+        hp: Math.round(cr.hp * scale),
+        atk: Math.round(cr.atk * scale),
+        def: Math.round(cr.def * scale),
+        spd: Math.round(cr.spd * scale),
+      }
+    })
+  }
+
+  creatures = applyOverrides(creatures, body)
+
+  if (body.options.noActives) {
+    creatures = creatures.map((cr) => ({
+      ...cr,
+      active: { templateId: 'bite', displayName: 'Bite' },
+    }))
+  }
+
+  if (body.options.noPassives) {
+    creatures = creatures.map((cr) => ({
+      ...cr,
+      passive: { templateId: 'none', displayName: 'None' },
+    }))
+  }
+
+  if (body.options.syntheticMode) {
+    console.log(`Synthetic mode: ${creatures.length} virtual creatures`)
+  }
+
+  const templateMap = buildTemplateMap(body.constants.abilityOverrides)
+
+  return { creatures, templateMap }
+}
+
 // ─── Synthetic Creature Generator ────────────────────────────────
 
 function generateSyntheticCreatures(): Array<CreatureRecord> {
@@ -229,57 +295,15 @@ function generateSyntheticCreatures(): Array<CreatureRecord> {
   return creatures
 }
 
-// ─── Sim SSE Endpoint ────────────────────────────────────────────
+// ─── Meta Sim SSE Endpoint ───────────────────────────────────────
 
 app.post('/api/sim', async (c) => {
   const body: SimRequest = await c.req.json()
-  const base = body.options.syntheticMode
-    ? generateSyntheticCreatures()
-    : getCreatures()
-
-  // Normalize BEFORE applying overrides so role/rarity modifiers aren't erased
-  let creatures = base
-  if (body.options.normalizeStats) {
-    const TARGET_TOTAL = 170
-    creatures = creatures.map((cr) => {
-      const total = cr.hp + cr.atk + cr.def + cr.spd
-      if (total === 0) return cr
-      const scale = TARGET_TOTAL / total
-      return {
-        ...cr,
-        hp: Math.round(cr.hp * scale),
-        atk: Math.round(cr.atk * scale),
-        def: Math.round(cr.def * scale),
-        spd: Math.round(cr.spd * scale),
-      }
-    })
-  }
-
-  creatures = applyOverrides(creatures, body)
-
-  if (body.options.noActives) {
-    creatures = creatures.map((cr) => ({
-      ...cr,
-      active: { templateId: 'bite', displayName: 'Bite' },
-    }))
-  }
-
-  if (body.options.noPassives) {
-    creatures = creatures.map((cr) => ({
-      ...cr,
-      passive: { templateId: 'none', displayName: 'None' },
-    }))
-  }
+  const { creatures, templateMap } = prepareCreatures(body)
 
   if (creatures.length < 3) {
     return c.json({ error: 'Need at least 3 enabled creatures' }, 400)
   }
-
-  if (body.options.syntheticMode) {
-    console.log(`Synthetic mode: ${creatures.length} virtual creatures`)
-  }
-
-  const templateMap = buildTemplateMap(body.constants.abilityOverrides)
 
   const encoder = new TextEncoder()
   const stream = new ReadableStream({
@@ -310,6 +334,57 @@ app.post('/api/sim', async (c) => {
           },
         })
         send({ type: 'done', result: { result, snapshots } })
+      } catch (err) {
+        send({
+          type: 'error',
+          message: err instanceof Error ? err.message : String(err),
+        })
+      } finally {
+        controller.close()
+      }
+    },
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    },
+  })
+})
+
+// ─── Field Sim SSE Endpoint ─────────────────────────────────────
+
+app.post('/api/field-sim', async (c) => {
+  const body: FieldSimRequest = await c.req.json()
+  const { creatures, templateMap } = prepareCreatures(body)
+
+  if (creatures.length < 2) {
+    return c.json({ error: 'Need at least 2 enabled creatures' }, 400)
+  }
+
+  const encoder = new TextEncoder()
+  const stream = new ReadableStream({
+    start(controller) {
+      const send = (event: FieldSimProgressEvent) =>
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`))
+
+      try {
+        const fieldResult = runFieldReport(creatures, {
+          trialsPerPair: body.options.trialsPerPair,
+          teamSampleSize: body.options.teamSampleSize,
+          teamMatchCount: body.options.teamMatchCount,
+          csv: false,
+          templateMap,
+          damageScale: body.constants.combatDamageScale,
+          defScaling: body.constants.defScalingConstant,
+          basicAttackMultiplier: body.constants.basicAttackMultiplier,
+          onProgress: (phase, completed, total) => {
+            send({ type: 'progress', phase, completed, total })
+          },
+        })
+        send({ type: 'done', result: fieldResult })
       } catch (err) {
         send({
           type: 'error',

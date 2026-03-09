@@ -1,5 +1,7 @@
 import type {
   CreaturesResponse,
+  FieldSimProgressEvent,
+  FieldSimRequest,
   SimProgressEvent,
   SimRequest,
 } from '../../shared/types.ts'
@@ -14,14 +16,15 @@ export async function reloadCreatures(): Promise<CreaturesResponse> {
   return res.json()
 }
 
-export async function runSim(
-  request: SimRequest,
-  onProgress: (event: SimProgressEvent) => void,
+async function streamSSE<T>(
+  url: string,
+  body: unknown,
+  onEvent: (event: T) => void,
 ): Promise<void> {
-  const res = await fetch('/api/sim', {
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(request),
+    body: JSON.stringify(body),
   })
 
   if (!res.ok) {
@@ -44,9 +47,23 @@ export async function runSim(
 
     for (const line of lines) {
       if (line.startsWith('data: ')) {
-        const data = JSON.parse(line.slice(6)) as SimProgressEvent
-        onProgress(data)
+        const data = JSON.parse(line.slice(6)) as T
+        onEvent(data)
       }
     }
   }
+}
+
+export async function runSim(
+  request: SimRequest,
+  onProgress: (event: SimProgressEvent) => void,
+): Promise<void> {
+  return streamSSE('/api/sim', request, onProgress)
+}
+
+export async function runFieldSim(
+  request: FieldSimRequest,
+  onProgress: (event: FieldSimProgressEvent) => void,
+): Promise<void> {
+  return streamSSE('/api/field-sim', request, onProgress)
 }

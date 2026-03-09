@@ -1,7 +1,18 @@
+export type SimState = 'idle' | 'running' | 'done' | 'error'
+
 export const AVG_TURNS_TARGET_MIN = 7
 export const AVG_TURNS_TARGET_MAX = 10
 
 export const ROLE_ORDER = ['striker', 'tank', 'support', 'bruiser']
+export const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary']
+
+export const RARITY_COLOR_VALUES: Record<string, string> = {
+  common: 'oklch(0.6 0.05 290)',
+  uncommon: 'oklch(0.65 0.15 145)',
+  rare: 'oklch(0.65 0.15 245)',
+  epic: 'oklch(0.6 0.2 300)',
+  legendary: 'oklch(0.75 0.2 75)',
+}
 
 export const ROLE_COLORS: Record<string, string> = {
   striker: 'bg-role-striker',
