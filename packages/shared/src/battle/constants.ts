@@ -2,10 +2,10 @@ import type { Ability, AbilityTemplate, Role } from './types'
 
 // ─── Combat Tuning ─────────────────────────────────────────────────
 // Global damage multiplier — scales ALL damage output to control battle length.
-export const COMBAT_DAMAGE_SCALE = 0.48
+export const COMBAT_DAMAGE_SCALE = 0.6
 // DEF formula constant: damage *= DEF_SCALING / (DEF_SCALING + def)
 // Lower values make DEF stronger. At 75, DEF 60 = 55.6% through. At 100 (default), DEF 60 = 62.5%.
-export const DEF_SCALING_CONSTANT = 75
+export const DEF_SCALING_CONSTANT = 60
 
 // ─── Rarity Base Stat Totals ────────────────────────────────────────
 
@@ -45,8 +45,8 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
   {
     id: 'crushing_jaw',
     name: 'Crushing Jaw',
-    trigger: { type: 'onUse', cooldown: 3 },
-    effects: [{ type: 'damage', multiplier: 1.2, scaling: 'atk' }],
+    trigger: { type: 'onUse', cooldown: 4 },
+    effects: [{ type: 'damage', multiplier: 1.0, scaling: 'atk' }],
     target: 'single_enemy',
     description: 'The strongest single-target bite, crushing bones.',
     roleAffinity: ['striker'],
@@ -193,7 +193,7 @@ export const ACTIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     effects: [
       { type: 'taunt', duration: 2 },
       { type: 'buff', stat: 'def', percent: 40, duration: 2 },
-      { type: 'shield', percent: 30, duration: 2 },
+      { type: 'shield', percent: 40, duration: 2 },
     ],
     target: 'self',
     description: 'Draws all single-target attacks to self for 2 turns, boosts DEF by 40%, and grants a shield absorbing 30% max HP.',
@@ -273,11 +273,11 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
       condition: { type: 'in_row', row: 'front' },
     },
     effects: [
-      { type: 'buff', stat: 'atk', percent: 10, duration: 999 },
-      { type: 'buff', stat: 'def', percent: 10, duration: 999 },
+      { type: 'buff', stat: 'atk', percent: 5, duration: 999 },
+      { type: 'buff', stat: 'def', percent: 5, duration: 999 },
     ],
     target: 'self',
-    description: '+10% ATK and DEF when in the front row.',
+    description: '+5% ATK and DEF when in the front row.',
     roleAffinity: ['bruiser'],
   },
   {
@@ -335,9 +335,9 @@ export const PASSIVE_ABILITY_TEMPLATES: Array<AbilityTemplate> = [
     id: 'weakening_strikes',
     name: 'Weakening Strikes',
     trigger: { type: 'onTurnStart' },
-    effects: [{ type: 'debuff', stat: 'atk', percent: 35, duration: 2 }],
+    effects: [{ type: 'debuff', stat: 'atk', percent: 25, duration: 2 }],
     target: 'random_enemy',
-    description: 'At the start of each turn, weakens a random enemy\'s ATK by 35% for 2 turns.',
+    description: 'At the start of each turn, weakens a random enemy\'s ATK by 25% for 2 turns.',
     roleAffinity: ['support'],
   },
   // ── No passive ──
@@ -364,7 +364,7 @@ export const BASIC_ATTACK: Ability = {
   name: 'Basic Attack',
   displayName: 'Basic Attack',
   trigger: { type: 'onUse', cooldown: 0 },
-  effects: [{ type: 'damage', multiplier: 0.9, scaling: 'atk' }],
+  effects: [{ type: 'damage', multiplier: 0.7, scaling: 'atk' }],
   target: 'single_enemy',
   description: 'A basic attack.',
 }
