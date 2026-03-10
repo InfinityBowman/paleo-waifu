@@ -7,10 +7,6 @@ import { generateAndShareKeypair, getPublicKeyHex } from './helpers/crypto'
 import type { ChildProcess } from 'node:child_process'
 
 const BOT_DIR = resolve(import.meta.dirname, '..')
-const WRANGLER_STATE_DIR = join(
-  BOT_DIR,
-  '.wrangler/state/v3/d1/miniflare-D1DatabaseObject',
-)
 const MIGRATIONS_DIR = resolve(BOT_DIR, '../web/drizzle')
 
 let workerProcess: ChildProcess | null = null
@@ -67,13 +63,6 @@ async function applyMigrations() {
   }
 }
 
-export async function findDbPath(): Promise<string> {
-  const files = await readdir(WRANGLER_STATE_DIR)
-  const sqlite = files.find((f) => f.endsWith('.sqlite'))
-  if (!sqlite) throw new Error('No D1 SQLite file found')
-  return join(WRANGLER_STATE_DIR, sqlite)
-}
-
 export async function setup() {
   // Generate test keypair and share via env
   await generateAndShareKeypair()
@@ -101,6 +90,8 @@ export async function setup() {
       'DISCORD_BOT_TOKEN:test-token',
       '--var',
       'XP_API_SECRET:test-xp-secret',
+      '--var',
+      'TEST_MODE:true',
     ],
     {
       cwd: BOT_DIR,

@@ -265,6 +265,7 @@ export const Route = createFileRoute('/_app/battle')({
 
 function BattlePage() {
   const data = Route.useLoaderData()
+  const { session } = Route.useRouteContext()
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8 2xl:max-w-400">
@@ -296,6 +297,8 @@ function BattlePage() {
         teams={data.teams}
         battleReadyCreatures={data.battleReadyCreatures}
         userId={data.userId}
+        userName={session.user.name}
+        userImage={session.user.image ?? null}
         dailyLimit={data.dailyLimit}
       />
     </div>

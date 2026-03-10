@@ -37,6 +37,7 @@ interface Env {
   DISCORD_PUBLIC_KEY: string
   DISCORD_BOT_TOKEN: string
   XP_API_SECRET: string
+  TEST_MODE?: string
 }
 
 export default {
@@ -54,6 +55,11 @@ export default {
     // XP endpoint — shared secret auth, not Discord signature
     if (url.pathname === '/api/xp') {
       return handleXpRequest(request, env)
+    }
+
+    // Test-only DB endpoints — only available when TEST_MODE is set
+    if (env.TEST_MODE && url.pathname.startsWith('/api/test/')) {
+      return handleTestDb(request, url.pathname, env)
     }
 
     // All other routes: Discord interaction flow
@@ -201,6 +207,45 @@ async function handleComponent(
     default:
       return ephemeralResponse('Unknown battle action.')
   }
+}
+
+async function handleTestDb(
+  request: Request,
+  pathname: string,
+  env: Env,
+): Promise<Response> {
+  // Batch has a different body shape — handle it first
+  if (pathname === '/api/test/batch') {
+    const body: {
+      statements: Array<{ sql: string; params?: Array<unknown> }>
+    } = await request.json()
+    const stmts = body.statements.map((s) => {
+      const st = env.DB.prepare(s.sql)
+      return s.params?.length ? st.bind(...s.params) : st
+    })
+    await env.DB.batch(stmts)
+    return jsonResponse({ success: true })
+  }
+
+  const body: { sql: string; params?: Array<unknown> } = await request.json()
+  if (!body.sql) {
+    return jsonResponse({ error: 'Missing sql' }, 400)
+  }
+
+  const stmt = env.DB.prepare(body.sql)
+  const bound = body.params?.length ? stmt.bind(...body.params) : stmt
+
+  if (pathname === '/api/test/query') {
+    const result = await bound.all()
+    return jsonResponse({ rows: result.results })
+  }
+
+  if (pathname === '/api/test/execute') {
+    await bound.run()
+    return jsonResponse({ success: true })
+  }
+
+  return jsonResponse({ error: 'Unknown test endpoint' }, 404)
 }
 
 function routeCommand(

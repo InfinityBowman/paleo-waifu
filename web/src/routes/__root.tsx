@@ -61,7 +61,7 @@ export const Route = createRootRoute({
       },
       {
         rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&family=Klee+One:wght@400;600&display=swap',
+        href: 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&family=Klee+One:wght@400;600&family=Bangers&family=Permanent+Marker&display=swap',
       },
       { rel: 'stylesheet', href: appCss },
     ],

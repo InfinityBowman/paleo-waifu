@@ -130,6 +130,7 @@ Collection view filtered to battle-ready creatures. Click to fill 3 slots, assig
 ### Opponent Cards (Arena)
 
 Each opponent card shows:
+
 - Avatar, username, arena tier, rating
 - 3 defense team creatures with rarity-colored borders and role labels
 - Attack button (disabled if daily limit reached)

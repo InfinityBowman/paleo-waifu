@@ -43,23 +43,18 @@ describe('/pull', () => {
     })
     await sendInteraction(interaction)
 
-    // Poll for the new creature to appear (1 seeded + 1 pulled = 2)
-    await pollUntil(
+    // Poll for fossils to be deducted (100 - 1 = 99)
+    const currency = await pollUntil(
       async () => {
-        const rows = await queryAll<{ id: string }>(
-          'SELECT id FROM user_creature WHERE user_id = ?',
+        const r = await queryOne<{ fossils: number }>(
+          'SELECT fossils FROM currency WHERE user_id = ?',
           TEST_APP_USER_ID,
         )
-        return rows.length >= 2 ? rows : null
+        return r && r.fossils < 100 ? r : null
       },
       { timeoutMs: 10_000 },
     )
-
-    const currency = await queryOne<{ fossils: number }>(
-      'SELECT fossils FROM currency WHERE user_id = ?',
-      TEST_APP_USER_ID,
-    )
-    expect(currency!.fossils).toBe(99)
+    expect(currency.fossils).toBe(99)
 
     const creatures = await queryAll<{ id: string }>(
       'SELECT id FROM user_creature WHERE user_id = ?',
