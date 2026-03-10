@@ -1,7 +1,7 @@
 ---
 title: Battle System
 tag: feature
-publishedAt: 2026-03-12
+publishedAt: 2026-03-11
 ---
 
 Your creatures can now fight. Build a team, climb the ranks, and prove your collection is the strongest.
