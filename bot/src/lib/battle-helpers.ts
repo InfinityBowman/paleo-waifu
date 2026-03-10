@@ -1,28 +1,6 @@
 import { eq } from 'drizzle-orm'
-import { battleRating, battleTeamPreset } from '@paleo-waifu/shared/db/schema'
+import { battleRating } from '@paleo-waifu/shared/db/schema'
 import type { Database } from '@paleo-waifu/shared/db/client'
-
-export interface PresetRow {
-  id: string
-  name: string
-  members: string // JSON
-}
-
-/** Load all team presets for a user */
-export async function loadPresets(
-  db: Database,
-  userId: string,
-): Promise<Array<PresetRow>> {
-  return db
-    .select({
-      id: battleTeamPreset.id,
-      name: battleTeamPreset.name,
-      members: battleTeamPreset.members,
-    })
-    .from(battleTeamPreset)
-    .where(eq(battleTeamPreset.userId, userId))
-    .all()
-}
 
 /** Ensure a battle rating row exists for the user */
 export async function ensureBattleRating(

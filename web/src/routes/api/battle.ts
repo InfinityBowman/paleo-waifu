@@ -1,17 +1,18 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { and, eq, inArray, sql } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
+import { and, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import {
-  battleChallenge,
-  battleTeamPreset,
-  userCreature,
-} from '@paleo-waifu/shared/db/schema'
+import { battleTeam, userCreature } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
-import { createChallenge, resolveBattle, validateChallenge } from '@/lib/battle'
+import {
+  deleteTeam,
+  executeArenaBattle,
+  executeFriendlyBattle,
+  getTeams,
+  setTeam,
+} from '@/lib/battle'
 
 const idField = z.string().min(1).max(50)
 
@@ -21,31 +22,26 @@ const teamSlot = z.object({
 })
 
 const BattleBody = z.discriminatedUnion('action', [
+  // Team management
   z.object({
-    action: z.literal('challenge'),
+    action: z.literal('set_team'),
+    slot: z.enum(['offense', 'defense']),
+    members: z.array(teamSlot).length(3),
+  }),
+  z.object({
+    action: z.literal('delete_team'),
+    slot: z.enum(['offense', 'defense']),
+  }),
+  // Arena attack
+  z.object({
+    action: z.literal('arena_attack'),
     defenderId: idField,
-    team: z.array(teamSlot).length(3),
   }),
+  // Friendly battle
   z.object({
-    action: z.literal('accept'),
-    challengeId: idField,
-    team: z.array(teamSlot).length(3),
+    action: z.literal('friendly_attack'),
+    defenderId: idField,
   }),
-  z.object({ action: z.literal('decline'), challengeId: idField }),
-  z.object({ action: z.literal('cancel'), challengeId: idField }),
-  // Preset CRUD
-  z.object({
-    action: z.literal('save_preset'),
-    name: z.string().min(1).max(50),
-    members: z.array(teamSlot).length(3),
-  }),
-  z.object({
-    action: z.literal('update_preset'),
-    presetId: idField,
-    name: z.string().min(1).max(50),
-    members: z.array(teamSlot).length(3),
-  }),
-  z.object({ action: z.literal('delete_preset'), presetId: idField }),
 ])
 
 export const Route = createFileRoute('/api/battle')({
@@ -76,10 +72,10 @@ export const Route = createFileRoute('/api/battle')({
         const db = await createDb(cfEnv.DB)
         const userId = session.user.id
 
-        // ── CHALLENGE ─────────────────────────────────────────────
-        if (body.action === 'challenge') {
-          // Validate unique creature species (not just unique userCreatureIds)
-          const ucIds = body.team.map((s) => s.userCreatureId)
+        // ── SET TEAM ──────────────────────────────────────────
+        if (body.action === 'set_team') {
+          // Validate unique creature species
+          const ucIds = body.members.map((s) => s.userCreatureId)
           if (new Set(ucIds).size !== 3) {
             return jsonResponse(
               { error: 'All 3 team slots must be different creatures' },
@@ -106,164 +102,105 @@ export const Route = createFileRoute('/api/battle')({
             )
           }
 
-          const error = await validateChallenge(db, userId, body.defenderId)
-          if (error) return jsonResponse({ error }, 400)
-
-          const result = await createChallenge(
-            db,
-            userId,
-            body.defenderId,
-            body.team,
-          )
+          const result = await setTeam(db, userId, body.slot, body.members)
           return jsonResponse(result)
         }
 
-        // ── ACCEPT ────────────────────────────────────────────────
-        if (body.action === 'accept') {
-          const ucIds = body.team.map((s) => s.userCreatureId)
-          if (new Set(ucIds).size !== 3) {
-            return jsonResponse(
-              { error: 'All 3 team slots must be different creatures' },
-              400,
-            )
+        // ── DELETE TEAM ───────────────────────────────────────
+        if (body.action === 'delete_team') {
+          const deleted = await deleteTeam(db, userId, body.slot)
+          if (!deleted) {
+            return jsonResponse({ error: 'Team not found' }, 404)
           }
-          const ucRows = await db
-            .select({ creatureId: userCreature.creatureId })
-            .from(userCreature)
+          return jsonResponse({ success: true })
+        }
+
+        // ── ARENA ATTACK ─────────────────────────────────────
+        if (body.action === 'arena_attack') {
+          if (body.defenderId === userId) {
+            return jsonResponse({ error: 'You cannot attack yourself' }, 400)
+          }
+
+          // Load attacker's offense team
+          const teams = await getTeams(db, userId)
+          if (!teams.offense) {
+            return jsonResponse({ error: 'Set your offense team first' }, 400)
+          }
+
+          // Load defender's defense team
+          const defenderTeamRow = await db
+            .select({ members: battleTeam.members })
+            .from(battleTeam)
             .where(
               and(
-                eq(userCreature.userId, userId),
-                inArray(userCreature.id, ucIds),
+                eq(battleTeam.userId, body.defenderId),
+                eq(battleTeam.slot, 'defense'),
               ),
             )
-            .all()
-          if (
-            ucRows.length !== 3 ||
-            new Set(ucRows.map((r) => r.creatureId)).size !== 3
-          ) {
+            .get()
+          if (!defenderTeamRow) {
             return jsonResponse(
-              { error: 'All 3 team slots must be different species' },
+              { error: 'This player has no defense team set' },
               400,
             )
           }
 
-          const result = await resolveBattle(
+          const defenderSlots = JSON.parse(defenderTeamRow.members)
+          const result = await executeArenaBattle(
             db,
-            body.challengeId,
             userId,
-            body.team,
+            body.defenderId,
+            teams.offense,
+            defenderSlots,
           )
+
           if (!result.success) {
             return jsonResponse({ error: result.error }, 400)
           }
-          return jsonResponse({ battleId: result.battleId })
+          return jsonResponse(result)
         }
 
-        // ── DECLINE ───────────────────────────────────────────────
-        if (body.action === 'decline') {
-          const updated = await db
-            .update(battleChallenge)
-            .set({ status: 'declined' })
-            .where(
-              and(
-                eq(battleChallenge.id, body.challengeId),
-                eq(battleChallenge.defenderId, userId),
-                eq(battleChallenge.status, 'pending'),
-              ),
-            )
-            .returning({ id: battleChallenge.id })
-          if (updated.length === 0) {
-            return jsonResponse(
-              { error: 'Challenge not found or not declinable' },
-              404,
-            )
-          }
-          return jsonResponse({ success: true })
+        // ── FRIENDLY ATTACK ──────────────────────────────────
+        // body.action === 'friendly_attack'
+        if (body.defenderId === userId) {
+          return jsonResponse({ error: 'You cannot battle yourself' }, 400)
         }
 
-        // ── CANCEL ────────────────────────────────────────────────
-        if (body.action === 'cancel') {
-          const updated = await db
-            .update(battleChallenge)
-            .set({ status: 'cancelled' })
-            .where(
-              and(
-                eq(battleChallenge.id, body.challengeId),
-                eq(battleChallenge.challengerId, userId),
-                eq(battleChallenge.status, 'pending'),
-              ),
-            )
-            .returning({ id: battleChallenge.id })
-          if (updated.length === 0) {
-            return jsonResponse(
-              { error: 'Challenge not found or not cancellable' },
-              404,
-            )
-          }
-          return jsonResponse({ success: true })
+        const teams = await getTeams(db, userId)
+        if (!teams.offense) {
+          return jsonResponse({ error: 'Set your offense team first' }, 400)
         }
 
-        // ── SAVE PRESET ───────────────────────────────────────────
-        if (body.action === 'save_preset') {
-          // Enforce 10 preset cap
-          const [capRow] = await db
-            .select({ total: sql<number>`count(*)` })
-            .from(battleTeamPreset)
-            .where(eq(battleTeamPreset.userId, userId))
-          if (capRow.total >= 10) {
-            return jsonResponse(
-              { error: 'You can have at most 10 team presets.' },
-              400,
-            )
-          }
-
-          const id = nanoid()
-          await db.insert(battleTeamPreset).values({
-            id,
-            userId,
-            name: body.name,
-            members: JSON.stringify(body.members),
-          })
-          return jsonResponse({ id })
-        }
-
-        // ── UPDATE PRESET ─────────────────────────────────────────
-        if (body.action === 'update_preset') {
-          const updated = await db
-            .update(battleTeamPreset)
-            .set({
-              name: body.name,
-              members: JSON.stringify(body.members),
-              updatedAt: new Date(),
-            })
-            .where(
-              and(
-                eq(battleTeamPreset.id, body.presetId),
-                eq(battleTeamPreset.userId, userId),
-              ),
-            )
-            .returning({ id: battleTeamPreset.id })
-          if (updated.length === 0) {
-            return jsonResponse({ error: 'Preset not found' }, 404)
-          }
-          return jsonResponse({ success: true })
-        }
-
-        // ── DELETE PRESET ─────────────────────────────────────────
-        // body.action === 'delete_preset' — last branch of discriminated union
-        const deleted = await db
-          .delete(battleTeamPreset)
+        const defenderTeamRow = await db
+          .select({ members: battleTeam.members })
+          .from(battleTeam)
           .where(
             and(
-              eq(battleTeamPreset.id, body.presetId),
-              eq(battleTeamPreset.userId, userId),
+              eq(battleTeam.userId, body.defenderId),
+              eq(battleTeam.slot, 'defense'),
             ),
           )
-          .returning({ id: battleTeamPreset.id })
-        if (deleted.length === 0) {
-          return jsonResponse({ error: 'Preset not found' }, 404)
+          .get()
+        if (!defenderTeamRow) {
+          return jsonResponse(
+            { error: 'This player has no defense team set' },
+            400,
+          )
         }
-        return jsonResponse({ success: true })
+
+        const defenderSlots = JSON.parse(defenderTeamRow.members)
+        const result = await executeFriendlyBattle(
+          db,
+          userId,
+          body.defenderId,
+          teams.offense,
+          defenderSlots,
+        )
+
+        if (!result.success) {
+          return jsonResponse({ error: result.error }, 400)
+        }
+        return jsonResponse(result)
       },
     },
   },

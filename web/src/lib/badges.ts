@@ -3,7 +3,6 @@ import { getRequest } from '@tanstack/react-start/server'
 import { and, count, eq } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
-  battleChallenge,
   currency,
   tradeOffer,
   tradeProposal,
@@ -14,7 +13,6 @@ import { getCfEnv } from './env'
 export interface BadgeData {
   canClaimDaily: boolean
   incomingProposals: number
-  incomingChallenges: number
 }
 
 export const getBadges = createServerFn({ method: 'GET' }).handler(
@@ -28,7 +26,7 @@ export const getBadges = createServerFn({ method: 'GET' }).handler(
     const db = await createDb(cfEnv.DB)
     const userId = session.user.id
 
-    const [currencyRow, proposalCount, challengeCount] = await Promise.all([
+    const [currencyRow, proposalCount] = await Promise.all([
       db
         .select({ lastDailyClaim: currency.lastDailyClaim })
         .from(currency)
@@ -46,16 +44,6 @@ export const getBadges = createServerFn({ method: 'GET' }).handler(
           ),
         )
         .get(),
-      db
-        .select({ count: count() })
-        .from(battleChallenge)
-        .where(
-          and(
-            eq(battleChallenge.defenderId, userId),
-            eq(battleChallenge.status, 'pending'),
-          ),
-        )
-        .get(),
     ])
 
     const now = Math.floor(Date.now() / 1000)
@@ -67,7 +55,6 @@ export const getBadges = createServerFn({ method: 'GET' }).handler(
     return {
       canClaimDaily: lastClaim < startOfDay,
       incomingProposals: proposalCount?.count ?? 0,
-      incomingChallenges: challengeCount?.count ?? 0,
     }
   },
 )

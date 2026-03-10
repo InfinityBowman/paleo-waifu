@@ -1,4 +1,4 @@
-import { and, count, eq, inArray, lt, or } from 'drizzle-orm'
+import { and, eq, inArray, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import {
@@ -7,8 +7,9 @@ import {
   templateToAbility,
 } from '@paleo-waifu/shared/battle/constants'
 import {
-  battleChallenge,
+  battleLog,
   battleRating,
+  battleTeam,
   creature,
   creatureAbility,
   creatureBattleStats,
@@ -49,7 +50,6 @@ export async function hydrateTeam(
 ): Promise<Array<BattleTeamMember>> {
   const ucIds = slots.map((s) => s.userCreatureId)
 
-  // Load user creatures with joined creature + battle stats
   const rows = await db
     .select({
       ucId: userCreature.id,
@@ -80,7 +80,6 @@ export async function hydrateTeam(
     throw new Error('Not all creatures are battle-ready or owned by this user')
   }
 
-  // Load abilities for these creatures
   const creatureIds = rows.map((r) => r.creatureId)
   const abilities = await db
     .select({
@@ -104,7 +103,6 @@ export async function hydrateTeam(
     abilityMap.set(a.creatureId, entry)
   }
 
-  // Build BattleTeamMember array in slot order
   const rowMap = new Map(slots.map((s) => [s.userCreatureId, s.row]))
   return rows.map((r) => {
     const abs = abilityMap.get(r.creatureId) ?? {}
@@ -132,157 +130,217 @@ export async function hydrateTeam(
   })
 }
 
-// ─── Challenge Validation ─────────────────────────────────────────
+// ─── Team CRUD ────────────────────────────────────────────────────
 
-const MAX_OUTGOING = 3
-const MAX_INCOMING = 5
-const CHALLENGE_TTL_MS = 24 * 60 * 60 * 1000
-
-export async function validateChallenge(
+export async function setTeam(
   db: Database,
-  challengerId: string,
-  defenderId: string,
-): Promise<string | null> {
-  if (challengerId === defenderId) return 'You cannot challenge yourself.'
-
-  // Check defender exists
-  const defender = await db
-    .select({ id: user.id })
-    .from(user)
-    .where(eq(user.id, defenderId))
-    .get()
-  if (!defender) return 'User not found.'
-
-  // Count outgoing pending challenges
-  const [outgoing] = await db
-    .select({ total: count() })
-    .from(battleChallenge)
-    .where(
-      and(
-        eq(battleChallenge.challengerId, challengerId),
-        eq(battleChallenge.status, 'pending'),
-      ),
-    )
-  if (outgoing.total >= MAX_OUTGOING)
-    return `You already have ${MAX_OUTGOING} active challenges. Cancel one first.`
-
-  // Count incoming pending challenges for defender
-  const [incoming] = await db
-    .select({ total: count() })
-    .from(battleChallenge)
-    .where(
-      and(
-        eq(battleChallenge.defenderId, defenderId),
-        eq(battleChallenge.status, 'pending'),
-      ),
-    )
-  if (incoming.total >= MAX_INCOMING)
-    return 'That player has too many pending challenges.'
-
-  // Check for existing pending challenge between these two
-  const existing = await db
-    .select({ id: battleChallenge.id })
-    .from(battleChallenge)
-    .where(
-      and(
-        eq(battleChallenge.status, 'pending'),
-        or(
-          and(
-            eq(battleChallenge.challengerId, challengerId),
-            eq(battleChallenge.defenderId, defenderId),
-          ),
-          and(
-            eq(battleChallenge.challengerId, defenderId),
-            eq(battleChallenge.defenderId, challengerId),
-          ),
-        ),
-      ),
-    )
-    .get()
-  if (existing) return 'A challenge already exists between you and this player.'
-
-  return null
-}
-
-// ─── Challenge Creation ───────────────────────────────────────────
-
-export async function createChallenge(
-  db: Database,
-  challengerId: string,
-  defenderId: string,
-  team: Array<TeamSlotInput>,
+  userId: string,
+  slot: 'offense' | 'defense',
+  members: Array<TeamSlotInput>,
 ): Promise<{ id: string }> {
   const id = nanoid()
-  await db.insert(battleChallenge).values({
-    id,
-    challengerId,
-    defenderId,
-    status: 'pending',
-    challengerTeam: JSON.stringify(team),
-  })
+  await db
+    .insert(battleTeam)
+    .values({
+      id,
+      userId,
+      slot,
+      members: JSON.stringify(members),
+    })
+    .onConflictDoUpdate({
+      target: [battleTeam.userId, battleTeam.slot],
+      set: {
+        members: JSON.stringify(members),
+        updatedAt: new Date(),
+      },
+    })
   return { id }
 }
 
-// ─── Battle Resolution ────────────────────────────────────────────
+export async function deleteTeam(
+  db: Database,
+  userId: string,
+  slot: 'offense' | 'defense',
+): Promise<boolean> {
+  const deleted = await db
+    .delete(battleTeam)
+    .where(and(eq(battleTeam.userId, userId), eq(battleTeam.slot, slot)))
+    .returning({ id: battleTeam.id })
+  return deleted.length > 0
+}
+
+export async function getTeams(
+  db: Database,
+  userId: string,
+): Promise<{
+  offense: Array<TeamSlotInput> | null
+  defense: Array<TeamSlotInput> | null
+}> {
+  const rows = await db
+    .select({ slot: battleTeam.slot, members: battleTeam.members })
+    .from(battleTeam)
+    .where(eq(battleTeam.userId, userId))
+    .all()
+
+  let offense: Array<TeamSlotInput> | null = null
+  let defense: Array<TeamSlotInput> | null = null
+  for (const r of rows) {
+    const members = JSON.parse(r.members) as Array<TeamSlotInput>
+    if (r.slot === 'offense') offense = members
+    else if (r.slot === 'defense') defense = members
+  }
+  return { offense, defense }
+}
+
+// ─── Arena Matchmaking ───────────────────────────────────────────
+
+const ARENA_DAILY_LIMIT = 5
+const RATING_RANGE = 300
+
+export { ARENA_DAILY_LIMIT }
+
+export interface ArenaOpponent {
+  userId: string
+  name: string
+  image: string | null
+  rating: number
+  tier: string
+  defenseTeam: Array<TeamSlotInput>
+}
+
+/** Find ~4 opponents near the attacker's rating who have defense teams */
+export async function findArenaOpponents(
+  db: Database,
+  attackerId: string,
+  attackerRating: number,
+): Promise<Array<ArenaOpponent>> {
+  // Find users with defense teams, excluding the attacker
+  const opponents = await db
+    .select({
+      userId: battleTeam.userId,
+      members: battleTeam.members,
+      name: user.name,
+      image: user.image,
+    })
+    .from(battleTeam)
+    .innerJoin(user, eq(user.id, battleTeam.userId))
+    .where(
+      and(eq(battleTeam.slot, 'defense'), ne(battleTeam.userId, attackerId)),
+    )
+    .all()
+
+  if (opponents.length === 0) return []
+
+  // Get ratings for all opponent candidates
+  const opponentIds = opponents.map((o) => o.userId)
+  const ratings = await db
+    .select({ userId: battleRating.userId, rating: battleRating.rating })
+    .from(battleRating)
+    .where(inArray(battleRating.userId, opponentIds))
+    .all()
+  const ratingMap = new Map(ratings.map((r) => [r.userId, r.rating]))
+
+  // Score by rating proximity, shuffle within range
+  const scored = opponents.map((o) => {
+    const rating = ratingMap.get(o.userId) ?? 0
+    const distance = Math.abs(rating - attackerRating)
+    return { ...o, rating, distance }
+  })
+
+  // Filter to within range, then take closest 4 (with some randomness)
+  const inRange = scored.filter((o) => o.distance <= RATING_RANGE)
+  const pool = inRange.length >= 4 ? inRange : scored
+
+  // Shuffle and take 4
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[pool[i], pool[j]] = [pool[j], pool[i]]
+  }
+
+  return pool.slice(0, 4).map((o) => ({
+    userId: o.userId,
+    name: o.name,
+    image: o.image,
+    rating: o.rating,
+    tier: getArenaTier(o.rating),
+    defenseTeam: JSON.parse(o.members) as Array<TeamSlotInput>,
+  }))
+}
+
+// ─── Daily Limit ─────────────────────────────────────────────────
+
+function todayUTC(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export async function checkDailyLimit(
+  db: Database,
+  userId: string,
+): Promise<{ allowed: boolean; remaining: number }> {
+  const row = await db
+    .select({
+      arenaAttacksToday: battleRating.arenaAttacksToday,
+      lastAttackDate: battleRating.lastAttackDate,
+    })
+    .from(battleRating)
+    .where(eq(battleRating.userId, userId))
+    .get()
+
+  const today = todayUTC()
+  const attacks =
+    row && row.lastAttackDate === today ? row.arenaAttacksToday : 0
+  const remaining = ARENA_DAILY_LIMIT - attacks
+  return { allowed: remaining > 0, remaining: Math.max(0, remaining) }
+}
+
+// ─── Battle Execution ────────────────────────────────────────────
 
 const RATING_WIN = 25
 const RATING_LOSS = 20
 
-export async function resolveBattle(
+interface BattleExecResult {
+  success: true
+  battleId: string
+  winnerId: string | null
+  turns: number
+  reason: string
+  attackerRatingAfter: number
+  defenderRatingAfter: number
+  attackerDelta: number
+  defenderDelta: number
+}
+
+interface BattleExecError {
+  success: false
+  error: string
+}
+
+/** Execute an arena battle — updates ratings and daily counter */
+export async function executeArenaBattle(
   db: Database,
-  challengeId: string,
+  attackerId: string,
   defenderId: string,
-  defenderTeam: Array<TeamSlotInput>,
-): Promise<
-  { success: true; battleId: string } | { success: false; error: string }
-> {
-  // Atomically claim the challenge to prevent double resolution
-  const claimed = await db
-    .update(battleChallenge)
-    .set({ status: 'resolving' })
-    .where(
-      and(
-        eq(battleChallenge.id, challengeId),
-        eq(battleChallenge.defenderId, defenderId),
-        eq(battleChallenge.status, 'pending'),
-      ),
-    )
-    .returning()
-
-  if (!claimed.length)
-    return { success: false, error: 'Challenge not found or already resolved.' }
-
-  const challenge = claimed[0]
-
-  // Check expiry
-  if (
-    challenge.createdAt &&
-    Date.now() - challenge.createdAt.getTime() > CHALLENGE_TTL_MS
-  ) {
-    await db
-      .update(battleChallenge)
-      .set({ status: 'expired' })
-      .where(eq(battleChallenge.id, challengeId))
-    return { success: false, error: 'Challenge has expired.' }
+  attackerSlots: Array<TeamSlotInput>,
+  defenderSlots: Array<TeamSlotInput>,
+): Promise<BattleExecResult | BattleExecError> {
+  // Check daily limit
+  const limit = await checkDailyLimit(db, attackerId)
+  if (!limit.allowed) {
+    return {
+      success: false,
+      error: 'You have no arena attacks remaining today.',
+    }
   }
 
-  // Hydrate both teams
-  let challengerMembers: Array<BattleTeamMember>
+  // Hydrate teams
+  let attackerMembers: Array<BattleTeamMember>
   let defenderMembers: Array<BattleTeamMember>
   try {
-    const challengerSlots: Array<TeamSlotInput> = JSON.parse(
-      challenge.challengerTeam,
-    )
-    ;[challengerMembers, defenderMembers] = await Promise.all([
-      hydrateTeam(db, challengerSlots, challenge.challengerId),
-      hydrateTeam(db, defenderTeam, defenderId),
+    ;[attackerMembers, defenderMembers] = await Promise.all([
+      hydrateTeam(db, attackerSlots, attackerId),
+      hydrateTeam(db, defenderSlots, defenderId),
     ])
   } catch {
-    // Revert status back to pending if hydration fails (e.g., creature traded away)
-    await db
-      .update(battleChallenge)
-      .set({ status: 'pending' })
-      .where(eq(battleChallenge.id, challengeId))
     return {
       success: false,
       error: 'One or more creatures are no longer available.',
@@ -290,7 +348,7 @@ export async function resolveBattle(
   }
 
   const teamA: BattleTeam = {
-    members: challengerMembers as [
+    members: attackerMembers as [
       BattleTeamMember,
       BattleTeamMember,
       BattleTeamMember,
@@ -304,22 +362,22 @@ export async function resolveBattle(
     ],
   }
 
-  // Run battle
   const seed = Math.floor(Math.random() * 2 ** 31)
   const result = simulateBattle(teamA, teamB, { seed })
 
   const winnerId =
     result.winner === 'A'
-      ? challenge.challengerId
+      ? attackerId
       : result.winner === 'B'
         ? defenderId
         : null
+
   // Read current ratings
   const [ratingA, ratingB] = await Promise.all([
     db
       .select()
       .from(battleRating)
-      .where(eq(battleRating.userId, challenge.challengerId))
+      .where(eq(battleRating.userId, attackerId))
       .get(),
     db
       .select()
@@ -328,59 +386,77 @@ export async function resolveBattle(
       .get(),
   ])
 
-  const challengerRating = ratingA?.rating ?? 0
+  const attackerRating = ratingA?.rating ?? 0
   const defenderRating = ratingB?.rating ?? 0
 
-  // Compute new ratings
-  let newChallengerRating = challengerRating
+  let newAttackerRating = attackerRating
   let newDefenderRating = defenderRating
-  let challengerWins = ratingA?.wins ?? 0
-  let challengerLosses = ratingA?.losses ?? 0
+  let attackerWins = ratingA?.wins ?? 0
+  let attackerLosses = ratingA?.losses ?? 0
   let defenderWins = ratingB?.wins ?? 0
   let defenderLosses = ratingB?.losses ?? 0
 
-  if (winnerId === challenge.challengerId) {
-    newChallengerRating = challengerRating + RATING_WIN
+  let attackerDelta = 0
+  let defenderDelta = 0
+
+  if (winnerId === attackerId) {
+    attackerDelta = RATING_WIN
+    defenderDelta = -RATING_LOSS
+    newAttackerRating = attackerRating + RATING_WIN
     newDefenderRating = Math.max(0, defenderRating - RATING_LOSS)
-    challengerWins++
+    attackerWins++
     defenderLosses++
   } else if (winnerId === defenderId) {
+    attackerDelta = -RATING_LOSS
+    defenderDelta = RATING_WIN
+    newAttackerRating = Math.max(0, attackerRating - RATING_LOSS)
     newDefenderRating = defenderRating + RATING_WIN
-    newChallengerRating = Math.max(0, challengerRating - RATING_LOSS)
     defenderWins++
-    challengerLosses++
+    attackerLosses++
   }
 
   const now = new Date()
+  const today = todayUTC()
+  const battleId = nanoid()
 
-  // Batch update: challenge result + ratings
+  // Daily attack counter
+  const prevAttacks =
+    ratingA && ratingA.lastAttackDate === today ? ratingA.arenaAttacksToday : 0
+
   await db.batch([
-    db
-      .update(battleChallenge)
-      .set({
-        defenderTeam: JSON.stringify(defenderTeam),
-        result: JSON.stringify(result),
-        status: 'resolved',
-        winnerId,
-        resolvedAt: now,
-      })
-      .where(eq(battleChallenge.id, challengeId)),
-    // Upsert challenger rating
+    // Insert battle log
+    db.insert(battleLog).values({
+      id: battleId,
+      attackerId,
+      defenderId,
+      mode: 'arena',
+      attackerTeam: JSON.stringify(attackerSlots),
+      defenderTeam: JSON.stringify(defenderSlots),
+      result: JSON.stringify(result),
+      winnerId,
+      ratingChange: attackerDelta,
+      createdAt: now,
+    }),
+    // Upsert attacker rating + daily counter
     db
       .insert(battleRating)
       .values({
-        userId: challenge.challengerId,
-        rating: newChallengerRating,
-        wins: challengerWins,
-        losses: challengerLosses,
+        userId: attackerId,
+        rating: newAttackerRating,
+        wins: attackerWins,
+        losses: attackerLosses,
+        arenaAttacksToday: prevAttacks + 1,
+        lastAttackDate: today,
         updatedAt: now,
       })
       .onConflictDoUpdate({
         target: battleRating.userId,
         set: {
-          rating: newChallengerRating,
-          wins: challengerWins,
-          losses: challengerLosses,
+          rating: newAttackerRating,
+          wins: attackerWins,
+          losses: attackerLosses,
+          arenaAttacksToday: prevAttacks + 1,
+          lastAttackDate: today,
           updatedAt: now,
         },
       }),
@@ -405,22 +481,107 @@ export async function resolveBattle(
       }),
   ])
 
-  return { success: true, battleId: challengeId }
+  return {
+    success: true,
+    battleId,
+    winnerId,
+    turns: result.turns,
+    reason: result.reason,
+    attackerRatingAfter: newAttackerRating,
+    defenderRatingAfter: newDefenderRating,
+    attackerDelta,
+    defenderDelta,
+  }
 }
 
-// ─── Expire Stale Challenges ──────────────────────────────────────
+/** Execute a friendly battle — no rating change, no daily limit */
+export async function executeFriendlyBattle(
+  db: Database,
+  attackerId: string,
+  defenderId: string,
+  attackerSlots: Array<TeamSlotInput>,
+  defenderSlots: Array<TeamSlotInput>,
+): Promise<BattleExecResult | BattleExecError> {
+  // Hydrate teams
+  let attackerMembers: Array<BattleTeamMember>
+  let defenderMembers: Array<BattleTeamMember>
+  try {
+    ;[attackerMembers, defenderMembers] = await Promise.all([
+      hydrateTeam(db, attackerSlots, attackerId),
+      hydrateTeam(db, defenderSlots, defenderId),
+    ])
+  } catch {
+    return {
+      success: false,
+      error: 'One or more creatures are no longer available.',
+    }
+  }
 
-export async function expireStaleChallenges(db: Database): Promise<void> {
-  const cutoff = new Date(Date.now() - CHALLENGE_TTL_MS)
-  await db
-    .update(battleChallenge)
-    .set({ status: 'expired' })
-    .where(
-      and(
-        eq(battleChallenge.status, 'pending'),
-        lt(battleChallenge.createdAt, cutoff),
-      ),
-    )
+  const teamA: BattleTeam = {
+    members: attackerMembers as [
+      BattleTeamMember,
+      BattleTeamMember,
+      BattleTeamMember,
+    ],
+  }
+  const teamB: BattleTeam = {
+    members: defenderMembers as [
+      BattleTeamMember,
+      BattleTeamMember,
+      BattleTeamMember,
+    ],
+  }
+
+  const seed = Math.floor(Math.random() * 2 ** 31)
+  const result = simulateBattle(teamA, teamB, { seed })
+
+  const winnerId =
+    result.winner === 'A'
+      ? attackerId
+      : result.winner === 'B'
+        ? defenderId
+        : null
+
+  const battleId = nanoid()
+
+  await db.insert(battleLog).values({
+    id: battleId,
+    attackerId,
+    defenderId,
+    mode: 'friendly',
+    attackerTeam: JSON.stringify(attackerSlots),
+    defenderTeam: JSON.stringify(defenderSlots),
+    result: JSON.stringify(result),
+    winnerId,
+    ratingChange: null,
+    createdAt: new Date(),
+  })
+
+  // Read ratings for display (not modified)
+  const [ratingA, ratingB] = await Promise.all([
+    db
+      .select()
+      .from(battleRating)
+      .where(eq(battleRating.userId, attackerId))
+      .get(),
+    db
+      .select()
+      .from(battleRating)
+      .where(eq(battleRating.userId, defenderId))
+      .get(),
+  ])
+
+  return {
+    success: true,
+    battleId,
+    winnerId,
+    turns: result.turns,
+    reason: result.reason,
+    attackerRatingAfter: ratingA?.rating ?? 0,
+    defenderRatingAfter: ratingB?.rating ?? 0,
+    attackerDelta: 0,
+    defenderDelta: 0,
+  }
 }
 
 // ─── Arena Tier ───────────────────────────────────────────────────

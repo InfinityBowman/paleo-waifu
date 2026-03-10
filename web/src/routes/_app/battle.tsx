@@ -5,9 +5,8 @@ import { alias } from 'drizzle-orm/sqlite-core'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import { ALL_ABILITY_TEMPLATES } from '@paleo-waifu/shared/battle/constants'
 import {
-  battleChallenge,
+  battleLog,
   battleRating,
-  battleTeamPreset,
   creature,
   creatureAbility,
   creatureBattleStats,
@@ -16,7 +15,13 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
-import { expireStaleChallenges, getArenaTier } from '@/lib/battle'
+import {
+  ARENA_DAILY_LIMIT,
+  checkDailyLimit,
+  findArenaOpponents,
+  getArenaTier,
+  getTeams,
+} from '@/lib/battle'
 import { BattleList } from '@/components/battle/BattleList'
 
 const TEMPLATE_MAP = new Map(ALL_ABILITY_TEMPLATES.map((t) => [t.id, t]))
@@ -26,7 +31,6 @@ export const searchUsers = createServerFn({ method: 'GET' })
   .handler(async ({ data: { query, excludeId } }) => {
     if (!query || query.length < 2) return []
     const cfEnv = getCfEnv()
-    // Auth check — prevent unauthenticated user enumeration
     const { getRequest } = await import('@tanstack/react-start/server')
     const { createAuth } = await import('@/lib/auth')
     const request = getRequest()
@@ -47,66 +51,102 @@ export const searchUsers = createServerFn({ method: 'GET' })
     return results.filter((u) => u.id !== excludeId)
   })
 
+export const refreshOpponents = createServerFn({ method: 'GET' })
+  .inputValidator((d: string) => d)
+  .handler(async ({ data: userId }) => {
+    const db = await createDb(getCfEnv().DB)
+    const ratingRow = await db
+      .select({ rating: battleRating.rating })
+      .from(battleRating)
+      .where(eq(battleRating.userId, userId))
+      .get()
+    const myRating = ratingRow?.rating ?? 0
+
+    const opponents = await findArenaOpponents(db, userId, myRating)
+
+    // Enrich opponent defense teams with creature details
+    const allUcIds = opponents.flatMap((o) =>
+      o.defenseTeam.map((s) => s.userCreatureId),
+    )
+    if (allUcIds.length === 0) return []
+
+    const creatureRows = await db
+      .select({
+        ucId: userCreature.id,
+        creatureId: creature.id,
+        name: creature.name,
+        rarity: creature.rarity,
+        imageUrl: creature.imageUrl,
+        role: creatureBattleStats.role,
+      })
+      .from(userCreature)
+      .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+      .innerJoin(
+        creatureBattleStats,
+        eq(creatureBattleStats.creatureId, creature.id),
+      )
+      .where(inArray(userCreature.id, allUcIds))
+      .all()
+
+    const creatureMap = new Map(creatureRows.map((r) => [r.ucId, r]))
+
+    return opponents.map((o) => ({
+      ...o,
+      defenseCreatures: o.defenseTeam.map((s) => {
+        const c = creatureMap.get(s.userCreatureId)
+        return {
+          name: c?.name ?? 'Unknown',
+          rarity: c?.rarity ?? 'common',
+          role: c?.role ?? 'striker',
+          imageUrl: c?.imageUrl ? toCdnUrl(c.imageUrl) : null,
+          row: s.row,
+        }
+      }),
+    }))
+  })
+
 const getBattleData = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
   .handler(async ({ data: userId }) => {
     const db = await createDb(getCfEnv().DB)
 
-    await expireStaleChallenges(db)
-
-    const challengerUser = alias(user, 'challenger_user')
+    const attackerUser = alias(user, 'attacker_user')
     const defenderUser = alias(user, 'defender_user')
 
-    const [challenges, presets, battleReadyCreatures, myRating] =
+    const [history, teams, battleReadyCreatures, myRatingRow, dailyLimit] =
       await Promise.all([
-        // All challenges involving this user
+        // Recent battle history
         db
           .select({
-            id: battleChallenge.id,
-            challengerId: battleChallenge.challengerId,
-            challengerName: challengerUser.name,
-            challengerImage: challengerUser.image,
-            defenderId: battleChallenge.defenderId,
+            id: battleLog.id,
+            attackerId: battleLog.attackerId,
+            attackerName: attackerUser.name,
+            attackerImage: attackerUser.image,
+            defenderId: battleLog.defenderId,
             defenderName: defenderUser.name,
             defenderImage: defenderUser.image,
-            status: battleChallenge.status,
-            winnerId: battleChallenge.winnerId,
-            createdAt: battleChallenge.createdAt,
-            resolvedAt: battleChallenge.resolvedAt,
+            mode: battleLog.mode,
+            winnerId: battleLog.winnerId,
+            ratingChange: battleLog.ratingChange,
+            createdAt: battleLog.createdAt,
           })
-          .from(battleChallenge)
-          .innerJoin(
-            challengerUser,
-            eq(challengerUser.id, battleChallenge.challengerId),
-          )
-          .innerJoin(
-            defenderUser,
-            eq(defenderUser.id, battleChallenge.defenderId),
-          )
+          .from(battleLog)
+          .innerJoin(attackerUser, eq(attackerUser.id, battleLog.attackerId))
+          .innerJoin(defenderUser, eq(defenderUser.id, battleLog.defenderId))
           .where(
             or(
-              eq(battleChallenge.challengerId, userId),
-              eq(battleChallenge.defenderId, userId),
+              eq(battleLog.attackerId, userId),
+              eq(battleLog.defenderId, userId),
             ),
           )
-          .orderBy(desc(battleChallenge.createdAt))
-          .limit(50)
+          .orderBy(desc(battleLog.createdAt))
+          .limit(30)
           .all(),
 
-        // Team presets
-        db
-          .select({
-            id: battleTeamPreset.id,
-            name: battleTeamPreset.name,
-            members: battleTeamPreset.members,
-            createdAt: battleTeamPreset.createdAt,
-            updatedAt: battleTeamPreset.updatedAt,
-          })
-          .from(battleTeamPreset)
-          .where(eq(battleTeamPreset.userId, userId))
-          .all(),
+        // My teams (offense + defense)
+        getTeams(db, userId),
 
-        // Battle-ready creatures (inner join on creatureBattleStats filters to battle-ready only)
+        // Battle-ready creatures
         db
           .select({
             id: userCreature.id,
@@ -140,6 +180,9 @@ const getBattleData = createServerFn({ method: 'GET' })
           .from(battleRating)
           .where(eq(battleRating.userId, userId))
           .get(),
+
+        // Daily limit check
+        checkDailyLimit(db, userId),
       ])
 
     // Load abilities for battle-ready creatures
@@ -160,7 +203,6 @@ const getBattleData = createServerFn({ method: 'GET' })
             .all()
         : []
 
-    // Build ability lookup: creatureId → { active, passive }
     const abilityMap = new Map<
       string,
       {
@@ -188,25 +230,9 @@ const getBattleData = createServerFn({ method: 'GET' })
       abilityMap.set(a.creatureId, entry)
     }
 
-    const incoming = challenges.filter(
-      (c) => c.status === 'pending' && c.defenderId === userId,
-    )
-    const outgoing = challenges.filter(
-      (c) => c.status === 'pending' && c.challengerId === userId,
-    )
-    const history = challenges.filter((c) => c.status !== 'pending')
-
     return {
-      incoming,
-      outgoing,
       history,
-      presets: presets.map((p) => ({
-        ...p,
-        members: JSON.parse(p.members) as Array<{
-          userCreatureId: string
-          row: 'front' | 'back'
-        }>,
-      })),
+      teams,
       battleReadyCreatures: battleReadyCreatures.map((c) => {
         const abs = abilityMap.get(c.creatureId)
         return {
@@ -217,14 +243,18 @@ const getBattleData = createServerFn({ method: 'GET' })
         }
       }),
       userId,
-      myRating: myRating
+      myRating: myRatingRow
         ? {
-            rating: myRating.rating,
-            wins: myRating.wins,
-            losses: myRating.losses,
-            tier: getArenaTier(myRating.rating),
+            rating: myRatingRow.rating,
+            wins: myRatingRow.wins,
+            losses: myRatingRow.losses,
+            tier: getArenaTier(myRatingRow.rating),
           }
         : { rating: 0, wins: 0, losses: 0, tier: 'Bronze' },
+      dailyLimit: {
+        remaining: dailyLimit.remaining,
+        total: ARENA_DAILY_LIMIT,
+      },
     }
   })
 
@@ -241,7 +271,7 @@ function BattlePage() {
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold">Arena</h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Challenge other players to battle with your prehistoric team.
+          Battle other players with your prehistoric team.
         </p>
         <div className="mt-3 inline-flex items-center gap-3 rounded-lg border border-border bg-card/50 px-4 py-2 text-sm">
           <span className="font-display font-semibold text-primary">
@@ -262,12 +292,11 @@ function BattlePage() {
         </div>
       </div>
       <BattleList
-        incoming={data.incoming}
-        outgoing={data.outgoing}
         history={data.history}
-        presets={data.presets}
+        teams={data.teams}
         battleReadyCreatures={data.battleReadyCreatures}
         userId={data.userId}
+        dailyLimit={data.dailyLimit}
       />
     </div>
   )

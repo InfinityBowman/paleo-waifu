@@ -4,7 +4,7 @@ import { eq, inArray } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
-  battleChallenge,
+  battleLog,
   battleRating,
   creature,
   creatureBattleStats,
@@ -12,151 +12,134 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import type { BattleResult } from '@paleo-waifu/shared/battle/types'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import { IconFossil } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
 import { getArenaTier } from '@/lib/battle'
 import { BattleReplay } from '@/components/battle/BattleReplay'
 
+type TeamCreature = {
+  name: string
+  rarity: string
+  role: string
+  imageUrl: string | null
+  row: string
+}
+
+async function loadTeamCreatures(
+  db: Database,
+  teamJson: string,
+): Promise<Array<TeamCreature>> {
+  const slots = JSON.parse(teamJson) as Array<{
+    userCreatureId: string
+    row: string
+  }>
+  const ucIds = slots.map((s) => s.userCreatureId)
+  const rowMap = new Map(slots.map((s) => [s.userCreatureId, s.row]))
+  const rows = await db
+    .select({
+      ucId: userCreature.id,
+      name: creature.name,
+      rarity: creature.rarity,
+      role: creatureBattleStats.role,
+      imageUrl: creature.imageUrl,
+    })
+    .from(userCreature)
+    .innerJoin(creature, eq(creature.id, userCreature.creatureId))
+    .innerJoin(
+      creatureBattleStats,
+      eq(creatureBattleStats.creatureId, creature.id),
+    )
+    .where(inArray(userCreature.id, ucIds))
+    .all()
+  const byId = new Map(rows.map((r) => [r.ucId, r]))
+  return ucIds
+    .map((ucId) => {
+      const r = byId.get(ucId)
+      if (!r) return null
+      return {
+        name: r.name,
+        rarity: r.rarity,
+        role: r.role,
+        imageUrl: toCdnUrl(r.imageUrl),
+        row: rowMap.get(ucId) ?? 'front',
+      }
+    })
+    .filter(Boolean) as Array<TeamCreature>
+}
+
 const getBattleById = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
   .handler(async ({ data: battleId }) => {
     const db = await createDb(getCfEnv().DB)
 
-    const challengerUser = alias(user, 'challenger_user')
+    const attackerUser = alias(user, 'attacker_user')
     const defenderUser = alias(user, 'defender_user')
 
-    const challenge = await db
+    const entry = await db
       .select({
-        id: battleChallenge.id,
-        challengerId: battleChallenge.challengerId,
-        challengerName: challengerUser.name,
-        challengerImage: challengerUser.image,
-        defenderId: battleChallenge.defenderId,
+        id: battleLog.id,
+        attackerId: battleLog.attackerId,
+        attackerName: attackerUser.name,
+        attackerImage: attackerUser.image,
+        defenderId: battleLog.defenderId,
         defenderName: defenderUser.name,
         defenderImage: defenderUser.image,
-        status: battleChallenge.status,
-        challengerTeam: battleChallenge.challengerTeam,
-        defenderTeam: battleChallenge.defenderTeam,
-        result: battleChallenge.result,
-        winnerId: battleChallenge.winnerId,
-        createdAt: battleChallenge.createdAt,
-        resolvedAt: battleChallenge.resolvedAt,
+        attackerTeam: battleLog.attackerTeam,
+        defenderTeam: battleLog.defenderTeam,
+        result: battleLog.result,
+        winnerId: battleLog.winnerId,
+        mode: battleLog.mode,
+        createdAt: battleLog.createdAt,
       })
-      .from(battleChallenge)
-      .innerJoin(
-        challengerUser,
-        eq(challengerUser.id, battleChallenge.challengerId),
-      )
-      .innerJoin(defenderUser, eq(defenderUser.id, battleChallenge.defenderId))
-      .where(eq(battleChallenge.id, battleId))
+      .from(battleLog)
+      .innerJoin(attackerUser, eq(attackerUser.id, battleLog.attackerId))
+      .innerJoin(defenderUser, eq(defenderUser.id, battleLog.defenderId))
+      .where(eq(battleLog.id, battleId))
       .get()
 
-    if (!challenge) return null
+    if (!entry) return null
 
-    // Get ratings for both players
-    const [challengerRating, defenderRating] = await Promise.all([
+    const [attackerRating, defenderRating] = await Promise.all([
       db
         .select()
         .from(battleRating)
-        .where(eq(battleRating.userId, challenge.challengerId))
+        .where(eq(battleRating.userId, entry.attackerId))
         .get(),
       db
         .select()
         .from(battleRating)
-        .where(eq(battleRating.userId, challenge.defenderId))
+        .where(eq(battleRating.userId, entry.defenderId))
         .get(),
     ])
 
-    // If resolved, get creature details for the team display
-    let teamACreatures: Array<{
-      name: string
-      rarity: string
-      role: string
-      imageUrl: string | null
-      row: string
-    }> = []
-    let teamBCreatures: Array<{
-      name: string
-      rarity: string
-      role: string
-      imageUrl: string | null
-      row: string
-    }> = []
-
-    // Batch-load team creatures (2 queries instead of N+1)
-    async function loadTeamCreatures(
-      teamJson: string | null,
-    ): Promise<typeof teamACreatures> {
-      if (!teamJson) return []
-      const slots = JSON.parse(teamJson) as Array<{
-        userCreatureId: string
-        row: string
-      }>
-      const ucIds = slots.map((s) => s.userCreatureId)
-      const rowMap = new Map(slots.map((s) => [s.userCreatureId, s.row]))
-      const rows = await db
-        .select({
-          ucId: userCreature.id,
-          name: creature.name,
-          rarity: creature.rarity,
-          role: creatureBattleStats.role,
-          imageUrl: creature.imageUrl,
-        })
-        .from(userCreature)
-        .innerJoin(creature, eq(creature.id, userCreature.creatureId))
-        .innerJoin(
-          creatureBattleStats,
-          eq(creatureBattleStats.creatureId, creature.id),
-        )
-        .where(inArray(userCreature.id, ucIds))
-        .all()
-      const byId = new Map(rows.map((r) => [r.ucId, r]))
-      return ucIds
-        .map((ucId) => {
-          const r = byId.get(ucId)
-          if (!r) return null
-          return {
-            name: r.name,
-            rarity: r.rarity,
-            role: r.role,
-            imageUrl: toCdnUrl(r.imageUrl),
-            row: rowMap.get(ucId) ?? 'front',
-          }
-        })
-        .filter(Boolean) as typeof teamACreatures
-    }
-
-    const [loadedTeamA, loadedTeamB] = await Promise.all([
-      loadTeamCreatures(challenge.challengerTeam),
-      loadTeamCreatures(challenge.defenderTeam),
+    const [teamA, teamB] = await Promise.all([
+      loadTeamCreatures(db, entry.attackerTeam),
+      loadTeamCreatures(db, entry.defenderTeam),
     ])
-    teamACreatures = loadedTeamA
-    teamBCreatures = loadedTeamB
 
     return {
       challenge: {
-        id: challenge.id,
-        challengerName: challenge.challengerName,
-        challengerImage: challenge.challengerImage,
-        defenderName: challenge.defenderName,
-        defenderImage: challenge.defenderImage,
-        winnerId: challenge.winnerId,
-        challengerId: challenge.challengerId,
-        defenderId: challenge.defenderId,
-        status: challenge.status,
-        createdAt: challenge.createdAt,
-        resolvedAt: challenge.resolvedAt,
+        id: entry.id,
+        challengerName: entry.attackerName,
+        challengerImage: entry.attackerImage,
+        defenderName: entry.defenderName,
+        defenderImage: entry.defenderImage,
+        winnerId: entry.winnerId,
+        challengerId: entry.attackerId,
+        defenderId: entry.defenderId,
+        status: 'resolved',
+        createdAt: entry.createdAt,
+        resolvedAt: entry.createdAt,
       },
-      result: challenge.result
-        ? (JSON.parse(challenge.result) as BattleResult)
-        : null,
-      teamA: teamACreatures,
-      teamB: teamBCreatures,
+      result: JSON.parse(entry.result) as BattleResult,
+      teamA,
+      teamB,
       ratings: {
         challenger: {
-          rating: challengerRating?.rating ?? 0,
-          tier: getArenaTier(challengerRating?.rating ?? 0),
+          rating: attackerRating?.rating ?? 0,
+          tier: getArenaTier(attackerRating?.rating ?? 0),
         },
         defender: {
           rating: defenderRating?.rating ?? 0,

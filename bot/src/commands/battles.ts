@@ -1,6 +1,6 @@
 import { desc, eq, or } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/sqlite-core'
-import { battleChallenge, user } from '@paleo-waifu/shared/db/schema'
+import { battleLog, user } from '@paleo-waifu/shared/db/schema'
 import { ephemeralResponse } from '../lib/discord'
 import {
   ensureBattleRating,
@@ -12,40 +12,38 @@ import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
 import type { Embed } from '../lib/discord'
 
-/** /battles — Show active challenges and recent history (ephemeral) */
+/** /battles — Show rating and recent battle history (ephemeral) */
 export async function handleBattles(
   db: Database,
   appUser: AppUser,
 ): Promise<Response> {
-  const challenger = alias(user, 'challenger')
-  const defender = alias(user, 'defender')
+  const attacker = alias(user, 'attacker_user')
+  const defender = alias(user, 'defender_user')
 
-  const challenges = await db
+  const battles = await db
     .select({
-      id: battleChallenge.id,
-      status: battleChallenge.status,
-      challengerId: battleChallenge.challengerId,
-      defenderId: battleChallenge.defenderId,
-      winnerId: battleChallenge.winnerId,
-      challengerName: challenger.name,
+      id: battleLog.id,
+      mode: battleLog.mode,
+      attackerId: battleLog.attackerId,
+      defenderId: battleLog.defenderId,
+      winnerId: battleLog.winnerId,
+      attackerName: attacker.name,
       defenderName: defender.name,
-      createdAt: battleChallenge.createdAt,
+      ratingChange: battleLog.ratingChange,
+      createdAt: battleLog.createdAt,
     })
-    .from(battleChallenge)
-    .innerJoin(challenger, eq(challenger.id, battleChallenge.challengerId))
-    .innerJoin(defender, eq(defender.id, battleChallenge.defenderId))
+    .from(battleLog)
+    .innerJoin(attacker, eq(attacker.id, battleLog.attackerId))
+    .innerJoin(defender, eq(defender.id, battleLog.defenderId))
     .where(
       or(
-        eq(battleChallenge.challengerId, appUser.id),
-        eq(battleChallenge.defenderId, appUser.id),
+        eq(battleLog.attackerId, appUser.id),
+        eq(battleLog.defenderId, appUser.id),
       ),
     )
-    .orderBy(desc(battleChallenge.createdAt))
-    .limit(15)
+    .orderBy(desc(battleLog.createdAt))
+    .limit(10)
     .all()
-
-  const pending = challenges.filter((c) => c.status === 'pending')
-  const resolved = challenges.filter((c) => c.status === 'resolved')
 
   const rating = await ensureBattleRating(db, appUser.id)
 
@@ -57,38 +55,25 @@ export async function handleBattles(
   )
   lines.push('')
 
-  // Pending
-  if (pending.length > 0) {
-    lines.push('**Active Challenges:**')
-    for (const c of pending) {
-      const isChallenger = c.challengerId === appUser.id
-      const opponent = isChallenger ? c.defenderName : c.challengerName
-      const direction = isChallenger ? '\u2192' : '\u2190'
-      lines.push(`${direction} vs **${opponent}** (pending)`)
-    }
-    lines.push('')
-  }
-
   // History
-  if (resolved.length > 0) {
+  if (battles.length > 0) {
     lines.push('**Recent Battles:**')
-    for (const c of resolved) {
+    for (const b of battles) {
       const opponent =
-        c.challengerId === appUser.id ? c.defenderName : c.challengerName
+        b.attackerId === appUser.id ? b.defenderName : b.attackerName
       const result =
-        c.winnerId === appUser.id
+        b.winnerId === appUser.id
           ? '\u2705 WIN'
-          : c.winnerId
+          : b.winnerId
             ? '\u274C LOSS'
             : '\uD83E\uDD1D DRAW'
+      const modeLabel = b.mode === 'arena' ? 'Arena' : 'Friendly'
       lines.push(
-        `${result} vs **${opponent}** — [replay](${APP_URL}/battle/${c.id})`,
+        `${result} vs **${opponent}** (${modeLabel}) — [replay](${APP_URL}/battle/${b.id})`,
       )
     }
-  }
-
-  if (pending.length === 0 && resolved.length === 0) {
-    lines.push('No battles yet. Use `/battle @user` to challenge someone!')
+  } else {
+    lines.push('No battles yet. Visit the web app to start battling!')
   }
 
   const embed: Embed = {

@@ -345,57 +345,7 @@ export const creatureAbility = sqliteTable(
   ],
 )
 
-// Legacy table — kept for data preservation, no longer used by active code
-export const battleChallenge = sqliteTable(
-  'battle_challenge',
-  {
-    id: text('id').primaryKey(),
-    challengerId: text('challenger_id')
-      .notNull()
-      .references(() => user.id),
-    defenderId: text('defender_id')
-      .notNull()
-      .references(() => user.id),
-    status: text('status').notNull(),
-    challengerTeam: text('challenger_team').notNull(),
-    defenderTeam: text('defender_team'),
-    result: text('result'),
-    winnerId: text('winner_id').references(() => user.id),
-    discordMessageId: text('discord_message_id'),
-    discordChannelId: text('discord_channel_id'),
-    createdAt: integer('created_at', { mode: 'timestamp' }).default(
-      sql`(unixepoch())`,
-    ),
-    resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
-  },
-  (table) => [
-    index('bc_challenger_id_idx').on(table.challengerId),
-    index('bc_defender_id_idx').on(table.defenderId),
-    index('bc_status_idx').on(table.status),
-  ],
-)
-
-// Legacy table — kept for data preservation, no longer used by active code
-export const battleTeamPreset = sqliteTable(
-  'battle_team_preset',
-  {
-    id: text('id').primaryKey(),
-    userId: text('user_id')
-      .notNull()
-      .references(() => user.id, { onDelete: 'cascade' }),
-    name: text('name').notNull(),
-    members: text('members').notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' }).default(
-      sql`(unixepoch())`,
-    ),
-    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
-      sql`(unixepoch())`,
-    ),
-  },
-  (table) => [index('btp_user_id_idx').on(table.userId)],
-)
-
-// ─── Battle v2 tables ────────────────────────────────────────────────
+// ─── Battle tables ───────────────────────────────────────────────────
 
 export const battleTeam = sqliteTable(
   'battle_team',
@@ -413,9 +363,7 @@ export const battleTeam = sqliteTable(
       sql`(unixepoch())`,
     ),
   },
-  (table) => [
-    uniqueIndex('bt_user_slot_idx').on(table.userId, table.slot),
-  ],
+  (table) => [uniqueIndex('bt_user_slot_idx').on(table.userId, table.slot)],
 )
 
 export const battleLog = sqliteTable(

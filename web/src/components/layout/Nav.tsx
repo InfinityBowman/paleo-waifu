@@ -130,9 +130,6 @@ export function Nav() {
                   <Link to="/battle" className={NAV_LINK_CLASS}>
                     <Swords className="h-4 w-4" />
                     Battle
-                    {badges && badges.incomingChallenges > 0 && (
-                      <CountBadge count={badges.incomingChallenges} />
-                    )}
                   </Link>
                 </>
               )}
@@ -273,9 +270,6 @@ export function Nav() {
                       >
                         <Swords className="h-4 w-4" />
                         Battle
-                        {badges && badges.incomingChallenges > 0 && (
-                          <CountBadge count={badges.incomingChallenges} />
-                        )}
                       </Link>
                     </>
                   )}
