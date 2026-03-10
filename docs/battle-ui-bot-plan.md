@@ -219,21 +219,27 @@ Reusable `BattleTeamPicker` component manages exactly 2 teams (offense/defense).
 ```
 # Schema + migrations
 packages/shared/src/db/schema.ts          # battle_team, battle_log, battle_rating
-web/drizzle/0013_opposite_magdalene.sql    # Migration: new tables + rating columns
+web/drizzle/0012_bizarre_deathstrike.sql    # Migration: battle_team_preset, battle_rating redesign
+web/drizzle/0013_opposite_magdalene.sql    # Migration: battle_team, battle_log, daily limit columns
 
 # Backend
 web/src/lib/battle.ts                      # Team CRUD, matchmaking, instant resolution, daily limits
 web/src/routes/api/battle.ts               # API: set_team, delete_team, arena_attack, friendly_attack
 
 # Web UI
-web/src/routes/_app/battle.tsx             # Route loader: history, teams, creatures, rating, daily limit
+web/src/routes/_app/battle.index.tsx        # Route loader: history, teams, creatures, rating, daily limit
 web/src/routes/_app/battle.$id.tsx         # Replay page (queries battle_log)
-web/src/components/battle/BattleList.tsx    # All tabs: Arena, Teams, Friendly, History + OpponentCard
+web/src/components/battle/BattleList.tsx    # Tab container (Arena, Teams, Friendly, History)
+web/src/components/battle/ArenaTab.tsx      # Arena opponent browser + attack flow
+web/src/components/battle/FriendlyTab.tsx   # User search + instant friendly battle
+web/src/components/battle/BattleHistory.tsx # Recent battles with W/L badges + replay links
+web/src/components/battle/OpponentCard.tsx  # Opponent card with rating/tier/team preview
 web/src/components/battle/BattleTransition.tsx  # Full-screen battle transition animation overlay
 web/src/components/battle/BattleTeamPicker.tsx  # Reusable team picker (offense/defense)
 web/src/components/battle/BattleCreatureSlot.tsx # Creature slot with stats/abilities
 web/src/components/battle/SynergyPreview.tsx    # Synergy bonus display
 web/src/components/battle/BattleReplay.tsx      # Turn-by-turn replay renderer
+web/src/components/battle/BattleLogViewer.tsx   # Detailed event-by-event combat log
 web/src/lib/badges.ts                      # Nav badges (removed challenge badge)
 
 # Bot (stubbed for v2 rework)
