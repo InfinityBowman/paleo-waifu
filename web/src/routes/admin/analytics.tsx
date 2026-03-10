@@ -234,10 +234,29 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
 })
 
 export const Route = createFileRoute('/admin/analytics')({
+  ssr: 'data-only',
   loader: () => getAnalyticsData(),
   staleTime: 5 * 60 * 1000,
   component: AnalyticsPage,
+  pendingComponent: AnalyticsPending,
 })
+
+function AnalyticsPending() {
+  return (
+    <div className="space-y-6 p-6">
+      <div className="h-8 w-48 animate-pulse rounded bg-muted/50" />
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-xl bg-muted/50" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="h-64 animate-pulse rounded-xl bg-muted/50" />
+        <div className="h-64 animate-pulse rounded-xl bg-muted/50" />
+      </div>
+    </div>
+  )
+}
 
 function AnalyticsPage() {
   const data = Route.useLoaderData()

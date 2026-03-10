@@ -54,9 +54,32 @@ const getGachaData = createServerFn({ method: 'GET' })
   })
 
 export const Route = createFileRoute('/_app/gacha')({
+  ssr: 'data-only',
   loader: ({ context }) => getGachaData({ data: context.session.user.id }),
   component: GachaPage,
+  pendingComponent: GachaPending,
 })
+
+function GachaPending() {
+  return (
+    <div className="mx-auto max-w-4xl px-4 py-8 xl:max-w-6xl">
+      <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <div className="h-8 w-32 animate-pulse rounded bg-muted/50" />
+          <div className="h-4 w-64 animate-pulse rounded bg-muted/50" />
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-28 animate-pulse rounded-md bg-muted/50" />
+          <div className="h-14 w-36 animate-pulse rounded-xl bg-muted/50" />
+        </div>
+      </div>
+      <div className="space-y-6">
+        <div className="h-12 w-full animate-pulse rounded-lg bg-muted/50" />
+        <div className="h-64 w-full animate-pulse rounded-xl bg-muted/50" />
+      </div>
+    </div>
+  )
+}
 
 function formatTimeLeft(totalSeconds: number): string {
   const h = Math.floor(totalSeconds / 3600)
