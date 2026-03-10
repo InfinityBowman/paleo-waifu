@@ -36,7 +36,7 @@ function stripMarkdown(md: string): string {
 
 export function UpdatePostList({ posts }: { posts: Array<UpdatePost> }) {
   if (posts.length === 0) {
-    return <p className="py-12 text-center text-lavender/40">No updates yet.</p>
+    return <p className="py-12 text-center text-lavender/40">No patch notes yet.</p>
   }
 
   return (
@@ -46,7 +46,7 @@ export function UpdatePostList({ posts }: { posts: Array<UpdatePost> }) {
         return (
           <Link
             key={post.id}
-            to="/updates/$postId"
+            to="/patch-notes/$postId"
             params={{ postId: post.id }}
             className="group block rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 transition-colors hover:border-white/[0.1] hover:bg-white/[0.04]"
           >

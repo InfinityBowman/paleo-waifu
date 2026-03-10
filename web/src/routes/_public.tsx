@@ -41,10 +41,10 @@ function PublicLayout() {
           </div>
           <div className="mt-2 flex items-center justify-center gap-3 text-[10px] text-lavender/40">
             <Link
-              to="/updates"
+              to="/patch-notes"
               className="transition-colors hover:text-lavender/50"
             >
-              Updates
+              Patch Notes
             </Link>
             <span>·</span>
             <Link
