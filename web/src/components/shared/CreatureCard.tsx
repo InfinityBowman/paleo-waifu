@@ -87,7 +87,7 @@ export function CreatureCard({
               NEW
             </Badge>
           )}
-          {creature.isBattleReady && (
+          {!!creature.isBattleReady && (
             <Swords className="h-3 w-3 text-amber-400" />
           )}
         </div>

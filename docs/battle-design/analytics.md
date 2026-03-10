@@ -10,7 +10,7 @@ The balance UI currently uses two simulation modes (meta sim and field sim) to e
 
 ## Data Available Per Battle
 
-Every resolved `battleChallenge` stores the full `BattleResult` from `simulateBattle()`:
+Every `battleLog` entry stores the full `BattleResult` from `simulateBattle()`:
 
 **Top-level** (fast to query):
 
@@ -34,10 +34,10 @@ Every resolved `battleChallenge` stores the full `BattleResult` from `simulateBa
 - `passive_trigger` — passive ability activations
 - `reflect_damage` — reflect damage events
 
-**From the challenge record** (not in BattleResult):
+**From the battle log record** (not in BattleResult):
 
-- `challengerTeam` / `defenderTeam` — full team compositions with creature IDs, rows
-- Player IDs, ratings, timestamp
+- `attackerTeam` / `defenderTeam` — full team compositions with creature IDs, rows
+- Player IDs, ratings, mode (arena/friendly), timestamp
 
 ## Metrics Derivable from Real Data
 
@@ -64,7 +64,7 @@ D1 keeps only the last 30 days of battle data for active queries. Older battles 
 ### Flow
 
 ```
-D1 (battleChallenge, status = 'resolved')
+D1 (battleLog)
   → Every ~30 days: pull battles older than 30 days
   → Write to R2 as JSON/NDJSON (batched by date range)
   → Delete archived rows from D1
@@ -101,4 +101,4 @@ The aggregate output should match the existing `FieldResult` shape where possibl
 
 ## No Schema Changes Needed
 
-The battle plan already stores everything required in `battleChallenge.result`. No additional columns or tables are needed to support analytics — it's purely a processing and presentation concern on top of existing data.
+The battle plan already stores everything required in `battleLog.result`. No additional columns or tables are needed to support analytics — it's purely a processing and presentation concern on top of existing data.
