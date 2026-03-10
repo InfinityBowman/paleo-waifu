@@ -11,7 +11,8 @@ import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
-const SITE_URL = 'https://paleo-waifu.jacobmaynard.dev'
+const CANONICAL_DOMAIN = 'paleowaifu.com'
+const SITE_URL = `https://${CANONICAL_DOMAIN}`
 
 export const Route = createRootRoute({
   headers: () => ({
