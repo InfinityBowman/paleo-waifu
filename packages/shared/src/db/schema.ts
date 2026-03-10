@@ -408,26 +408,3 @@ export const battleRating = sqliteTable('battle_rating', {
     sql`(unixepoch())`,
   ),
 })
-
-// ─── Update posts ───────────────────────────────────────────────────
-
-export const updatePost = sqliteTable(
-  'update_post',
-  {
-    id: text('id').primaryKey(),
-    title: text('title').notNull(),
-    body: text('body').notNull(), // raw markdown
-    tag: text('tag'), // 'feature' | 'balance' | 'bugfix' | 'event'
-    publishedAt: integer('published_at', { mode: 'timestamp' }).notNull(),
-    createdAt: integer('created_at', { mode: 'timestamp' }).default(
-      sql`(unixepoch())`,
-    ),
-    updatedAt: integer('updated_at', { mode: 'timestamp' }).default(
-      sql`(unixepoch())`,
-    ),
-  },
-  (table) => [
-    index('up_published_at_idx').on(table.publishedAt),
-    index('up_tag_idx').on(table.tag),
-  ],
-)

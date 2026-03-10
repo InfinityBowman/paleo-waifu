@@ -79,11 +79,7 @@ export function FriendlyTab({
             >
               <div className="flex items-center gap-2.5">
                 {u.image ? (
-                  <img
-                    src={u.image}
-                    alt=""
-                    className="h-7 w-7 rounded-full"
-                  />
+                  <img src={u.image} alt="" className="h-7 w-7 rounded-full" />
                 ) : (
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/30 text-xs">
                     {u.name?.[0] ?? '?'}

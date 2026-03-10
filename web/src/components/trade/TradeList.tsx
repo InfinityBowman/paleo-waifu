@@ -2,7 +2,11 @@ import { useState } from 'react'
 import { useRouter } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { Loader2, Plus } from 'lucide-react'
+import { TradeMarketplace } from './TradeMarketplace'
+import { TradeMyOffers } from './TradeMyOffers'
 import type { PickerCreature } from '@/components/shared/CreaturePickerModal'
+import type { TradeItem } from './TradeMarketplace'
+import type { IncomingProposalItem, MyProposalItem } from './TradeMyOffers'
 import { CreatureModal } from '@/components/collection/CreatureModal'
 import { getCreaturePreview } from '@/routes/_app/trade'
 import { Button } from '@/components/ui/button'
@@ -19,10 +23,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { CreaturePickerModal } from '@/components/shared/CreaturePickerModal'
-import { TradeMarketplace } from './TradeMarketplace'
-import { TradeMyOffers } from './TradeMyOffers'
-import type { TradeItem } from './TradeMarketplace'
-import type { IncomingProposalItem, MyProposalItem } from './TradeMyOffers'
 
 interface MyCreature {
   id: string

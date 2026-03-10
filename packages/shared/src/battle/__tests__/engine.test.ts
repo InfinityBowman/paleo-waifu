@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { simulateBattle } from '../engine'
-import { makeTeam, THICK_HIDE } from './test-helpers'
+import { THICK_HIDE, makeTeam } from './test-helpers'
 import type { Ability, BattleTeamMember } from '../types'
 
 // ─── Engine Integration Tests ──────────────────────────────────────
@@ -143,15 +143,13 @@ describe('Turn order determinism (audit #1)', () => {
 })
 
 describe('Dead creature guards (audit #2, #3, #4)', () => {
-  it('venomous passive does NOT fire after attacker is KO\'d by reflect (audit #2)', () => {
+  it("venomous passive does NOT fire after attacker is KO'd by reflect (audit #2)", () => {
     const venomousPassive: Ability = {
       id: 'venomous',
       name: 'Venomous',
       displayName: 'Venomous',
       trigger: { type: 'onBasicAttack' },
-      effects: [
-        { type: 'dot', dotKind: 'poison', percent: 3, duration: 2 },
-      ],
+      effects: [{ type: 'dot', dotKind: 'poison', percent: 3, duration: 2 }],
       target: 'attack_target',
       description: 'Basic attacks apply poison.',
     }
@@ -199,9 +197,7 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
     // to the reflector on that action.
     const venomousKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Venomous',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Venomous',
     )
     expect(venomousKo).toBeDefined()
 
@@ -259,9 +255,7 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
     // After healer dies, no soothing_aura triggers should appear
     const healerKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Healer',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Healer',
     )
     expect(healerKo).toBeDefined()
     const koTurn = 'turn' in healerKo! ? healerKo.turn : 0
@@ -337,7 +331,7 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
         'passiveId' in e &&
         e.passiveId === 'scavenger' &&
         'creatureId' in e &&
-        (e.creatureId as string).includes('FragileKiller'),
+        e.creatureId.includes('FragileKiller'),
     )
     expect(onKillTrigger).toBeUndefined()
   })
@@ -350,8 +344,16 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
         name: 'Dying',
         stats: { hp: 1, atk: 1, def: 1, spd: 1 },
       },
-      { creatureId: 'a2-c', name: 'A2', stats: { hp: 100, atk: 10, def: 20, spd: 10 } },
-      { creatureId: 'a3-c', name: 'A3', stats: { hp: 100, atk: 10, def: 20, spd: 10 } },
+      {
+        creatureId: 'a2-c',
+        name: 'A2',
+        stats: { hp: 100, atk: 10, def: 20, spd: 10 },
+      },
+      {
+        creatureId: 'a3-c',
+        name: 'A3',
+        stats: { hp: 100, atk: 10, def: 20, spd: 10 },
+      },
     ])
     const teamB = makeTeam([
       {
@@ -359,8 +361,16 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
         name: 'Killer',
         stats: { hp: 100, atk: 999, def: 20, spd: 100 },
       },
-      { creatureId: 'b2-c', name: 'B2', stats: { hp: 100, atk: 30, def: 20, spd: 10 } },
-      { creatureId: 'b3-c', name: 'B3', stats: { hp: 100, atk: 30, def: 20, spd: 10 } },
+      {
+        creatureId: 'b2-c',
+        name: 'B2',
+        stats: { hp: 100, atk: 30, def: 20, spd: 10 },
+      },
+      {
+        creatureId: 'b3-c',
+        name: 'B3',
+        stats: { hp: 100, atk: 30, def: 20, spd: 10 },
+      },
     ])
 
     const result = simulateBattle(teamA, teamB, { seed: 42 })
@@ -368,9 +378,7 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
     // The dying creature should be KO'd and never appear in status_tick events after death
     const dyingKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Dying',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Dying',
     )
     expect(dyingKo).toBeDefined()
     const koTurn = 'turn' in dyingKo! ? dyingKo.turn : 0
@@ -380,7 +388,7 @@ describe('Dead creature guards (audit #2, #3, #4)', () => {
       (e) =>
         e.type === 'status_tick' &&
         'targetId' in e &&
-        (e.targetId as string).includes('dying-c') &&
+        e.targetId.includes('dying-c') &&
         'turn' in e &&
         e.turn > koTurn,
     )
@@ -467,9 +475,7 @@ describe('Stun Integration', () => {
       name: 'Venomous',
       displayName: 'Venomous',
       trigger: { type: 'onBasicAttack' },
-      effects: [
-        { type: 'dot', dotKind: 'poison', percent: 10, duration: 3 },
-      ],
+      effects: [{ type: 'dot', dotKind: 'poison', percent: 10, duration: 3 }],
       target: 'attack_target',
       description: 'Basic attacks apply poison.',
     }
@@ -503,7 +509,7 @@ describe('Stun Integration', () => {
       (e) =>
         e.type === 'stun_skip' &&
         'creatureId' in e &&
-        (e.creatureId as string).includes('Victim'),
+        e.creatureId.includes('Victim'),
     )
 
     // We can't guarantee the exact scenario plays out with this seed,
@@ -515,7 +521,7 @@ describe('Stun Integration', () => {
         (e) =>
           e.type === 'status_tick' &&
           'targetId' in e &&
-          (e.targetId as string).includes('Victim') &&
+          e.targetId.includes('Victim') &&
           'kind' in e &&
           e.kind === 'poison',
       )
@@ -559,9 +565,7 @@ describe('KO Triggers', () => {
     // Fodder should be KO'd
     const fodderKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Fodder',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Fodder',
     )
     expect(fodderKo).toBeDefined()
 
@@ -611,9 +615,7 @@ describe('KO Triggers', () => {
     // Weak should be KO'd
     const weakKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Weak',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Weak',
     )
     expect(weakKo).toBeDefined()
 
@@ -664,9 +666,7 @@ describe('KO Triggers', () => {
     // Fodder should be KO'd
     const fodderKo = result.log.find(
       (e) =>
-        e.type === 'ko' &&
-        'creatureName' in e &&
-        e.creatureName === 'Fodder',
+        e.type === 'ko' && 'creatureName' in e && e.creatureName === 'Fodder',
     )
     expect(fodderKo).toBeDefined()
 
@@ -703,9 +703,7 @@ describe('KO Triggers', () => {
     for (const name of ['Weak1', 'Weak2', 'Weak3']) {
       const koEvents = result.log.filter(
         (e) =>
-          e.type === 'ko' &&
-          'creatureName' in e &&
-          e.creatureName === name,
+          e.type === 'ko' && 'creatureName' in e && e.creatureName === name,
       )
       expect(koEvents).toHaveLength(1)
     }

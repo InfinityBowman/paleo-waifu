@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { calculateDamage } from '../damage'
 import { createRng } from '../rng'
-import { makeCreature, NONE_PASSIVE, THICK_HIDE } from './test-helpers'
+import { NONE_PASSIVE, THICK_HIDE, makeCreature } from './test-helpers'
 import type { Effect } from '../types'
 
 describe('Damage', () => {

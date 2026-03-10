@@ -10,7 +10,7 @@ import {
   resolveTarget,
   tickStatusEffects,
 } from '../abilities'
-import { makeCreature, NONE_PASSIVE, THICK_HIDE } from './test-helpers'
+import { NONE_PASSIVE, THICK_HIDE, makeCreature } from './test-helpers'
 import type { Ability, Effect, EffectContext } from '../types'
 
 describe('Abilities', () => {
@@ -298,7 +298,12 @@ describe('Stun Effects', () => {
     expect(target.isStunned).toBe(true)
     expect(target.statusEffects.some((e) => e.kind === 'stun')).toBe(true)
     expect(
-      results.some((r) => r.kind === 'status_applied' && 'effect' in r && r.effect.kind === 'stun'),
+      results.some(
+        (r) =>
+          r.kind === 'status_applied' &&
+          'effect' in r &&
+          r.effect.kind === 'stun',
+      ),
     ).toBe(true)
   })
 
@@ -440,10 +445,7 @@ describe('Lifesteal Effects', () => {
     expect(healRes).toBeDefined()
 
     // Heal should be 25% of damage dealt
-    const expectedHeal = Math.max(
-      1,
-      Math.floor(damageRes!.amount * 0.25),
-    )
+    const expectedHeal = Math.max(1, Math.floor(damageRes!.amount * 0.25))
     expect(healRes!.amount).toBe(expectedHeal)
     expect(caster.currentHp).toBe(
       Math.min(caster.maxHp, hpBefore + expectedHeal),
@@ -525,7 +527,7 @@ describe('Lifesteal Effects', () => {
     expect(caster.currentHp).toBe(50) // unchanged
   })
 
-  it('lifesteal fires even when target was KO\'d by the damage', () => {
+  it("lifesteal fires even when target was KO'd by the damage", () => {
     const rng = createRng(42)
     const caster = makeCreature({
       id: 'caster',
@@ -577,7 +579,7 @@ describe('Lifesteal Effects', () => {
     expect(caster.currentHp).toBeGreaterThan(50)
   })
 
-  it('secondary effects (non-lifesteal) do NOT fire on KO\'d target', () => {
+  it("secondary effects (non-lifesteal) do NOT fire on KO'd target", () => {
     const rng = createRng(42)
     const caster = makeCreature({
       id: 'caster',
@@ -621,9 +623,7 @@ describe('Lifesteal Effects', () => {
     expect(target.isAlive).toBe(false)
     // Poison should NOT have been applied
     expect(target.statusEffects.some((e) => e.kind === 'poison')).toBe(false)
-    expect(
-      results.some((r) => r.kind === 'status_applied'),
-    ).toBe(false)
+    expect(results.some((r) => r.kind === 'status_applied')).toBe(false)
   })
 })
 
@@ -802,7 +802,7 @@ describe('Shield Absorption', () => {
     expect(dmgRes).toBeDefined()
     expect(reflectRes).toBeDefined()
     // Reflect amount should be floor(finalDamage * 0.30)
-    expect(reflectRes!.amount).toBe(Math.floor(dmgRes!.amount * 0.30))
+    expect(reflectRes!.amount).toBe(Math.floor(dmgRes!.amount * 0.3))
   })
 })
 

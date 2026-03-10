@@ -121,10 +121,7 @@ export function BattleList({
     }
   }
 
-  function startTransition(
-    defenderName: string,
-    defenderImage: string | null,
-  ) {
+  function startTransition(defenderName: string, defenderImage: string | null) {
     setTransitionPlayers({
       attackerName: userName,
       attackerImage: userImage,

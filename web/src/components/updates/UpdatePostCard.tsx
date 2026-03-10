@@ -1,8 +1,6 @@
 import { MarkdownRenderer } from './MarkdownRenderer'
-import type { updatePost } from '@paleo-waifu/shared/db/schema'
+import type { UpdatePost } from '@/lib/updates'
 import { Badge } from '@/components/ui/badge'
-
-type UpdatePostRow = typeof updatePost.$inferSelect
 
 const TAG_STYLES: Record<string, string> = {
   feature: 'bg-rarity-rare/20 text-rarity-rare border-rarity-rare/30',
@@ -27,7 +25,7 @@ function formatDate(date: Date) {
   })
 }
 
-export function UpdatePostCard({ post }: { post: UpdatePostRow }) {
+export function UpdatePostCard({ post }: { post: UpdatePost }) {
   return (
     <article>
       <div className="mb-3 flex items-center gap-2">

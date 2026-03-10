@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { ReactNode } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -9,6 +8,7 @@ import {
   Swords,
   Zap,
 } from 'lucide-react'
+import type { ReactNode } from 'react'
 import type { BattleLogEvent } from '@paleo-waifu/shared/battle/types'
 import { cn } from '@/lib/utils'
 

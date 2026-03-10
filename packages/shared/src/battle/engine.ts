@@ -205,9 +205,7 @@ export function simulateBattle(
           ? {
               ...ability,
               effects: ability.effects.map((e, i) =>
-                i === 0 && e.type === 'damage'
-                  ? { ...e, multiplier: bam }
-                  : e,
+                i === 0 && e.type === 'damage' ? { ...e, multiplier: bam } : e,
               ),
             }
           : ability
@@ -219,7 +217,11 @@ export function simulateBattle(
       logResolutions(creature, resolutions, turn, log)
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
-      if (creature.isAlive && ability.id === 'basic_attack' && targets.length > 0) {
+      if (
+        creature.isAlive &&
+        ability.id === 'basic_attack' &&
+        targets.length > 0
+      ) {
         const attackCtx = makeCtx(
           creature,
           allies,

@@ -135,9 +135,7 @@ export function TradeMarketplace({
                         </span>
                         <button
                           className="font-display block font-bold underline decoration-muted-foreground/30 underline-offset-2 transition-colors hover:decoration-current"
-                          onClick={() =>
-                            onPreview(trade.offeredCreatureBaseId)
-                          }
+                          onClick={() => onPreview(trade.offeredCreatureBaseId)}
                         >
                           {trade.offeredCreatureName}
                         </button>
@@ -186,9 +184,7 @@ export function TradeMarketplace({
                 onClick={handleLoadMore}
                 disabled={loadingMore}
               >
-                {loadingMore && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
+                {loadingMore && <Loader2 className="h-4 w-4 animate-spin" />}
                 Load more trades
               </Button>
             </div>

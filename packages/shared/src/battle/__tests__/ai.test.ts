@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { createRng } from '../rng'
 import { selectAction } from '../ai'
-import { makeCreature, NONE_PASSIVE, TAIL_SWEEP } from './test-helpers'
+import { NONE_PASSIVE, TAIL_SWEEP, makeCreature } from './test-helpers'
 import type { Ability } from '../types'
 
 describe('AI', () => {

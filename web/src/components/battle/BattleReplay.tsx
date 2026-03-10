@@ -1,10 +1,10 @@
 import { Skull, Trophy } from 'lucide-react'
+import { FullBattleLog, KeyMoments } from './BattleLogViewer'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import type { BattleResult } from '@paleo-waifu/shared/battle/types'
 import { IconFossil } from '@/components/icons'
 import { cn } from '@/lib/utils'
 import { RARITY_BG, RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
-import { KeyMoments, FullBattleLog } from './BattleLogViewer'
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -331,16 +331,8 @@ export function BattleReplay({
       {/* Battle Log */}
       {result && (
         <>
-          <KeyMoments
-            log={result.log}
-            nameMap={nameMap}
-            sideMap={sideMap}
-          />
-          <FullBattleLog
-            log={result.log}
-            nameMap={nameMap}
-            sideMap={sideMap}
-          />
+          <KeyMoments log={result.log} nameMap={nameMap} sideMap={sideMap} />
+          <FullBattleLog log={result.log} nameMap={nameMap} sideMap={sideMap} />
         </>
       )}
     </div>

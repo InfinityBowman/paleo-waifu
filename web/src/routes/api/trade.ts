@@ -10,11 +10,10 @@ import {
   tradeProposal,
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
+import type { Database } from '@paleo-waifu/shared/db/client'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
-
-import type { Database } from '@paleo-waifu/shared/db/client'
 
 const idField = z.string().min(1).max(50)
 
@@ -30,7 +29,7 @@ async function isOnBattleTeam(
     .where(eq(battleTeam.userId, userId))
     .all()
   for (const team of teams) {
-    const members: { userCreatureId: string }[] = JSON.parse(team.members)
+    const members: Array<{ userCreatureId: string }> = JSON.parse(team.members)
     if (members.some((m) => m.userCreatureId === userCreatureId)) return true
   }
   return false

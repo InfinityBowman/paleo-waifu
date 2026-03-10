@@ -1,29 +1,11 @@
 import { Link, createFileRoute, notFound } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
 import { ArrowLeft } from 'lucide-react'
-import { createDb } from '@paleo-waifu/shared/db/client'
-import { updatePost } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
+import { getUpdatePost } from '@/lib/updates'
 import { UpdatePostCard } from '@/components/updates/UpdatePostCard'
 
-const getUpdatePost = createServerFn({ method: 'GET' })
-  .inputValidator((d: string) => d)
-  .handler(async ({ data: postId }) => {
-    const db = await createDb(getCfEnv().DB)
-    const post = await db
-      .select()
-      .from(updatePost)
-      .where(eq(updatePost.id, postId))
-      .get()
-    if (!post) return null
-    if (post.publishedAt.getTime() > Date.now()) return null
-    return post
-  })
-
 export const Route = createFileRoute('/_public/updates/$postId')({
-  loader: async ({ params }) => {
-    const post = await getUpdatePost({ data: params.postId })
+  loader: ({ params }) => {
+    const post = getUpdatePost(params.postId)
     if (!post) throw notFound()
     return post
   },

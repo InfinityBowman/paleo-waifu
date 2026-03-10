@@ -15,7 +15,7 @@
     "db:seed:battle:local": "cd web && pnpm db:seed:battle:local",
     "db:seed:battle:prod": "cd web && pnpm db:seed:battle:prod",
     "lint": "eslint",
-    "format": "prettier",
+    "format": "prettier --write .",
     "check": "prettier --write . && eslint --fix",
     "typecheck": "pnpm -r --parallel run typecheck",
     "bot:dev": "cd bot && pnpm dev",

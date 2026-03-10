@@ -1,21 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { createServerFn } from '@tanstack/react-start'
-import { desc, sql } from 'drizzle-orm'
 import { Newspaper } from 'lucide-react'
-import { createDb } from '@paleo-waifu/shared/db/client'
-import { updatePost } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
+import { getAllUpdatePosts } from '@/lib/updates'
 import { UpdatePostList } from '@/components/updates/UpdatePostList'
-
-const getUpdatePosts = createServerFn({ method: 'GET' }).handler(async () => {
-  const db = await createDb(getCfEnv().DB)
-  return db
-    .select()
-    .from(updatePost)
-    .where(sql`${updatePost.publishedAt} <= unixepoch()`)
-    .orderBy(desc(updatePost.publishedAt))
-    .all()
-})
 
 export const Route = createFileRoute('/_public/updates')({
   headers: () => ({
@@ -31,7 +17,7 @@ export const Route = createFileRoute('/_public/updates')({
       },
     ],
   }),
-  loader: () => getUpdatePosts(),
+  loader: () => getAllUpdatePosts(),
   component: UpdatesPage,
 })
 

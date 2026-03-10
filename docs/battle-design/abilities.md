@@ -273,25 +273,30 @@ The engine has one `resolveEffect()` function that handles every effect type uni
 ```
 
 **Stun:**
+
 - Sets `isStunned = true` and adds a stun status effect.
 - Re-stunning clears the old stun status effect before adding the new one (prevents stacking).
 - Does not apply to dead targets.
 - Consumed by the engine (not `tickStatusEffects`) -- the engine checks `isStunned`, skips the action, then clears the flag and removes the status.
 
 **Lifesteal:**
+
 - Heals caster for `max(1, floor(lastDamageDealt * percent / 100))`.
 - Returns empty if `lastDamageDealt <= 0` (dodged or no preceding damage).
 - Caps at `maxHp`.
 - Explicitly exempted from the "skip effects after target death" rule -- lifesteal heals the caster, not the target.
 
 **Buff/Debuff replacement:**
+
 - Applying a buff/debuff to a stat that already has one of the same kind (buff or debuff) first removes the old modifier, then applies the new one. This prevents stat drift from accumulated modifiers.
 - Different stats can have simultaneous buffs/debuffs (e.g., ATK buff + DEF buff).
 
 **Taunt:**
+
 - Applying taunt clears all existing taunts on the caster's team before adding the new one. Only one creature per team can taunt at a time.
 
 **Shield:**
+
 - Applying a new shield removes the existing shield status effect (latest replaces previous).
 - Shield value is based on `caster.maxHp * percent / 100`.
 

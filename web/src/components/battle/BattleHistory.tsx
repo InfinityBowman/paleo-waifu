@@ -109,9 +109,7 @@ export function BattleHistory({ history, userId }: BattleHistoryProps) {
                       )
                     })()}
                   {b.createdAt && (
-                    <span>
-                      {new Date(b.createdAt).toLocaleDateString()}
-                    </span>
+                    <span>{new Date(b.createdAt).toLocaleDateString()}</span>
                   )}
                 </div>
               </div>

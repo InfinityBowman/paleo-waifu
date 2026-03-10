@@ -77,8 +77,7 @@ export function TradeMyOffers({
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {incomingProposals.map((proposal) => {
-              const proposerRarity =
-                proposal.proposerCreatureRarity as Rarity
+              const proposerRarity = proposal.proposerCreatureRarity as Rarity
               const tradeRarity = proposal.tradeCreatureRarity as Rarity
               return (
                 <Card

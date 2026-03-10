@@ -1,8 +1,6 @@
 import { Link } from '@tanstack/react-router'
-import type { updatePost } from '@paleo-waifu/shared/db/schema'
+import type { UpdatePost } from '@/lib/updates'
 import { Badge } from '@/components/ui/badge'
-
-type UpdatePostRow = typeof updatePost.$inferSelect
 
 const TAG_STYLES: Record<string, string> = {
   feature: 'bg-rarity-rare/20 text-rarity-rare border-rarity-rare/30',
@@ -36,7 +34,7 @@ function stripMarkdown(md: string): string {
     .trim()
 }
 
-export function UpdatePostList({ posts }: { posts: Array<UpdatePostRow> }) {
+export function UpdatePostList({ posts }: { posts: Array<UpdatePost> }) {
   if (posts.length === 0) {
     return <p className="py-12 text-center text-lavender/40">No updates yet.</p>
   }
