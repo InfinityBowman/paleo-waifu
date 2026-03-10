@@ -12,6 +12,7 @@ import {
 } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { toCdnUrl } from '@/lib/utils'
+import { getLockedCreatureIds } from '@/lib/trade-locks'
 import { TradeList } from '@/components/trade/TradeList'
 
 export const getCreaturePreview = createServerFn({ method: 'GET' })
@@ -56,29 +57,6 @@ async function expireStaleTradesIfAny(
 
   const tradeIds = staleTrades.map((t) => t.id)
 
-  // Fetch pending proposals on these trades so we can unlock their creatures
-  const pendingProposals = await db
-    .select({ proposerCreatureId: tradeProposal.proposerCreatureId })
-    .from(tradeProposal)
-    .where(
-      and(
-        inArray(tradeProposal.tradeId, tradeIds),
-        eq(tradeProposal.status, 'pending'),
-      ),
-    )
-    .all()
-
-  const proposalCreatureIds = pendingProposals.map((p) => p.proposerCreatureId)
-
-  // Collect offeredCreatureIds to unlock
-  const offeredCreatureIds = (
-    await db
-      .select({ offeredCreatureId: tradeOffer.offeredCreatureId })
-      .from(tradeOffer)
-      .where(inArray(tradeOffer.id, tradeIds))
-      .all()
-  ).map((t) => t.offeredCreatureId)
-
   await db.batch([
     db
       .update(tradeOffer)
@@ -94,24 +72,6 @@ async function expireStaleTradesIfAny(
           eq(tradeProposal.status, 'pending'),
         ),
       ),
-    // Unlock offerer creatures
-    ...(offeredCreatureIds.length > 0
-      ? [
-          db
-            .update(userCreature)
-            .set({ isLocked: false })
-            .where(inArray(userCreature.id, offeredCreatureIds)),
-        ]
-      : []),
-    // Unlock proposal creatures
-    ...(proposalCreatureIds.length > 0
-      ? [
-          db
-            .update(userCreature)
-            .set({ isLocked: false })
-            .where(inArray(userCreature.id, proposalCreatureIds)),
-        ]
-      : []),
   ])
 }
 
@@ -248,7 +208,7 @@ const getTradeData = createServerFn({ method: 'GET' })
           )
           .all(),
 
-        // My unlocked creatures for making proposals
+        // My creatures for making proposals
         db
           .select({
             id: userCreature.id,
@@ -257,16 +217,10 @@ const getTradeData = createServerFn({ method: 'GET' })
             rarity: creature.rarity,
             imageUrl: creature.imageUrl,
             imageAspectRatio: creature.imageAspectRatio,
-            isLocked: userCreature.isLocked,
           })
           .from(userCreature)
           .innerJoin(creature, eq(creature.id, userCreature.creatureId))
-          .where(
-            and(
-              eq(userCreature.userId, userId),
-              eq(userCreature.isLocked, false),
-            ),
-          )
+          .where(eq(userCreature.userId, userId))
           .all(),
       ])
 
@@ -283,14 +237,20 @@ const getTradeData = createServerFn({ method: 'GET' })
         offeredCreatureImage: toCdnUrl(t.offeredCreatureImage ?? null),
       }))
 
+    // Filter out creatures already committed to active trades
+    const lockedIds = await getLockedCreatureIds(
+      db,
+      myCreatures.map((c) => c.id),
+    )
+    const availableCreatures = myCreatures
+      .filter((c) => !lockedIds.has(c.id))
+      .map((c) => ({ ...c, imageUrl: toCdnUrl(c.imageUrl) }))
+
     return {
       openTrades: mapCdn(openTrades),
       myProposals,
       incomingProposals,
-      myCreatures: myCreatures.map((c) => ({
-        ...c,
-        imageUrl: toCdnUrl(c.imageUrl),
-      })),
+      myCreatures: availableCreatures,
       userId,
       hasMore,
     }

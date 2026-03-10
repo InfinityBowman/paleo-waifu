@@ -7,6 +7,7 @@ import { searchUsers } from '@/routes/_app/battle.index'
 
 interface FriendlyTabProps {
   hasOffenseTeam: boolean
+  onGoToTeams: () => void
   userId: string
   loading: string | null
   onFriendlyBattle: (defenderId: string) => void
@@ -14,6 +15,7 @@ interface FriendlyTabProps {
 
 export function FriendlyTab({
   hasOffenseTeam,
+  onGoToTeams,
   userId,
   loading,
   onFriendlyBattle,
@@ -33,12 +35,22 @@ export function FriendlyTab({
 
   if (!hasOffenseTeam) {
     return (
-      <div className="flex flex-col items-center py-12 text-muted-foreground/50">
-        <Swords className="mb-3 h-8 w-8" />
-        <p className="text-sm">Set your offense team first</p>
-        <p className="mt-1 text-xs">
-          Go to the Teams tab to configure your lineup.
+      <div className="flex flex-col items-center py-12">
+        <Swords className="mb-3 h-10 w-10 text-amber-400" />
+        <p className="text-base font-medium text-muted-foreground">
+          Set your offense team first
         </p>
+        <p className="mt-1 text-sm text-muted-foreground/70">
+          Configure your lineup before challenging friends.
+        </p>
+        <Button
+          variant="default"
+          size="sm"
+          className="mt-4"
+          onClick={onGoToTeams}
+        >
+          Go to Teams
+        </Button>
       </div>
     )
   }
@@ -63,7 +75,7 @@ export function FriendlyTab({
           />
         </div>
         <Button
-          variant="outline"
+          variant="default"
           onClick={handleFriendlySearch}
           disabled={friendlySearch.length < 2}
         >

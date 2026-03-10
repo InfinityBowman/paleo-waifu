@@ -31,7 +31,6 @@ interface MyCreature {
   rarity: string
   imageUrl: string | null
   imageAspectRatio: number | null
-  isLocked: boolean | null
 }
 
 export function TradeList({

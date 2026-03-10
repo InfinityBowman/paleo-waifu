@@ -10,7 +10,7 @@
     "db:generate": "cd web && pnpm db:generate",
     "db:migrate:local": "cd web && pnpm db:migrate:local",
     "db:migrate:prod": "cd web && pnpm db:migrate:prod",
-    "clear:data:local": "cd web && pnpm clear:data:local",
+    "db:setup:local": "cd web && pnpm db:setup:local",
     "db:seed:dev-users": "cd web && pnpm db:seed:dev-users",
     "db:seed:battle:local": "cd web && pnpm db:seed:battle:local",
     "db:seed:battle:prod": "cd web && pnpm db:seed:battle:prod",

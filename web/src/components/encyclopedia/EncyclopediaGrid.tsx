@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { Link, Outlet, useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import type { EncyclopediaFilters } from '@/routes/_public/encyclopedia'
 import { IconMagnifyingGlass } from '@/components/icons'
 import { distributeToColumns } from '@/lib/utils'
-import { CreatureModal } from '@/components/collection/CreatureModal'
 import { CreatureCard } from '@/components/shared/CreatureCard'
 import { Input } from '@/components/ui/input'
 import {
@@ -14,42 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  getCreatureDetails,
-  loadMoreCreatures,
-} from '@/routes/_public/encyclopedia'
+import { loadMoreCreatures } from '@/routes/_public/encyclopedia'
 
 interface CreatureGridItem {
   id: string
   name: string
   scientificName: string
+  slug: string | null
   era: string
   diet: string
   rarity: string
   imageUrl: string | null
   imageAspectRatio: number | null
   isBattleReady: boolean
-}
-
-interface CreatureDetails {
-  description: string
-  period: string | null
-  sizeMeters: number | null
-  weightKg: number | null
-  funFacts: string | null
-  battleStats?: {
-    role: string
-    hp: number
-    atk: number
-    def: number
-    spd: number
-    active: {
-      displayName: string
-      description: string
-      cooldown: number
-    } | null
-    passive: { displayName: string; description: string } | null
-  } | null
 }
 
 interface Props {
@@ -136,52 +112,6 @@ export function EncyclopediaGrid({
     })
   }
 
-  // ── Prefetch / modal ──────────────────────────────────────────────────────
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [selectedDetails, setSelectedDetails] =
-    useState<CreatureDetails | null>(null)
-
-  const prefetchCache = useRef<Map<string, CreatureDetails>>(new Map())
-  const prefetchInFlight = useRef<Set<string>>(new Set())
-  const prefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const cancelPrefetch = useCallback(() => {
-    if (prefetchTimer.current) {
-      clearTimeout(prefetchTimer.current)
-      prefetchTimer.current = null
-    }
-  }, [])
-
-  const prefetch = useCallback(
-    (id: string) => {
-      cancelPrefetch()
-      if (prefetchCache.current.has(id) || prefetchInFlight.current.has(id))
-        return
-      prefetchTimer.current = setTimeout(() => {
-        prefetchInFlight.current.add(id)
-        getCreatureDetails({ data: id }).then((result) => {
-          prefetchInFlight.current.delete(id)
-          if (result) prefetchCache.current.set(id, result)
-        })
-      }, 200)
-    },
-    [cancelPrefetch],
-  )
-
-  const handleClick = useCallback((id: string) => {
-    setSelectedId(id)
-    const cached = prefetchCache.current.get(id)
-    if (cached) {
-      setSelectedDetails(cached)
-    } else {
-      setSelectedDetails(null)
-      getCreatureDetails({ data: id }).then((result) => {
-        if (result) prefetchCache.current.set(id, result)
-        setSelectedDetails(result)
-      })
-    }
-  }, [])
-
   const allCreatures = [...creatures, ...extraItems]
 
   // ── Masonry column distribution ──────────────────────────────────────────
@@ -215,13 +145,6 @@ export function EncyclopediaGrid({
     () => distributeToColumns(allCreatures, columnCount),
     [creatures, extraItems, columnCount],
   )
-
-  const selectedGridItem = selectedId
-    ? (allCreatures.find((c) => c.id === selectedId) ?? null)
-    : null
-  const modalCreature = selectedGridItem
-    ? { ...selectedGridItem, ...selectedDetails }
-    : null
 
   // ── Infinite scroll ────────────────────────────────────────────────────────
   const sentinelRef = useRef<HTMLDivElement | null>(null)
@@ -341,15 +264,21 @@ export function EncyclopediaGrid({
       <div ref={containerRef} className="flex gap-4">
         {columns.map((col, colIdx) => (
           <div key={colIdx} className="flex flex-1 flex-col gap-4">
-            {col.map((c) => (
-              <CreatureCard
-                key={c.id}
-                creature={c}
-                onMouseEnter={() => prefetch(c.id)}
-                onMouseLeave={cancelPrefetch}
-                onClick={() => handleClick(c.id)}
-              />
-            ))}
+            {col.map((c) =>
+              c.slug ? (
+                <Link
+                  key={c.id}
+                  to="/encyclopedia/$creatureSlug/modal"
+                  params={{ creatureSlug: c.slug }}
+                  preload="intent"
+                  className="block"
+                >
+                  <CreatureCard creature={c} />
+                </Link>
+              ) : (
+                <CreatureCard key={c.id} creature={c} />
+              ),
+            )}
           </div>
         ))}
       </div>
@@ -363,17 +292,8 @@ export function EncyclopediaGrid({
         </div>
       )}
 
-      {/* Modal */}
-      <CreatureModal
-        creature={modalCreature}
-        open={!!selectedId}
-        onOpenChange={(open) => {
-          if (!open) {
-            setSelectedId(null)
-            setSelectedDetails(null)
-          }
-        }}
-      />
+      {/* Modal child route renders here */}
+      <Outlet />
     </>
   )
 }

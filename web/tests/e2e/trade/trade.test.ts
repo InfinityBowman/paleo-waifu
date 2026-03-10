@@ -25,7 +25,7 @@ beforeEach(async () => {
 })
 
 describe('trade system', () => {
-  test('full trade lifecycle: create → lock → propose → confirm → swap ownership', async () => {
+  test('full trade lifecycle: create → propose → confirm → swap ownership', async () => {
     const cookie1 = await createSession(TEST_USER_ID)
 
     // Create trade
@@ -35,15 +35,8 @@ describe('trade system', () => {
       cookie1,
     )
     expect(createRes.status).toBe(200)
-    const { id: tradeId } = await createRes.json()
+    const { id: tradeId } = (await createRes.json()) as { id: string }
     expect(tradeId).toBeDefined()
-
-    // Verify creature locked
-    const locked = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_1,
-    )
-    expect(locked?.is_locked).toBe(1)
 
     // Verify trade created with open status
     const trade = await queryOne<{ status: string; offerer_id: string }>(
@@ -53,6 +46,14 @@ describe('trade system', () => {
     expect(trade?.status).toBe('open')
     expect(trade?.offerer_id).toBe(TEST_USER_ID)
 
+    // Creature is committed — can't be used in another trade
+    const dupRes = await authenticatedPost(
+      '/api/trade',
+      { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
+      cookie1,
+    )
+    expect(dupRes.status).toBe(400)
+
     // User-002 proposes
     const cookie2 = await createSession(TEST_USER_ID_2)
     const proposeRes = await authenticatedPost(
@@ -61,14 +62,15 @@ describe('trade system', () => {
       cookie2,
     )
     expect(proposeRes.status).toBe(200)
-    const { id: proposalId } = await proposeRes.json()
+    const { id: proposalId } = (await proposeRes.json()) as { id: string }
 
-    // Verify proposer's creature locked
-    const proposerLocked = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_4,
+    // Proposer's creature is committed — can't be used in another trade
+    const dupPropose = await authenticatedPost(
+      '/api/trade',
+      { action: 'create', offeredCreatureId: TEST_UC_ID_4 },
+      cookie2,
     )
-    expect(proposerLocked?.is_locked).toBe(1)
+    expect(dupPropose.status).toBe(400)
 
     // User-001 confirms
     const confirmRes = await authenticatedPost(
@@ -79,19 +81,17 @@ describe('trade system', () => {
     expect(confirmRes.status).toBe(200)
 
     // Verify ownership swapped
-    const uc1 = await queryOne<{ user_id: string; is_locked: number }>(
-      'SELECT user_id, is_locked FROM user_creature WHERE id = ?',
+    const uc1 = await queryOne<{ user_id: string }>(
+      'SELECT user_id FROM user_creature WHERE id = ?',
       TEST_UC_ID_1,
     )
     expect(uc1?.user_id).toBe(TEST_USER_ID_2)
-    expect(uc1?.is_locked).toBe(0)
 
-    const uc4 = await queryOne<{ user_id: string; is_locked: number }>(
-      'SELECT user_id, is_locked FROM user_creature WHERE id = ?',
+    const uc4 = await queryOne<{ user_id: string }>(
+      'SELECT user_id FROM user_creature WHERE id = ?',
       TEST_UC_ID_4,
     )
     expect(uc4?.user_id).toBe(TEST_USER_ID)
-    expect(uc4?.is_locked).toBe(0)
 
     // Verify trade_history created
     const history = await queryOne<{
@@ -125,7 +125,7 @@ describe('trade system', () => {
       },
       cookie1,
     )
-    const { id: tradeId } = await createRes.json()
+    const { id: tradeId } = (await createRes.json()) as { id: string }
 
     const cookie2 = await createSession(TEST_USER_ID_2)
 
@@ -146,7 +146,7 @@ describe('trade system', () => {
     expect(rightRes.status).toBe(200)
   })
 
-  test('cancel trade unlocks offered creature and cancels pending proposals', async () => {
+  test('cancel trade frees creature and cancels pending proposals', async () => {
     const cookie1 = await createSession(TEST_USER_ID)
 
     // Create trade
@@ -155,7 +155,7 @@ describe('trade system', () => {
       { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
       cookie1,
     )
-    const { id: tradeId } = await createRes.json()
+    const { id: tradeId } = (await createRes.json()) as { id: string }
 
     // User-002 proposes
     const cookie2 = await createSession(TEST_USER_ID_2)
@@ -164,14 +164,7 @@ describe('trade system', () => {
       { action: 'propose', tradeId, myCreatureId: TEST_UC_ID_4 },
       cookie2,
     )
-    const { id: proposalId } = await proposeRes.json()
-
-    // Verify both creatures locked
-    const beforeUc4 = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_4,
-    )
-    expect(beforeUc4?.is_locked).toBe(1)
+    const { id: proposalId } = (await proposeRes.json()) as { id: string }
 
     // Cancel trade
     const cancelRes = await authenticatedPost(
@@ -181,35 +174,38 @@ describe('trade system', () => {
     )
     expect(cancelRes.status).toBe(200)
 
-    // Offered creature unlocked
-    const uc1 = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_1,
+    // Offered creature is now free — can be used in a new trade
+    const newTradeRes = await authenticatedPost(
+      '/api/trade',
+      { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
+      cookie1,
     )
-    expect(uc1?.is_locked).toBe(0)
+    expect(newTradeRes.status).toBe(200)
 
-    // Proposal cancelled and proposer's creature unlocked
+    // Proposal cancelled
     const proposal = await queryOne<{ status: string }>(
       'SELECT status FROM trade_proposal WHERE id = ?',
       proposalId,
     )
     expect(proposal?.status).toBe('cancelled')
 
-    const uc4 = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_4,
+    // Proposer's creature is also free
+    const newProposerTrade = await authenticatedPost(
+      '/api/trade',
+      { action: 'create', offeredCreatureId: TEST_UC_ID_4 },
+      cookie2,
     )
-    expect(uc4?.is_locked).toBe(0)
+    expect(newProposerTrade.status).toBe(200)
   })
 
-  test('withdraw proposal unlocks proposer creature', async () => {
+  test('withdraw proposal frees proposer creature', async () => {
     const cookie1 = await createSession(TEST_USER_ID)
     const createRes = await authenticatedPost(
       '/api/trade',
       { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
       cookie1,
     )
-    const { id: tradeId } = await createRes.json()
+    const { id: tradeId } = (await createRes.json()) as { id: string }
 
     const cookie2 = await createSession(TEST_USER_ID_2)
     const proposeRes = await authenticatedPost(
@@ -217,7 +213,7 @@ describe('trade system', () => {
       { action: 'propose', tradeId, myCreatureId: TEST_UC_ID_4 },
       cookie2,
     )
-    const { id: proposalId } = await proposeRes.json()
+    const { id: proposalId } = (await proposeRes.json()) as { id: string }
 
     // Withdraw
     const withdrawRes = await authenticatedPost(
@@ -233,11 +229,13 @@ describe('trade system', () => {
     )
     expect(proposal?.status).toBe('withdrawn')
 
-    const uc = await queryOne<{ is_locked: number }>(
-      'SELECT is_locked FROM user_creature WHERE id = ?',
-      TEST_UC_ID_4,
+    // Proposer's creature is free again
+    const newTrade = await authenticatedPost(
+      '/api/trade',
+      { action: 'create', offeredCreatureId: TEST_UC_ID_4 },
+      cookie2,
     )
-    expect(uc?.is_locked).toBe(0)
+    expect(newTrade.status).toBe(200)
   })
 
   test('cannot propose on your own trade', async () => {
@@ -247,7 +245,7 @@ describe('trade system', () => {
       { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
       cookie,
     )
-    const { id: tradeId } = await createRes.json()
+    const { id: tradeId } = (await createRes.json()) as { id: string }
 
     const res = await authenticatedPost(
       '/api/trade',
@@ -290,7 +288,7 @@ describe('trade system', () => {
       cookie,
     )
     expect(res.status).toBe(400)
-    const body = await res.json()
+    const body = (await res.json()) as { error: string }
     expect(body.error).toContain('5 active trades')
   })
 
@@ -316,7 +314,7 @@ describe('trade system', () => {
       cookie,
     )
     expect(res.status).toBe(400)
-    const body = await res.json()
+    const body = (await res.json()) as { error: string }
     expect(body.error).toContain('battle team')
   })
 
@@ -329,7 +327,7 @@ describe('trade system', () => {
       { action: 'create', offeredCreatureId: TEST_UC_ID_1 },
       cookie,
     )
-    const body = await res.json()
+    const body = (await res.json()) as { id: string }
 
     const trade = await queryOne<{ expires_at: number }>(
       'SELECT expires_at FROM trade_offer WHERE id = ?',

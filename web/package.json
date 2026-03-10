@@ -10,7 +10,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate:local": "wrangler d1 migrations apply paleo-waifu-db --local",
     "db:migrate:prod": "wrangler d1 migrations apply paleo-waifu-db-prod --remote --env production",
-    "clear:data:local": "rm -rf .wrangler/state && pnpm run db:migrate:local",
+    "db:setup:local": "bash scripts/setup-local.sh",
     "db:seed:dev-users": "wrangler d1 execute paleo-waifu-db --local --file=./seed-dev-users.sql",
     "db:seed:battle:local": "wrangler d1 execute paleo-waifu-db --local --file=./battle_seed.sql",
     "db:seed:battle:prod": "wrangler d1 execute paleo-waifu-db-prod --remote --env production --file=./battle_seed.sql",

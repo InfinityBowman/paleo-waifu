@@ -14,6 +14,7 @@ import type { Database } from '@paleo-waifu/shared/db/client'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { isCreatureInTrade } from '@/lib/trade-locks'
 
 const idField = z.string().min(1).max(50)
 
@@ -84,35 +85,33 @@ export const Route = createFileRoute('/api/trade')({
         const userId = session.user.id
 
         // ── CREATE ────────────────────────────────────────────────
-        // Lock the offerer's creature immediately (one open trade per creature)
         if (body.action === 'create') {
-          // Lock creature atomically — fails if not owned or already locked
-          const locked = await db
-            .update(userCreature)
-            .set({ isLocked: true })
+          // Verify ownership
+          const owned = await db
+            .select({ id: userCreature.id })
+            .from(userCreature)
             .where(
               and(
                 eq(userCreature.id, body.offeredCreatureId),
                 eq(userCreature.userId, userId),
-                eq(userCreature.isLocked, false),
               ),
             )
-            .returning({ id: userCreature.id })
+            .get()
 
-          if (locked.length === 0) {
+          if (!owned) {
+            return jsonResponse({ error: 'Creature not found' }, 400)
+          }
+
+          // Check if already in a trade
+          if (await isCreatureInTrade(db, body.offeredCreatureId)) {
             return jsonResponse(
-              { error: 'Creature not found or already in a trade' },
+              { error: 'Creature is already in a trade' },
               400,
             )
           }
 
           // Block creatures on battle teams
           if (await isOnBattleTeam(db, userId, body.offeredCreatureId)) {
-            // Undo the lock
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, body.offeredCreatureId))
             return jsonResponse(
               {
                 error:
@@ -134,11 +133,6 @@ export const Route = createFileRoute('/api/trade')({
             )
 
           if (capRow.total >= 5) {
-            // Undo the lock
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, body.offeredCreatureId))
             return jsonResponse(
               {
                 error:
@@ -166,7 +160,7 @@ export const Route = createFileRoute('/api/trade')({
         }
 
         // ── CANCEL ────────────────────────────────────────────────
-        // Offerer cancels their trade — unlock offered creature + cancel all proposals
+        // Offerer cancels their trade — cancel all proposals
         if (body.action === 'cancel') {
           const trade = await db
             .select()
@@ -187,31 +181,11 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Fetch all pending proposals to unlock their creatures
-          const pendingProposals = await db
-            .select({ proposerCreatureId: tradeProposal.proposerCreatureId })
-            .from(tradeProposal)
-            .where(
-              and(
-                eq(tradeProposal.tradeId, body.tradeId),
-                eq(tradeProposal.status, 'pending'),
-              ),
-            )
-            .all()
-
-          const proposalCreatureIds = pendingProposals.map(
-            (p) => p.proposerCreatureId,
-          )
-
           await db.batch([
             db
               .update(tradeOffer)
               .set({ status: 'cancelled' })
               .where(eq(tradeOffer.id, body.tradeId)),
-            db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, trade.offeredCreatureId)),
             // Cancel all pending proposals
             db
               .update(tradeProposal)
@@ -222,15 +196,6 @@ export const Route = createFileRoute('/api/trade')({
                   eq(tradeProposal.status, 'pending'),
                 ),
               ),
-            // Unlock all proposal creatures
-            ...(proposalCreatureIds.length > 0
-              ? [
-                  db
-                    .update(userCreature)
-                    .set({ isLocked: false })
-                    .where(inArray(userCreature.id, proposalCreatureIds)),
-                ]
-              : []),
           ])
 
           return jsonResponse({ success: true })
@@ -280,32 +245,32 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Lock the proposer's creature
-          const locked = await db
-            .update(userCreature)
-            .set({ isLocked: true })
+          // Verify ownership
+          const owned = await db
+            .select({ id: userCreature.id, creatureId: userCreature.creatureId })
+            .from(userCreature)
             .where(
               and(
                 eq(userCreature.id, body.myCreatureId),
                 eq(userCreature.userId, userId),
-                eq(userCreature.isLocked, false),
               ),
             )
-            .returning({ id: userCreature.id })
+            .get()
 
-          if (locked.length === 0) {
+          if (!owned) {
+            return jsonResponse({ error: 'Creature not found' }, 400)
+          }
+
+          // Check if already in a trade
+          if (await isCreatureInTrade(db, body.myCreatureId)) {
             return jsonResponse(
-              { error: 'Your creature not found or already in use' },
+              { error: 'Your creature is already in a trade' },
               400,
             )
           }
 
           // Block creatures on battle teams
           if (await isOnBattleTeam(db, userId, body.myCreatureId)) {
-            await db
-              .update(userCreature)
-              .set({ isLocked: false })
-              .where(eq(userCreature.id, body.myCreatureId))
             return jsonResponse(
               {
                 error:
@@ -317,17 +282,7 @@ export const Route = createFileRoute('/api/trade')({
 
           // Validate wantedCreatureId constraint
           if (trade.wantedCreatureId) {
-            const mySpecies = await db
-              .select({ creatureId: userCreature.creatureId })
-              .from(userCreature)
-              .where(eq(userCreature.id, body.myCreatureId))
-              .get()
-
-            if (mySpecies?.creatureId !== trade.wantedCreatureId) {
-              await db
-                .update(userCreature)
-                .set({ isLocked: false })
-                .where(eq(userCreature.id, body.myCreatureId))
+            if (owned.creatureId !== trade.wantedCreatureId) {
               return jsonResponse(
                 { error: 'This trade requires a specific creature species' },
                 400,
@@ -385,7 +340,7 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Verify proposer still owns their creature and it's locked
+          // Verify proposer still owns their creature
           const proposerOwns = await db
             .select({ id: userCreature.id })
             .from(userCreature)
@@ -393,7 +348,6 @@ export const Route = createFileRoute('/api/trade')({
               and(
                 eq(userCreature.id, proposal.proposerCreatureId),
                 eq(userCreature.userId, proposal.proposerId),
-                eq(userCreature.isLocked, true),
               ),
             )
             .get()
@@ -410,7 +364,7 @@ export const Route = createFileRoute('/api/trade')({
             )
           }
 
-          // Verify offerer still owns their creature and it's locked
+          // Verify offerer still owns their creature
           const offererOwns = await db
             .select({ id: userCreature.id })
             .from(userCreature)
@@ -418,24 +372,21 @@ export const Route = createFileRoute('/api/trade')({
               and(
                 eq(userCreature.id, trade.offeredCreatureId),
                 eq(userCreature.userId, trade.offererId),
-                eq(userCreature.isLocked, true),
               ),
             )
             .get()
 
           if (!offererOwns) {
-            // Integrity error — shouldn't happen since we locked on create
             return jsonResponse(
               { error: 'Trade integrity error — your creature is missing' },
               409,
             )
           }
 
-          // Fetch all OTHER pending proposals so we can cancel + unlock them
+          // Fetch all OTHER pending proposals so we can cancel them
           const losingProposals = await db
             .select({
               id: tradeProposal.id,
-              proposerCreatureId: tradeProposal.proposerCreatureId,
             })
             .from(tradeProposal)
             .where(
@@ -447,9 +398,6 @@ export const Route = createFileRoute('/api/trade')({
             )
             .all()
 
-          const losingCreatureIds = losingProposals.map(
-            (p) => p.proposerCreatureId,
-          )
           const losingProposalIds = losingProposals.map((p) => p.id)
 
           // Execute the swap + settle all proposals atomically
@@ -471,12 +419,12 @@ export const Route = createFileRoute('/api/trade')({
             // Swap: offerer's creature → proposer
             db
               .update(userCreature)
-              .set({ userId: proposal.proposerId, isLocked: false })
+              .set({ userId: proposal.proposerId })
               .where(eq(userCreature.id, trade.offeredCreatureId)),
             // Swap: proposer's creature → offerer
             db
               .update(userCreature)
-              .set({ userId: trade.offererId, isLocked: false })
+              .set({ userId: trade.offererId })
               .where(eq(userCreature.id, proposal.proposerCreatureId)),
             // Record trade history
             db.insert(tradeHistory).values({
@@ -494,15 +442,6 @@ export const Route = createFileRoute('/api/trade')({
                     .update(tradeProposal)
                     .set({ status: 'cancelled' })
                     .where(inArray(tradeProposal.id, losingProposalIds)),
-                ]
-              : []),
-            // Unlock losing creatures
-            ...(losingCreatureIds.length > 0
-              ? [
-                  db
-                    .update(userCreature)
-                    .set({ isLocked: false })
-                    .where(inArray(userCreature.id, losingCreatureIds)),
                 ]
               : []),
           ])
@@ -531,16 +470,10 @@ export const Route = createFileRoute('/api/trade')({
           )
         }
 
-        await db.batch([
-          db
-            .update(tradeProposal)
-            .set({ status: 'withdrawn' })
-            .where(eq(tradeProposal.id, body.proposalId)),
-          db
-            .update(userCreature)
-            .set({ isLocked: false })
-            .where(eq(userCreature.id, proposal.proposerCreatureId)),
-        ])
+        await db
+          .update(tradeProposal)
+          .set({ status: 'withdrawn' })
+          .where(eq(tradeProposal.id, body.proposalId))
 
         return jsonResponse({ success: true })
       },

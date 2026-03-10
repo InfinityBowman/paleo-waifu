@@ -26,7 +26,6 @@ interface CollectionItem {
   imageAspectRatio: number | null
   description: string
   isFavorite: boolean | null
-  isLocked: boolean | null
   isBattleReady: boolean
   battleStats?: BattleStatsData | null
 }

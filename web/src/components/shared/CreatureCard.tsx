@@ -37,8 +37,10 @@ export function CreatureCard({
 }) {
   const rarity = creature.rarity as Rarity
 
+  const Tag = onClick ? 'button' : 'div'
+
   return (
-    <button
+    <Tag
       onClick={onClick}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
@@ -106,6 +108,6 @@ export function CreatureCard({
       {creature.isFavorite && (
         <IconRoundStar className="absolute right-1.5 top-1.5 h-4 w-4 animate-sparkle fill-rarity-legendary/85 text-rarity-legendary/85" />
       )}
-    </button>
+    </Tag>
   )
 }

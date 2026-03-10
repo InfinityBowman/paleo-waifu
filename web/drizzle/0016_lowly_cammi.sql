@@ -1,0 +1,1 @@
+ALTER TABLE `user_creature` DROP COLUMN `is_locked`;

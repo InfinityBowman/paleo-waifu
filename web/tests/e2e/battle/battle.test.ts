@@ -17,6 +17,12 @@ import {
   seedTestData,
 } from '../helpers/db-seed'
 
+interface BattleResult {
+  success: boolean
+  battleId: string
+  error?: string
+}
+
 async function setupBothTeams() {
   const cookie1 = await createSession(TEST_USER_ID)
   const r1 = await authenticatedPost(
@@ -87,7 +93,7 @@ describe('battle system', () => {
     expect(JSON.parse(team!.members)).toHaveLength(3)
   })
 
-  test('team validation: duplicates, non-owned, and locked creatures rejected', async () => {
+  test('team validation: duplicates, non-owned, and in-trade creatures rejected', async () => {
     const cookie = await createSession(TEST_USER_ID)
 
     // Duplicate creatures
@@ -122,12 +128,16 @@ describe('battle system', () => {
     )
     expect(nonOwnedRes.status).toBe(400)
 
-    // Locked creature
+    // Creature in active trade
     await execute(
-      'UPDATE user_creature SET is_locked = 1 WHERE id = ?',
+      `INSERT INTO trade_offer (id, offerer_id, offered_creature_id, status, expires_at)
+       VALUES (?, ?, ?, 'open', ?)`,
+      'trade-lock-test',
+      TEST_USER_ID,
       TEST_UC_ID_1,
+      Math.floor(Date.now() / 1000) + 86400,
     )
-    const lockedRes = await authenticatedPost(
+    const inTradeRes = await authenticatedPost(
       '/api/battle',
       {
         action: 'set_team',
@@ -140,7 +150,7 @@ describe('battle system', () => {
       },
       cookie,
     )
-    expect(lockedRes.status).toBe(400)
+    expect(inTradeRes.status).toBe(400)
   })
 
   test('arena attack: executes battle, creates log, updates ratings', async () => {
@@ -153,7 +163,7 @@ describe('battle system', () => {
     )
     expect(res.status).toBe(200)
 
-    const body = await res.json()
+    const body = (await res.json()) as BattleResult
     expect(body.success).toBe(true)
     expect(body.battleId).toBeDefined()
 
@@ -198,7 +208,7 @@ describe('battle system', () => {
       cookie1,
     )
     expect(res.status).toBe(400)
-    const body = await res.json()
+    const body = (await res.json()) as { error: string }
     expect(body.error).toContain('no arena attacks remaining')
   })
 
@@ -212,7 +222,7 @@ describe('battle system', () => {
     )
     expect(res.status).toBe(200)
 
-    const body = await res.json()
+    const body = (await res.json()) as BattleResult
     expect(body.success).toBe(true)
 
     // Verify friendly mode in log

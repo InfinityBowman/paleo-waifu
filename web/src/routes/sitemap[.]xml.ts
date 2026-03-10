@@ -1,4 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { isNotNull } from 'drizzle-orm'
+import { createDb } from '@paleo-waifu/shared/db/client'
+import { creature } from '@paleo-waifu/shared/db/schema'
+import { getCfEnv } from '@/lib/env'
 
 const SITE_URL = 'https://paleowaifu.com'
 
@@ -12,8 +16,15 @@ const STATIC_PAGES = [
 export const Route = createFileRoute('/sitemap.xml')({
   server: {
     handlers: {
-      GET: () => {
-        const urls = STATIC_PAGES.map(
+      GET: async () => {
+        const db = await createDb(getCfEnv().DB)
+        const slugs = await db
+          .select({ slug: creature.slug })
+          .from(creature)
+          .where(isNotNull(creature.slug))
+          .all()
+
+        const staticUrls = STATIC_PAGES.map(
           (p) => `
   <url>
     <loc>${SITE_URL}${p.path}</loc>
@@ -22,8 +33,19 @@ export const Route = createFileRoute('/sitemap.xml')({
   </url>`,
         ).join('')
 
+        const creatureUrls = slugs
+          .map(
+            (r) => `
+  <url>
+    <loc>${SITE_URL}/encyclopedia/${r.slug}</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`,
+          )
+          .join('')
+
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${staticUrls}${creatureUrls}
 </urlset>`
 
         return new Response(xml, {

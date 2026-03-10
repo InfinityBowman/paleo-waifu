@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { env } from 'cloudflare:workers'
+import { getCfEnv } from '@/lib/env'
 
 // Test-only DB endpoints — only available in dev builds.
 // In production, Vite replaces import.meta.env.DEV with false
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/api/test')({
               return json({ error: 'Missing or invalid ?action= param' }, 400)
             }
 
-            const db = env.DB
+            const db = getCfEnv().DB
 
             // Batch: multiple statements
             if (action === 'batch') {

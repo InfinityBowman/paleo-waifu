@@ -44,7 +44,7 @@ describe('admin operations', () => {
       cookie,
     )
     expect(addRes.status).toBe(200)
-    const addBody = await addRes.json()
+    const addBody = (await addRes.json()) as { fossils: number }
     expect(addBody.fossils).toBe(150) // 100 + 50
 
     // Remove more than available (floors at 0)
@@ -54,7 +54,7 @@ describe('admin operations', () => {
       cookie,
     )
     expect(removeRes.status).toBe(200)
-    const removeBody = await removeRes.json()
+    const removeBody = (await removeRes.json()) as { fossils: number }
     expect(removeBody.fossils).toBe(0)
   })
 

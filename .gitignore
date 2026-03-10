@@ -20,7 +20,6 @@ python/data/cache/
 python/data/images/
 python/data/nhm_dinosaurs.csv
 assets-preview/
-seed.sql
 battle_seed.sql
 python/data/battle_creatures.json
 python/data/battle_abilities.json

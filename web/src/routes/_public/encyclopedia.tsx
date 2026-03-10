@@ -129,6 +129,7 @@ async function queryCreaturePage(
       id: creature.id,
       name: creature.name,
       scientificName: creature.scientificName,
+      slug: creature.slug,
       era: creature.era,
       diet: creature.diet,
       rarity: creature.rarity,
@@ -279,6 +280,88 @@ export const getCreatureDetails = createServerFn({ method: 'GET' })
     }
 
     return { ...details, battleStats }
+  })
+
+export const getCreatureBySlug = createServerFn({ method: 'GET' })
+  .inputValidator((slug: string) => slug)
+  .handler(async ({ data: slug }) => {
+    const db = await createDb(getCfEnv().DB)
+    const row = await db
+      .select({
+        id: creature.id,
+        name: creature.name,
+        scientificName: creature.scientificName,
+        slug: creature.slug,
+        era: creature.era,
+        diet: creature.diet,
+        rarity: creature.rarity,
+        imageUrl: creature.imageUrl,
+        description: creature.description,
+        period: creature.period,
+        sizeMeters: creature.sizeMeters,
+        weightKg: creature.weightKg,
+        funFacts: creature.funFacts,
+      })
+      .from(creature)
+      .where(eq(creature.slug, slug))
+      .get()
+
+    if (!row) return null
+
+    const [stats, abilities] = await Promise.all([
+      db
+        .select()
+        .from(creatureBattleStats)
+        .where(eq(creatureBattleStats.creatureId, row.id))
+        .get(),
+      db
+        .select({
+          templateId: creatureAbility.templateId,
+          slot: creatureAbility.slot,
+          displayName: creatureAbility.displayName,
+        })
+        .from(creatureAbility)
+        .where(eq(creatureAbility.creatureId, row.id))
+        .all(),
+    ])
+
+    let battleStats = null
+    if (stats) {
+      let active = null
+      let passive = null
+      for (const a of abilities) {
+        const template = TEMPLATE_MAP.get(a.templateId)
+        if (!template) continue
+        if (a.slot === 'active') {
+          active = {
+            displayName: a.displayName,
+            description: template.description,
+            cooldown:
+              template.trigger.type === 'onUse' ? template.trigger.cooldown : 1,
+          }
+        } else {
+          passive = {
+            displayName: a.displayName,
+            description: template.description,
+          }
+        }
+      }
+      battleStats = {
+        role: stats.role,
+        hp: stats.hp,
+        atk: stats.atk,
+        def: stats.def,
+        spd: stats.spd,
+        active,
+        passive,
+      }
+    }
+
+    return {
+      ...row,
+      imageUrl: toCdnUrl(row.imageUrl),
+      battleStats,
+    }
   })
 
 // ─── Route ───────────────────────────────────────────────────────────────────

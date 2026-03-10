@@ -6,6 +6,7 @@ import { battleTeam, userCreature } from '@paleo-waifu/shared/db/schema'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { getLockedCreatureIds } from '@/lib/trade-locks'
 import {
   deleteTeam,
   executeArenaBattle,
@@ -92,7 +93,6 @@ export const Route = createFileRoute('/api/battle')({
           const ucRows = await db
             .select({
               creatureId: userCreature.creatureId,
-              isLocked: userCreature.isLocked,
             })
             .from(userCreature)
             .where(
@@ -111,7 +111,8 @@ export const Route = createFileRoute('/api/battle')({
               400,
             )
           }
-          if (ucRows.some((r) => r.isLocked)) {
+          const locked = await getLockedCreatureIds(db, ucIds)
+          if (locked.size > 0) {
             return jsonResponse(
               {
                 error:

@@ -99,6 +99,7 @@ export const creature = sqliteTable(
     rarity: text('rarity').notNull(), // common | uncommon | rare | epic | legendary
     description: text('description').notNull(),
     funFacts: text('fun_facts'), // JSON array of strings
+    slug: text('slug'),
     imageUrl: text('image_url'),
     imageAspectRatio: real('image_aspect_ratio'),
     source: text('source'),
@@ -115,6 +116,7 @@ export const creature = sqliteTable(
     index('creature_rarity_idx').on(table.rarity),
     index('creature_name_idx').on(table.name),
     index('creature_era_idx').on(table.era),
+    uniqueIndex('creature_slug_idx').on(table.slug),
   ],
 )
 
@@ -161,7 +163,6 @@ export const userCreature = sqliteTable(
       sql`(unixepoch())`,
     ),
     isFavorite: integer('is_favorite', { mode: 'boolean' }).default(false),
-    isLocked: integer('is_locked', { mode: 'boolean' }).default(false),
   },
   (table) => [index('uc_user_id_idx').on(table.userId)],
 )

@@ -27,7 +27,7 @@ describe('collection management', () => {
       cookie,
     )
     expect(res1.status).toBe(200)
-    const body1 = await res1.json()
+    const body1 = (await res1.json()) as { isFavorite: boolean }
     expect(body1.isFavorite).toBe(true)
 
     const row1 = await queryOne<{ is_favorite: number }>(
@@ -43,7 +43,7 @@ describe('collection management', () => {
       cookie,
     )
     expect(res2.status).toBe(200)
-    const body2 = await res2.json()
+    const body2 = (await res2.json()) as { isFavorite: boolean }
     expect(body2.isFavorite).toBe(false)
 
     // Verify DB state after toggle-off
