@@ -19,7 +19,8 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
 - **Gacha pulls** — Single or 10-pull with a full pity system (soft pity at 50, hard guarantee at 90)
 - **Rate-up banners** — Featured creatures get 50% of their rarity's drop share
 - **Collection** — Browse and filter your discovered creatures by rarity and era
-- **Encyclopedia** — View all 615+ creatures with real paleontology data and fun facts
+- **Encyclopedia** — View all 615+ creatures with real paleontology data and fun facts, shareable creature pages with OG social previews
+- **Battles** — Build offense/defense teams, arena PvP with rating system, battle stats and abilities per creature
 - **Trading** — Create open trade offers, browse the marketplace, swap creatures with other players
 - **Leaderboard** — Top players by XP and collection size
 - **Daily rewards** — Log in daily for free fossils
@@ -41,7 +42,7 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
    cp .env.example .env
    ```
 
-   Fill in:
+   Copy `web/.env.example` and fill in:
    - `AUTH_SECRET` — any random string
    - `AUTH_BASE_URL` — `http://localhost:3000`
    - `DISCORD_CLIENT_ID` / `DISCORD_CLIENT_SECRET` — from the [Discord Developer Portal](https://discord.com/developers/applications) (set redirect URI to `http://localhost:3000/api/auth/callback/discord`)
@@ -72,8 +73,8 @@ Deployments are automated via GitHub Actions. Pushing to `main` triggers the rel
 
 | Workflow       | Trigger paths                                      | What it does                                                 |
 | -------------- | -------------------------------------------------- | ------------------------------------------------------------ |
-| Deploy Website | `src/`, `packages/shared/`, `drizzle/`, etc.       | D1 migrations + `wrangler deploy`                            |
-| Deploy Bot     | `bot/`, `packages/shared/`, `src/lib/`, `drizzle/` | D1 migrations + `wrangler deploy` (bot worker)               |
+| Deploy Website | `web/src/`, `packages/shared/`, `web/drizzle/`, etc. | D1 migrations + `wrangler deploy`                            |
+| Deploy Bot     | `bot/`, `packages/shared/`, `web/src/lib/`, `web/drizzle/` | D1 migrations + `wrangler deploy` (bot worker)               |
 | Gateway Docker | `gateway/`, `packages/shared/`                     | Docker build + push to GHCR + repository dispatch to homelab |
 | Editor Docker  | `editor/`, `packages/shared/`                      | Docker build + push to GHCR + repository dispatch to homelab |
 
@@ -117,11 +118,11 @@ packages/shared/       # @paleo-waifu/shared — runtime-agnostic shared code
 │       ├── types.ts   # Battle types (Role, AbilityTemplateData, etc.)
 │       └── constants.ts # Battle constants (stat distributions, ability templates)
 
-src/                   # Main TanStack Start web app
+web/src/               # Main TanStack Start web app
 ├── components/
 │   ├── admin/         # Admin dashboard components
 │   ├── collection/    # Collection grid, creature card, detail modal
-│   ├── encyclopedia/  # Browse and filter all creatures
+│   ├── encyclopedia/  # Browse grid, filters, creature detail shared component
 │   ├── gacha/         # Banner select, pull button, pull animation, card reveal, pity counter
 │   ├── landing/       # Hero section
 │   ├── layout/        # Nav with auth state
@@ -134,11 +135,13 @@ src/                   # Main TanStack Start web app
 │   ├── auth-server.ts # Server-side session helpers
 │   ├── gacha.ts       # Pull logic, pity, currency management
 │   ├── rarity-styles.ts # Tailwind rarity CSS class maps
+│   ├── slug.ts        # Slug derivation for creature URLs
 │   └── utils.ts       # cn() utility
 ├── routes/
-│   ├── _public/       # Landing page, encyclopedia, leaderboard (no auth)
+│   ├── _public/       # Landing, encyclopedia (grid + creature pages), leaderboard (no auth)
 │   ├── _app/          # Gacha, collection, trade, profile, admin (auth guarded)
 │   └── api/           # Gacha pull, trade, collection, admin, auth endpoints
+├── router.tsx         # Router config with route masks
 ├── store/             # Zustand store
 └── styles.css         # Warm amber OKLCH theme
 
@@ -157,9 +160,12 @@ gateway/               # Discord Gateway listener (Node.js, runs on homelab)
 └── Dockerfile         # Pushed to GHCR, deployed via repository dispatch
 
 editor/                # Creature editor dashboard (React + Hono)
+tools/                 # Dev tooling
+├── battle-sim/        # Monte Carlo battle simulator for balance testing
+└── balance-ui/        # React dashboard for visualizing simulation results
 python/                # Data pipeline for creature scraping, enrichment, image generation, R2 upload
 docs/                  # Design docs and reference
-tests/                 # Production integration tests (Vitest)
+web/tests/             # Production integration + E2E tests (Vitest)
 ```
 
 ## Scripts

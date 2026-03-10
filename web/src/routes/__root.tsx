@@ -21,7 +21,7 @@ export const Route = createRootRoute({
     'Referrer-Policy': 'strict-origin-when-cross-origin',
     'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
     'Content-Security-Policy':
-      "default-src 'self'; img-src 'self' cdn.jacobmaynard.dev cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'",
+      "default-src 'self'; img-src 'self' cdn.paleowaifu.com cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'",
   }),
   head: () => ({
     meta: [

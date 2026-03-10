@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-const BASE = process.env.TEST_BASE_URL ?? 'https://paleo-waifu.jacobmaynard.dev'
+const BASE = process.env.TEST_BASE_URL ?? 'https://paleowaifu.com'
 
 // Cache HTML fetches so we don't slam the server
 const htmlCache = new Map<string, string>()

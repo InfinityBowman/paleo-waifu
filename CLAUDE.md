@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code when working with this repository.
 
+IMPORTANT: Don't commit anything and never push changes.
+
 ## Commands
 
 ```bash
@@ -58,7 +60,8 @@ pnpm workspace with 6 packages:
 - **`bot/`** — Discord bot (Cloudflare Worker)
 - **`gateway/`** — Discord gateway listener (Node.js, Docker)
 - **`editor/`** — Creature editor dashboard (React + Hono)
-- Python - data analysis and database tools, use `uv` for python.
+- **`tools/`** — Battle simulator (`battle-sim`) and balance dashboard (`balance-ui`)
+- **`python/`** — Data pipeline for creature scraping, enrichment, image generation, and R2 upload (use `uv`)
 
 ### Shared Package (`@paleo-waifu/shared`)
 
@@ -77,7 +80,7 @@ When adding code used by 2+ workspaces, add it to `packages/shared/`. When addin
 
 ### Routing
 
-File-based routing via TanStack Router. Route tree auto-generated in `web/src/routeTree.gen.ts` — do not edit manually. Two layout groups:
+File-based routing via TanStack Router. Route tree auto-generated in `web/src/routeTree.gen.ts` — do not edit manually. Uses `createRouteMask()` for modal-to-page URL masking (configured in `web/src/router.tsx`). Two layout groups:
 
 - `_public` — Public layout with nav (landing, encyclopedia, leaderboard)
 - `_app` — Auth-guarded layout (gacha, collection, trade, profile)
@@ -85,7 +88,9 @@ File-based routing via TanStack Router. Route tree auto-generated in `web/src/ro
 Routes:
 
 - `/` — Landing page
-- `/encyclopedia` — Browse all creatures (public)
+- `/encyclopedia` — Browse all creatures (public, masonry grid with infinite scroll)
+- `/encyclopedia/$creatureSlug` — Standalone creature page (SSR, OG tags, edge-cached)
+- `/encyclopedia/$creatureSlug/modal` — Modal overlay (route-masked to show `/encyclopedia/$creatureSlug` in URL bar)
 - `/leaderboard` — Top players by XP and collection (public)
 - `/gacha` — Pull screen (auth required)
 - `/collection` — My collection (auth required)
@@ -106,17 +111,19 @@ Routes:
 - `web/src/routes/` — File-based route definitions
 - `web/src/components/gacha/` — Banner select, pull button, animation, card reveal
 - `web/src/components/collection/` — Grid, creature card, detail modal
-- `web/src/components/encyclopedia/` — Browse and filter all creatures
+- `web/src/components/encyclopedia/` — Browse grid, filters, creature detail shared component
 - `web/src/components/trade/` — Trade list, offer, card
 - `web/src/components/layout/` — Nav with auth state
 - `web/src/components/landing/` — Hero section
 - `web/src/components/admin/` — Admin dashboard components
 - `web/src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
 - `web/src/components/ui/` — shadcn/ui primitives
-- `web/src/lib/` — Auth, gacha logic, rarity styles, utilities
+- `web/src/lib/` — Auth, gacha logic, rarity styles, slug utilities
 - `web/src/store/` — Zustand store (fossils, pull results)
 - `python/` — Data pipeline for creature scraping, enrichment, image generation, and R2 upload
 - `editor/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)
+- `tools/battle-sim/` — Monte Carlo battle simulator for balance testing
+- `tools/balance-ui/` — React dashboard for visualizing simulation results
 
 ### Auth
 
@@ -132,7 +139,7 @@ Uses better-auth with Discord OAuth only. Server-side session validation via `ge
 
 ### Database Schema
 
-Auth tables (user, session, account, verification) managed by better-auth. Game tables: creature, banner, banner_pool, user_creature, currency, pity_counter, trade_offer, trade_proposal, trade_history, wishlist, user_xp. Schema defined in `packages/shared/src/db/schema.ts`.
+Auth tables (user, session, account, verification) managed by better-auth. Schema defined in `packages/shared/src/db/schema.ts`.
 
 ### Discord Bot (`bot/`)
 
@@ -166,6 +173,7 @@ Production integration tests in `web/tests/production/` using Vitest. Tests hit 
 - `web/public/_headers` — Cloudflare Workers Assets header rules (immutable cache for hashed `/assets/*`)
 - `web/public/og-image.png` — Open Graph social preview image
 - Creature images stored in R2, served via `cdn.jacobmaynard.dev` custom domain
+- Individual creature pages edge-cached: `s-maxage=3600, stale-while-revalidate=86400`
 - Security headers (CSP, X-Frame-Options, etc.) applied globally via root route `headers()`
 
 ## Conventions

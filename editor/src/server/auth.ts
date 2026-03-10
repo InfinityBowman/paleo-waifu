@@ -168,7 +168,7 @@ export function createAuthRoutes() {
       return c.html(
         `<html><body style="font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#1a1a1a;color:#fff;flex-direction:column">
           <h1>Account Not Found</h1>
-          <p>You need to sign up at <a href="https://paleo-waifu.jacobmaynard.dev" style="color:#f59e0b">paleo-waifu.jacobmaynard.dev</a> first.</p>
+          <p>You need to sign up at <a href="https://paleowaifu.com" style="color:#f59e0b">paleowaifu.com</a> first.</p>
           <a href="/auth/discord/login" style="color:#f59e0b;margin-top:1rem">Try again</a>
         </body></html>`,
       )

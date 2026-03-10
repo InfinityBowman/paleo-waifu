@@ -6,7 +6,7 @@ export function cn(...inputs: Array<ClassValue>) {
   return twMerge(clsx(inputs))
 }
 
-const CDN_BASE = 'https://cdn.jacobmaynard.dev'
+const CDN_BASE = 'https://cdn.paleowaifu.com'
 
 /** Rewrite `/api/images/…` paths to direct CDN URLs to avoid Worker round-trips. */
 export function toCdnUrl(imageUrl: string | null): string | null {
@@ -24,7 +24,7 @@ export const SECURITY_HEADERS: Record<string, string> = {
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=()',
   'Cache-Control': 'no-store',
   'Content-Security-Policy':
-    "default-src 'self'; img-src 'self' cdn.jacobmaynard.dev cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
+    "default-src 'self'; img-src 'self' cdn.paleowaifu.com cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'",
 }
 
 export function jsonResponse(body: unknown, status = 200): Response {

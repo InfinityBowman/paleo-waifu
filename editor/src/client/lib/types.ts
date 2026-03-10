@@ -1,7 +1,7 @@
 export type { Creature, Rarity, Stats } from '../../shared/types'
 export { slugify } from '../../shared/types'
 
-const CDN_BASE = 'https://cdn.jacobmaynard.dev'
+const CDN_BASE = 'https://cdn.paleowaifu.com'
 
 /** Rewrite `/api/images/…` paths to direct CDN URLs. */
 export function toCdnUrl(imageUrl: string | null): string | null {

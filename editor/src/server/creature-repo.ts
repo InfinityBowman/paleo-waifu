@@ -19,7 +19,6 @@ export const VALID_RARITIES = new Set([
 ])
 
 // ─── In-memory cache ──────────────────────────────────────────────────
-// Reduces D1 REST API calls since findRowBySlug does a full table scan.
 
 const CACHE_TTL = 60_000 // 1 minute
 let cachedRows: Array<CreatureRow> | null = null
@@ -70,18 +69,16 @@ function rowToCreature(row: CreatureRow): Creature {
   }
 }
 
-/**
- * Find a creature row by slug. Since slugs are derived from scientificName
- * and D1/SQLite lacks a native slugify, we fetch all rows and filter in JS.
- * Uses the in-memory cache to avoid hitting the D1 REST API on every call.
- * TODO: Add a `slug` column to the schema and use WHERE slug = ? instead.
- */
 async function findRowBySlug(
   db: EditorDatabase,
   slug: string,
 ): Promise<CreatureRow | undefined> {
-  const rows = await getAllRows(db)
-  return rows.find((r: CreatureRow) => slugify(r.scientificName) === slug)
+  const rows = await db
+    .select()
+    .from(schema.creature)
+    .where(eq(schema.creature.slug, slug))
+    .limit(1)
+  return rows[0]
 }
 
 export async function listCreatures(
@@ -113,6 +110,7 @@ export async function insertCreature(
 
   await db.insert(schema.creature).values({
     id,
+    slug,
     name: data.name,
     scientificName: data.scientificName,
     era: data.era,
@@ -145,8 +143,10 @@ export async function updateCreatureBySlug(
 
   const values: Record<string, unknown> = {}
   if (updates.name !== undefined) values.name = updates.name
-  if (updates.scientificName !== undefined)
+  if (updates.scientificName !== undefined) {
     values.scientificName = updates.scientificName
+    values.slug = slugify(updates.scientificName)
+  }
   if (updates.era !== undefined) values.era = updates.era
   if (updates.period !== undefined) values.period = updates.period
   if (updates.diet !== undefined) values.diet = updates.diet

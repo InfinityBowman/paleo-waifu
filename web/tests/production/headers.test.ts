@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-const BASE = process.env.TEST_BASE_URL ?? 'https://paleo-waifu.jacobmaynard.dev'
+const BASE = process.env.TEST_BASE_URL ?? 'https://paleowaifu.com'
 
 async function head(path: string, opts?: RequestInit) {
   const res = await fetch(`${BASE}${path}`, {

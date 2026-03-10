@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-const BASE = process.env.TEST_BASE_URL ?? 'https://paleo-waifu.jacobmaynard.dev'
+const BASE = process.env.TEST_BASE_URL ?? 'https://paleowaifu.com'
 
 // ─── Server-rendered content ────────────────────────────────────────────
 
@@ -80,7 +80,7 @@ describe('/api/images redirect', () => {
     expect(res.status).toBeGreaterThanOrEqual(300)
     expect(res.status).toBeLessThan(400)
     const location = res.headers.get('location')
-    expect(location).toContain('cdn.jacobmaynard.dev')
+    expect(location).toContain('cdn.paleowaifu.com')
   })
 
   test('redirect has cache header', async () => {
@@ -119,7 +119,7 @@ describe('404 handling', () => {
 describe('CDN image delivery', () => {
   test('creature images are accessible from CDN', async () => {
     const res = await fetch(
-      'https://cdn.jacobmaynard.dev/creatures/aardonyx-celestae.webp',
+      'https://cdn.paleowaifu.com/creatures/aardonyx-celestae.webp',
       {
         method: 'HEAD',
       },
@@ -130,7 +130,7 @@ describe('CDN image delivery', () => {
 
   test('CDN images have cache headers', async () => {
     const res = await fetch(
-      'https://cdn.jacobmaynard.dev/creatures/aardonyx-celestae.webp',
+      'https://cdn.paleowaifu.com/creatures/aardonyx-celestae.webp',
       {
         method: 'HEAD',
       },

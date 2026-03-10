@@ -27,6 +27,6 @@ export const RARITY_LABEL: Record<Rarity, string> = {
   legendary: 'Legendary',
 }
 
-export const APP_URL = 'https://paleo-waifu.jacobmaynard.dev'
+export const APP_URL = 'https://paleowaifu.com'
 export const UNLINKED_MESSAGE = `You haven't linked your Discord account yet! Sign in at ${APP_URL} with Discord to get started.`
 export const BANNED_MESSAGE = 'Your account has been banned.'

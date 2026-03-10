@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-const CDN_BASE = 'https://cdn.jacobmaynard.dev'
+const CDN_BASE = 'https://cdn.paleowaifu.com'
 
 export const Route = createFileRoute('/api/images/$')({
   server: {
