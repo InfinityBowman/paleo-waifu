@@ -1,11 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 
-const SITE_URL = 'https://paleo-waifu.jacobmaynard.dev'
+const SITE_URL = 'https://paleowaifu.com'
 
 const STATIC_PAGES = [
   { path: '/', priority: '1.0', changefreq: 'daily' },
   { path: '/encyclopedia', priority: '0.8', changefreq: 'weekly' },
   { path: '/leaderboard', priority: '0.7', changefreq: 'hourly' },
+  { path: '/updates', priority: '0.5', changefreq: 'weekly' },
 ]
 
 export const Route = createFileRoute('/sitemap.xml')({

@@ -1,5 +1,4 @@
-import handler from '@tanstack/react-start/server-entry'
-import { createServerEntry } from '@tanstack/react-start/server-entry'
+import handler, { createServerEntry } from '@tanstack/react-start/server-entry'
 
 const CANONICAL_DOMAIN = 'paleowaifu.com'
 

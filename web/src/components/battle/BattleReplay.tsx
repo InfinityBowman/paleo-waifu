@@ -1,4 +1,4 @@
-import { type ReactNode, useState } from 'react'
+import {  useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -9,6 +9,7 @@ import {
   Trophy,
   Zap,
 } from 'lucide-react'
+import type {ReactNode} from 'react';
 import type { Rarity } from '@paleo-waifu/shared/types'
 import type {
   BattleLogEvent,

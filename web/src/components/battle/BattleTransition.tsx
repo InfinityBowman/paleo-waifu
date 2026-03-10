@@ -617,15 +617,13 @@ function ChargingPhase({ players }: { players: BattlePlayers | null }) {
                 className="h-16 w-16"
                 style={{
                   color: 'oklch(0.65 0.15 340)',
-                  filter:
-                    'drop-shadow(0 0 20px oklch(0.65 0.15 340 / 0.5))',
+                  filter: 'drop-shadow(0 0 20px oklch(0.65 0.15 340 / 0.5))',
                 }}
               />
             </motion.div>
           </motion.div>
         </div>
       )}
-
     </div>
   )
 }

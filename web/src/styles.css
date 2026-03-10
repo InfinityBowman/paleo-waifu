@@ -858,6 +858,88 @@
   }
 }
 
+/* ═══ Prose for update posts ═══ */
+
+.prose-updates h1,
+.prose-updates h2,
+.prose-updates h3,
+.prose-updates h4 {
+  color: oklch(0.88 0.03 290);
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+.prose-updates h1 {
+  font-size: 1.5rem;
+}
+.prose-updates h2 {
+  font-size: 1.25rem;
+}
+.prose-updates h3 {
+  font-size: 1.1rem;
+}
+.prose-updates p {
+  margin-bottom: 0.75em;
+}
+.prose-updates ul,
+.prose-updates ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+.prose-updates ul {
+  list-style-type: disc;
+}
+.prose-updates ol {
+  list-style-type: decimal;
+}
+.prose-updates li {
+  margin-bottom: 0.25em;
+}
+.prose-updates code {
+  background: oklch(1 0 0 / 6%);
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+  font-size: 0.875em;
+}
+.prose-updates pre {
+  background: oklch(1 0 0 / 4%);
+  border: 1px solid oklch(1 0 0 / 6%);
+  border-radius: 8px;
+  padding: 0.75em 1em;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+.prose-updates pre code {
+  background: none;
+  padding: 0;
+}
+.prose-updates a {
+  color: oklch(0.7 0.15 340);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-updates a:hover {
+  color: oklch(0.8 0.15 340);
+}
+.prose-updates blockquote {
+  border-left: 3px solid oklch(1 0 0 / 10%);
+  padding-left: 1em;
+  margin-bottom: 0.75em;
+  color: oklch(0.6 0.03 290);
+}
+.prose-updates hr {
+  border: none;
+  border-top: 1px solid oklch(1 0 0 / 6%);
+  margin: 1.5em 0;
+}
+.prose-updates strong {
+  color: oklch(0.85 0.03 290);
+  font-weight: 600;
+}
+.prose-updates > *:first-child {
+  margin-top: 0;
+}
+
 /* Subtle noise texture background */
 .bg-noise::before {
   content: '';

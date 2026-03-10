@@ -5,6 +5,7 @@ import {
   BarChart3,
   LayoutDashboard,
   Menu,
+  Newspaper,
   Shield,
   Users,
 } from 'lucide-react'
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/analytics', label: 'Analytics', icon: BarChart3 },
+  { to: '/admin/updates', label: 'Updates', icon: Newspaper },
 ] as const
 
 function NavLinks({ onClick }: { onClick?: () => void }) {

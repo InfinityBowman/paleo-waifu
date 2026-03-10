@@ -143,43 +143,43 @@ Seeds and queries D1 via the worker's `/api/test/*` endpoints. Provides:
 
 ### Auth (2 files, 7 tests)
 
-| Test | What it asserts |
-| --- | --- |
-| Reject missing signature headers | 401 response |
-| Reject invalid signature | 401 response |
-| Accept valid PING | 200 + PONG (type 1) |
-| Reject non-POST | 405 response |
-| Linked user resolves | Command succeeds |
-| Unlinked user blocked | UNLINKED_MESSAGE ephemeral |
-| Banned user blocked | BANNED_MESSAGE ephemeral |
+| Test                             | What it asserts            |
+| -------------------------------- | -------------------------- |
+| Reject missing signature headers | 401 response               |
+| Reject invalid signature         | 401 response               |
+| Accept valid PING                | 200 + PONG (type 1)        |
+| Reject non-POST                  | 405 response               |
+| Linked user resolves             | Command succeeds           |
+| Unlinked user blocked            | UNLINKED_MESSAGE ephemeral |
+| Banned user blocked              | BANNED_MESSAGE ephemeral   |
 
 ### Immediate Commands (5 files, 13 tests)
 
-| Command | Auth | What it asserts |
-| --- | --- | --- |
-| `/help` | No | Type 4, ephemeral, mentions key commands; works for unlinked users |
-| `/balance` | Yes | Correct fossil count; zero balance for user with no fossils |
-| `/pity` | Yes | Correct pity for active banner; zero pity for new user; no active banner handled |
-| `/level` | Yes | Own level/XP in embed; `user` option targets other user; error for unlinked target |
-| `/leaderboard-xp` | No | Correct XP ranking in embed |
-| `/leaderboard-collection` | No | Correct collection ranking in embed |
+| Command                   | Auth | What it asserts                                                                    |
+| ------------------------- | ---- | ---------------------------------------------------------------------------------- |
+| `/help`                   | No   | Type 4, ephemeral, mentions key commands; works for unlinked users                 |
+| `/balance`                | Yes  | Correct fossil count; zero balance for user with no fossils                        |
+| `/pity`                   | Yes  | Correct pity for active banner; zero pity for new user; no active banner handled   |
+| `/level`                  | Yes  | Own level/XP in embed; `user` option targets other user; error for unlinked target |
+| `/leaderboard-xp`         | No   | Correct XP ranking in embed                                                        |
+| `/leaderboard-collection` | No   | Correct collection ranking in embed                                                |
 
 ### Deferred Commands (2 files, 9 tests)
 
-| Command | What it asserts |
-| --- | --- |
-| `/daily` | Type 5 response; fossils awarded (poll); double-claim blocked same day |
-| `/pull` | Type 5 non-ephemeral; fossils deducted, `user_creature` created, `pity_counter` updated (poll) |
-| `/pull10` | Type 5 response; 10 fossils deducted, 10 creatures created; insufficient fossils rejected |
+| Command   | What it asserts                                                                                |
+| --------- | ---------------------------------------------------------------------------------------------- |
+| `/daily`  | Type 5 response; fossils awarded (poll); double-claim blocked same day                         |
+| `/pull`   | Type 5 non-ephemeral; fossils deducted, `user_creature` created, `pity_counter` updated (poll) |
+| `/pull10` | Type 5 response; 10 fossils deducted, 10 creatures created; insufficient fossils rejected      |
 
 ### XP API (1 file, 4 tests)
 
-| Scenario | What it asserts |
-| --- | --- |
-| Invalid bearer token | 401 response |
-| Unlinked Discord ID | 404 response |
-| Valid request | XP awarded, 200 response, XP value increased |
-| Missing body field | 400 response |
+| Scenario             | What it asserts                              |
+| -------------------- | -------------------------------------------- |
+| Invalid bearer token | 401 response                                 |
+| Unlinked Discord ID  | 404 response                                 |
+| Valid request        | XP awarded, 200 response, XP value increased |
+| Missing body field   | 400 response                                 |
 
 ## Not Currently Tested
 
@@ -191,13 +191,13 @@ These areas don't have E2E tests yet:
 
 ## Potential Challenges
 
-| Challenge | Mitigation |
-| --- | --- |
-| Worker startup time (3-10s) | `globalSetup` starts once for entire suite |
-| D1 state isolation between tests | `beforeEach` resets relevant tables via `/api/test/batch`, re-seeds base data |
+| Challenge                                | Mitigation                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------------- |
+| Worker startup time (3-10s)              | `globalSetup` starts once for entire suite                                    |
+| D1 state isolation between tests         | `beforeEach` resets relevant tables via `/api/test/batch`, re-seeds base data |
 | `waitUntil` timing for deferred commands | Poll DB via `/api/test/query` with retry loop (200ms interval, 5-10s timeout) |
-| `@/` path alias resolution | Vitest config alias + wrangler handles bundling for the worker |
-| Ed25519 in Node.js | `@noble/ed25519` works reliably across all Node versions |
+| `@/` path alias resolution               | Vitest config alias + wrangler handles bundling for the worker                |
+| Ed25519 in Node.js                       | `@noble/ed25519` works reliably across all Node versions                      |
 
 ## Future Enhancements
 
