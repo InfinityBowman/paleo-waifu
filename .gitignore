@@ -30,3 +30,4 @@ python/data/battle_abilities.json
 .DS_Store
 *.pdf
 __pycache__/
+reference/
