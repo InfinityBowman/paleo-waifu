@@ -1,9 +1,9 @@
 /**
- * Poll a condition until it returns truthy, with a timeout.
+ * Poll a condition until it returns a non-nullish value, with a timeout.
  * Used for asserting deferred command side-effects in D1.
  */
 export async function pollUntil<T>(
-  fn: () => Promise<T>,
+  fn: () => Promise<T | null | undefined>,
   options?: { intervalMs?: number; timeoutMs?: number },
 ): Promise<T> {
   const interval = options?.intervalMs ?? 200
@@ -12,7 +12,7 @@ export async function pollUntil<T>(
 
   while (Date.now() - start < timeout) {
     const result = await fn()
-    if (result) return result
+    if (result != null) return result
     await new Promise((r) => setTimeout(r, interval))
   }
 

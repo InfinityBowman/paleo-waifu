@@ -1,7 +1,10 @@
-import { spawn, type ChildProcess } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { readdir } from 'node:fs/promises'
-import { resolve, join } from 'node:path'
+import { join, resolve } from 'node:path'
+
 import { generateAndShareKeypair, getPublicKeyHex } from './helpers/crypto'
+
+import type { ChildProcess } from 'node:child_process'
 
 const BOT_DIR = resolve(import.meta.dirname, '..')
 const WRANGLER_STATE_DIR = join(
@@ -13,10 +16,7 @@ const MIGRATIONS_DIR = resolve(BOT_DIR, '../web/drizzle')
 let workerProcess: ChildProcess | null = null
 let workerUrl: string
 
-async function waitForReady(
-  url: string,
-  timeoutMs = 30_000,
-): Promise<void> {
+async function waitForReady(url: string, timeoutMs = 30_000): Promise<void> {
   const start = Date.now()
   while (Date.now() - start < timeoutMs) {
     try {
@@ -31,13 +31,13 @@ async function waitForReady(
   throw new Error(`Worker did not become ready within ${timeoutMs}ms`)
 }
 
-async function applyMigrations(port: number) {
+async function applyMigrations() {
   const files = await readdir(MIGRATIONS_DIR)
   const sqlFiles = files.filter((f) => f.endsWith('.sql')).sort()
 
   for (const file of sqlFiles) {
     const result = await new Promise<{ code: number; stderr: string }>(
-      (resolve) => {
+      (res) => {
         const proc = spawn(
           'npx',
           [
@@ -54,8 +54,8 @@ async function applyMigrations(port: number) {
           { cwd: BOT_DIR, stdio: ['pipe', 'pipe', 'pipe'] },
         )
         let stderr = ''
-        proc.stderr?.on('data', (d) => (stderr += d.toString()))
-        proc.on('close', (code) => resolve({ code: code ?? 1, stderr }))
+        proc.stderr.on('data', (d: Buffer) => (stderr += d.toString()))
+        proc.on('close', (code) => res({ code: code ?? 1, stderr }))
       },
     )
     if (result.code !== 0) {
@@ -110,11 +110,11 @@ export async function setup() {
   )
 
   // Log worker output for debugging
-  workerProcess.stdout?.on('data', (data) => {
+  workerProcess.stdout?.on('data', (data: Buffer) => {
     const msg = data.toString().trim()
     if (msg) console.log(`[worker] ${msg}`)
   })
-  workerProcess.stderr?.on('data', (data) => {
+  workerProcess.stderr?.on('data', (data: Buffer) => {
     const msg = data.toString().trim()
     if (msg && !msg.includes('ExperimentalWarning')) {
       console.error(`[worker:err] ${msg}`)
@@ -125,7 +125,7 @@ export async function setup() {
   await waitForReady(workerUrl)
 
   // Apply D1 migrations
-  await applyMigrations(port)
+  await applyMigrations()
 
   // Provide worker URL to tests via env
   process.env.__TEST_WORKER_URL = workerUrl

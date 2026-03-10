@@ -35,11 +35,8 @@ export async function getDb(): Promise<Database.Database> {
   return db
 }
 
-/** No-op for compatibility — connections are now ephemeral */
-export function closeDb() {}
-
 /** Run a function with a DB connection that's auto-closed after */
-async function withDb<T>(fn: (db: Database.Database) => T): Promise<T> {
+export async function withDb<T>(fn: (db: Database.Database) => T): Promise<T> {
   const db = await getDb()
   try {
     return fn(db)
@@ -58,49 +55,126 @@ export async function seedTestData() {
     db.prepare(
       `INSERT OR REPLACE INTO user (id, name, email, emailVerified, role, banned, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_APP_USER_ID, 'TestUser', 'test@example.com', 0, 'user', 0, now, now)
+    ).run(
+      TEST_APP_USER_ID,
+      'TestUser',
+      'test@example.com',
+      0,
+      'user',
+      0,
+      now,
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO user (id, name, email, emailVerified, role, banned, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_APP_USER_ID_2, 'TestUser2', 'test2@example.com', 0, 'user', 0, now, now)
+    ).run(
+      TEST_APP_USER_ID_2,
+      'TestUser2',
+      'test2@example.com',
+      0,
+      'user',
+      0,
+      now,
+      now,
+    )
 
     // Discord accounts (link Discord ID → app user)
     db.prepare(
       `INSERT OR REPLACE INTO account (id, accountId, providerId, userId, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?)`,
-    ).run('acc-001', TEST_DISCORD_USER_ID, 'discord', TEST_APP_USER_ID, now, now)
+    ).run(
+      'acc-001',
+      TEST_DISCORD_USER_ID,
+      'discord',
+      TEST_APP_USER_ID,
+      now,
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO account (id, accountId, providerId, userId, createdAt, updatedAt)
        VALUES (?, ?, ?, ?, ?, ?)`,
-    ).run('acc-002', TEST_DISCORD_USER_ID_2, 'discord', TEST_APP_USER_ID_2, now, now)
+    ).run(
+      'acc-002',
+      TEST_DISCORD_USER_ID_2,
+      'discord',
+      TEST_APP_USER_ID_2,
+      now,
+      now,
+    )
 
     // Creatures
     db.prepare(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, diet, rarity, description, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_CREATURE_ID, 'Tyrannosaurus', 'T. rex', 'Cretaceous', 'Carnivore', 'legendary', 'The king of dinosaurs', now)
+    ).run(
+      TEST_CREATURE_ID,
+      'Tyrannosaurus',
+      'T. rex',
+      'Cretaceous',
+      'Carnivore',
+      'legendary',
+      'The king of dinosaurs',
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, diet, rarity, description, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_CREATURE_ID_2, 'Triceratops', 'Triceratops horridus', 'Cretaceous', 'Herbivore', 'common', 'Three-horned face', now)
+    ).run(
+      TEST_CREATURE_ID_2,
+      'Triceratops',
+      'Triceratops horridus',
+      'Cretaceous',
+      'Herbivore',
+      'common',
+      'Three-horned face',
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, diet, rarity, description, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_CREATURE_ID_3, 'Stegosaurus', 'Stegosaurus stenops', 'Jurassic', 'Herbivore', 'uncommon', 'Plated dinosaur', now)
+    ).run(
+      TEST_CREATURE_ID_3,
+      'Stegosaurus',
+      'Stegosaurus stenops',
+      'Jurassic',
+      'Herbivore',
+      'uncommon',
+      'Plated dinosaur',
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, diet, rarity, description, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_CREATURE_ID_4, 'Velociraptor', 'V. mongoliensis', 'Cretaceous', 'Carnivore', 'rare', 'Clever girl', now)
+    ).run(
+      TEST_CREATURE_ID_4,
+      'Velociraptor',
+      'V. mongoliensis',
+      'Cretaceous',
+      'Carnivore',
+      'rare',
+      'Clever girl',
+      now,
+    )
 
     db.prepare(
       `INSERT OR REPLACE INTO creature (id, name, scientific_name, era, diet, rarity, description, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(TEST_CREATURE_ID_5, 'Spinosaurus', 'S. aegyptiacus', 'Cretaceous', 'Carnivore', 'epic', 'Sail-backed predator', now)
+    ).run(
+      TEST_CREATURE_ID_5,
+      'Spinosaurus',
+      'S. aegyptiacus',
+      'Cretaceous',
+      'Carnivore',
+      'epic',
+      'Sail-backed predator',
+      now,
+    )
 
     // Banner with creatures
     db.prepare(
@@ -148,7 +222,13 @@ export async function seedTestData() {
     db.prepare(
       `INSERT OR REPLACE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at)
        VALUES (?, ?, ?, ?, ?)`,
-    ).run(TEST_USER_CREATURE_ID, TEST_APP_USER_ID, TEST_CREATURE_ID_2, TEST_BANNER_ID, now)
+    ).run(
+      TEST_USER_CREATURE_ID,
+      TEST_APP_USER_ID,
+      TEST_CREATURE_ID_2,
+      TEST_BANNER_ID,
+      now,
+    )
 
     // XP
     db.prepare(
@@ -199,16 +279,25 @@ export async function resetTestData() {
 
 // ─── Query Helpers ──────────────────────────────────────────────────
 
-export async function queryOne<T>(sql: string, ...params: unknown[]): Promise<T | undefined> {
+export async function queryOne<T>(
+  sql: string,
+  ...params: Array<unknown>
+): Promise<T | undefined> {
   return withDb((db) => db.prepare(sql).get(...params) as T | undefined)
 }
 
-export async function queryAll<T>(sql: string, ...params: unknown[]): Promise<T[]> {
-  return withDb((db) => db.prepare(sql).all(...params) as T[])
+export async function queryAll<T>(
+  sql: string,
+  ...params: Array<unknown>
+): Promise<Array<T>> {
+  return withDb((db) => db.prepare(sql).all(...params) as Array<T>)
 }
 
 /** Run an arbitrary write statement (INSERT, UPDATE, DELETE) */
-export async function execute(sql: string, ...params: unknown[]): Promise<void> {
+export async function execute(
+  sql: string,
+  ...params: Array<unknown>
+): Promise<void> {
   await withDb((db) => {
     db.prepare(sql).run(...params)
   })

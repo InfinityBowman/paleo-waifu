@@ -1,4 +1,4 @@
-import { keygenAsync, signAsync, etc } from '@noble/ed25519'
+import { etc, keygenAsync, signAsync } from '@noble/ed25519'
 
 let privateKey: Uint8Array
 let publicKeyHex: string
@@ -24,7 +24,9 @@ export function loadKeypairFromEnv() {
   const privHex = process.env.__TEST_PRIVATE_KEY_HEX
   const pubHex = process.env.__TEST_PUBLIC_KEY_HEX
   if (!privHex || !pubHex) {
-    throw new Error('Test keypair not found in env — globalSetup must run first')
+    throw new Error(
+      'Test keypair not found in env — globalSetup must run first',
+    )
   }
   privateKey = etc.hexToBytes(privHex)
   publicKeyHex = pubHex

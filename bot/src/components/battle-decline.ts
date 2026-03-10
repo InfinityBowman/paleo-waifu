@@ -1,9 +1,6 @@
 import { and, eq } from 'drizzle-orm'
 import { battleChallenge, user } from '@paleo-waifu/shared/db/schema'
-import {
-  ephemeralResponse,
-  updateMessageResponse,
-} from '../lib/discord'
+import { ephemeralResponse, updateMessageResponse } from '../lib/discord'
 import { declinedEmbed } from '../lib/battle-embeds'
 import type { Interaction } from '../lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
@@ -44,11 +41,21 @@ export async function handleBattleDecline(
     )
   }
 
-  // Update challenge status
-  await db
+  // Update challenge status (guard on pending to prevent TOCTOU race)
+  const updated = await db
     .update(battleChallenge)
     .set({ status: 'declined' })
-    .where(eq(battleChallenge.id, challengeId))
+    .where(
+      and(
+        eq(battleChallenge.id, challengeId),
+        eq(battleChallenge.status, 'pending'),
+      ),
+    )
+    .returning()
+
+  if (!updated.length) {
+    return ephemeralResponse('This challenge is no longer active.')
+  }
 
   // Get challenger name for the embed
   const challengerRow = await db

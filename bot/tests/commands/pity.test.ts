@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,12 +6,12 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
-  execute,
-  TEST_DISCORD_USER_ID,
   TEST_APP_USER_ID,
   TEST_BANNER_ID,
+  TEST_DISCORD_USER_ID,
+  execute,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 
 beforeEach(async () => {
@@ -27,7 +27,12 @@ describe('/pity', () => {
     await execute(
       `INSERT INTO pity_counter (id, user_id, banner_id, pulls_since_rare, pulls_since_legendary, total_pulls)
        VALUES (?, ?, ?, ?, ?, ?)`,
-      'pity-001', TEST_APP_USER_ID, TEST_BANNER_ID, 5, 15, 20,
+      'pity-001',
+      TEST_APP_USER_ID,
+      TEST_BANNER_ID,
+      5,
+      15,
+      20,
     )
 
     const interaction = buildCommandInteraction('pity', {
@@ -36,7 +41,7 @@ describe('/pity', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.flags).toBe(64)
 
@@ -54,7 +59,7 @@ describe('/pity', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.data.content).toContain('Total pulls: **0**')
   })
 
@@ -70,7 +75,7 @@ describe('/pity', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.data.content).toContain('No active banner')
   })
 })

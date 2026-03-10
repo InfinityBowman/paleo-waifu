@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,9 +6,9 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
   TEST_DISCORD_USER_ID,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 import { seedBattleData, seedPendingChallenge } from '../helpers/battle-seed'
 
@@ -28,7 +28,7 @@ describe('/battles', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.flags).toBe(64)
   })
@@ -43,13 +43,13 @@ describe('/battles', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
 
-    const embedText = JSON.stringify(body.data.embeds ?? [])
-    const content = body.data.content ?? ''
-    const fullText = content + embedText
-    // Should mention pending challenge or the opponent
-    expect(fullText.length).toBeGreaterThan(0)
+    // Should have at least one embed showing the pending challenge
+    expect(body.data.embeds?.length).toBeGreaterThan(0)
+    const embedText = JSON.stringify(body.data.embeds)
+    // Should mention the opponent or pending status
+    expect(embedText).toContain('TestUser2')
   })
 })

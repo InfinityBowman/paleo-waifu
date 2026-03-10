@@ -1,22 +1,21 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import {
+  sendBadSignatureInteraction,
   sendInteraction,
   sendUnsignedInteraction,
-  sendBadSignatureInteraction,
   setWorkerUrl,
 } from '../helpers/worker-client'
-import { buildPingInteraction } from '../helpers/interaction-builder'
-import { resetInteractionCounter } from '../helpers/interaction-builder'
-import { closeDb } from '../helpers/db-seed'
+import {
+  buildPingInteraction,
+  resetInteractionCounter,
+} from '../helpers/interaction-builder'
 
-beforeEach(async () => {
+beforeEach(() => {
   loadKeypairFromEnv()
   setWorkerUrl(process.env.__TEST_WORKER_URL!)
   resetInteractionCounter()
 })
-
-afterAll(() => closeDb())
 
 describe('Signature verification', () => {
   it('rejects requests with missing signature headers', async () => {
@@ -38,7 +37,7 @@ describe('Signature verification', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(1) // PONG
   })
 

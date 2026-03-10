@@ -1,19 +1,16 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
   buildCommandInteraction,
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
-import { closeDb } from '../helpers/db-seed'
 
-beforeEach(async () => {
+beforeEach(() => {
   loadKeypairFromEnv()
   setWorkerUrl(process.env.__TEST_WORKER_URL!)
   resetInteractionCounter()
 })
-
-afterAll(() => closeDb())
 
 describe('/help', () => {
   it('returns ephemeral response with command list', async () => {
@@ -21,15 +18,16 @@ describe('/help', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4) // CHANNEL_MESSAGE_WITH_SOURCE
     expect(body.data.flags).toBe(64) // EPHEMERAL
 
     // Help should mention key commands
     const content = body.data.content ?? ''
-    const embedText = body.data.embeds
-      ?.map((e: { description?: string }) => e.description ?? '')
-      .join(' ') ?? ''
+    const embedText =
+      body.data.embeds
+        ?.map((e: { description?: string }) => e.description ?? '')
+        .join(' ') ?? ''
     const fullText = content + embedText
 
     expect(fullText).toContain('pull')
@@ -44,7 +42,7 @@ describe('/help', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     // Should NOT be the "link your account" message
     expect(body.type).toBe(4)
     expect(body.data.content ?? '').not.toContain('link')

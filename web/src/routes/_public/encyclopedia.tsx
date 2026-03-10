@@ -258,9 +258,7 @@ export const getCreatureDetails = createServerFn({ method: 'GET' })
             displayName: a.displayName,
             description: template.description,
             cooldown:
-              template.trigger.type === 'onUse'
-                ? template.trigger.cooldown
-                : 1,
+              template.trigger.type === 'onUse' ? template.trigger.cooldown : 1,
           }
         } else {
           passive = {

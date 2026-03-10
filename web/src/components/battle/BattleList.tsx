@@ -335,9 +335,7 @@ export function BattleList({
 
         {/* Team Picker */}
         <div className="rounded-xl border border-border bg-card/50 p-5">
-          <h3 className="mb-3 font-display text-sm font-semibold">
-            Your Team
-          </h3>
+          <h3 className="mb-3 font-display text-sm font-semibold">Your Team</h3>
           <BattleTeamPicker
             creatures={battleReadyCreatures}
             value={challengeTeam}
@@ -360,9 +358,7 @@ export function BattleList({
         {/* Team Presets */}
         <div className="rounded-xl border border-border bg-card/50 p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-display text-sm font-semibold">
-              Team Presets
-            </h3>
+            <h3 className="font-display text-sm font-semibold">Team Presets</h3>
             <Button
               variant="outline"
               size="sm"

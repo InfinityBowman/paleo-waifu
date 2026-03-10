@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,12 +6,12 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
-  execute,
-  UNLINKED_DISCORD_USER_ID,
-  TEST_DISCORD_USER_ID,
   TEST_APP_USER_ID,
+  TEST_DISCORD_USER_ID,
+  UNLINKED_DISCORD_USER_ID,
+  execute,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 
 beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('User resolution', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.flags).toBe(64)
     expect(body.data.content).toContain('link')
@@ -45,7 +45,7 @@ describe('User resolution', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.flags).toBe(64)
     expect(body.data.content).toContain('banned')
@@ -58,7 +58,7 @@ describe('User resolution', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.content).toContain('Fossil')
   })

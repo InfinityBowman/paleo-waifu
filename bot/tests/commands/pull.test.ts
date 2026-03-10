@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,13 +6,13 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
-  queryOne,
-  queryAll,
-  execute,
-  TEST_DISCORD_USER_ID,
   TEST_APP_USER_ID,
+  TEST_DISCORD_USER_ID,
+  execute,
+  queryAll,
+  queryOne,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 import { pollUntil } from '../helpers/poll'
 
@@ -32,7 +32,7 @@ describe('/pull', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(5)
     expect(body.data?.flags).toBeUndefined()
   })
@@ -85,7 +85,7 @@ describe('/pull', () => {
       { timeoutMs: 10_000 },
     )
 
-    expect(pity!.total_pulls).toBe(1)
+    expect(pity.total_pulls).toBe(1)
   })
 })
 
@@ -97,7 +97,7 @@ describe('/pull10', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(5)
   })
 
@@ -107,23 +107,18 @@ describe('/pull10', () => {
     })
     await sendInteraction(interaction)
 
-    // Poll for creatures to appear (1 seeded + 10 pulled = 11)
-    await pollUntil(
+    // Poll for fossils to be deducted (100 - 10 = 90)
+    const currency = await pollUntil(
       async () => {
-        const rows = await queryAll<{ id: string }>(
-          'SELECT id FROM user_creature WHERE user_id = ?',
+        const r = await queryOne<{ fossils: number }>(
+          'SELECT fossils FROM currency WHERE user_id = ?',
           TEST_APP_USER_ID,
         )
-        return rows.length >= 11 ? rows : null
+        return r && r.fossils < 100 ? r : null
       },
       { timeoutMs: 15_000 },
     )
-
-    const currency = await queryOne<{ fossils: number }>(
-      'SELECT fossils FROM currency WHERE user_id = ?',
-      TEST_APP_USER_ID,
-    )
-    expect(currency!.fossils).toBe(90)
+    expect(currency.fossils).toBe(90)
 
     const creatures = await queryAll<{ id: string }>(
       'SELECT id FROM user_creature WHERE user_id = ?',
@@ -144,7 +139,7 @@ describe('/pull10', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(5)
 
     // Give the worker time to process the deferred response

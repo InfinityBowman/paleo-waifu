@@ -151,9 +151,7 @@ export function BattleCreatureSlot({
             {STAT_MINI.map(({ key, icon: Icon, color }) => (
               <div key={key} className="flex items-center gap-0.5">
                 <Icon className={cn('h-2.5 w-2.5', color)} />
-                <span className="text-[10px] font-medium">
-                  {creature[key]}
-                </span>
+                <span className="text-[10px] font-medium">{creature[key]}</span>
               </div>
             ))}
           </div>
@@ -171,9 +169,7 @@ export function BattleCreatureSlot({
               bgClass="bg-amber-500/8 hover:bg-amber-500/15"
               cooldown={creature.active.cooldown}
               description={creature.active.description}
-              popoverIcon={
-                <Zap className="h-3.5 w-3.5 text-amber-400" />
-              }
+              popoverIcon={<Zap className="h-3.5 w-3.5 text-amber-400" />}
               popoverAccent="text-amber-300"
               popoverBadge={
                 creature.active.cooldown > 1 ? (
@@ -186,16 +182,12 @@ export function BattleCreatureSlot({
           )}
           {creature.passive && (
             <AbilityPill
-              icon={
-                <Shield className="h-2.5 w-2.5 shrink-0 text-purple-400" />
-              }
+              icon={<Shield className="h-2.5 w-2.5 shrink-0 text-purple-400" />}
               name={creature.passive.displayName}
               nameClass="text-purple-300"
               bgClass="bg-purple-500/8 hover:bg-purple-500/15"
               description={creature.passive.description}
-              popoverIcon={
-                <Shield className="h-3.5 w-3.5 text-purple-400" />
-              }
+              popoverIcon={<Shield className="h-3.5 w-3.5 text-purple-400" />}
               popoverAccent="text-purple-300"
               popoverBadge={
                 <span className="rounded-sm bg-purple-500/15 px-1.5 py-0.5 text-[10px] font-medium text-purple-400">
@@ -276,7 +268,9 @@ function AbilityPill({
       >
         <div className="flex items-center gap-2">
           {popoverIcon}
-          <span className={cn('font-display text-sm font-semibold', popoverAccent)}>
+          <span
+            className={cn('font-display text-sm font-semibold', popoverAccent)}
+          >
             {name}
           </span>
           {popoverBadge}

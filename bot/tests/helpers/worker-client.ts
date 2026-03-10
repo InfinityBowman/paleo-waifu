@@ -1,5 +1,5 @@
-import type { Interaction } from '../../src/lib/discord'
 import { signPayload } from './crypto'
+import type { Interaction } from '../../src/lib/discord'
 
 let workerUrl: string
 

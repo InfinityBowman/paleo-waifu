@@ -168,20 +168,14 @@ function ProfilePage() {
                 </span>
               </div>
               <div className="mt-0.5 text-xs text-muted-foreground">
-                <span className="font-medium text-green-400">
-                  {arenaWins}W
-                </span>
+                <span className="font-medium text-green-400">{arenaWins}W</span>
                 {' / '}
-                <span className="font-medium text-red-400">
-                  {arenaLosses}L
-                </span>
+                <span className="font-medium text-red-400">{arenaLosses}L</span>
                 {arenaWins + arenaLosses > 0 && (
                   <span className="ml-1.5">
                     &middot;{' '}
-                    {Math.round(
-                      (arenaWins / (arenaWins + arenaLosses)) * 100,
-                    )}
-                    % win rate
+                    {Math.round((arenaWins / (arenaWins + arenaLosses)) * 100)}%
+                    win rate
                   </span>
                 )}
               </div>

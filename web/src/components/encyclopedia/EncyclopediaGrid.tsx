@@ -43,7 +43,11 @@ interface CreatureDetails {
     atk: number
     def: number
     spd: number
-    active: { displayName: string; description: string; cooldown: number } | null
+    active: {
+      displayName: string
+      description: string
+      cooldown: number
+    } | null
     passive: { displayName: string; description: string } | null
   } | null
 }

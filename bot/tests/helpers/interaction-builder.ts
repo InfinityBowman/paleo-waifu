@@ -1,5 +1,5 @@
-import type { Interaction, InteractionOption } from '../../src/lib/discord'
 import { InteractionType } from '../../src/lib/discord'
+import type { Interaction, InteractionOption } from '../../src/lib/discord'
 
 const DEFAULT_USER = {
   id: '111111111111111111',
@@ -28,7 +28,7 @@ export function buildCommandInteraction(
   name: string,
   options?: {
     userId?: string
-    options?: InteractionOption[]
+    options?: Array<InteractionOption>
   },
 ): Interaction {
   const userId = options?.userId ?? DEFAULT_USER.id
@@ -56,7 +56,8 @@ export function buildComponentInteraction(
   customId: string,
   options?: {
     userId?: string
-    values?: string[]
+    values?: Array<string>
+    componentType?: number
   },
 ): Interaction {
   const userId = options?.userId ?? DEFAULT_USER.id
@@ -69,7 +70,7 @@ export function buildComponentInteraction(
       id: nextId(),
       name: '',
       custom_id: customId,
-      component_type: customId.includes('preset') ? 3 : 2, // select menu vs button
+      component_type: options?.componentType ?? 2, // 2 = button, 3 = select menu
       values: options?.values,
     },
     member: {

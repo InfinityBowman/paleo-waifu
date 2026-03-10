@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,13 +6,13 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
-  execute,
+  TEST_APP_USER_ID,
   TEST_DISCORD_USER_ID,
   TEST_DISCORD_USER_ID_2,
-  TEST_APP_USER_ID,
   UNLINKED_DISCORD_USER_ID,
+  execute,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 import { ApplicationCommandOptionType } from '../../src/lib/discord'
 
@@ -32,7 +32,7 @@ describe('/rating', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.flags).toBe(64)
 
@@ -44,7 +44,10 @@ describe('/rating', () => {
     await execute(
       `INSERT OR REPLACE INTO battle_rating (user_id, rating, wins, losses)
        VALUES (?, ?, ?, ?)`,
-      TEST_APP_USER_ID, 750, 10, 5,
+      TEST_APP_USER_ID,
+      750,
+      10,
+      5,
     )
 
     const interaction = buildCommandInteraction('rating', {
@@ -53,7 +56,7 @@ describe('/rating', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     const embedText = JSON.stringify(body.data.embeds)
     expect(embedText).toContain('Silver') // 750 = Silver tier
     expect(embedText).toContain('10') // wins
@@ -74,7 +77,7 @@ describe('/rating', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(4)
     expect(body.data.embeds).toBeDefined()
   })
@@ -93,7 +96,7 @@ describe('/rating', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.data.content).toContain('linked')
   })
 })

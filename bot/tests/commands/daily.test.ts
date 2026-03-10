@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { loadKeypairFromEnv } from '../helpers/crypto'
 import { sendInteraction, setWorkerUrl } from '../helpers/worker-client'
 import {
@@ -6,12 +6,11 @@ import {
   resetInteractionCounter,
 } from '../helpers/interaction-builder'
 import {
-  seedTestData,
-  resetTestData,
-  closeDb,
-  queryOne,
-  TEST_DISCORD_USER_ID,
   TEST_APP_USER_ID,
+  TEST_DISCORD_USER_ID,
+  queryOne,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 import { pollUntil } from '../helpers/poll'
 
@@ -23,8 +22,6 @@ beforeEach(async () => {
   await seedTestData()
 })
 
-afterAll(() => closeDb())
-
 describe('/daily', () => {
   it('returns deferred response (type 5)', async () => {
     const interaction = buildCommandInteraction('daily', {
@@ -33,7 +30,7 @@ describe('/daily', () => {
     const res = await sendInteraction(interaction)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(5) // DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
   })
 
@@ -53,8 +50,8 @@ describe('/daily', () => {
     })
 
     expect(row).toBeDefined()
-    expect(row!.fossils).toBe(103) // 100 + 3 daily
-    expect(row!.last_daily_claim).toBeDefined()
+    expect(row.fossils).toBe(103) // 100 + 3 daily
+    expect(row.last_daily_claim).toBeDefined()
   })
 
   it('blocks double-claim on same day', async () => {
@@ -80,11 +77,11 @@ describe('/daily', () => {
     const res = await sendInteraction(interaction2)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.type).toBe(5) // Still deferred
 
-    // Give the worker a moment to process
-    await new Promise((r) => setTimeout(r, 1000))
+    // Allow worker time to process the deferred rejection
+    await new Promise((r) => setTimeout(r, 1500))
 
     // Fossils should still be 103 (not 106)
     const row = await queryOne<{ fossils: number }>(

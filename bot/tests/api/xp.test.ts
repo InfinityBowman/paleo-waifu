@@ -1,13 +1,12 @@
-import { describe, it, expect, beforeEach, afterAll } from 'vitest'
-import { setWorkerUrl, sendXpRequest } from '../helpers/worker-client'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { sendXpRequest, setWorkerUrl } from '../helpers/worker-client'
 import {
-  seedTestData,
-  resetTestData,
-  closeDb,
-  queryOne,
-  TEST_DISCORD_USER_ID,
   TEST_APP_USER_ID,
+  TEST_DISCORD_USER_ID,
   UNLINKED_DISCORD_USER_ID,
+  queryOne,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 
 beforeEach(async () => {
@@ -16,14 +15,12 @@ beforeEach(async () => {
   await seedTestData()
 })
 
-afterAll(() => closeDb())
-
 describe('XP API', () => {
   it('rejects requests with invalid token', async () => {
     const res = await sendXpRequest(TEST_DISCORD_USER_ID, 'wrong-token')
 
     expect(res.status).toBe(401)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.error).toBe('Unauthorized')
   })
 
@@ -31,7 +28,7 @@ describe('XP API', () => {
     const res = await sendXpRequest(UNLINKED_DISCORD_USER_ID)
 
     expect(res.status).toBe(404)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body.error).toBe('User not linked')
   })
 
@@ -39,7 +36,7 @@ describe('XP API', () => {
     const res = await sendXpRequest(TEST_DISCORD_USER_ID)
 
     expect(res.status).toBe(200)
-    const body = await res.json()
+    const body = (await res.json()) as any
     expect(body).toBeDefined()
 
     // Verify XP increased in DB

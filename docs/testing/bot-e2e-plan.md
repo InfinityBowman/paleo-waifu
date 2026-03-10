@@ -155,42 +155,42 @@ Seeds the local D1 SQLite file directly via `better-sqlite3`. Provides:
 
 ### Immediate Commands
 
-| Command | Auth | What to Assert |
-|---------|------|----------------|
-| `/help` | No | Response type 4, ephemeral flag, content includes all commands |
-| `/balance` | Yes | Correct fossil count; unlinked user gets UNLINKED_MESSAGE |
-| `/pity` | Yes | Correct pity values; no active banner handled |
-| `/level` | Yes | Correct level/XP in embed; `user` option targets other user |
-| `/leaderboard-xp` | No | Correct ranking in embed |
-| `/leaderboard-collection` | No | Correct ranking in embed |
-| `/rating` | Yes | Correct tier/rating/record |
-| `/battles` | Yes | Pending and resolved challenges shown |
+| Command                   | Auth | What to Assert                                                 |
+| ------------------------- | ---- | -------------------------------------------------------------- |
+| `/help`                   | No   | Response type 4, ephemeral flag, content includes all commands |
+| `/balance`                | Yes  | Correct fossil count; unlinked user gets UNLINKED_MESSAGE      |
+| `/pity`                   | Yes  | Correct pity values; no active banner handled                  |
+| `/level`                  | Yes  | Correct level/XP in embed; `user` option targets other user    |
+| `/leaderboard-xp`         | No   | Correct ranking in embed                                       |
+| `/leaderboard-collection` | No   | Correct ranking in embed                                       |
+| `/rating`                 | Yes  | Correct tier/rating/record                                     |
+| `/battles`                | Yes  | Pending and resolved challenges shown                          |
 
 ### Deferred Commands
 
-| Command | What to Assert |
-|---------|----------------|
-| `/daily` | Type 5 response; DB: `lastDailyClaim` updated, fossils +3; double-claim blocked |
-| `/pull` | Type 5 response; DB: fossils deducted, `user_creature` created, `pity_counter` updated |
-| `/pull10` | Same as `/pull` but 10 creatures, 10 fossils deducted |
-| `/battle @user` | Type 5 response; DB: `battle_challenge` created with status `'pending'` |
+| Command         | What to Assert                                                                         |
+| --------------- | -------------------------------------------------------------------------------------- |
+| `/daily`        | Type 5 response; DB: `lastDailyClaim` updated, fossils +3; double-claim blocked        |
+| `/pull`         | Type 5 response; DB: fossils deducted, `user_creature` created, `pity_counter` updated |
+| `/pull10`       | Same as `/pull` but 10 creatures, 10 fossils deducted                                  |
+| `/battle @user` | Type 5 response; DB: `battle_challenge` created with status `'pending'`                |
 
 ### Component Interactions
 
-| Component | What to Assert |
-|-----------|----------------|
-| `battle_accept:{id}` | Type 5 response; wrong user rejected; preset select shown |
-| `battle_decline:{id}` | Type 7 (UPDATE_MESSAGE); DB: challenge status → `'declined'` |
+| Component                     | What to Assert                                                    |
+| ----------------------------- | ----------------------------------------------------------------- |
+| `battle_accept:{id}`          | Type 5 response; wrong user rejected; preset select shown         |
+| `battle_decline:{id}`         | Type 7 (UPDATE_MESSAGE); DB: challenge status → `'declined'`      |
 | `battle_defender_preset:{id}` | Type 6 (DEFERRED_UPDATE); DB: challenge resolved, ratings updated |
 
 ### XP API
 
-| Scenario | What to Assert |
-|----------|----------------|
+| Scenario                  | What to Assert           |
+| ------------------------- | ------------------------ |
 | Valid token + linked user | XP awarded, 200 response |
-| Invalid token | 401 response |
-| Unlinked Discord ID | 404 response |
-| Level-up boundary | Level incremented in DB |
+| Invalid token             | 401 response             |
+| Unlinked Discord ID       | 404 response             |
+| Level-up boundary         | Level incremented in DB  |
 
 ## Implementation Phases
 
@@ -229,14 +229,14 @@ Seeds the local D1 SQLite file directly via `better-sqlite3`. Provides:
 
 ## Potential Challenges
 
-| Challenge | Mitigation |
-|-----------|------------|
-| Worker startup time (3-10s) | `globalSetup` starts once for entire suite |
-| D1 state isolation between tests | `beforeEach` resets relevant tables, re-seeds base data |
-| `waitUntil` timing for deferred commands | Poll DB with retry loop (200ms interval, 5s timeout) |
-| `@/` path alias resolution | Vitest config alias + wrangler handles bundling for the worker |
-| D1 SQLite file location | Discover `.wrangler/state/v3/d1/<binding-id>/db.sqlite` at setup time |
-| Ed25519 in Node.js | `@noble/ed25519` works reliably across all Node versions |
+| Challenge                                | Mitigation                                                            |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| Worker startup time (3-10s)              | `globalSetup` starts once for entire suite                            |
+| D1 state isolation between tests         | `beforeEach` resets relevant tables, re-seeds base data               |
+| `waitUntil` timing for deferred commands | Poll DB with retry loop (200ms interval, 5s timeout)                  |
+| `@/` path alias resolution               | Vitest config alias + wrangler handles bundling for the worker        |
+| D1 SQLite file location                  | Discover `.wrangler/state/v3/d1/<binding-id>/db.sqlite` at setup time |
+| Ed25519 in Node.js                       | `@noble/ed25519` works reliably across all Node versions              |
 
 ## Future Enhancement
 
