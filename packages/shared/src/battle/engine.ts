@@ -217,11 +217,8 @@ export function simulateBattle(
       logResolutions(creature, resolutions, turn, log)
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
-      if (
-        creature.isAlive &&
-        ability.id === 'basic_attack' &&
-        targets.length > 0
-      ) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- creature may die from resolveAbilityEffects
+      if (creature.isAlive && ability.id === 'basic_attack' && targets.length > 0) {
         const attackCtx = makeCtx(
           creature,
           allies,
@@ -263,6 +260,7 @@ export function simulateBattle(
       if (winner) break
 
       // Tick status effects (DoT, buff/debuff expiry, shield duration)
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- creature may die from damage effects
       if (creature.isAlive) tickAndLog(creature, turn, log)
 
       // Handle KOs from DoT
@@ -282,6 +280,7 @@ export function simulateBattle(
       if (winner) break
 
       // Fire onTurnEnd passives (regenerative) — skip for dead creatures
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- creature may die from DoT
       if (creature.isAlive) {
         fireAndLog(
           'onTurnEnd',

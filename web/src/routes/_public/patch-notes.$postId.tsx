@@ -6,7 +6,7 @@ import { UpdatePostCard } from '@/components/updates/UpdatePostCard'
 
 const fetchUpdatePost = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
-  .handler(async ({ data: postId }) => {
+  .handler(({ data: postId }) => {
     return getUpdatePost(postId)
   })
 

@@ -46,7 +46,7 @@ export function OpponentCard({
             <img src={opponent.image} alt="" className="h-9 w-9 rounded-full" />
           ) : (
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/30 font-display text-sm font-bold">
-              {opponent.name?.[0] ?? '?'}
+              {opponent.name[0] || '?'}
             </div>
           )}
           <div>

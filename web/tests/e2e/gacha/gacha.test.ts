@@ -3,12 +3,12 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createSession } from '../helpers/auth'
 import { authenticatedPost } from '../helpers/client'
 import {
+  TEST_BANNER_ID,
+  TEST_USER_ID,
   execute,
   queryOne,
   resetTestData,
   seedTestData,
-  TEST_BANNER_ID,
-  TEST_USER_ID,
 } from '../helpers/db-seed'
 
 beforeEach(async () => {

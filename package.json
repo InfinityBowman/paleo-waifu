@@ -46,12 +46,13 @@
     "test:watch": "cd web && pnpm test:watch",
     "test:e2e": "cd web && pnpm test:e2e",
     "test:e2e:watch": "cd web && pnpm test:e2e:watch",
-    "deps:up": "pnpm update --latest --recursive"
+    "deps:up": "pnpm update --latest --recursive",
+    "deps:check": "pnpm outdated --recursive"
   },
   "devDependencies": {
     "@tanstack/eslint-config": "^0.4.0",
     "concurrently": "^9.2.1",
-    "eslint": "^9.39.3",
+    "eslint": "^10.0.3",
     "prettier": "^3.8.1"
   },
   "pnpm": {

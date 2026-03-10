@@ -8,10 +8,10 @@ import {
   unauthenticatedGet,
 } from '../helpers/client'
 import {
-  resetTestData,
-  seedTestData,
   TEST_ADMIN_ID,
   TEST_USER_ID,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 
 beforeEach(async () => {

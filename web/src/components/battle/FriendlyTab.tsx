@@ -82,7 +82,7 @@ export function FriendlyTab({
                   <img src={u.image} alt="" className="h-7 w-7 rounded-full" />
                 ) : (
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/30 text-xs">
-                    {u.name?.[0] ?? '?'}
+                    {u.name[0] || '?'}
                   </div>
                 )}
                 <span className="text-sm font-medium">{u.name}</span>

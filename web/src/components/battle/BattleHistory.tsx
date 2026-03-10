@@ -75,7 +75,7 @@ export function BattleHistory({ history, userId }: BattleHistoryProps) {
                 />
               ) : (
                 <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted/30 text-xs">
-                  {opponentName?.[0] ?? '?'}
+                  {opponentName[0] || '?'}
                 </div>
               )}
               <div>

@@ -3,10 +3,6 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { createSession } from '../helpers/auth'
 import { authenticatedPost } from '../helpers/client'
 import {
-  execute,
-  queryOne,
-  resetTestData,
-  seedTestData,
   TEST_UC_ID_1,
   TEST_UC_ID_2,
   TEST_UC_ID_3,
@@ -15,6 +11,10 @@ import {
   TEST_UC_ID_6,
   TEST_USER_ID,
   TEST_USER_ID_2,
+  execute,
+  queryOne,
+  resetTestData,
+  seedTestData,
 } from '../helpers/db-seed'
 
 async function setupBothTeams() {

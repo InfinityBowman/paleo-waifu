@@ -25,22 +25,22 @@
   "dependencies": {
     "@paleo-waifu/shared": "workspace:*",
     "@tailwindcss/vite": "^4.2.1",
-    "@tanstack/react-router": "^1.163.3",
-    "@tanstack/react-start": "^1.166.1",
-    "better-auth": "^1.5.1",
+    "@tanstack/react-router": "^1.166.6",
+    "@tanstack/react-start": "^1.166.6",
+    "better-auth": "^1.5.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.1",
-    "lucide-react": "^0.576.0",
+    "lucide-react": "^0.577.0",
     "marked": "^17.0.4",
-    "motion": "^12.34.4",
+    "motion": "^12.35.2",
     "nanoid": "^5.1.6",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "recharts": "^3.7.0",
-    "shadcn": "^3.8.5",
+    "recharts": "^3.8.0",
+    "shadcn": "^4.0.2",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.1",
@@ -50,11 +50,11 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
-    "@cloudflare/vite-plugin": "^1.25.6",
-    "@cloudflare/workers-types": "^4.20260301.1",
+    "@cloudflare/vite-plugin": "^1.26.1",
+    "@cloudflare/workers-types": "^4.20260310.1",
     "@tanstack/eslint-config": "^0.4.0",
-    "@tanstack/router-plugin": "^1.164.0",
-    "@types/node": "^25.3.3",
+    "@tanstack/router-plugin": "^1.166.6",
+    "@types/node": "^25.4.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
@@ -62,6 +62,6 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.18",
-    "wrangler": "^4.69.0"
+    "wrangler": "^4.71.0"
   }
 }

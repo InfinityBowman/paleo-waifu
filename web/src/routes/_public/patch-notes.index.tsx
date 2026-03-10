@@ -4,7 +4,7 @@ import { Newspaper } from 'lucide-react'
 import { getAllUpdatePosts } from '@/lib/updates'
 import { UpdatePostList } from '@/components/updates/UpdatePostList'
 
-const getUpdatePosts = createServerFn({ method: 'GET' }).handler(async () => {
+const getUpdatePosts = createServerFn({ method: 'GET' }).handler(() => {
   return getAllUpdatePosts()
 })
 

@@ -91,7 +91,7 @@ function PlayerBadge({
           <img src={image} alt={name} className="h-12 w-12 rounded-full" />
         ) : (
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/30 font-display text-lg font-bold">
-            {name?.[0] ?? '?'}
+            {name[0] || '?'}
           </div>
         )}
         {isWinner && (
