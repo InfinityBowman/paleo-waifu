@@ -8,6 +8,7 @@ import {
 import appCss from '../styles.css?url'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { DevAccountSwitcher } from '@/components/dev/DevAccountSwitcher'
+import { DevToolsPanel } from '@/components/dev/DevToolsPanel'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 
@@ -378,6 +379,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <body className="bg-paleo min-h-screen bg-background text-foreground antialiased">
         <TooltipProvider>{children}</TooltipProvider>
         {import.meta.env.DEV && <DevAccountSwitcher />}
+        {import.meta.env.DEV && <DevToolsPanel />}
         <Toaster />
         <Scripts />
       </body>

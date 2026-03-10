@@ -12,7 +12,20 @@ const config = defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      prerender: {
+        enabled: true,
+        // crawlLinks discovers /patch-notes/$postId pages from the index links
+        crawlLinks: true,
+        // Only prerender static public pages (no D1, no auth)
+        filter: ({ path }) => {
+          const allowed = ['/', '/privacy', '/terms', '/patch-notes']
+          return (
+            allowed.includes(path) || path.startsWith('/patch-notes/')
+          )
+        },
+      },
+    }),
     viteReact(),
   ],
 })
