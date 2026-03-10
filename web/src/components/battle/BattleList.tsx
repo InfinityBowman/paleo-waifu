@@ -14,7 +14,7 @@ import { RARITY_BORDER, RARITY_COLORS } from '@/lib/rarity-styles'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { refreshOpponents, searchUsers } from '@/routes/_app/battle'
+import { refreshOpponents, searchUsers } from '@/routes/_app/battle.index'
 
 interface BattleLogItem {
   id: string

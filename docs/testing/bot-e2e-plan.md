@@ -1,8 +1,8 @@
-# Discord Bot E2E Testing Plan
+# Discord Bot E2E Testing
 
 ## Approach
 
-**`wrangler dev` + Vitest** — spin up the actual Worker locally with a real D1 database, send real HTTP requests with properly signed payloads. Matches the existing web test pattern (`web/tests/production/`).
+**`wrangler dev` + Vitest** — spin up the actual Worker locally with a real D1 database, send real HTTP requests with properly signed payloads. All DB access (seeding, assertions, resets) goes through test-only HTTP endpoints on the worker, ensuring a single D1 connection and eliminating WAL lock contention.
 
 ## Directory Structure
 
@@ -13,8 +13,9 @@ bot/tests/
   helpers/
     crypto.ts                  # Ed25519 signing with @noble/ed25519
     interaction-builder.ts     # Build Discord interaction payloads
-    db-seed.ts                 # Seed/reset D1 via better-sqlite3
+    db-seed.ts                 # Seed/reset D1 via worker's /api/test/* endpoints
     worker-client.ts           # HTTP client with auto-signing
+    poll.ts                    # Poll DB state for deferred command assertions
   auth/
     signature.test.ts          # Invalid sig, missing headers, PING/PONG
     user-resolution.test.ts    # Unlinked/banned users
@@ -26,12 +27,6 @@ bot/tests/
     pity.test.ts
     level.test.ts
     leaderboard.test.ts
-    rating.test.ts
-    battles.test.ts
-    battle.test.ts
-  components/
-    battle-accept.test.ts      # Button handlers
-    battle-decline.test.ts
   api/
     xp.test.ts                 # Bearer token auth flow
 ```
@@ -47,13 +42,19 @@ Generate a test Ed25519 keypair using `@noble/ed25519`, pass the public key to t
 Verify two things:
 
 1. Immediate response is type 5 (`DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE`)
-2. Database state changed correctly (poll D1 with retry loop, ~5s timeout)
+2. Database state changed correctly (poll via `/api/test/query` with retry loop, ~5-10s timeout)
 
-The Discord REST API calls (`editDeferredResponse`) will fail silently in test (fake token, real discord.com) but they already have error handling. This gives ~90% confidence without mocking external APIs.
+The Discord REST API calls (`editDeferredResponse`) will fail silently in test (fake app ID) but they already have error handling. This gives ~90% confidence without mocking external APIs.
 
-### DB Access for Assertions/Seeding
+### DB Access via Test-Only Worker Endpoints
 
-Use `better-sqlite3` to read/write the local D1 SQLite file in `.wrangler/state/`. Each test file resets relevant tables in `beforeEach`.
+The worker exposes three endpoints gated behind `TEST_MODE` env var (never set in production):
+
+- `POST /api/test/query` — `{ sql, params? }` → `{ rows: [...] }` (SELECT)
+- `POST /api/test/execute` — `{ sql, params? }` → `{ success: true }` (INSERT/UPDATE/DELETE)
+- `POST /api/test/batch` — `{ statements: [{ sql, params? }, ...] }` → `{ success: true }` (atomic batch)
+
+All seeding, resets, and query assertions go through these endpoints, which use miniflare's single D1 connection. This eliminates the WAL lock contention that occurs when a separate process (like `better-sqlite3`) accesses the same SQLite file.
 
 ### Worker Lifecycle
 
@@ -61,34 +62,23 @@ Start once in `globalSetup`, shared across all test files. Avoids 3-10s boot per
 
 ## Dependencies
 
-Add to `bot/package.json` devDependencies:
+`bot/package.json` devDependencies:
 
 ```json
 {
   "vitest": "^4.0.18",
-  "@noble/ed25519": "^2.2.3",
-  "better-sqlite3": "^11.0.0",
-  "@types/better-sqlite3": "^7.6.11"
+  "@noble/ed25519": "^3.0.0"
 }
 ```
 
 ## Scripts
 
-Add to `bot/package.json`:
+`bot/package.json`:
 
 ```json
 {
   "test": "vitest run --config tests/vitest.config.ts",
   "test:watch": "vitest --config tests/vitest.config.ts"
-}
-```
-
-Add to root `package.json`:
-
-```json
-{
-  "bot:test": "cd bot && pnpm test",
-  "bot:test:watch": "cd bot && pnpm test:watch"
 }
 ```
 
@@ -101,30 +91,19 @@ Add to root `package.json`:
 - Long timeout (30s test, 60s hooks) — worker takes a moment to boot
 - Path aliases matching bot's tsconfig (`@/*` → `../web/src/*`)
 - `globalSetup` for worker lifecycle
-- `pool: 'forks'` to avoid shared state between test files
+- `pool: 'forks'` with `fileParallelism: false` to avoid shared state between test files
 
 ### Global Setup (`bot/tests/setup.ts`)
 
 1. Generate Ed25519 keypair (one-time, shared across all tests)
-2. Start `wrangler dev` with `--var DISCORD_PUBLIC_KEY:<test-public-key-hex>`, `--var DISCORD_APPLICATION_ID:test-app-id`, `--var DISCORD_BOT_TOKEN:test-token`, `--var XP_API_SECRET:test-xp-secret`
+2. Start `wrangler dev` with `--var DISCORD_PUBLIC_KEY:<hex>`, `--var DISCORD_APPLICATION_ID:test-app-id`, `--var DISCORD_BOT_TOKEN:test-token`, `--var XP_API_SECRET:test-xp-secret`, `--var TEST_MODE:true`
 3. Apply all D1 migrations from `web/drizzle/` via `wrangler d1 execute --local`
-4. Wait for worker to be ready (HTTP health check)
+4. Wait for worker to be ready (HTTP health check — worker responds 405 to GET)
 5. Provide teardown that kills the process
 
 ### Crypto Helper (`bot/tests/helpers/crypto.ts`)
 
-```ts
-import * as ed from '@noble/ed25519'
-
-const privateKey = ed.utils.randomPrivateKey()
-const publicKey = await ed.getPublicKeyAsync(privateKey)
-const publicKeyHex = Buffer.from(publicKey).toString('hex')
-
-// To sign a request:
-const message = new TextEncoder().encode(timestamp + body)
-const signature = await ed.signAsync(message, privateKey)
-const signatureHex = Buffer.from(signature).toString('hex')
-```
+Generates a keypair in `globalSetup` and shares it to forked test processes via env vars (`__TEST_PRIVATE_KEY_HEX`, `__TEST_PUBLIC_KEY_HEX`). Each test file calls `loadKeypairFromEnv()` in `beforeEach` to recover the keys.
 
 ### Interaction Payload Builder (`bot/tests/helpers/interaction-builder.ts`)
 
@@ -132,7 +111,7 @@ Builders for the three interaction types:
 
 - `buildPingInteraction()` — type 1 PING
 - `buildCommandInteraction(name, options?)` — type 2 slash command with user/options
-- `buildComponentInteraction(customId, options?)` — type 3 button/select menu
+- `buildComponentInteraction(customId, options?)` — type 3 button/select menu (supports explicit `componentType`)
 
 Each creates a complete `Interaction` object with reasonable defaults (`id`, `token`, `application_id`, `member.user`).
 
@@ -141,107 +120,87 @@ Each creates a complete `Interaction` object with reasonable defaults (`id`, `to
 Wraps HTTP requests with automatic signing:
 
 - `sendInteraction(interaction)` — POST to worker root with signed headers
+- `sendUnsignedInteraction(interaction)` — POST without signature headers
+- `sendBadSignatureInteraction(interaction)` — POST with invalid signature
 - `sendXpRequest(discordUserId)` — POST to `/api/xp` with bearer token
+
+### Poll Helper (`bot/tests/helpers/poll.ts`)
+
+`pollUntil(fn, options?)` — polls a condition every 200ms (configurable) until it returns a non-nullish value, or throws after a timeout (default 5s). Used for asserting deferred command side-effects where `ctx.waitUntil()` work completes after the immediate response.
 
 ### Database Seeding (`bot/tests/helpers/db-seed.ts`)
 
-Seeds the local D1 SQLite file directly via `better-sqlite3`. Provides:
+Seeds and queries D1 via the worker's `/api/test/*` endpoints. Provides:
 
 - Test user constants (`TEST_DISCORD_USER_ID`, `TEST_APP_USER_ID`, etc.)
-- `seedTestData()` — creates users, accounts, creatures, banners, currency
-- `resetTestData()` — truncates game tables between tests (preserves schema)
+- `seedTestData()` — creates users, accounts, creatures, banners, currency, XP via batch
+- `resetTestData()` — truncates game tables between tests via batch (preserves schema)
+- `queryOne(sql, ...params)` — single row query for assertions
+- `queryAll(sql, ...params)` — multi-row query for assertions
+- `execute(sql, ...params)` — arbitrary write statement for test setup
 
-## What to Test
+## Test Coverage
 
-### Immediate Commands
+### Auth (2 files, 7 tests)
 
-| Command                   | Auth | What to Assert                                                 |
-| ------------------------- | ---- | -------------------------------------------------------------- |
-| `/help`                   | No   | Response type 4, ephemeral flag, content includes all commands |
-| `/balance`                | Yes  | Correct fossil count; unlinked user gets UNLINKED_MESSAGE      |
-| `/pity`                   | Yes  | Correct pity values; no active banner handled                  |
-| `/level`                  | Yes  | Correct level/XP in embed; `user` option targets other user    |
-| `/leaderboard-xp`         | No   | Correct ranking in embed                                       |
-| `/leaderboard-collection` | No   | Correct ranking in embed                                       |
-| `/rating`                 | Yes  | Correct tier/rating/record                                     |
-| `/battles`                | Yes  | Pending and resolved challenges shown                          |
+| Test | What it asserts |
+| --- | --- |
+| Reject missing signature headers | 401 response |
+| Reject invalid signature | 401 response |
+| Accept valid PING | 200 + PONG (type 1) |
+| Reject non-POST | 405 response |
+| Linked user resolves | Command succeeds |
+| Unlinked user blocked | UNLINKED_MESSAGE ephemeral |
+| Banned user blocked | BANNED_MESSAGE ephemeral |
 
-### Deferred Commands
+### Immediate Commands (5 files, 13 tests)
 
-| Command         | What to Assert                                                                         |
-| --------------- | -------------------------------------------------------------------------------------- |
-| `/daily`        | Type 5 response; DB: `lastDailyClaim` updated, fossils +3; double-claim blocked        |
-| `/pull`         | Type 5 response; DB: fossils deducted, `user_creature` created, `pity_counter` updated |
-| `/pull10`       | Same as `/pull` but 10 creatures, 10 fossils deducted                                  |
-| `/battle @user` | Type 5 response; DB: `battle_challenge` created with status `'pending'`                |
+| Command | Auth | What it asserts |
+| --- | --- | --- |
+| `/help` | No | Type 4, ephemeral, mentions key commands; works for unlinked users |
+| `/balance` | Yes | Correct fossil count; zero balance for user with no fossils |
+| `/pity` | Yes | Correct pity for active banner; zero pity for new user; no active banner handled |
+| `/level` | Yes | Own level/XP in embed; `user` option targets other user; error for unlinked target |
+| `/leaderboard-xp` | No | Correct XP ranking in embed |
+| `/leaderboard-collection` | No | Correct collection ranking in embed |
 
-### Component Interactions
+### Deferred Commands (2 files, 9 tests)
 
-| Component                     | What to Assert                                                    |
-| ----------------------------- | ----------------------------------------------------------------- |
-| `battle_accept:{id}`          | Type 5 response; wrong user rejected; preset select shown         |
-| `battle_decline:{id}`         | Type 7 (UPDATE_MESSAGE); DB: challenge status → `'declined'`      |
-| `battle_defender_preset:{id}` | Type 6 (DEFERRED_UPDATE); DB: challenge resolved, ratings updated |
+| Command | What it asserts |
+| --- | --- |
+| `/daily` | Type 5 response; fossils awarded (poll); double-claim blocked same day |
+| `/pull` | Type 5 non-ephemeral; fossils deducted, `user_creature` created, `pity_counter` updated (poll) |
+| `/pull10` | Type 5 response; 10 fossils deducted, 10 creatures created; insufficient fossils rejected |
 
-### XP API
+### XP API (1 file, 4 tests)
 
-| Scenario                  | What to Assert           |
-| ------------------------- | ------------------------ |
-| Valid token + linked user | XP awarded, 200 response |
-| Invalid token             | 401 response             |
-| Unlinked Discord ID       | 404 response             |
-| Level-up boundary         | Level incremented in DB  |
+| Scenario | What it asserts |
+| --- | --- |
+| Invalid bearer token | 401 response |
+| Unlinked Discord ID | 404 response |
+| Valid request | XP awarded, 200 response, XP value increased |
+| Missing body field | 400 response |
 
-## Implementation Phases
+## Not Currently Tested
 
-### Phase 1: Foundation
+These areas don't have E2E tests yet:
 
-1. `bot/tests/helpers/crypto.ts`
-2. `bot/tests/helpers/interaction-builder.ts`
-3. `bot/tests/helpers/worker-client.ts`
-4. `bot/tests/setup.ts`
-5. `bot/tests/vitest.config.ts`
-
-### Phase 2: Core Tests
-
-6. `bot/tests/auth/signature.test.ts`
-7. `bot/tests/auth/user-resolution.test.ts`
-8. `bot/tests/commands/help.test.ts`
-9. `bot/tests/commands/balance.test.ts`
-10. `bot/tests/api/xp.test.ts`
-
-### Phase 3: Database-Heavy Tests
-
-11. `bot/tests/helpers/db-seed.ts`
-12. `bot/tests/commands/daily.test.ts`
-13. `bot/tests/commands/pity.test.ts`
-14. `bot/tests/commands/level.test.ts`
-15. `bot/tests/commands/leaderboard.test.ts`
-16. `bot/tests/commands/pull.test.ts`
-
-### Phase 4: Battle System Tests
-
-17. `bot/tests/commands/rating.test.ts`
-18. `bot/tests/commands/battles.test.ts`
-19. `bot/tests/commands/battle.test.ts`
-20. `bot/tests/components/battle-accept.test.ts`
-21. `bot/tests/components/battle-decline.test.ts`
+- **Battle commands** (`/battle`, `/battles`, `/rating`) — battle system was rewritten to v2 (arena + friendly), bot commands are currently stubbed to redirect to web app
+- **Component interactions** (battle accept/decline/preset) — same reason, old challenge flow removed
+- **Discord embed content** — deferred responses fail to reach Discord (fake app ID), so we can't assert on embed content
 
 ## Potential Challenges
 
-| Challenge                                | Mitigation                                                            |
-| ---------------------------------------- | --------------------------------------------------------------------- |
-| Worker startup time (3-10s)              | `globalSetup` starts once for entire suite                            |
-| D1 state isolation between tests         | `beforeEach` resets relevant tables, re-seeds base data               |
-| `waitUntil` timing for deferred commands | Poll DB with retry loop (200ms interval, 5s timeout)                  |
-| `@/` path alias resolution               | Vitest config alias + wrangler handles bundling for the worker        |
-| D1 SQLite file location                  | Discover `.wrangler/state/v3/d1/<binding-id>/db.sqlite` at setup time |
-| Ed25519 in Node.js                       | `@noble/ed25519` works reliably across all Node versions              |
+| Challenge | Mitigation |
+| --- | --- |
+| Worker startup time (3-10s) | `globalSetup` starts once for entire suite |
+| D1 state isolation between tests | `beforeEach` resets relevant tables via `/api/test/batch`, re-seeds base data |
+| `waitUntil` timing for deferred commands | Poll DB via `/api/test/query` with retry loop (200ms interval, 5-10s timeout) |
+| `@/` path alias resolution | Vitest config alias + wrangler handles bundling for the worker |
+| Ed25519 in Node.js | `@noble/ed25519` works reliably across all Node versions |
 
-## Future Enhancement
+## Future Enhancements
 
-Extract Discord API base URL into an env var (`DISCORD_API_BASE`) in `bot/src/lib/discord.ts`, defaulting to `https://discord.com/api/v10`. In tests, override to `http://localhost:<port>` where a mock server captures deferred response payloads. This lets you assert on the actual embed content sent back to Discord. Functions to refactor:
-
-- `sendFollowup()`
-- `editChannelMessage()`
-- `editDeferredResponse()`
+- **Battle system tests** — once bot commands for v2 arena/friendly battles are implemented
+- **Mock Discord API** — extract Discord API base URL into an env var, override in tests to capture deferred response payloads and assert on embed content
+- **Level-up boundary test** — XP award that crosses a level threshold, verify level incremented

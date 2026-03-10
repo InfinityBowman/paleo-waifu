@@ -258,7 +258,7 @@ const getBattleData = createServerFn({ method: 'GET' })
     }
   })
 
-export const Route = createFileRoute('/_app/battle')({
+export const Route = createFileRoute('/_app/battle/')({
   loader: ({ context }) => getBattleData({ data: context.session.user.id }),
   component: BattlePage,
 })

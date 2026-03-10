@@ -165,6 +165,15 @@ Reusable `BattleTeamPicker` component manages exactly 2 teams (offense/defense).
 - [x] Arena attack flow (pick opponent → instant result → redirect to replay)
 - [x] Daily attack counter display (pip dots, X/5)
 - [x] Friendly battle tab (user search + instant battle)
+- [x] Battle transition animation (full-screen overlay with fighting-game VS splash)
+  - Diagonal split screen (attacker pink vs defender blue)
+  - Lightning bolt SVG divider with flicker animation
+  - Massive player names in Bangers font with multi-layer outlines/glows
+  - Brush-stroke "VS" in Permanent Marker font, 5-layer text effect
+  - Avatars with pulsing glow borders
+  - Clash phase (impact flash, screen shake, slash marks, spark particles)
+  - Result phase (VICTORY/DEFEAT/DRAW with rating change)
+  - Tap-to-skip, auto-navigate to replay page
 
 ### Discord Bot
 
@@ -220,6 +229,7 @@ web/src/routes/api/battle.ts               # API: set_team, delete_team, arena_a
 web/src/routes/_app/battle.tsx             # Route loader: history, teams, creatures, rating, daily limit
 web/src/routes/_app/battle.$id.tsx         # Replay page (queries battle_log)
 web/src/components/battle/BattleList.tsx    # All tabs: Arena, Teams, Friendly, History + OpponentCard
+web/src/components/battle/BattleTransition.tsx  # Full-screen battle transition animation overlay
 web/src/components/battle/BattleTeamPicker.tsx  # Reusable team picker (offense/defense)
 web/src/components/battle/BattleCreatureSlot.tsx # Creature slot with stats/abilities
 web/src/components/battle/SynergyPreview.tsx    # Synergy bonus display

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import {
   ChevronDown,
   ChevronRight,
@@ -206,33 +206,114 @@ function TeamDisplay({
   )
 }
 
-function formatEvent(event: BattleLogEvent): string | null {
+type NameMap = Map<string, string>
+type SideMap = Map<string, 'A' | 'B'>
+
+const TEAM_TEXT = {
+  A: 'text-rose-400',
+  B: 'text-sky-400',
+} as const
+
+function C({
+  id,
+  nameMap,
+  sideMap,
+}: {
+  id: string
+  nameMap: NameMap
+  sideMap: SideMap
+}) {
+  const name = nameMap.get(id) ?? id.slice(0, 8)
+  const side = sideMap.get(id)
+  return (
+    <span className={cn('font-semibold', side ? TEAM_TEXT[side] : '')}>
+      {name}
+    </span>
+  )
+}
+
+function formatEvent(
+  event: BattleLogEvent,
+  nameMap: NameMap,
+  sideMap: SideMap,
+): ReactNode | null {
+  const c = (id: string) => <C id={id} nameMap={nameMap} sideMap={sideMap} />
+
   switch (event.type) {
     case 'creature_action':
-      return `${event.creatureName} uses ${event.abilityName}`
+      return (
+        <>
+          {c(event.creatureId)} uses {event.abilityName}
+          {event.targetIds.length === 1 && <> → {c(event.targetIds[0])}</>}
+        </>
+      )
     case 'damage':
-      if (event.isDodged) return `Dodged!`
-      return `${event.amount} damage${event.isCrit ? ' (CRIT!)' : ''}`
+      if (event.isDodged)
+        return (
+          <>
+            {c(event.targetId)} dodges {c(event.sourceId)}
+          </>
+        )
+      return (
+        <>
+          {c(event.sourceId)} deals {event.amount} to {c(event.targetId)}
+          {event.isCrit ? ' (CRIT!)' : ''}
+        </>
+      )
     case 'heal':
-      return `Heals for ${event.amount}`
+      return event.sourceId === event.targetId ? (
+        <>
+          {c(event.sourceId)} heals for {event.amount}
+        </>
+      ) : (
+        <>
+          {c(event.sourceId)} heals {c(event.targetId)} for {event.amount}
+        </>
+      )
     case 'ko':
-      return `${event.creatureName} is KO'd!`
+      return <>{c(event.creatureId)} is KO&apos;d!</>
     case 'status_applied':
-      return `${event.effect.kind} applied${event.effect.turnsRemaining ? ` (${event.effect.turnsRemaining}t)` : ''}`
+      return (
+        <>
+          {c(event.targetId)} gains {event.effect.kind}
+          {event.effect.turnsRemaining
+            ? ` (${event.effect.turnsRemaining}t)`
+            : ''}
+        </>
+      )
     case 'status_tick':
-      return event.damage > 0
-        ? `${event.kind} deals ${event.damage}`
-        : `${event.kind} heals ${Math.abs(event.damage)}`
+      return event.damage > 0 ? (
+        <>
+          {event.kind} deals {event.damage} to {c(event.targetId)}
+        </>
+      ) : (
+        <>
+          {event.kind} heals {c(event.targetId)} for {Math.abs(event.damage)}
+        </>
+      )
     case 'stun_skip':
-      return `Stunned — skips turn`
+      return <>{c(event.creatureId)} is stunned — skips turn</>
     case 'shield_absorbed':
-      return `Shield absorbs ${event.absorbed} (${event.remaining} left)`
+      return (
+        <>
+          {c(event.targetId)}&apos;s shield absorbs {event.absorbed} (
+          {event.remaining} left)
+        </>
+      )
     case 'reflect_damage':
-      return `Reflects ${event.amount} damage`
+      return (
+        <>
+          {c(event.targetId)} reflects {event.amount} to {c(event.sourceId)}
+        </>
+      )
     case 'passive_trigger':
-      return `${event.description}`
+      return (
+        <>
+          {c(event.creatureId)}: {event.description}
+        </>
+      )
     case 'synergy_applied':
-      return `${event.synergy.description}`
+      return <>{event.synergy.description}</>
     case 'battle_end':
       return event.winner
         ? `Battle ends in ${event.turns} turns`
@@ -299,6 +380,20 @@ export function BattleReplay({
   const challengerWon = challenge.winnerId === challenge.challengerId
   const defenderWon = challenge.winnerId === challenge.defenderId
   const isDraw = isResolved && !challenge.winnerId
+
+  // Build creature ID → name/side maps from final state
+  const nameMap: NameMap = new Map()
+  const sideMap: SideMap = new Map()
+  if (result) {
+    for (const c of result.finalState.teamA) {
+      nameMap.set(c.id, c.name)
+      sideMap.set(c.id, 'A')
+    }
+    for (const c of result.finalState.teamB) {
+      nameMap.set(c.id, c.name)
+      sideMap.set(c.id, 'B')
+    }
+  }
 
   // Key moments: KOs, crits, synergies, battle end
   const keyMoments = result?.log.filter(
@@ -409,6 +504,24 @@ export function BattleReplay({
         />
       </div>
 
+      {/* Team Legend */}
+      {isResolved && (
+        <div className="flex items-center justify-center gap-6 text-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-rose-400" />
+            <span className="text-muted-foreground">
+              {challenge.challengerName}&apos;s team
+            </span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block h-2.5 w-2.5 rounded-full bg-sky-400" />
+            <span className="text-muted-foreground">
+              {challenge.defenderName}&apos;s team
+            </span>
+          </span>
+        </div>
+      )}
+
       {/* Key Moments */}
       {keyMoments && keyMoments.length > 0 && (
         <div>
@@ -417,7 +530,7 @@ export function BattleReplay({
           </h2>
           <div className="space-y-1.5 rounded-xl border border-border bg-card/50 p-4">
             {keyMoments.map((event, i) => {
-              const text = formatEvent(event)
+              const text = formatEvent(event, nameMap, sideMap)
               if (!text) return null
               const icon = eventIcon(event)
               return (
@@ -471,7 +584,7 @@ export function BattleReplay({
                   )}
                   <div className="space-y-0.5">
                     {group.events.map((event, i) => {
-                      const text = formatEvent(event)
+                      const text = formatEvent(event, nameMap, sideMap)
                       if (!text) return null
                       const icon = eventIcon(event)
                       const isIndented =
