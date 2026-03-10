@@ -22,6 +22,9 @@ jobs:
   migrate:
     name: D1 Migrations
     runs-on: ubuntu-latest
+    concurrency:
+      group: d1-migrations-prod
+      cancel-in-progress: false
     permissions:
       contents: read
     steps:
