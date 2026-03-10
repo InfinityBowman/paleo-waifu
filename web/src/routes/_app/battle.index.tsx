@@ -68,7 +68,11 @@ export const refreshOpponents = createServerFn({ method: 'GET' })
     const allUcIds = opponents.flatMap((o) =>
       o.defenseTeam.map((s) => s.userCreatureId),
     )
-    if (allUcIds.length === 0) return []
+    if (allUcIds.length === 0)
+      return opponents.map((o) => ({
+        ...o,
+        defenseCreatures: [],
+      }))
 
     const creatureRows = await db
       .select({

@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne } from 'drizzle-orm'
+import { and, eq, inArray, ne, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { simulateBattle } from '@paleo-waifu/shared/battle/engine'
 import {
@@ -323,9 +323,36 @@ export async function executeArenaBattle(
   attackerSlots: Array<TeamSlotInput>,
   defenderSlots: Array<TeamSlotInput>,
 ): Promise<BattleExecResult | BattleExecError> {
-  // Check daily limit
-  const limit = await checkDailyLimit(db, attackerId)
-  if (!limit.allowed) {
+  // Atomically claim a daily attack slot to prevent race conditions.
+  // Upsert the rating row, then increment the counter only if under the limit.
+  const today = todayUTC()
+  await db
+    .insert(battleRating)
+    .values({
+      userId: attackerId,
+      rating: 0,
+      wins: 0,
+      losses: 0,
+      arenaAttacksToday: 0,
+      lastAttackDate: today,
+    })
+    .onConflictDoNothing()
+
+  const claimed = await db
+    .update(battleRating)
+    .set({
+      arenaAttacksToday: sql`CASE WHEN ${battleRating.lastAttackDate} = ${today} THEN ${battleRating.arenaAttacksToday} + 1 ELSE 1 END`,
+      lastAttackDate: today,
+    })
+    .where(
+      and(
+        eq(battleRating.userId, attackerId),
+        sql`CASE WHEN ${battleRating.lastAttackDate} = ${today} THEN ${battleRating.arenaAttacksToday} < ${ARENA_DAILY_LIMIT} ELSE 1 END`,
+      ),
+    )
+    .returning({ arenaAttacksToday: battleRating.arenaAttacksToday })
+
+  if (claimed.length === 0) {
     return {
       success: false,
       error: 'You have no arena attacks remaining today.',
@@ -416,12 +443,7 @@ export async function executeArenaBattle(
   }
 
   const now = new Date()
-  const today = todayUTC()
   const battleId = nanoid()
-
-  // Daily attack counter
-  const prevAttacks =
-    ratingA && ratingA.lastAttackDate === today ? ratingA.arenaAttacksToday : 0
 
   await db.batch([
     // Insert battle log
@@ -437,29 +459,16 @@ export async function executeArenaBattle(
       ratingChange: attackerDelta,
       createdAt: now,
     }),
-    // Upsert attacker rating + daily counter
+    // Update attacker rating (daily counter already claimed atomically above)
     db
-      .insert(battleRating)
-      .values({
-        userId: attackerId,
+      .update(battleRating)
+      .set({
         rating: newAttackerRating,
         wins: attackerWins,
         losses: attackerLosses,
-        arenaAttacksToday: prevAttacks + 1,
-        lastAttackDate: today,
         updatedAt: now,
       })
-      .onConflictDoUpdate({
-        target: battleRating.userId,
-        set: {
-          rating: newAttackerRating,
-          wins: attackerWins,
-          losses: attackerLosses,
-          arenaAttacksToday: prevAttacks + 1,
-          lastAttackDate: today,
-          updatedAt: now,
-        },
-      }),
+      .where(eq(battleRating.userId, attackerId)),
     // Upsert defender rating
     db
       .insert(battleRating)

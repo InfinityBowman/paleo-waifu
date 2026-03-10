@@ -59,8 +59,9 @@ export function BattleTeamPicker({
   const [roleFilter, setRoleFilter] = useState<string>('all')
 
   // Exclude already-selected creature IDs
-  const selectedCreatureIds = new Set(
-    value.filter(Boolean).map((s) => s!.creature.creatureId),
+  const selectedCreatureIds = useMemo(
+    () => new Set(value.filter(Boolean).map((s) => s!.creature.creatureId)),
+    [value],
   )
 
   const filtered = useMemo(() => {

@@ -292,7 +292,7 @@ export type BattleLogEvent =
   | {
       type: 'battle_end'
       winner: TeamSide | null
-      reason: 'ko' | 'timeout'
+      reason: 'ko' | 'timeout' | 'mutual_ko'
       turns: number
     }
 
@@ -305,7 +305,7 @@ export interface SynergyBonus {
 
 export interface BattleResult {
   winner: TeamSide | null
-  reason: 'ko' | 'timeout'
+  reason: 'ko' | 'timeout' | 'mutual_ko'
   turns: number
   teamAHpPercent: number
   teamBHpPercent: number

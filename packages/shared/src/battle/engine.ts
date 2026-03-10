@@ -91,19 +91,20 @@ export function simulateBattle(
 
   // 5. Turn loop
   let turnCount = 0
-  let winner: TeamSide | null = null
+  let winner: TeamSide | 'mutual_ko' | null = null
 
   for (let turn = 1; turn <= MAX_TURNS; turn++) {
     turnCount = turn
     log.push({ type: 'turn_start', turn })
 
-    // Weighted initiative: spd × random(0.5, 1.5)
-    const turnOrder = [...creaturesA, ...creaturesB]
-      .filter((c) => c.isAlive)
-      .sort(
-        (a, b) =>
-          b.spd * rng.nextFloat(0.5, 1.5) - a.spd * rng.nextFloat(0.5, 1.5),
-      )
+    // Weighted initiative: pre-roll per creature, then sort deterministically
+    const pool = [...creaturesA, ...creaturesB].filter((c) => c.isAlive)
+    const withInit = pool.map((c) => ({
+      c,
+      init: c.spd * rng.nextFloat(0.5, 1.5),
+    }))
+    withInit.sort((a, b) => b.init - a.init)
+    const turnOrder = withInit.map((x) => x.c)
 
     for (const creature of turnOrder) {
       if (!creature.isAlive) continue
@@ -203,7 +204,11 @@ export function simulateBattle(
         ability.id === 'basic_attack' && bam != null
           ? {
               ...ability,
-              effects: [{ ...ability.effects[0], multiplier: bam }],
+              effects: ability.effects.map((e, i) =>
+                i === 0 && e.type === 'damage'
+                  ? { ...e, multiplier: bam }
+                  : e,
+              ),
             }
           : ability
 
@@ -214,7 +219,7 @@ export function simulateBattle(
       logResolutions(creature, resolutions, turn, log)
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
-      if (ability.id === 'basic_attack' && targets.length > 0) {
+      if (creature.isAlive && ability.id === 'basic_attack' && targets.length > 0) {
         const attackCtx = makeCtx(
           creature,
           allies,
@@ -256,7 +261,7 @@ export function simulateBattle(
       if (winner) break
 
       // Tick status effects (DoT, buff/debuff expiry, shield duration)
-      tickAndLog(creature, turn, log)
+      if (creature.isAlive) tickAndLog(creature, turn, log)
 
       // Handle KOs from DoT
       processNewKOs(
@@ -274,18 +279,20 @@ export function simulateBattle(
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
 
-      // Fire onTurnEnd passives (regenerative)
-      fireAndLog(
-        'onTurnEnd',
-        creature,
-        creaturesA,
-        creaturesB,
-        rng,
-        turn,
-        log,
-        ds,
-        defS,
-      )
+      // Fire onTurnEnd passives (regenerative) — skip for dead creatures
+      if (creature.isAlive) {
+        fireAndLog(
+          'onTurnEnd',
+          creature,
+          creaturesA,
+          creaturesB,
+          rng,
+          turn,
+          log,
+          ds,
+          defS,
+        )
+      }
 
       winner = checkWinner(creaturesA, creaturesB)
       if (winner) break
@@ -296,16 +303,19 @@ export function simulateBattle(
   }
 
   // 6. Resolution
-  if (!winner) {
+  let reason: 'ko' | 'timeout' | 'mutual_ko'
+  if (winner === 'mutual_ko') {
+    reason = 'mutual_ko'
+    winner = null // no winner on mutual KO
+  } else if (!winner) {
+    // Timeout — higher HP% wins, defender (B) wins ties
     const teamAHp = calcTeamHpPercent(creaturesA)
     const teamBHp = calcTeamHpPercent(creaturesB)
     winner = teamAHp > teamBHp ? 'A' : 'B'
+    reason = 'timeout'
+  } else {
+    reason = 'ko'
   }
-
-  const reason =
-    turnCount >= MAX_TURNS && !checkWinner(creaturesA, creaturesB)
-      ? 'timeout'
-      : 'ko'
 
   log.push({
     type: 'battle_end',
@@ -615,10 +625,10 @@ function tickAndLog(
 function checkWinner(
   teamA: Array<BattleCreature>,
   teamB: Array<BattleCreature>,
-): TeamSide | null {
+): TeamSide | 'mutual_ko' | null {
   const aAlive = teamA.some((c) => c.isAlive)
   const bAlive = teamB.some((c) => c.isAlive)
-  if (!aAlive && !bAlive) return 'B' // simultaneous wipe favors defender
+  if (!aAlive && !bAlive) return 'mutual_ko'
   if (!aAlive) return 'B'
   if (!bAlive) return 'A'
   return null

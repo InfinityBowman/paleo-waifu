@@ -337,7 +337,7 @@ function NamePlate({
                 color: 'oklch(0.7 0.04 290)',
               }}
             >
-              {name[0].toUpperCase()}
+              {(name?.[0] ?? '?').toUpperCase()}
             </div>
           )}
         </motion.div>
@@ -426,7 +426,7 @@ function NamePlate({
                 color: 'oklch(0.7 0.04 290)',
               }}
             >
-              {name[0].toUpperCase()}
+              {(name?.[0] ?? '?').toUpperCase()}
             </div>
           )}
         </motion.div>

@@ -147,8 +147,8 @@ export function computeStackMultiplier(
 }
 
 function scaleEffect(effect: Effect, multiplier: number): Effect {
-  if (multiplier <= 0) return effect
   if (multiplier === 1) return effect
+  if (multiplier <= 0) multiplier = 0
   switch (effect.type) {
     case 'buff':
       return { ...effect, percent: effect.percent * multiplier }

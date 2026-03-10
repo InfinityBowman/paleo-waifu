@@ -72,7 +72,15 @@ async function loadTeamCreatures(
 const getBattleById = createServerFn({ method: 'GET' })
   .inputValidator((d: string) => d)
   .handler(async ({ data: battleId }) => {
-    const db = await createDb(getCfEnv().DB)
+    const cfEnv = getCfEnv()
+    const { getRequest } = await import('@tanstack/react-start/server')
+    const { createAuth } = await import('@/lib/auth')
+    const request = getRequest()
+    const auth = await createAuth(cfEnv)
+    const session = await auth.api.getSession({ headers: request.headers })
+    if (!session) return null
+
+    const db = await createDb(cfEnv.DB)
 
     const attackerUser = alias(user, 'attacker_user')
     const defenderUser = alias(user, 'defender_user')

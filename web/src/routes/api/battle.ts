@@ -21,6 +21,13 @@ const teamSlot = z.object({
   row: z.enum(['front', 'back']),
 })
 
+const storedTeamMembers = z.array(teamSlot).length(3)
+
+function parseTeamMembers(json: string) {
+  const parsed = storedTeamMembers.safeParse(JSON.parse(json))
+  return parsed.success ? parsed.data : null
+}
+
 const BattleBody = z.discriminatedUnion('action', [
   // Team management
   z.object({
@@ -83,7 +90,10 @@ export const Route = createFileRoute('/api/battle')({
             )
           }
           const ucRows = await db
-            .select({ creatureId: userCreature.creatureId })
+            .select({
+              creatureId: userCreature.creatureId,
+              isLocked: userCreature.isLocked,
+            })
             .from(userCreature)
             .where(
               and(
@@ -98,6 +108,15 @@ export const Route = createFileRoute('/api/battle')({
           ) {
             return jsonResponse(
               { error: 'All 3 team slots must be different species' },
+              400,
+            )
+          }
+          if (ucRows.some((r) => r.isLocked)) {
+            return jsonResponse(
+              {
+                error:
+                  'One or more creatures are in an active trade. Cancel the trade first.',
+              },
               400,
             )
           }
@@ -145,7 +164,13 @@ export const Route = createFileRoute('/api/battle')({
             )
           }
 
-          const defenderSlots = JSON.parse(defenderTeamRow.members)
+          const defenderSlots = parseTeamMembers(defenderTeamRow.members)
+          if (!defenderSlots) {
+            return jsonResponse(
+              { error: "Defender's team data is corrupted" },
+              400,
+            )
+          }
           const result = await executeArenaBattle(
             db,
             userId,
@@ -188,7 +213,13 @@ export const Route = createFileRoute('/api/battle')({
           )
         }
 
-        const defenderSlots = JSON.parse(defenderTeamRow.members)
+        const defenderSlots = parseTeamMembers(defenderTeamRow.members)
+        if (!defenderSlots) {
+          return jsonResponse(
+            { error: "Defender's team data is corrupted" },
+            400,
+          )
+        }
         const result = await executeFriendlyBattle(
           db,
           userId,

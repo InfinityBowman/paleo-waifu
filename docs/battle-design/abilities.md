@@ -258,3 +258,47 @@ The engine has one `resolveEffect()` function that handles every effect type uni
 3. If a target is KO'd by a damage effect, subsequent effects targeting that creature are skipped (except lifesteal, which heals the caster)
 4. Shield absorption happens during damage resolution -- damage is reduced by the shield's remaining value before hitting HP
 5. Reflect damage is calculated after shield absorption and applied to the attacker
+
+### Effect-Specific Edge Cases
+
+**Damage resolution order:**
+
+```
+1. Calculate raw damage (ATK * multiplier, crit, DEF mitigation, variance, passives)
+2. Shield absorption: absorbed = min(damage, shieldValue). Shield removed if depleted.
+3. Reflect: reflectDmg = floor(postShieldDamage * reflectPercent / 100).
+   - Only fires if postShieldDamage > 0 (fully shielded hits don't reflect).
+   - Reflect damage is applied directly to attacker HP. Can KO the attacker.
+4. Apply remaining damage to target HP.
+```
+
+**Stun:**
+- Sets `isStunned = true` and adds a stun status effect.
+- Re-stunning clears the old stun status effect before adding the new one (prevents stacking).
+- Does not apply to dead targets.
+- Consumed by the engine (not `tickStatusEffects`) -- the engine checks `isStunned`, skips the action, then clears the flag and removes the status.
+
+**Lifesteal:**
+- Heals caster for `max(1, floor(lastDamageDealt * percent / 100))`.
+- Returns empty if `lastDamageDealt <= 0` (dodged or no preceding damage).
+- Caps at `maxHp`.
+- Explicitly exempted from the "skip effects after target death" rule -- lifesteal heals the caster, not the target.
+
+**Buff/Debuff replacement:**
+- Applying a buff/debuff to a stat that already has one of the same kind (buff or debuff) first removes the old modifier, then applies the new one. This prevents stat drift from accumulated modifiers.
+- Different stats can have simultaneous buffs/debuffs (e.g., ATK buff + DEF buff).
+
+**Taunt:**
+- Applying taunt clears all existing taunts on the caster's team before adding the new one. Only one creature per team can taunt at a time.
+
+**Shield:**
+- Applying a new shield removes the existing shield status effect (latest replaces previous).
+- Shield value is based on `caster.maxHp * percent / 100`.
+
+### Trigger Safety Guards
+
+- **`onBasicAttack`** only fires if the attacker is still alive after ability resolution. If reflect damage KOs the attacker, `onBasicAttack` passives (e.g., Venomous) do NOT fire.
+- **`onKill`** only fires if the attacker is still alive. A creature that dies from reflect on the same action that kills an enemy does NOT trigger `onKill`.
+- **`onTurnEnd` / `onTurnStart`** only fire for living creatures. Dead creatures' passives are inert.
+- **`onEnemyKO`** fires for all living members of the opposing team when any creature is KO'd.
+- **`onAllyKO`** fires for all living allies (excluding the dead creature itself).

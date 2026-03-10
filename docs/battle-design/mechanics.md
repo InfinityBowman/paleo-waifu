@@ -97,10 +97,17 @@ The damage pipeline is clean and linear. No branching on ability type, no specia
 
 3. DEF mitigation (diminishing returns)
    raw *= K / (K + defender.DEF)
-   K = DEF_SCALING_CONSTANT (default 100, tunable)
-   Lower K = DEF is stronger.
-   At K=100: DEF 60 lets 62.5% through, DEF 100 lets 50% through.
-   At K=80:  DEF 60 lets 57.1% through, DEF 100 lets 44.4% through.
+   K = DEF_SCALING_CONSTANT (default 60, tunable)
+   Lower K = DEF is stronger (blocks more damage).
+
+   Example — DEF 60 at different K values:
+     K=100: 100/(100+60) = 62.5% damage gets through (DEF blocks 37.5%)
+     K=60:   60/(60+60)  = 50.0% damage gets through (DEF blocks 50.0%)
+
+   Example — varying DEF at K=60 (current default):
+     DEF 30:  60/(60+30) = 66.7% through
+     DEF 60:  60/(60+60) = 50.0% through
+     DEF 100: 60/(60+100) = 37.5% through
 
 4. Variance
    raw *= random(0.9, 1.1)
@@ -125,7 +132,7 @@ The damage pipeline is clean and linear. No branching on ability type, no specia
 
 ### Design Decisions
 
-- **DEF uses diminishing returns** (`K / (K + DEF)`) rather than flat subtraction. This means stacking DEF is always useful but never makes a creature unkillable. The constant K is tunable via the balance UI.
+- **DEF uses diminishing returns** (`K / (K + DEF)`) rather than flat subtraction. This means stacking DEF is always useful but never makes a creature unkillable. The constant K (default 60) is tunable via the balance UI.
 - **No diet damage modifier.** Diet affects team synergies and role fallback assignment, but not individual hit damage. Removed to simplify the formula.
 - **DoTs bypass DEF entirely.** Poison and bleed deal `floor(maxHp * percent)` per turn -- flat percentage damage with no mitigation. This makes them strong against high-DEF tanks.
 - **Crit is a flat 10% chance** with a 1.5x multiplier (before Spiked Plates reduction). No crit scaling stat.
@@ -204,8 +211,11 @@ Buffs/debuffs of the same stat don't stack -- latest applied replaces the previo
      10. Tick status effects (DoT damage, buff/debuff expiry, shield duration)
      11. Process KOs from DoT
      12. Fire `onTurnEnd` triggers (e.g., Regenerative heals)
-   - Win check: if one team has 0 creatures alive, other team wins
-3. **Timeout** (turn 30): Team with higher total remaining HP% wins. If tied, defender (team B) wins (anti-stall).
+   - Win check after each creature's action
+3. **Resolution:**
+   - **KO win:** If one team has 0 creatures alive, the other team wins with reason `ko`.
+   - **Mutual KO:** If both teams are wiped simultaneously (e.g., reflect kills the last attacker on the same action that kills the last defender), the result is `mutual_ko` with no winner (`winner: null`).
+   - **Timeout** (turn 30): Team with higher total remaining HP% wins. If tied, defender (team B) wins (anti-stall).
 
 ### Trigger Resolution Order
 
@@ -217,6 +227,65 @@ The entire battle is deterministic given the same inputs and RNG seed. Same team
 
 ---
 
+## Edge Cases & Safety Guards
+
+These are the precise rules the engine enforces to handle tricky combat interactions. Each is covered by a corresponding test in `packages/shared/src/battle/__tests__/`.
+
+### Dead Creature Guards
+
+- **Dead creatures don't act.** If a creature dies mid-turn (e.g., from reflect damage on an earlier creature's action), it is skipped in the turn order.
+- **Dead creatures don't receive status ticks.** Poison, bleed, HoT, and other status effects are not ticked on dead creatures.
+- **Dead creatures don't fire passives.** `onTurnEnd`, `onTurnStart`, and other triggered passives are skipped for KO'd creatures. A dead creature with Soothing Aura does not heal allies.
+
+### KO Processing
+
+KOs are processed twice per creature action: once after ability resolution (damage KOs) and once after status effect ticks (DoT KOs). A `koLogged` set prevents the same creature's KO from being logged or triggering events twice.
+
+When a creature is KO'd, three trigger types fire in order:
+
+1. **`onKill`** -- fires for the attacker that caused the KO. **Guard:** Only fires if the attacker is still alive. If reflect damage kills the attacker on the same action, `onKill` does NOT fire.
+2. **`onEnemyKO`** -- fires for all living members of the opposing team (regardless of who dealt the killing blow).
+3. **`onAllyKO`** -- fires for all living allies of the dead creature.
+
+### Stun
+
+- Stunned creatures skip their action and emit a `stun_skip` log event.
+- After skipping, `isStunned` is reset to `false` and the stun status effect is removed.
+- Status effect ticks (DoT, buff/debuff expiry) still run during the stunned creature's turn -- stun only prevents the action, not passive effects.
+- Re-stunning a creature clears the old stun status before adding the new one (no stacking).
+- Stun is NOT decremented by `tickStatusEffects`. It is consumed solely by the engine's stun skip path.
+
+### Shield & Reflect Interaction
+
+Shield absorption and reflect are resolved in order during damage resolution:
+
+1. Shield absorbs damage first. If a shield exists, `absorbed = min(finalDamage, shieldValue)`. The shield's value is reduced by the absorbed amount. If the shield reaches 0, it is removed entirely.
+2. Reflect is calculated on the damage that passes through the shield (`finalDamage` after absorption). **If shield fully absorbs all damage (`finalDamage = 0`), reflect does not fire.**
+3. Reflect damage is `floor(finalDamage * reflectPercent / 100)` and is applied directly to the attacker's HP. If this kills the attacker, `attacker.isAlive` is set to `false`.
+
+### Lifesteal
+
+- Lifesteal heals the caster for `max(1, floor(lastDamageDealt * percent / 100))`.
+- Lifesteal caps at `maxHp` -- caster HP never exceeds maximum.
+- **Lifesteal is the only effect that fires after the target is KO'd.** All other secondary effects (DoT, debuff, etc.) are skipped when the target dies from an earlier effect in the same ability.
+- If `lastDamageDealt` is 0 (damage was dodged or no damage effect preceded the lifesteal), lifesteal does nothing.
+
+### Crit & Dodge
+
+- **Crit:** 10% chance, applies `1 + 0.5 * (1 - critReductionPercent / 100)` multiplier. With 100% crit reduction, the crit bonus is fully negated (damage unchanged). The `isCrit` flag is still `true` for display purposes.
+- **Dodge:** Only checked when `dodgeBasePercent > 0`. Dodge chance scales with SPD ratio: `min(0.4, max(0.03, baseDodge * defenderSPD / attackerSPD))`. The 3% floor prevents dodge from being useless against fast attackers. The 40% cap prevents it from being too strong. A successful dodge sets `finalDamage = 0` and `isCrit = false`.
+
+### Multi-Effect Abilities
+
+When an ability has multiple effects (e.g., damage + poison, or damage + lifesteal):
+
+- Effects are resolved in array order.
+- If the target is KO'd by a damage effect, all subsequent effects targeting that creature are skipped.
+- **Exception:** Lifesteal still fires after target death because it heals the caster, not the target.
+- `lastDamageDealt` is tracked across effects within the same ability to inform lifesteal calculations.
+
+---
+
 ## Tuning Constants
 
 These values are adjustable via the balance UI without code changes:
@@ -224,7 +293,7 @@ These values are adjustable via the balance UI without code changes:
 | Constant                | Default | Purpose                                            |
 | ----------------------- | ------- | -------------------------------------------------- |
 | `COMBAT_DAMAGE_SCALE`   | 0.6     | Global damage multiplier. Controls battle length.  |
-| `DEF_SCALING_CONSTANT`  | 100     | DEF formula constant. Lower = DEF is stronger.     |
+| `DEF_SCALING_CONSTANT`  | 60      | DEF formula constant. Lower = DEF is stronger.     |
 | Role stat distributions | (table) | Per-role % allocation of stat budget.              |
 | Rarity stat modifiers   | (none)  | Optional per-rarity stat scaling overrides.        |
 | Ability overrides       | (none)  | Per-ability multiplier/duration/percent overrides. |

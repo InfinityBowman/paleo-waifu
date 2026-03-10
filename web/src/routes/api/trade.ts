@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid'
 import { z } from 'zod'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
+  battleTeam,
   tradeHistory,
   tradeOffer,
   tradeProposal,
@@ -13,7 +14,27 @@ import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
 import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
 
+import type { Database } from '@paleo-waifu/shared/db/client'
+
 const idField = z.string().min(1).max(50)
+
+/** Check if a creature is on any battle team (max 2 rows per user) */
+async function isOnBattleTeam(
+  db: Database,
+  userId: string,
+  userCreatureId: string,
+) {
+  const teams = await db
+    .select({ members: battleTeam.members })
+    .from(battleTeam)
+    .where(eq(battleTeam.userId, userId))
+    .all()
+  for (const team of teams) {
+    const members: { userCreatureId: string }[] = JSON.parse(team.members)
+    if (members.some((m) => m.userCreatureId === userCreatureId)) return true
+  }
+  return false
+}
 
 const TradeBody = z.discriminatedUnion('action', [
   z.object({
@@ -82,6 +103,22 @@ export const Route = createFileRoute('/api/trade')({
           if (locked.length === 0) {
             return jsonResponse(
               { error: 'Creature not found or already in a trade' },
+              400,
+            )
+          }
+
+          // Block creatures on battle teams
+          if (await isOnBattleTeam(db, userId, body.offeredCreatureId)) {
+            // Undo the lock
+            await db
+              .update(userCreature)
+              .set({ isLocked: false })
+              .where(eq(userCreature.id, body.offeredCreatureId))
+            return jsonResponse(
+              {
+                error:
+                  'This creature is on a battle team. Remove it from your team first.',
+              },
               400,
             )
           }
@@ -260,6 +297,21 @@ export const Route = createFileRoute('/api/trade')({
           if (locked.length === 0) {
             return jsonResponse(
               { error: 'Your creature not found or already in use' },
+              400,
+            )
+          }
+
+          // Block creatures on battle teams
+          if (await isOnBattleTeam(db, userId, body.myCreatureId)) {
+            await db
+              .update(userCreature)
+              .set({ isLocked: false })
+              .where(eq(userCreature.id, body.myCreatureId))
+            return jsonResponse(
+              {
+                error:
+                  'This creature is on a battle team. Remove it from your team first.',
+              },
               400,
             )
           }
