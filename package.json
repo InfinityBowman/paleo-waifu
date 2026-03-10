@@ -44,6 +44,8 @@
     "test": "cd web && pnpm test",
     "test:unit": "cd web && pnpm test:unit",
     "test:watch": "cd web && pnpm test:watch",
+    "test:e2e": "cd web && pnpm test:e2e",
+    "test:e2e:watch": "cd web && pnpm test:e2e:watch",
     "deps:up": "pnpm update --latest --recursive"
   },
   "devDependencies": {

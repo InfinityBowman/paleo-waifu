@@ -14,6 +14,7 @@ import {
   HARD_PITY_THRESHOLD,
   NEW_USER_BONUS,
   RATE_UP_SHARE,
+  SOFT_PITY_RATE_INCREMENT,
   SOFT_PITY_THRESHOLD,
 } from '@paleo-waifu/shared/types'
 import { toCdnUrl } from './utils'
@@ -137,21 +138,21 @@ function calculateRarity(
     return 'legendary'
   }
 
-  // Soft pity for legendary: double rate each pull past threshold
+  // Soft pity for legendary: linear ramp past threshold (+6% per pull, Genshin-style)
   let legendaryRate = BASE_RATES.legendary
   if (pullsSinceLegendary >= SOFT_PITY_THRESHOLD) {
     const extraPulls = pullsSinceLegendary - SOFT_PITY_THRESHOLD
-    legendaryRate = BASE_RATES.legendary * Math.pow(2, extraPulls + 1)
+    legendaryRate =
+      BASE_RATES.legendary + extraPulls * SOFT_PITY_RATE_INCREMENT
   }
 
-  // Soft pity for rare+: after 50 pulls with no rare, double rate
+  // Soft pity for rare+: linear ramp past threshold (+3% per pull)
   let rareRate = BASE_RATES.rare
   let epicRate = BASE_RATES.epic
   if (pullsSinceRare >= SOFT_PITY_THRESHOLD) {
     const extraPulls = pullsSinceRare - SOFT_PITY_THRESHOLD
-    const multiplier = Math.pow(2, extraPulls + 1)
-    rareRate = BASE_RATES.rare * multiplier
-    epicRate = BASE_RATES.epic * multiplier
+    rareRate = BASE_RATES.rare + extraPulls * 0.03
+    epicRate = BASE_RATES.epic + extraPulls * 0.02
   }
 
   // Normalize and roll
@@ -318,6 +319,11 @@ export async function executePullBatch(
   }> = []
 
   for (let i = 0; i < count; i++) {
+    // Increment BEFORE check so the counter represents "this is your Nth pull"
+    // e.g. after 89 non-legendary pulls, this becomes 90 → hard pity fires on pull 90
+    pullsSinceRare++
+    pullsSinceLegendary++
+
     const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary)
 
     let creatureId = selectCreatureFromPool(poolByRarity, rarity, rateUpId)
@@ -362,9 +368,6 @@ export async function executePullBatch(
         isBattleReady: picked.isBattleReady,
       })
     }
-
-    pullsSinceRare++
-    pullsSinceLegendary++
 
     if (['rare', 'epic', 'legendary'].includes(rarity)) pullsSinceRare = 0
     if (rarity === 'legendary') pullsSinceLegendary = 0

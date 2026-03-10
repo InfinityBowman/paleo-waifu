@@ -20,8 +20,10 @@ export const PULL_COST_MULTI = 10
 export const MULTI_PULL_COUNT = 10
 export const NEW_USER_BONUS = 10
 export const DAILY_FOSSILS = 3
-export const SOFT_PITY_THRESHOLD = 50
+export const SOFT_PITY_THRESHOLD = 75
 export const HARD_PITY_THRESHOLD = 90
+/** Per-pull legendary rate increase once soft pity kicks in (linear ramp) */
+export const SOFT_PITY_RATE_INCREMENT = 0.06
 
 export const BASE_RATES: Record<Rarity, number> = {
   common: 0.5,
