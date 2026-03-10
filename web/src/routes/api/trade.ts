@@ -247,7 +247,10 @@ export const Route = createFileRoute('/api/trade')({
 
           // Verify ownership
           const owned = await db
-            .select({ id: userCreature.id, creatureId: userCreature.creatureId })
+            .select({
+              id: userCreature.id,
+              creatureId: userCreature.creatureId,
+            })
             .from(userCreature)
             .where(
               and(

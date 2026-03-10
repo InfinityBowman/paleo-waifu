@@ -1,8 +1,5 @@
 import { and, eq, inArray } from 'drizzle-orm'
-import {
-  tradeOffer,
-  tradeProposal,
-} from '@paleo-waifu/shared/db/schema'
+import { tradeOffer, tradeProposal } from '@paleo-waifu/shared/db/schema'
 import type { Database } from '@paleo-waifu/shared/db/client'
 
 /**

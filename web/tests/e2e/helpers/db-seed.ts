@@ -270,7 +270,13 @@ export async function seedTestData() {
     {
       sql: `INSERT OR REPLACE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at)
             VALUES (?, ?, ?, ?, ?)`,
-      params: [TEST_UC_ID_1, TEST_USER_ID, TEST_CREATURE_ID, TEST_BANNER_ID, now],
+      params: [
+        TEST_UC_ID_1,
+        TEST_USER_ID,
+        TEST_CREATURE_ID,
+        TEST_BANNER_ID,
+        now,
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO user_creature (id, user_id, creature_id, banner_id, pulled_at)
@@ -376,32 +382,68 @@ export async function seedTestData() {
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-001', TEST_CREATURE_ID, 'bite', 'active', 'Crushing Bite'],
+      params: [
+        'e2e-ca-001',
+        TEST_CREATURE_ID,
+        'bite',
+        'active',
+        'Crushing Bite',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-002', TEST_CREATURE_ID, 'intimidate', 'passive', 'Apex Predator'],
+      params: [
+        'e2e-ca-002',
+        TEST_CREATURE_ID,
+        'intimidate',
+        'passive',
+        'Apex Predator',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-003', TEST_CREATURE_ID_2, 'charge', 'active', 'Horn Charge'],
+      params: [
+        'e2e-ca-003',
+        TEST_CREATURE_ID_2,
+        'charge',
+        'active',
+        'Horn Charge',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-004', TEST_CREATURE_ID_2, 'thick_hide', 'passive', 'Thick Hide'],
+      params: [
+        'e2e-ca-004',
+        TEST_CREATURE_ID_2,
+        'thick_hide',
+        'passive',
+        'Thick Hide',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-005', TEST_CREATURE_ID_3, 'tail_whip', 'active', 'Tail Whip'],
+      params: [
+        'e2e-ca-005',
+        TEST_CREATURE_ID_3,
+        'tail_whip',
+        'active',
+        'Tail Whip',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-006', TEST_CREATURE_ID_3, 'plated_armor', 'passive', 'Plated Armor'],
+      params: [
+        'e2e-ca-006',
+        TEST_CREATURE_ID_3,
+        'plated_armor',
+        'passive',
+        'Plated Armor',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
@@ -411,27 +453,57 @@ export async function seedTestData() {
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-008', TEST_CREATURE_ID_4, 'pack_hunter', 'passive', 'Pack Hunter'],
+      params: [
+        'e2e-ca-008',
+        TEST_CREATURE_ID_4,
+        'pack_hunter',
+        'passive',
+        'Pack Hunter',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-009', TEST_CREATURE_ID_5, 'aqua_slash', 'active', 'Aqua Slash'],
+      params: [
+        'e2e-ca-009',
+        TEST_CREATURE_ID_5,
+        'aqua_slash',
+        'active',
+        'Aqua Slash',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-010', TEST_CREATURE_ID_5, 'sail_back', 'passive', 'Sail Back'],
+      params: [
+        'e2e-ca-010',
+        TEST_CREATURE_ID_5,
+        'sail_back',
+        'passive',
+        'Sail Back',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-011', TEST_CREATURE_ID_6, 'club_tail', 'active', 'Club Tail'],
+      params: [
+        'e2e-ca-011',
+        TEST_CREATURE_ID_6,
+        'club_tail',
+        'active',
+        'Club Tail',
+      ],
     },
     {
       sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name)
             VALUES (?, ?, ?, ?, ?)`,
-      params: ['e2e-ca-012', TEST_CREATURE_ID_6, 'fortress', 'passive', 'Fortress'],
+      params: [
+        'e2e-ca-012',
+        TEST_CREATURE_ID_6,
+        'fortress',
+        'passive',
+        'Fortress',
+      ],
     },
   ])
 }

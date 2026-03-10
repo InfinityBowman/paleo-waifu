@@ -334,7 +334,9 @@ describe('trade system', () => {
       body.id,
     )
     const sevenDays = 7 * 24 * 60 * 60
-    expect(trade!.expires_at).toBeGreaterThanOrEqual(beforeCreate + sevenDays - 5)
+    expect(trade!.expires_at).toBeGreaterThanOrEqual(
+      beforeCreate + sevenDays - 5,
+    )
     expect(trade!.expires_at).toBeLessThanOrEqual(beforeCreate + sevenDays + 5)
   })
 })

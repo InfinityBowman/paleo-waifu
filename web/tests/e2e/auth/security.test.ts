@@ -72,10 +72,7 @@ describe('auth + CSRF security', () => {
 
     for (const endpoint of endpoints) {
       const res = await crossOriginPost(endpoint, {}, cookie)
-      expect(
-        res.status,
-        `${endpoint} should reject cross-origin`,
-      ).toBe(403)
+      expect(res.status, `${endpoint} should reject cross-origin`).toBe(403)
     }
   })
 

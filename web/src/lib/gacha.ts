@@ -142,8 +142,7 @@ function calculateRarity(
   let legendaryRate = BASE_RATES.legendary
   if (pullsSinceLegendary >= SOFT_PITY_THRESHOLD) {
     const extraPulls = pullsSinceLegendary - SOFT_PITY_THRESHOLD
-    legendaryRate =
-      BASE_RATES.legendary + extraPulls * SOFT_PITY_RATE_INCREMENT
+    legendaryRate = BASE_RATES.legendary + extraPulls * SOFT_PITY_RATE_INCREMENT
   }
 
   // Soft pity for rare+: linear ramp past threshold (+3% per pull)

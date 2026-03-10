@@ -52,16 +52,26 @@ The signing logic already exists in `web/src/routes/api/dev/switch-user.ts`:
 
 ```typescript
 // 1. Insert session row
-await execute(`INSERT INTO session (id, token, userId, expiresAt, ipAddress, userAgent)
-  VALUES (?, ?, ?, ?, '127.0.0.1', 'e2e-test')`, [sessionId, token, userId, expiresAt])
+await execute(
+  `INSERT INTO session (id, token, userId, expiresAt, ipAddress, userAgent)
+  VALUES (?, ?, ?, ?, '127.0.0.1', 'e2e-test')`,
+  [sessionId, token, userId, expiresAt],
+)
 
 // 2. Sign token with HMAC-SHA256
 async function signCookieValue(value: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
-    'raw', new TextEncoder().encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
   )
-  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value))
+  const sig = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    new TextEncoder().encode(value),
+  )
   const base64Sig = btoa(String.fromCharCode(...new Uint8Array(sig)))
   return encodeURIComponent(`${value}.${base64Sig}`)
 }
@@ -88,7 +98,8 @@ export const Route = createFileRoute('/api/test')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        if (!process.env.TEST_MODE) return new Response('Not Found', { status: 404 })
+        if (!process.env.TEST_MODE)
+          return new Response('Not Found', { status: 404 })
         // ... query/execute/batch handlers (same as bot/src/index.ts)
       },
     },
@@ -173,20 +184,22 @@ Wraps `fetch` with session cookie and CSRF headers:
 Same pattern as bot tests, adapted for web app needs:
 
 **Test Constants:**
+
 ```typescript
-TEST_USER_ID = 'e2e-user-001'              // Primary test user (100 fossils)
-TEST_USER_ID_2 = 'e2e-user-002'            // Secondary user (50 fossils, for trades/battles)
-TEST_ADMIN_ID = 'e2e-admin-001'            // Admin user
-TEST_CREATURE_ID = 'e2e-creature-001'      // Legendary
-TEST_CREATURE_ID_2 = 'e2e-creature-002'    // Common
-TEST_CREATURE_ID_3 = 'e2e-creature-003'    // Uncommon
-TEST_CREATURE_ID_4 = 'e2e-creature-004'    // Rare
-TEST_CREATURE_ID_5 = 'e2e-creature-005'    // Epic
-TEST_CREATURE_ID_6 = 'e2e-creature-006'    // Common (extra for trade/team tests)
+TEST_USER_ID = 'e2e-user-001' // Primary test user (100 fossils)
+TEST_USER_ID_2 = 'e2e-user-002' // Secondary user (50 fossils, for trades/battles)
+TEST_ADMIN_ID = 'e2e-admin-001' // Admin user
+TEST_CREATURE_ID = 'e2e-creature-001' // Legendary
+TEST_CREATURE_ID_2 = 'e2e-creature-002' // Common
+TEST_CREATURE_ID_3 = 'e2e-creature-003' // Uncommon
+TEST_CREATURE_ID_4 = 'e2e-creature-004' // Rare
+TEST_CREATURE_ID_5 = 'e2e-creature-005' // Epic
+TEST_CREATURE_ID_6 = 'e2e-creature-006' // Common (extra for trade/team tests)
 TEST_BANNER_ID = 'e2e-banner-001'
 ```
 
 **Functions:**
+
 - `seedTestData()` — creates users, creatures, banners, banner pools, currency, user_creatures, XP
 - `resetTestData()` — truncates all game tables between tests
 - `queryOne<T>(sql, ...params)` — single row query via `/api/test/query`
@@ -194,6 +207,7 @@ TEST_BANNER_ID = 'e2e-banner-001'
 - `execute(sql, ...params)` — write statement via `/api/test/execute`
 
 **Seed Data:**
+
 - 3 users: primary (100 fossils), secondary (50 fossils), admin (role: 'admin')
 - 6 creatures across all rarities
 - 1 active banner with all creatures in pool
@@ -208,103 +222,103 @@ Reuse the same `pollUntil()` pattern from the bot tests. Used for any async side
 
 ### Auth Guards (1 file, ~8 tests)
 
-| Test | What it asserts |
-| --- | --- |
-| `/gacha` redirects unauthenticated → `/` | Layout guard works |
-| `/collection` redirects unauthenticated → `/` | Layout guard works |
-| `/trade` redirects unauthenticated → `/` | Layout guard works |
-| `/profile` redirects unauthenticated → `/` | Layout guard works |
-| `/battle` redirects unauthenticated → `/` | Layout guard works |
+| Test                                              | What it asserts    |
+| ------------------------------------------------- | ------------------ |
+| `/gacha` redirects unauthenticated → `/`          | Layout guard works |
+| `/collection` redirects unauthenticated → `/`     | Layout guard works |
+| `/trade` redirects unauthenticated → `/`          | Layout guard works |
+| `/profile` redirects unauthenticated → `/`        | Layout guard works |
+| `/battle` redirects unauthenticated → `/`         | Layout guard works |
 | `/battle/some-id` redirects unauthenticated → `/` | Layout guard works |
-| `/admin` redirects unauthenticated → `/` | Layout guard works |
-| `/admin` redirects non-admin authenticated → `/` | Role guard works |
+| `/admin` redirects unauthenticated → `/`          | Layout guard works |
+| `/admin` redirects non-admin authenticated → `/`  | Role guard works   |
 
 ### CSRF (1 file, ~3 tests)
 
-| Test | What it asserts |
-| --- | --- |
-| POST with mismatched Origin → 403 | `checkCsrfOrigin` rejects cross-origin |
-| POST with no Origin → passes through | Missing Origin is allowed |
-| POST with matching Origin → passes through | Same-origin accepted |
+| Test                                       | What it asserts                        |
+| ------------------------------------------ | -------------------------------------- |
+| POST with mismatched Origin → 403          | `checkCsrfOrigin` rejects cross-origin |
+| POST with no Origin → passes through       | Missing Origin is allowed              |
+| POST with matching Origin → passes through | Same-origin accepted                   |
 
 ### Gacha API (2 files, ~10 tests)
 
-| Test | Action | What it asserts |
-| --- | --- | --- |
-| Single pull → 200 | `pull` | Deducts 1 fossil, creates user_creature, updates pity |
-| Multi pull → 200 | `pull_multi` | Deducts 10 fossils, creates 10 user_creatures |
-| Pull with 0 fossils → 402 | `pull` | Returns `Insufficient fossils` error |
-| Pull on inactive banner → 400 | `pull` | Returns `Banner not found or inactive` |
-| Pull unauthenticated → 401 | `pull` | Auth check fires before logic |
-| Daily claim → 200 | `claim_daily` | Awards 3 fossils, sets last_daily_claim |
-| Double daily claim → error | `claim_daily` | Rejects second claim same day |
-| Daily claim unauthenticated → 401 | `claim_daily` | Auth check fires |
-| Invalid action → 400 | unknown | Zod discriminated union rejects |
-| Invalid JSON → 400 | malformed | JSON parse error handled |
+| Test                              | Action        | What it asserts                                       |
+| --------------------------------- | ------------- | ----------------------------------------------------- |
+| Single pull → 200                 | `pull`        | Deducts 1 fossil, creates user_creature, updates pity |
+| Multi pull → 200                  | `pull_multi`  | Deducts 10 fossils, creates 10 user_creatures         |
+| Pull with 0 fossils → 402         | `pull`        | Returns `Insufficient fossils` error                  |
+| Pull on inactive banner → 400     | `pull`        | Returns `Banner not found or inactive`                |
+| Pull unauthenticated → 401        | `pull`        | Auth check fires before logic                         |
+| Daily claim → 200                 | `claim_daily` | Awards 3 fossils, sets last_daily_claim               |
+| Double daily claim → error        | `claim_daily` | Rejects second claim same day                         |
+| Daily claim unauthenticated → 401 | `claim_daily` | Auth check fires                                      |
+| Invalid action → 400              | unknown       | Zod discriminated union rejects                       |
+| Invalid JSON → 400                | malformed     | JSON parse error handled                              |
 
 ### Trade API (4 files, ~18 tests)
 
-| Test | Action | What it asserts |
-| --- | --- | --- |
-| Create trade → 200 | `create` | Locks creature, creates trade_offer |
-| Create with locked creature → 400 | `create` | Already-traded creature rejected |
-| Create 6th trade → 400 | `create` | 5-trade cap enforced |
-| Create with creature on battle team → 400 | `create` | Battle team guard works |
-| Cancel own trade → 200 | `cancel` | Unlocks creature, cancels proposals |
-| Cancel other's trade → 404 | `cancel` | Ownership check works |
-| Propose on trade → 200 | `propose` | Locks proposer creature, creates proposal |
-| Propose on own trade → 409 | `propose` | Self-propose blocked |
-| Propose with wrong species → 400 | `propose` | wantedCreatureId constraint enforced |
-| Duplicate proposal → 409 | `propose` | One proposal per user per trade |
-| Confirm proposal → 200 | `confirm` | Creatures swap owners, both unlocked, trade_history created |
-| Confirm non-existent proposal → 404 | `confirm` | Proposal validation |
-| Confirm other's trade → 404 | `confirm` | Ownership check |
-| Withdraw proposal → 200 | `withdraw` | Unlocks proposer creature |
-| Withdraw other's proposal → 404 | `withdraw` | Ownership check |
-| All actions unauthenticated → 401 | * | Auth check fires before logic |
-| Losing proposals cancelled on confirm | `confirm` | All non-winning proposals cancelled + creatures unlocked |
-| Proposals cancelled on trade cancel | `cancel` | All pending proposals cancelled + creatures unlocked |
+| Test                                      | Action     | What it asserts                                             |
+| ----------------------------------------- | ---------- | ----------------------------------------------------------- |
+| Create trade → 200                        | `create`   | Locks creature, creates trade_offer                         |
+| Create with locked creature → 400         | `create`   | Already-traded creature rejected                            |
+| Create 6th trade → 400                    | `create`   | 5-trade cap enforced                                        |
+| Create with creature on battle team → 400 | `create`   | Battle team guard works                                     |
+| Cancel own trade → 200                    | `cancel`   | Unlocks creature, cancels proposals                         |
+| Cancel other's trade → 404                | `cancel`   | Ownership check works                                       |
+| Propose on trade → 200                    | `propose`  | Locks proposer creature, creates proposal                   |
+| Propose on own trade → 409                | `propose`  | Self-propose blocked                                        |
+| Propose with wrong species → 400          | `propose`  | wantedCreatureId constraint enforced                        |
+| Duplicate proposal → 409                  | `propose`  | One proposal per user per trade                             |
+| Confirm proposal → 200                    | `confirm`  | Creatures swap owners, both unlocked, trade_history created |
+| Confirm non-existent proposal → 404       | `confirm`  | Proposal validation                                         |
+| Confirm other's trade → 404               | `confirm`  | Ownership check                                             |
+| Withdraw proposal → 200                   | `withdraw` | Unlocks proposer creature                                   |
+| Withdraw other's proposal → 404           | `withdraw` | Ownership check                                             |
+| All actions unauthenticated → 401         | \*         | Auth check fires before logic                               |
+| Losing proposals cancelled on confirm     | `confirm`  | All non-winning proposals cancelled + creatures unlocked    |
+| Proposals cancelled on trade cancel       | `cancel`   | All pending proposals cancelled + creatures unlocked        |
 
 ### Battle API (3 files, ~14 tests)
 
-| Test | Action | What it asserts |
-| --- | --- | --- |
-| Set offense team → 200 | `set_team` | Creates battleTeam row with 3 members |
-| Set defense team → 200 | `set_team` | Creates battleTeam row with 3 members |
-| Set team with duplicates → 400 | `set_team` | Unique creature check |
-| Set team with locked creature → 400 | `set_team` | Trade-locked guard |
-| Set team with non-owned creature → 400 | `set_team` | Ownership check |
-| Set team with duplicate species → 400 | `set_team` | Species uniqueness check |
-| Delete team → 200 | `delete_team` | Removes battleTeam row |
-| Delete non-existent team → 404 | `delete_team` | Graceful handling |
-| Arena attack → 200 | `arena_attack` | Battle executes, rating updated, battle_log created |
-| Arena self-attack → 400 | `arena_attack` | Self-targeting blocked |
-| Arena without offense team → 400 | `arena_attack` | Team check fires |
-| Arena against player with no defense → 400 | `arena_attack` | Defender team check |
-| Friendly battle → 200 | `friendly_attack` | Battle executes, no rating change, battle_log created |
-| Friendly self-battle → 400 | `friendly_attack` | Self-targeting blocked |
+| Test                                       | Action            | What it asserts                                       |
+| ------------------------------------------ | ----------------- | ----------------------------------------------------- |
+| Set offense team → 200                     | `set_team`        | Creates battleTeam row with 3 members                 |
+| Set defense team → 200                     | `set_team`        | Creates battleTeam row with 3 members                 |
+| Set team with duplicates → 400             | `set_team`        | Unique creature check                                 |
+| Set team with locked creature → 400        | `set_team`        | Trade-locked guard                                    |
+| Set team with non-owned creature → 400     | `set_team`        | Ownership check                                       |
+| Set team with duplicate species → 400      | `set_team`        | Species uniqueness check                              |
+| Delete team → 200                          | `delete_team`     | Removes battleTeam row                                |
+| Delete non-existent team → 404             | `delete_team`     | Graceful handling                                     |
+| Arena attack → 200                         | `arena_attack`    | Battle executes, rating updated, battle_log created   |
+| Arena self-attack → 400                    | `arena_attack`    | Self-targeting blocked                                |
+| Arena without offense team → 400           | `arena_attack`    | Team check fires                                      |
+| Arena against player with no defense → 400 | `arena_attack`    | Defender team check                                   |
+| Friendly battle → 200                      | `friendly_attack` | Battle executes, no rating change, battle_log created |
+| Friendly self-battle → 400                 | `friendly_attack` | Self-targeting blocked                                |
 
 ### Collection API (1 file, ~4 tests)
 
-| Test | Action | What it asserts |
-| --- | --- | --- |
-| Toggle favorite → 200 | `toggleFavorite` | `isFavorite` flips |
-| Toggle again → 200 | `toggleFavorite` | `isFavorite` flips back |
-| Favorite other's creature → 404 | `toggleFavorite` | Ownership check |
-| Unauthenticated → 401 | `toggleFavorite` | Auth check fires |
+| Test                            | Action           | What it asserts         |
+| ------------------------------- | ---------------- | ----------------------- |
+| Toggle favorite → 200           | `toggleFavorite` | `isFavorite` flips      |
+| Toggle again → 200              | `toggleFavorite` | `isFavorite` flips back |
+| Favorite other's creature → 404 | `toggleFavorite` | Ownership check         |
+| Unauthenticated → 401           | `toggleFavorite` | Auth check fires        |
 
 ### Admin API (1 file, ~8 tests)
 
-| Test | Action | What it asserts |
-| --- | --- | --- |
-| Adjust fossils → 200 | `adjust_fossils` | Currency changes correctly |
-| Adjust fossils negative → 200 | `adjust_fossils` | Floors at 0 |
-| Ban user → 200 | `ban_user` | User marked banned |
-| Unban user → 200 | `unban_user` | User unmarked |
-| Set role → 200 | `set_role` | User role updated |
-| Non-admin → 403 | * | Role check fires before logic |
-| Unauthenticated → 401 | * | Auth check fires before role check |
-| Invalid action → 400 | unknown | Zod validation |
+| Test                          | Action           | What it asserts                    |
+| ----------------------------- | ---------------- | ---------------------------------- |
+| Adjust fossils → 200          | `adjust_fossils` | Currency changes correctly         |
+| Adjust fossils negative → 200 | `adjust_fossils` | Floors at 0                        |
+| Ban user → 200                | `ban_user`       | User marked banned                 |
+| Unban user → 200              | `unban_user`     | User unmarked                      |
+| Set role → 200                | `set_role`       | User role updated                  |
+| Non-admin → 403               | \*               | Role check fires before logic      |
+| Unauthenticated → 401         | \*               | Auth check fires before role check |
+| Invalid action → 400          | unknown          | Zod validation                     |
 
 ## Implementation Order
 
@@ -318,15 +332,15 @@ Reuse the same `pollUntil()` pattern from the bot tests. Used for any async side
 
 ## Potential Challenges
 
-| Challenge | Mitigation |
-| --- | --- |
-| TanStack Start cold boot (~5-15s) | `globalSetup` starts once for entire suite, pre-warm with GET `/` |
-| D1 state isolation between tests | `beforeEach` resets relevant tables via `/api/test/batch`, re-seeds base data |
-| Cookie signing must match better-auth | Reuse exact HMAC-SHA256 logic from `dev/switch-user.ts` |
-| CSRF requires matching Origin | Test client sets `Origin: http://localhost:<port>` automatically |
-| `@/` path alias in test helpers | Vitest config alias `@/ → src/` |
-| Web app needs env vars (AUTH_SECRET, etc.) | Pass via `--var` flags to `wrangler dev`, use dummy values |
-| TanStack Start route compilation | First request triggers build; pre-warm in setup before tests run |
+| Challenge                                  | Mitigation                                                                    |
+| ------------------------------------------ | ----------------------------------------------------------------------------- |
+| TanStack Start cold boot (~5-15s)          | `globalSetup` starts once for entire suite, pre-warm with GET `/`             |
+| D1 state isolation between tests           | `beforeEach` resets relevant tables via `/api/test/batch`, re-seeds base data |
+| Cookie signing must match better-auth      | Reuse exact HMAC-SHA256 logic from `dev/switch-user.ts`                       |
+| CSRF requires matching Origin              | Test client sets `Origin: http://localhost:<port>` automatically              |
+| `@/` path alias in test helpers            | Vitest config alias `@/ → src/`                                               |
+| Web app needs env vars (AUTH_SECRET, etc.) | Pass via `--var` flags to `wrangler dev`, use dummy values                    |
+| TanStack Start route compilation           | First request triggers build; pre-warm in setup before tests run              |
 
 ## Relationship to Existing Tests
 
@@ -334,8 +348,8 @@ The existing **production integration tests** (`web/tests/production/`) remain u
 
 The new **E2E tests** (`web/tests/e2e/`) test the full authenticated API surface against a local wrangler dev instance with seeded test data. They complement rather than replace the production tests.
 
-| Suite | Target | Auth | DB Mutations | Scope |
-| --- | --- | --- | --- | --- |
-| Production (`tests/production/`) | Live site | None | None | HTTP behavior, SSR, headers |
-| E2E (`tests/e2e/`) | Local wrangler dev | Session cookies | Full CRUD | API correctness, game logic |
-| Bot E2E (`bot/tests/`) | Local bot worker | Discord signing | Full CRUD | Bot commands, Discord interactions |
+| Suite                            | Target             | Auth            | DB Mutations | Scope                              |
+| -------------------------------- | ------------------ | --------------- | ------------ | ---------------------------------- |
+| Production (`tests/production/`) | Live site          | None            | None         | HTTP behavior, SSR, headers        |
+| E2E (`tests/e2e/`)               | Local wrangler dev | Session cookies | Full CRUD    | API correctness, game logic        |
+| Bot E2E (`bot/tests/`)           | Local bot worker   | Discord signing | Full CRUD    | Bot commands, Discord interactions |

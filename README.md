@@ -71,12 +71,12 @@ A prehistoric animal gacha game. Collect 615+ creatures spanning the Cambrian th
 
 Deployments are automated via GitHub Actions. Pushing to `main` triggers the relevant workflow based on which files changed:
 
-| Workflow       | Trigger paths                                      | What it does                                                 |
-| -------------- | -------------------------------------------------- | ------------------------------------------------------------ |
-| Deploy Website | `web/src/`, `packages/shared/`, `web/drizzle/`, etc. | D1 migrations + `wrangler deploy`                            |
+| Workflow       | Trigger paths                                              | What it does                                                 |
+| -------------- | ---------------------------------------------------------- | ------------------------------------------------------------ |
+| Deploy Website | `web/src/`, `packages/shared/`, `web/drizzle/`, etc.       | D1 migrations + `wrangler deploy`                            |
 | Deploy Bot     | `bot/`, `packages/shared/`, `web/src/lib/`, `web/drizzle/` | D1 migrations + `wrangler deploy` (bot worker)               |
-| Gateway Docker | `gateway/`, `packages/shared/`                     | Docker build + push to GHCR + repository dispatch to homelab |
-| Editor Docker  | `editor/`, `packages/shared/`                      | Docker build + push to GHCR + repository dispatch to homelab |
+| Gateway Docker | `gateway/`, `packages/shared/`                             | Docker build + push to GHCR + repository dispatch to homelab |
+| Editor Docker  | `editor/`, `packages/shared/`                              | Docker build + push to GHCR + repository dispatch to homelab |
 
 ### Manual deploy (first time or secrets)
 

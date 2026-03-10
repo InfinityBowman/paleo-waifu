@@ -122,7 +122,11 @@ export function BattleList({
         const res = await fetch('/api/battle', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'set_team', slot: 'offense', members }),
+          body: JSON.stringify({
+            action: 'set_team',
+            slot: 'offense',
+            members,
+          }),
         })
         if (res.ok) {
           savedOffenseRef.current = current
@@ -158,7 +162,11 @@ export function BattleList({
         const res = await fetch('/api/battle', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'set_team', slot: 'defense', members }),
+          body: JSON.stringify({
+            action: 'set_team',
+            slot: 'defense',
+            members,
+          }),
         })
         if (res.ok) {
           savedDefenseRef.current = current

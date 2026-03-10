@@ -36,7 +36,9 @@ function stripMarkdown(md: string): string {
 
 export function UpdatePostList({ posts }: { posts: Array<UpdatePost> }) {
   if (posts.length === 0) {
-    return <p className="py-12 text-center text-lavender/40">No patch notes yet.</p>
+    return (
+      <p className="py-12 text-center text-lavender/40">No patch notes yet.</p>
+    )
   }
 
   return (

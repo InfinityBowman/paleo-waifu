@@ -217,8 +217,14 @@ export function simulateBattle(
       logResolutions(creature, resolutions, turn, log)
 
       // Fire onBasicAttack passives (venomous, predator_instinct)
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- creature may die from resolveAbilityEffects
-      if (creature.isAlive && ability.id === 'basic_attack' && targets.length > 0) {
+
+      if (
+        // creature may have died from ability effects
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        creature.isAlive &&
+        ability.id === 'basic_attack' &&
+        targets.length > 0
+      ) {
         const attackCtx = makeCtx(
           creature,
           allies,

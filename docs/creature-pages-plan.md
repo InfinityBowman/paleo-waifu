@@ -22,6 +22,7 @@ TanStack Router has first-class **route masking** support — render one route w
 3. **`createRouteMask()`** — Masks the modal route URL to show the page URL in the browser
 
 When a user clicks a creature card in the encyclopedia:
+
 - Navigates to the modal route (fast, stays on grid)
 - URL bar shows `/encyclopedia/triceratops` (the standalone page URL)
 - If someone copies and shares that URL, the recipient gets the full standalone page with OG tags
@@ -65,7 +66,10 @@ export const Route = createFileRoute('/_public/encyclopedia/$creatureId')({
       { name: 'description', content: loaderData.description },
       { property: 'og:title', content: loaderData.name },
       { property: 'og:description', content: loaderData.description },
-      { property: 'og:image', content: `https://cdn.jacobmaynard.dev/${loaderData.imageUrl}` },
+      {
+        property: 'og:image',
+        content: `https://cdn.jacobmaynard.dev/${loaderData.imageUrl}`,
+      },
       { property: 'og:type', content: 'article' },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
@@ -95,7 +99,8 @@ Add `Cache-Control` headers on creature page routes:
 
 ```tsx
 headers: () => ({
-  'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+  'Cache-Control':
+    'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
 })
 ```
 

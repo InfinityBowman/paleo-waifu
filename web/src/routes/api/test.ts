@@ -49,9 +49,7 @@ export const Route = createFileRoute('/api/test')({
             }
 
             const stmt = db.prepare(body.sql)
-            const bound = body.params?.length
-              ? stmt.bind(...body.params)
-              : stmt
+            const bound = body.params?.length ? stmt.bind(...body.params) : stmt
 
             if (action === 'query') {
               const result = await bound.all()

@@ -4,11 +4,7 @@ import { getCreatureBySlug } from '@/routes/_public/encyclopedia'
 import { CreatureDetail } from '@/components/encyclopedia/CreatureDetail'
 import { cn } from '@/lib/utils'
 import { RARITY_BORDER } from '@/lib/rarity-styles'
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 
 export const Route = createFileRoute(
   '/_public/encyclopedia/$creatureSlug/modal',

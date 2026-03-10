@@ -3,25 +3,40 @@ import { Bug } from 'lucide-react'
 import { useSession } from '@/lib/auth-client'
 
 const DEV_USERS = [
-  { id: 'dev-user-1', name: 'DinoLover', fossils: 20, purpose: 'New player' },
+  {
+    id: 'dev-user-1',
+    name: 'DinoLover',
+    fossils: 20,
+    purpose: 'New player',
+    avatar: 0,
+  },
   {
     id: 'dev-user-2',
     name: 'FossilQueen',
     fossils: 150,
     purpose: 'Mid-game',
+    avatar: 1,
   },
-  { id: 'dev-user-3', name: 'MesozoicMax', fossils: 500, purpose: 'Whale' },
+  {
+    id: 'dev-user-3',
+    name: 'MesozoicMax',
+    fossils: 500,
+    purpose: 'Whale',
+    avatar: 2,
+  },
   {
     id: 'dev-user-4',
     name: 'TradeTyrant',
     fossils: 75,
     purpose: 'Trade-focused',
+    avatar: 3,
   },
   {
     id: 'dev-user-5',
     name: 'AdminRex',
     fossils: 9999,
     purpose: 'Admin',
+    avatar: 4,
   },
 ]
 
@@ -77,7 +92,7 @@ export function DevAccountSwitcher() {
                   } disabled:opacity-50`}
                 >
                   <img
-                    src={`https://api.dicebear.com/9.x/thumbs/svg?seed=${u.name}`}
+                    src={`https://cdn.discordapp.com/embed/avatars/${u.avatar}.png`}
                     alt={u.name}
                     className="h-8 w-8 rounded-full"
                   />

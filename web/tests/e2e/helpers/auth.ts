@@ -6,10 +6,7 @@ import { execute } from './db-seed'
  * Sign a cookie value using HMAC-SHA256, matching better-auth's format.
  * Reproduces the logic from web/src/routes/api/dev/switch-user.ts.
  */
-async function signCookieValue(
-  value: string,
-  secret: string,
-): Promise<string> {
+async function signCookieValue(value: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey(
     'raw',
     new TextEncoder().encode(secret),

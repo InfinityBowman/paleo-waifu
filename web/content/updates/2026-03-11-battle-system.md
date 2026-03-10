@@ -64,13 +64,13 @@ If no team is wiped by turn 30, the team with higher remaining HP% wins. Ties go
 
 Everyone starts at a base rating and climbs through five tiers:
 
-| Tier | Rating |
-|---|---|
-| Bronze | 0 to 499 |
-| Silver | 500 to 999 |
-| Gold | 1000 to 1499 |
+| Tier    | Rating       |
+| ------- | ------------ |
+| Bronze  | 0 to 499     |
+| Silver  | 500 to 999   |
+| Gold    | 1000 to 1499 |
 | Diamond | 1500 to 1999 |
-| Apex | 2000+ |
+| Apex    | 2000+        |
 
 Wins grant +25 rating, losses cost -20. Matchmaking pairs you against players within a similar rating range.
 

@@ -30,7 +30,9 @@ export const Route = createFileRoute('/_public/patch-notes/$postId')({
   },
   component: UpdatePostPage,
   notFoundComponent: () => (
-    <div className="py-20 text-center text-lavender/40">Patch note not found.</div>
+    <div className="py-20 text-center text-lavender/40">
+      Patch note not found.
+    </div>
   ),
 })
 

@@ -102,7 +102,9 @@ export function CreatureDetail({
         <h1 className="mt-1 font-display text-2xl font-bold">
           {creature.name}
         </h1>
-        <p className="italic text-muted-foreground">{creature.scientificName}</p>
+        <p className="italic text-muted-foreground">
+          {creature.scientificName}
+        </p>
 
         <div className="mt-4 flex flex-wrap gap-2 text-sm">
           <span className="rounded-full bg-muted/50 px-3 py-1.5">
