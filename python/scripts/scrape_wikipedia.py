@@ -102,7 +102,8 @@ def query_commons_image(title: str, search_suffix: str = "restoration") -> str |
 
 def slugify(name: str) -> str:
     """Convert a name to a filesystem-safe slug."""
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def extract_diet_from_text(text: str) -> str | None:

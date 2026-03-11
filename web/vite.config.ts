@@ -20,9 +20,7 @@ const config = defineConfig({
         // Only prerender static public pages (no D1, no auth)
         filter: ({ path }) => {
           const allowed = ['/', '/privacy', '/terms', '/patch-notes']
-          return (
-            allowed.includes(path) || path.startsWith('/patch-notes/')
-          )
+          return allowed.includes(path) || path.startsWith('/patch-notes/')
         },
       },
     }),

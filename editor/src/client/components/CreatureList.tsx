@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { ArrowUpDown, ImageOff } from 'lucide-react'
-import { slugify, toCdnUrl } from '../lib/types'
+import { toCdnUrl } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
 import { FilterBar } from './FilterBar'
 import type { Creature } from '../lib/types'
@@ -113,49 +113,46 @@ export function CreatureList({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((c) => {
-              const slug = slugify(c.scientificName)
-              return (
-                <tr
-                  key={slug}
-                  onClick={() => onSelect(slug)}
-                  className="cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50"
-                >
-                  <td className="px-4 py-2">
-                    {c.imageUrl ? (
-                      <img
-                        src={toCdnUrl(c.imageUrl)!}
-                        alt=""
-                        className="h-8 w-8 rounded object-cover"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
-                        <ImageOff className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-2 font-medium text-foreground">
-                    {c.name}
-                  </td>
-                  <td className="px-4 py-2 text-sm italic text-muted-foreground">
-                    {c.scientificName}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-muted-foreground">
-                    {c.era}
-                  </td>
-                  <td className="px-4 py-2">
-                    <RarityBadge rarity={c.rarity} />
-                  </td>
-                  <td className="px-4 py-2 text-sm text-muted-foreground">
-                    {c.diet}
-                  </td>
-                  <td className="px-4 py-2 text-sm text-muted-foreground">
-                    {c.type}
-                  </td>
-                </tr>
-              )
-            })}
+            {filtered.map((c) => (
+              <tr
+                key={c.slug}
+                onClick={() => onSelect(c.slug)}
+                className="cursor-pointer border-b border-border/50 transition-colors hover:bg-muted/50"
+              >
+                <td className="px-4 py-2">
+                  {c.imageUrl ? (
+                    <img
+                      src={toCdnUrl(c.imageUrl)!}
+                      alt=""
+                      className="h-8 w-8 rounded object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+                      <ImageOff className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  )}
+                </td>
+                <td className="px-4 py-2 font-medium text-foreground">
+                  {c.name}
+                </td>
+                <td className="px-4 py-2 text-sm italic text-muted-foreground">
+                  {c.scientificName}
+                </td>
+                <td className="px-4 py-2 text-sm text-muted-foreground">
+                  {c.era}
+                </td>
+                <td className="px-4 py-2">
+                  <RarityBadge rarity={c.rarity} />
+                </td>
+                <td className="px-4 py-2 text-sm text-muted-foreground">
+                  {c.diet}
+                </td>
+                <td className="px-4 py-2 text-sm text-muted-foreground">
+                  {c.type}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
         {filtered.length === 0 && (

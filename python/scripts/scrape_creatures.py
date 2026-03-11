@@ -32,7 +32,8 @@ SESSION.headers.update({"User-Agent": USER_AGENT})
 # ─── Helpers ─────────────────────────────────────────────────────────────
 
 def slugify(name: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def cached_get(url: str, cache_key: str, params: dict | None = None) -> str:

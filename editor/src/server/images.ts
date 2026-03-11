@@ -2,8 +2,7 @@ import { access, mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import sharp from 'sharp'
 import { deleteFromR2, listR2Keys, uploadToR2 } from './r2'
-import { listCreatures, slugify, updateCreatureImage } from './creature-repo'
-import type { Creature } from './creature-repo'
+import { listCreatures, updateCreatureImage } from './creature-repo'
 import type { EditorDatabase } from './db'
 
 const SAFE_SLUG = /^[a-z0-9-]+$/
@@ -128,8 +127,8 @@ export async function syncAllToR2(
   for (let i = 0; i < creatures.length; i += PARALLEL_UPLOADS) {
     const batch = creatures.slice(i, i + PARALLEL_UPLOADS)
     const results = await Promise.allSettled(
-      batch.map(async (creature: Creature) => {
-        const slug = slugify(creature.scientificName)
+      batch.map(async (creature) => {
+        const { slug } = creature
         const webpPath = resolve(imagesDir, `${slug}.webp`)
 
         try {
@@ -164,14 +163,10 @@ export async function listOrphanedR2Objects(
   db: EditorDatabase,
 ): Promise<Array<string>> {
   const creatures = await listCreatures(db)
-  const validKeys = new Set(
-    creatures.map(
-      (c: Creature) => `creatures/${slugify(c.scientificName)}.webp`,
-    ),
-  )
+  const validKeys = new Set(creatures.map((c) => `creatures/${c.slug}.webp`))
 
   const allKeys = await listR2Keys()
-  return allKeys.filter((key: string) => !validKeys.has(key))
+  return allKeys.filter((key) => !validKeys.has(key))
 }
 
 export async function deleteR2Object(key: string): Promise<void> {

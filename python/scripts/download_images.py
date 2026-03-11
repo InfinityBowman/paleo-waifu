@@ -29,7 +29,8 @@ SESSION.headers.update({"User-Agent": USER_AGENT})
 
 
 def slugify(name: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def download_with_retry(url: str, max_retries: int = 5) -> bytes:
@@ -94,7 +95,7 @@ def main():
             stats["no_url"] += 1
             continue
 
-        slug = slugify(creature["scientificName"])
+        slug = slugify(creature["name"])
         output_path = IMAGES_DIR / f"{slug}.webp"
 
         # Skip if already downloaded

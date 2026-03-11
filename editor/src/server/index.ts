@@ -3,6 +3,7 @@ import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { toSlug } from '@paleo-waifu/shared/slug'
 import { loadEnv } from './env'
 import { createEditorDb } from './db'
 import { initR2 } from './r2'
@@ -24,7 +25,6 @@ import {
   getStats,
   insertCreature,
   listCreatures,
-  slugify,
   updateCreatureBySlug,
 } from './creature-repo'
 import type { EditorUser } from './auth'
@@ -102,6 +102,7 @@ app.post('/api/creatures', async (c) => {
   }
 
   const creature: Creature = {
+    slug: toSlug(body.name),
     name: body.name,
     scientificName: body.scientificName,
     era: body.era,
@@ -123,8 +124,8 @@ app.post('/api/creatures', async (c) => {
   }
 
   try {
-    await insertCreature(c.get('db'), creature)
-    return c.json({ creature }, 201)
+    const created = await insertCreature(c.get('db'), creature)
+    return c.json({ creature: created }, 201)
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err)
     return c.json({ error: msg }, 409)
@@ -147,7 +148,7 @@ app.put('/api/creatures/:slug', async (c) => {
     await updateCreatureBySlug(c.get('db'), slug, body)
     const updated = await getCreatureBySlug(
       c.get('db'),
-      body.scientificName ? slugify(body.scientificName) : slug,
+      body.name ? toSlug(body.name) : slug,
     )
     return c.json({ creature: updated })
   } catch (err: unknown) {

@@ -1,12 +1,11 @@
 import { createHash } from 'node:crypto'
 import { eq } from 'drizzle-orm'
-import { slugify } from '../shared/types'
+import { toSlug } from '@paleo-waifu/shared/slug'
 import { schema } from './db'
 import type { EditorDatabase } from './db'
 import type { Creature } from '../shared/types'
 
 export type { Creature }
-export { slugify }
 
 type CreatureRow = typeof schema.creature.$inferSelect
 
@@ -48,6 +47,7 @@ function creatureId(scientificName: string): string {
 
 function rowToCreature(row: CreatureRow): Creature {
   return {
+    slug: row.slug ?? toSlug(row.name),
     name: row.name,
     scientificName: row.scientificName,
     era: row.era,
@@ -99,9 +99,9 @@ export async function getCreatureBySlug(
 export async function insertCreature(
   db: EditorDatabase,
   data: Creature,
-): Promise<void> {
+): Promise<Creature> {
   const id = creatureId(data.scientificName)
-  const slug = slugify(data.scientificName)
+  const slug = toSlug(data.name)
 
   const existing = await findRowBySlug(db, slug)
   if (existing) {
@@ -131,6 +131,7 @@ export async function insertCreature(
     wikipediaImageUrl: data.wikipediaImageUrl,
   })
   invalidateCache()
+  return { ...data, slug }
 }
 
 export async function updateCreatureBySlug(
@@ -142,10 +143,12 @@ export async function updateCreatureBySlug(
   if (!match) throw new Error(`Creature not found for slug: ${slug}`)
 
   const values: Record<string, unknown> = {}
-  if (updates.name !== undefined) values.name = updates.name
+  if (updates.name !== undefined) {
+    values.name = updates.name
+    values.slug = toSlug(updates.name)
+  }
   if (updates.scientificName !== undefined) {
     values.scientificName = updates.scientificName
-    values.slug = slugify(updates.scientificName)
   }
   if (updates.era !== undefined) values.era = updates.era
   if (updates.period !== undefined) values.period = updates.period

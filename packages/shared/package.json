@@ -14,7 +14,8 @@
     "./battle/synergies": "./src/battle/synergies.ts",
     "./battle/abilities": "./src/battle/abilities.ts",
     "./battle/ai": "./src/battle/ai.ts",
-    "./battle/engine": "./src/battle/engine.ts"
+    "./battle/engine": "./src/battle/engine.ts",
+    "./slug": "./src/slug.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1"

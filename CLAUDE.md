@@ -74,6 +74,7 @@ Buildless package — exports `.ts` files directly, consumers' bundlers compile 
 @paleo-waifu/shared/db/client     # createDb(), Database type
 @paleo-waifu/shared/battle/types  # Role, AbilityTemplateData, etc.
 @paleo-waifu/shared/battle/constants # RARITY_BASE_TOTALS, ability templates, etc.
+@paleo-waifu/shared/slug            # toSlug() — canonical slug derivation from common name
 ```
 
 When adding code used by 2+ workspaces, add it to `packages/shared/`. When adding code used only by the web app, keep it in `web/src/lib/`.
@@ -118,7 +119,7 @@ Routes:
 - `web/src/components/admin/` — Admin dashboard components
 - `web/src/components/shared/` — Shared components (CreatureCard, CreaturePickerModal)
 - `web/src/components/ui/` — shadcn/ui primitives
-- `web/src/lib/` — Auth, gacha logic, rarity styles, slug utilities
+- `web/src/lib/` — Auth, gacha logic, rarity styles
 - `web/src/store/` — Zustand store (fossils, pull results)
 - `python/` — Data pipeline for creature scraping, enrichment, image generation, and R2 upload
 - `editor/` — Creature editor dashboard (React + Hono, run via `pnpm editor`)

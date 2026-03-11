@@ -11,6 +11,7 @@ Individual creatures are accessible via sharable URLs with OG social previews, w
 - **`createRouteMask()`** — Masks the modal route URL to show the page URL in the browser
 
 When a user clicks a creature card in the encyclopedia:
+
 1. Navigates to the modal route (fast, stays on grid)
 2. URL bar shows `/encyclopedia/triceratops` (the standalone page URL)
 3. If someone shares that URL, the recipient gets the full standalone page with OG tags
@@ -50,12 +51,12 @@ Configured in `web/vite.config.ts` via `tanstackStart({ prerender: { ... } })`. 
 
 ### What's Prerendered
 
-| Route | Why |
-|-------|-----|
-| `/` | No loader, static hero |
-| `/privacy` | No loader, static HTML |
-| `/terms` | No loader, static HTML |
-| `/patch-notes` | Loader reads build-time markdown (Vite glob) |
+| Route                  | Why                                                    |
+| ---------------------- | ------------------------------------------------------ |
+| `/`                    | No loader, static hero                                 |
+| `/privacy`             | No loader, static HTML                                 |
+| `/terms`               | No loader, static HTML                                 |
+| `/patch-notes`         | Loader reads build-time markdown (Vite glob)           |
 | `/patch-notes/$postId` | Auto-discovered via `crawlLinks` from index page links |
 
 ### What's Excluded
@@ -90,21 +91,21 @@ Using `ssr: 'data-only'` per-route (not on layout) so the nav still SSRs and the
 
 ### Applied
 
-| Route | Why | Pending Component |
-|-------|-----|-------------------|
-| `/_app/gacha` | Pull animations conflict with hydration, tiny data payload | Skeleton matching page layout |
-| `/admin/analytics` | 14 parallel queries, Recharts is client-only anyway | Skeleton with stat cards + chart placeholders |
+| Route              | Why                                                        | Pending Component                             |
+| ------------------ | ---------------------------------------------------------- | --------------------------------------------- |
+| `/_app/gacha`      | Pull animations conflict with hydration, tiny data payload | Skeleton matching page layout                 |
+| `/admin/analytics` | 14 parallel queries, Recharts is client-only anyway        | Skeleton with stat cards + chart placeholders |
 
 ### Not Applied (SSR fine as-is)
 
-| Route | Why keep full SSR |
-|-------|-------------------|
-| `/_app/collection` | Standard grid, benefits from showing content on refresh |
-| `/_app/trade` | Standard list/tabs, content visible immediately is better UX |
-| `/_app/battle/` | Team builder, but content-on-refresh preferred |
-| `/_app/battle/$id` | Shareable replay, could get OG tags later |
-| `/_app/profile` | Tiny data, low interactivity |
-| `/admin/` | Lightweight stat cards |
+| Route              | Why keep full SSR                                            |
+| ------------------ | ------------------------------------------------------------ |
+| `/_app/collection` | Standard grid, benefits from showing content on refresh      |
+| `/_app/trade`      | Standard list/tabs, content visible immediately is better UX |
+| `/_app/battle/`    | Team builder, but content-on-refresh preferred               |
+| `/_app/battle/$id` | Shareable replay, could get OG tags later                    |
+| `/_app/profile`    | Tiny data, low interactivity                                 |
+| `/admin/`          | Lightweight stat cards                                       |
 
 ### Key Learnings
 
@@ -121,6 +122,7 @@ Loaders can return unawaited promises for secondary data. Server streams initial
 ### Best Candidates
 
 **Creature standalone page** — battle stats are secondary:
+
 ```tsx
 loader: async ({ params }) => {
   const creature = await getCreatureBySlug({ data: params.creatureSlug })
@@ -132,6 +134,7 @@ loader: async ({ params }) => {
 ```
 
 **Profile** — arena stats are secondary:
+
 ```tsx
 loader: async () => {
   const [currency, xp, creatures] = await Promise.all([...]) // critical
@@ -143,9 +146,10 @@ loader: async () => {
 ```
 
 **Leaderboard** — two independent tabs, stream the inactive one:
+
 ```tsx
 loader: async () => {
-  const xpLeaderboard = await getXpLeaderboard()  // critical (default tab)
+  const xpLeaderboard = await getXpLeaderboard() // critical (default tab)
   const collectionLeaderboard = getCollectionLeaderboard() // stream
   const totalSpecies = getTotalSpecies() // stream
   return { xpLeaderboard, collectionLeaderboard, totalSpecies }
@@ -177,6 +181,7 @@ function CreaturePage() {
 ### Discord Bot Links
 
 Bot `/pull` responses could include a link to the creature's encyclopedia page:
+
 ```
 🦕 You pulled **Triceratops** (Legendary)!
 🔗 https://paleowaifu.com/encyclopedia/triceratops

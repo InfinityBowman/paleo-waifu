@@ -11,7 +11,8 @@ IMAGES_DIR = DATA_DIR / "images"
 
 
 def slugify(name: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def main():
@@ -22,7 +23,7 @@ def main():
     missing = 0
 
     for creature in creatures:
-        slug = slugify(creature["scientificName"])
+        slug = slugify(creature["name"])
         img_path = IMAGES_DIR / f"{slug}.webp"
 
         if not img_path.exists():

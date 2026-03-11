@@ -1,4 +1,5 @@
 export interface Creature {
+  slug: string
   name: string
   scientificName: string
   era: string
@@ -28,11 +29,4 @@ export interface Stats {
   byDiet: Record<string, number>
   byType: Record<string, number>
   missingImages: number
-}
-
-export function slugify(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
 }

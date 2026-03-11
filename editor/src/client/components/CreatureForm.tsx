@@ -6,7 +6,7 @@ import {
   fetchCreature,
   updateCreature,
 } from '../lib/api'
-import { slugify } from '../lib/types'
+import { toSlug } from '../lib/types'
 import { RarityBadge } from './RarityBadge'
 import { ImageUploader } from './ImageUploader'
 import type { Creature, Rarity } from '../lib/types'
@@ -42,6 +42,7 @@ const DIETS = [
 ]
 
 const EMPTY: Creature = {
+  slug: '',
   name: '',
   scientificName: '',
   era: 'Cretaceous',
@@ -131,7 +132,7 @@ export function CreatureForm({
     )
   }
 
-  const currentSlug = form.scientificName ? slugify(form.scientificName) : null
+  const currentSlug = form.slug || (form.name ? toSlug(form.name) : null)
 
   return (
     <div className="flex flex-1 flex-col overflow-auto">

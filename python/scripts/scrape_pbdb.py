@@ -189,7 +189,8 @@ TRACE_FOSSIL_KEYWORDS = ["ichnogenus", "oogenus", "ichnotaxon", "trace fossil"]
 # ─── Helpers ──────────────────────────────────────────────────────────────
 
 def slugify(name: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def request_with_retry(method: str, url: str, max_retries: int = 3, **kwargs) -> requests.Response:

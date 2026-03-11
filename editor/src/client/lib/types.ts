@@ -1,5 +1,5 @@
 export type { Creature, Rarity, Stats } from '../../shared/types'
-export { slugify } from '../../shared/types'
+export { toSlug } from '@paleo-waifu/shared/slug'
 
 const CDN_BASE = 'https://cdn.paleowaifu.com'
 

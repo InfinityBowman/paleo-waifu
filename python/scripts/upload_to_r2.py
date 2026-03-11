@@ -31,7 +31,8 @@ WORKERS = 4
 
 
 def slugify(name: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+    s = re.sub(r"[''`]", "", name.lower())
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
 
 
 def check_exists(key: str, bucket: str, remote: bool = False) -> bool:
@@ -87,7 +88,7 @@ def main():
     # Build upload tasks
     tasks = []
     for creature in creatures:
-        slug = slugify(creature["scientificName"])
+        slug = slugify(creature["name"])
         local_path = IMAGES_DIR / f"{slug}.webp"
         if not local_path.exists():
             creature["_status"] = "missing"

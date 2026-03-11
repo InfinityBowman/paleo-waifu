@@ -72,7 +72,11 @@ export function DevToolsPanel() {
       <div className="flex items-center justify-between border-b border-primary/20 px-3 py-2">
         <span className="text-xs font-semibold text-primary">DEV TOOLS</span>
         {feedback && (
-          <span className={`text-[10px] ${feedback === 'Error!' ? 'text-red-400' : 'text-emerald-400'}`}>{feedback}</span>
+          <span
+            className={`text-[10px] ${feedback === 'Error!' ? 'text-red-400' : 'text-emerald-400'}`}
+          >
+            {feedback}
+          </span>
         )}
         <button
           onClick={() => setOpen(false)}

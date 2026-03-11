@@ -28,6 +28,7 @@ All the latest React 19 features are available but largely unused.
 - **Opt-in mode trades one boilerplate for another.** `compilationMode: "annotation"` only compiles functions with `"use memo"` directive — avoids global HMR slowdown but means manually annotating functions instead of manually memoizing them.
 
 **Library compatibility:**
+
 - Framer Motion / motion — Compatible
 - Zustand — Compatible (uses `useSyncExternalStore` internally)
 - TanStack Router — Mostly compatible, except `useMatchRoute` (see above)
@@ -187,18 +188,18 @@ The `<Activity>` component (for keeping off-screen UI alive) is still in React L
 
 ## Priority Summary
 
-| Feature                   | Impact         | Risk   | Priority                        |
-| ------------------------- | -------------- | ------ | ------------------------------- |
-| `useTransition`           | Medium         | Low    | **1 — Easiest quick win**       |
+| Feature                   | Impact         | Risk   | Priority                             |
+| ------------------------- | -------------- | ------ | ------------------------------------ |
+| `useTransition`           | Medium         | Low    | **1 — Easiest quick win**            |
 | `content-visibility`      | Medium         | None   | **2 — One-line CSS, CollectionGrid** |
-| React Compiler            | High           | Medium | **3 — Big win, weigh HMR cost** |
-| `useOptimistic`           | Medium         | Medium | **4 — Trade/Collection**        |
-| Suspense boundaries       | Medium         | Medium | 5 — Admin analytics             |
-| `useActionState`          | Low            | Low    | 6 — Future forms                |
-| `React.memo` CreatureCard | Medium         | Low    | Unnecessary w/ Compiler         |
-| Code-splitting            | Low            | Low    | Skip (route splitting suffices) |
-| `use()` hook              | Low            | Low    | Skip                            |
-| Activities                | High potential | High   | Wait for stable                 |
+| React Compiler            | High           | Medium | **3 — Big win, weigh HMR cost**      |
+| `useOptimistic`           | Medium         | Medium | **4 — Trade/Collection**             |
+| Suspense boundaries       | Medium         | Medium | 5 — Admin analytics                  |
+| `useActionState`          | Low            | Low    | 6 — Future forms                     |
+| `React.memo` CreatureCard | Medium         | Low    | Unnecessary w/ Compiler              |
+| Code-splitting            | Low            | Low    | Skip (route splitting suffices)      |
+| `use()` hook              | Low            | Low    | Skip                                 |
+| Activities                | High potential | High   | Wait for stable                      |
 
 `useTransition` is the safest starting point — zero dev experience cost, immediate cleanup of manual loading booleans. `content-visibility` is a free CSS win for CollectionGrid. The React Compiler offers the biggest production performance gains but comes with a real HMR slowdown tradeoff during development — consider `compilationMode: "annotation"` for incremental adoption.
 
@@ -238,6 +239,7 @@ The following items come from Vercel's React performance guidelines. Some are Ne
 **Context:** TanStack Router already does **route-based code splitting** — the gacha route's JS bundle is only loaded when navigating to `/gacha`. `PullAnimation` is always mounted when a banner is active (it idles until a pull happens), and users visit the gacha page specifically to pull. Splitting PullAnimation further within the route would only shave bytes off the initial gacha page load before the first pull — minimal real-world benefit.
 
 **Possible candidates if bundle size becomes an issue:**
+
 - `CreaturePickerModal` — Only opened on demand in trade flows
 - Admin route components — Already behind auth + route-split
 
@@ -305,19 +307,19 @@ export const CreatureCard = memo(function CreatureCard({ creature, ... }) {
 
 These Vercel best practices are **already followed** in the codebase:
 
-| Practice | Status | Notes |
-|---|---|---|
+| Practice                           | Status    | Notes                                                                      |
+| ---------------------------------- | --------- | -------------------------------------------------------------------------- |
 | `Promise.all` for parallel fetches | Excellent | Used in every loader — gacha, encyclopedia, analytics (14-query parallel!) |
-| Map/Set for O(1) lookups | Excellent | `TEMPLATE_MAP` in encyclopedia, `Set` for era deduplication |
-| No barrel file anti-pattern | Good | Direct file imports throughout, only `icons/index.tsx` re-exports |
-| Preloading on hover | Good | TanStack Router `preload="intent"` on encyclopedia links |
-| Image preloading | Good | Manual `new Image()` preload during gacha pull animation |
-| No RegExp in render | Good | All regex is in utility functions, not render paths |
-| Conditional `&&` safety | Good | Boolean coercion (`!!`) used correctly |
-| No localStorage in render | Good | All persistence via server/DB, not client storage |
-| No third-party analytics blocking | Good | No analytics scripts to defer |
-| Derived state during render | Good | `useMemo` for filtered lists, not useState + useEffect |
-| CSS animations over JS | Good | All animations via Tailwind keyframes or Framer Motion |
+| Map/Set for O(1) lookups           | Excellent | `TEMPLATE_MAP` in encyclopedia, `Set` for era deduplication                |
+| No barrel file anti-pattern        | Good      | Direct file imports throughout, only `icons/index.tsx` re-exports          |
+| Preloading on hover                | Good      | TanStack Router `preload="intent"` on encyclopedia links                   |
+| Image preloading                   | Good      | Manual `new Image()` preload during gacha pull animation                   |
+| No RegExp in render                | Good      | All regex is in utility functions, not render paths                        |
+| Conditional `&&` safety            | Good      | Boolean coercion (`!!`) used correctly                                     |
+| No localStorage in render          | Good      | All persistence via server/DB, not client storage                          |
+| No third-party analytics blocking  | Good      | No analytics scripts to defer                                              |
+| Derived state during render        | Good      | `useMemo` for filtered lists, not useState + useEffect                     |
+| CSS animations over JS             | Good      | All animations via Tailwind keyframes or Framer Motion                     |
 
 ### N/A for TanStack Start (Next.js-Specific)
 
