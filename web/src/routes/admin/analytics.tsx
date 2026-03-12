@@ -3,6 +3,8 @@ import { createServerFn } from '@tanstack/react-start'
 import { count, desc, eq, sql } from 'drizzle-orm'
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
+  battleLog,
+  battleRating,
   creature,
   currency,
   pityCounter,
@@ -24,11 +26,14 @@ import {
   PullDistribution,
   TradeActivity,
 } from '@/components/admin/analytics/GameHealthSection'
+import { BattleActivity } from '@/components/admin/analytics/BattleActivity'
 
 const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
   const { cfEnv } = await requireAdminSession()
   const db = await createDb(cfEnv.DB)
   const thirtyDaysAgo = Math.floor(Date.now() / 1000) - 30 * 24 * 60 * 60
+
+  const sevenDaysAgo = Math.floor(Date.now() / 1000) - 7 * 24 * 60 * 60
 
   const [
     rarityDist,
@@ -45,6 +50,11 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
     levelDistribution,
     pityStats,
     topWishlisted,
+    battlesPerDay,
+    totalBattles,
+    activeBattlers,
+    avgArenaAttacks,
+    ratingDist,
   ] = await Promise.all([
     db
       .select({ rarity: creature.rarity, count: count() })
@@ -177,6 +187,64 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
       .orderBy(desc(count()))
       .limit(10)
       .all(),
+    // ── Battle queries ──────────────────────────────────────
+    db
+      .select({
+        date: sql<string>`date(${battleLog.createdAt}, 'unixepoch')`.as(
+          'date',
+        ),
+        mode: battleLog.mode,
+        count: count(),
+      })
+      .from(battleLog)
+      .where(sql`${battleLog.createdAt} >= ${thirtyDaysAgo}`)
+      .groupBy(sql`date(${battleLog.createdAt}, 'unixepoch')`, battleLog.mode)
+      .orderBy(sql`date(${battleLog.createdAt}, 'unixepoch')`)
+      .all(),
+    db.select({ count: count() }).from(battleLog).get(),
+    db
+      .select({ count: sql<number>`count(distinct ${battleLog.attackerId})` })
+      .from(battleLog)
+      .where(sql`${battleLog.createdAt} >= ${sevenDaysAgo}`)
+      .get(),
+    db
+      .select({
+        avg: sql<number>`coalesce(round(avg(daily.cnt), 1), 0)`.as('avg'),
+      })
+      .from(
+        sql`(
+          select count(*) as cnt
+          from ${battleLog}
+          where ${battleLog.mode} = 'arena'
+            and ${battleLog.createdAt} >= ${sevenDaysAgo}
+          group by ${battleLog.attackerId}, date(${battleLog.createdAt}, 'unixepoch')
+        ) as daily`,
+      )
+      .get(),
+    db
+      .select({
+        bucket: sql<string>`case
+          when ${battleRating.rating} < 800 then '< 800'
+          when ${battleRating.rating} between 800 and 999 then '800-999'
+          when ${battleRating.rating} between 1000 and 1199 then '1000-1199'
+          when ${battleRating.rating} between 1200 and 1399 then '1200-1399'
+          when ${battleRating.rating} between 1400 and 1599 then '1400-1599'
+          else '1600+'
+        end`.as('bucket'),
+        count: count(),
+      })
+      .from(battleRating)
+      .groupBy(
+        sql`case
+          when ${battleRating.rating} < 800 then '< 800'
+          when ${battleRating.rating} between 800 and 999 then '800-999'
+          when ${battleRating.rating} between 1000 and 1199 then '1000-1199'
+          when ${battleRating.rating} between 1200 and 1399 then '1200-1399'
+          when ${battleRating.rating} between 1400 and 1599 then '1400-1599'
+          else '1600+'
+        end`,
+      )
+      .all(),
   ])
 
   return {
@@ -230,8 +298,42 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
       rarity: string
       count: number
     }>,
+    battleActivity: {
+      battlesPerDay: pivotBattlesPerDay(
+        battlesPerDay as Array<{
+          date: string
+          mode: string
+          count: number
+        }>,
+      ),
+      totalBattles: (totalBattles as { count: number } | undefined)?.count ?? 0,
+      activeBattlers:
+        (activeBattlers as { count: number } | undefined)?.count ?? 0,
+      totalUsers: totalUsers?.count ?? 0,
+      avgArenaAttacksPerDay:
+        (avgArenaAttacks as { avg: number } | undefined)?.avg ?? 0,
+      ratingDistribution: ratingDist as Array<{
+        bucket: string
+        count: number
+      }>,
+    },
   }
 })
+
+function pivotBattlesPerDay(
+  rows: Array<{ date: string; mode: string; count: number }>,
+): Array<{ date: string; arena: number; friendly: number }> {
+  const map = new Map<string, { arena: number; friendly: number }>()
+  for (const row of rows) {
+    const entry = map.get(row.date) ?? { arena: 0, friendly: 0 }
+    if (row.mode === 'arena') entry.arena = row.count
+    else entry.friendly = row.count
+    map.set(row.date, entry)
+  }
+  return Array.from(map.entries())
+    .map(([date, counts]) => ({ date, ...counts }))
+    .sort((a, b) => a.date.localeCompare(b.date))
+}
 
 export const Route = createFileRoute('/admin/analytics')({
   ssr: 'data-only',
@@ -285,6 +387,7 @@ function AnalyticsPage() {
         fossilDistribution={data.fossilDistribution}
         levelDistribution={data.levelDistribution}
       />
+      <BattleActivity data={data.battleActivity} />
       <PitySection pityStats={data.pityStats} />
       <TradeActivity tradesByStatus={data.tradesByStatus} />
     </div>
