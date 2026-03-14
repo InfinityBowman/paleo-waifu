@@ -16,75 +16,37 @@ async function get(path: string) {
   return res
 }
 
-// ─── HTML page cache headers ────────────────────────────────────────────
+// ─── Per-page header checks (one fetch per page) ────────────────────────
 
-describe('HTML cache headers', () => {
-  test('landing page has s-maxage=3600', async () => {
-    const res = await head('/')
-    const cc = res.headers.get('cache-control')
-    expect(cc).toContain('s-maxage=3600')
-    expect(cc).toContain('stale-while-revalidate')
-  })
+const pages = [
+  { path: '/', smaxage: 3600 },
+  { path: '/encyclopedia', smaxage: 300 },
+  { path: '/leaderboard', smaxage: 60 },
+  { path: '/privacy', smaxage: 3600 },
+  { path: '/terms', smaxage: 3600 },
+]
 
-  test('encyclopedia has s-maxage=300', async () => {
-    const res = await head('/encyclopedia')
-    const cc = res.headers.get('cache-control')
-    expect(cc).toContain('s-maxage=300')
-    expect(cc).toContain('stale-while-revalidate')
-  })
-
-  test('leaderboard has s-maxage=60', async () => {
-    const res = await head('/leaderboard')
-    const cc = res.headers.get('cache-control')
-    expect(cc).toContain('s-maxage=60')
-    expect(cc).toContain('stale-while-revalidate')
-  })
-
-  test('privacy page has s-maxage=3600', async () => {
-    const res = await head('/privacy')
-    const cc = res.headers.get('cache-control')
-    expect(cc).toContain('s-maxage=3600')
-    expect(cc).toContain('stale-while-revalidate')
-  })
-
-  test('terms page has s-maxage=3600', async () => {
-    const res = await head('/terms')
-    const cc = res.headers.get('cache-control')
-    expect(cc).toContain('s-maxage=3600')
-    expect(cc).toContain('stale-while-revalidate')
-  })
-})
-
-// ─── Security headers ───────────────────────────────────────────────────
-
-describe('security headers on HTML pages', () => {
-  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
-
-  for (const path of pages) {
+describe('HTML page headers', () => {
+  for (const { path, smaxage } of pages) {
     describe(path, () => {
-      test('X-Frame-Options is DENY', async () => {
+      test('content-type, cache, and security headers', async () => {
         const res = await head(path)
-        expect(res.headers.get('x-frame-options')?.toUpperCase()).toBe('DENY')
-      })
+        const h = res.headers
 
-      test('X-Content-Type-Options is nosniff', async () => {
-        const res = await head(path)
-        expect(res.headers.get('x-content-type-options')).toBe('nosniff')
-      })
+        // Content-Type
+        expect(h.get('content-type')).toContain('text/html')
 
-      test('Referrer-Policy is set', async () => {
-        const res = await head(path)
-        expect(res.headers.get('referrer-policy')).toBeTruthy()
-      })
+        // Cache
+        const cc = h.get('cache-control')
+        expect(cc).toContain(`s-maxage=${smaxage}`)
+        expect(cc).toContain('stale-while-revalidate')
 
-      test('Content-Security-Policy is set', async () => {
-        const res = await head(path)
-        expect(res.headers.get('content-security-policy')).toBeTruthy()
-      })
-
-      test('Permissions-Policy is set', async () => {
-        const res = await head(path)
-        expect(res.headers.get('permissions-policy')).toBeTruthy()
+        // Security
+        expect(h.get('x-frame-options')?.toUpperCase()).toBe('DENY')
+        expect(h.get('x-content-type-options')).toBe('nosniff')
+        expect(h.get('referrer-policy')).toBeTruthy()
+        expect(h.get('content-security-policy')).toBeTruthy()
+        expect(h.get('permissions-policy')).toBeTruthy()
       })
     })
   }
@@ -130,17 +92,4 @@ describe('compression', () => {
     const encoding = res.headers.get('content-encoding')
     expect(encoding).toMatch(/br|gzip/)
   })
-})
-
-// ─── Content-Type ───────────────────────────────────────────────────────
-
-describe('content-type', () => {
-  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
-
-  for (const path of pages) {
-    test(`${path} returns text/html`, async () => {
-      const res = await head(path)
-      expect(res.headers.get('content-type')).toContain('text/html')
-    })
-  }
 })
