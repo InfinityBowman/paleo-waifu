@@ -40,16 +40,15 @@ describe('HTML cache headers', () => {
     expect(cc).toContain('stale-while-revalidate')
   })
 
-  // Trailing slash required — Workers Assets serves prerendered pages at /privacy/
   test('privacy page has s-maxage=3600', async () => {
-    const res = await head('/privacy/')
+    const res = await head('/privacy')
     const cc = res.headers.get('cache-control')
     expect(cc).toContain('s-maxage=3600')
     expect(cc).toContain('stale-while-revalidate')
   })
 
   test('terms page has s-maxage=3600', async () => {
-    const res = await head('/terms/')
+    const res = await head('/terms')
     const cc = res.headers.get('cache-control')
     expect(cc).toContain('s-maxage=3600')
     expect(cc).toContain('stale-while-revalidate')
@@ -59,8 +58,7 @@ describe('HTML cache headers', () => {
 // ─── Security headers ───────────────────────────────────────────────────
 
 describe('security headers on HTML pages', () => {
-  // Trailing slash for prerendered pages (Workers Assets serves /privacy/ not /privacy)
-  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy/', '/terms/']
+  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
 
   for (const path of pages) {
     describe(path, () => {
@@ -137,7 +135,7 @@ describe('compression', () => {
 // ─── Content-Type ───────────────────────────────────────────────────────
 
 describe('content-type', () => {
-  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy/', '/terms/']
+  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
 
   for (const path of pages) {
     test(`${path} returns text/html`, async () => {

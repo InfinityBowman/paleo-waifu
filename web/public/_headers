@@ -9,7 +9,7 @@
   Content-Security-Policy: default-src 'self'; img-src 'self' cdn.paleowaifu.com cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'
   Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
 
-/privacy/
+/privacy
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -17,7 +17,7 @@
   Content-Security-Policy: default-src 'self'; img-src 'self' cdn.paleowaifu.com cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'
   Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
 
-/terms/
+/terms
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
@@ -25,7 +25,7 @@
   Content-Security-Policy: default-src 'self'; img-src 'self' cdn.paleowaifu.com cdn.discordapp.com media.discordapp.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline' https://plausible.jacobmaynard.dev; connect-src 'self' https://plausible.jacobmaynard.dev; frame-ancestors 'none'
   Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400
 
-/patch-notes/
+/patch-notes
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
