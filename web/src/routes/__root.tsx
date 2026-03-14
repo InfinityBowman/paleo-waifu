@@ -62,6 +62,11 @@ export const Route = createRootRoute({
         crossOrigin: 'anonymous',
       },
       {
+        rel: 'preconnect',
+        href: 'https://cdn.paleowaifu.com',
+        crossOrigin: 'anonymous',
+      },
+      {
         rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600;700;800&family=M+PLUS+Rounded+1c:wght@300;400;500;700;800&family=Klee+One:wght@400;600&family=Bangers&family=Permanent+Marker&display=swap',
       },

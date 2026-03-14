@@ -11,7 +11,7 @@ import {
   IconTreasureChest,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { ensureUserCurrency, getFossils } from '@/lib/gacha'
+import { ensureUserCurrency } from '@/lib/gacha'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'
@@ -30,16 +30,19 @@ const getGachaData = createServerFn({ method: 'GET' })
 
     await ensureUserCurrency(db, userId)
 
-    const [banners, fossils, currencyRow] = await Promise.all([
+    const [banners, currencyRow] = await Promise.all([
       db.select().from(banner).where(eq(banner.isActive, true)).all(),
-      getFossils(db, userId),
       db
-        .select({ lastDailyClaim: currency.lastDailyClaim })
+        .select({
+          fossils: currency.fossils,
+          lastDailyClaim: currency.lastDailyClaim,
+        })
         .from(currency)
         .where(eq(currency.userId, userId))
         .get(),
     ])
 
+    const fossils = currencyRow?.fossils ?? 0
     const now = Math.floor(Date.now() / 1000)
     const startOfDay = now - (now % 86400)
     const lastClaim = currencyRow?.lastDailyClaim

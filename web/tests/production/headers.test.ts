@@ -39,12 +39,26 @@ describe('HTML cache headers', () => {
     expect(cc).toContain('s-maxage=60')
     expect(cc).toContain('stale-while-revalidate')
   })
+
+  test('privacy page has s-maxage=3600', async () => {
+    const res = await head('/privacy')
+    const cc = res.headers.get('cache-control')
+    expect(cc).toContain('s-maxage=3600')
+    expect(cc).toContain('stale-while-revalidate')
+  })
+
+  test('terms page has s-maxage=3600', async () => {
+    const res = await head('/terms')
+    const cc = res.headers.get('cache-control')
+    expect(cc).toContain('s-maxage=3600')
+    expect(cc).toContain('stale-while-revalidate')
+  })
 })
 
 // ─── Security headers ───────────────────────────────────────────────────
 
 describe('security headers on HTML pages', () => {
-  const pages = ['/', '/encyclopedia', '/leaderboard']
+  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
 
   for (const path of pages) {
     describe(path, () => {
@@ -121,7 +135,7 @@ describe('compression', () => {
 // ─── Content-Type ───────────────────────────────────────────────────────
 
 describe('content-type', () => {
-  const pages = ['/', '/encyclopedia', '/leaderboard']
+  const pages = ['/', '/encyclopedia', '/leaderboard', '/privacy', '/terms']
 
   for (const path of pages) {
     test(`${path} returns text/html`, async () => {

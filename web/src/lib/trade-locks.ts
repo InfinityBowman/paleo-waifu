@@ -45,29 +45,28 @@ export async function isCreatureInTrade(
   db: Database,
   creatureId: string,
 ): Promise<boolean> {
-  const row = await db
-    .select({ id: tradeOffer.offeredCreatureId })
-    .from(tradeOffer)
-    .where(
-      and(
-        eq(tradeOffer.offeredCreatureId, creatureId),
-        eq(tradeOffer.status, 'open'),
-      ),
-    )
-    .get()
+  const [offered, proposed] = await Promise.all([
+    db
+      .select({ id: tradeOffer.offeredCreatureId })
+      .from(tradeOffer)
+      .where(
+        and(
+          eq(tradeOffer.offeredCreatureId, creatureId),
+          eq(tradeOffer.status, 'open'),
+        ),
+      )
+      .get(),
+    db
+      .select({ id: tradeProposal.proposerCreatureId })
+      .from(tradeProposal)
+      .where(
+        and(
+          eq(tradeProposal.proposerCreatureId, creatureId),
+          eq(tradeProposal.status, 'pending'),
+        ),
+      )
+      .get(),
+  ])
 
-  if (row) return true
-
-  const proposal = await db
-    .select({ id: tradeProposal.proposerCreatureId })
-    .from(tradeProposal)
-    .where(
-      and(
-        eq(tradeProposal.proposerCreatureId, creatureId),
-        eq(tradeProposal.status, 'pending'),
-      ),
-    )
-    .get()
-
-  return !!proposal
+  return !!(offered || proposed)
 }

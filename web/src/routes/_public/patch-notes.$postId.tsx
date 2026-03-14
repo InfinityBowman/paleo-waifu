@@ -11,6 +11,9 @@ const fetchUpdatePost = createServerFn({ method: 'GET' })
   })
 
 export const Route = createFileRoute('/_public/patch-notes/$postId')({
+  headers: () => ({
+    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+  }),
   loader: async ({ params }) => {
     const post = await fetchUpdatePost({ data: params.postId })
     if (!post) throw notFound()

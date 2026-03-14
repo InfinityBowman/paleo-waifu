@@ -64,8 +64,8 @@ async function doPull(
     const pullCount = isMulti ? MULTI_PULL_COUNT : 1
 
     // Deduct fossils
-    const success = await deductFossils(db, appUser.id, cost)
-    if (!success) {
+    const afterDeduct = await deductFossils(db, appUser.id, cost)
+    if (afterDeduct == null) {
       const fossils = await getFossils(db, appUser.id)
       await edit({
         content: `Not enough Fossils! You need **${cost}** but only have **${fossils}**.\nUse \`/daily\` to claim free Fossils!`,
@@ -82,13 +82,12 @@ async function doPull(
         activeBanner.rateUpId,
         pullCount,
       )
-      const fossils = await getFossils(db, appUser.id)
 
       if (isMulti) {
-        await edit({ embeds: [multiPullEmbed(results, fossils)] })
+        await edit({ embeds: [multiPullEmbed(results, afterDeduct)] })
       } else {
         const embed = creatureEmbed(results[0])
-        embed.footer = { text: `Balance: ${fossils} Fossils` }
+        embed.footer = { text: `Balance: ${afterDeduct} Fossils` }
         await edit({ embeds: [embed] })
       }
     } catch {

@@ -52,12 +52,12 @@ export async function getFossils(
   return row?.fossils ?? 0
 }
 
-/** Deduct fossils atomically — returns false if insufficient */
+/** Deduct fossils atomically — returns new balance, or null if insufficient */
 export async function deductFossils(
   db: Database,
   userId: string,
   amount: number,
-): Promise<boolean> {
+): Promise<number | null> {
   const result = await db
     .update(currency)
     .set({
@@ -67,7 +67,7 @@ export async function deductFossils(
     .where(and(eq(currency.userId, userId), gte(currency.fossils, amount)))
     .returning({ fossils: currency.fossils })
 
-  return result.length > 0
+  return result.length > 0 ? result[0].fossils : null
 }
 
 /** Grant fossils as a reward (e.g. level-up bonus) */

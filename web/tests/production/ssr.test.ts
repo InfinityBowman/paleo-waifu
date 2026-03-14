@@ -42,6 +42,12 @@ describe('SSR content', () => {
     expect(html).toContain('href="/leaderboard"')
   })
 
+  test('landing page has CDN preconnect link', async () => {
+    const html = await fetch(`${BASE}/`).then((r) => r.text())
+    expect(html).toContain('rel="preconnect"')
+    expect(html).toContain('cdn.paleowaifu.com')
+  })
+
   test('landing page does NOT contain auth-only nav links', async () => {
     const html = await fetch(`${BASE}/`).then((r) => r.text())
     // Unauthenticated landing page should not render gacha/collection/trade links

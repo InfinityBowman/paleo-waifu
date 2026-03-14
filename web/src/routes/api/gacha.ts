@@ -83,8 +83,8 @@ export const Route = createFileRoute('/api/gacha')({
         const pullCount = isMulti ? MULTI_PULL_COUNT : 1
 
         // Deduct currency
-        const success = await deductFossils(db, session.user.id, cost)
-        if (!success) {
+        const afterDeduct = await deductFossils(db, session.user.id, cost)
+        if (afterDeduct == null) {
           const fossils = await getFossils(db, session.user.id)
           return jsonResponse({ error: 'Insufficient fossils', fossils }, 402)
         }
@@ -99,8 +99,7 @@ export const Route = createFileRoute('/api/gacha')({
             bannerRow.rateUpId,
             pullCount,
           )
-          const fossils = await getFossils(db, session.user.id)
-          return jsonResponse({ results, fossils })
+          return jsonResponse({ results, fossils: afterDeduct })
         } catch {
           await refundFossils(db, session.user.id, cost)
           const fossils = await getFossils(db, session.user.id)
