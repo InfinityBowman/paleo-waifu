@@ -20,7 +20,9 @@
     "test:unit": "vitest run --exclude 'tests/production/**'",
     "test:watch": "vitest",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
-    "test:e2e:watch": "vitest --config vitest.e2e.config.ts"
+    "test:e2e:watch": "vitest --config vitest.e2e.config.ts",
+    "test:browser": "playwright test",
+    "test:browser:ui": "playwright test --ui"
   },
   "dependencies": {
     "@paleo-waifu/shared": "workspace:*",
@@ -51,6 +53,7 @@
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.26.1",
     "@cloudflare/workers-types": "^4.20260310.1",
+    "@playwright/test": "^1.58.2",
     "@tanstack/eslint-config": "^0.4.0",
     "@tanstack/router-plugin": "^1.166.6",
     "@types/node": "^25.4.0",

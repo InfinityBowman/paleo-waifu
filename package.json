@@ -46,6 +46,7 @@
     "test:watch": "cd web && pnpm test:watch",
     "test:e2e": "cd web && pnpm test:e2e",
     "test:e2e:watch": "cd web && pnpm test:e2e:watch",
+    "test:browser": "cd web && pnpm test:browser",
     "deps:up": "pnpm update --latest --recursive",
     "deps:check": "pnpm outdated --recursive"
   },
