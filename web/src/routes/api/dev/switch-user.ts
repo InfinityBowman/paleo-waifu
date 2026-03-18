@@ -25,7 +25,7 @@ export const Route = createFileRoute('/api/dev/switch-user')({
             const { getCfEnv } = await import('@/lib/env')
             const { session, user } =
               await import('@paleo-waifu/shared/db/schema')
-            const { ensureUserCurrency } = await import('@/lib/gacha')
+            const { fossils } = await import('@/lib/gacha')
 
             const body: { userId?: string } = await request.json()
             const { userId } = body
@@ -62,7 +62,7 @@ export const Route = createFileRoute('/api/dev/switch-user')({
               )
             }
 
-            await ensureUserCurrency(db, userId)
+            await fossils.ensure(db, userId)
 
             const token = nanoid(32)
             const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)

@@ -25,8 +25,7 @@ export const Route = createFileRoute('/api/dev/tools')({
             const { getCfEnv } = await import('@/lib/env')
             const { creature, currency, userCreature, battleRating, user } =
               await import('@paleo-waifu/shared/db/schema')
-            const { grantFossils, ensureUserCurrency } =
-              await import('@/lib/gacha')
+            const { fossils } = await import('@/lib/gacha')
 
             const body = await request.json()
             const { action, userId } = body as {
@@ -50,8 +49,8 @@ export const Route = createFileRoute('/api/dev/tools')({
               const { amount } = body as { amount: number }
               if (!amount || amount < 1 || amount > 100000)
                 return json({ error: 'Invalid amount' }, 400)
-              await ensureUserCurrency(db, userId)
-              await grantFossils(db, userId, amount)
+              await fossils.ensure(db, userId)
+              await fossils.grant(db, userId, amount)
               return json({ success: true })
             }
 
@@ -78,7 +77,7 @@ export const Route = createFileRoute('/api/dev/tools')({
             }
 
             if (action === 'reset_daily') {
-              await ensureUserCurrency(db, userId)
+              await fossils.ensure(db, userId)
               await db
                 .update(currency)
                 .set({ lastDailyClaim: null })

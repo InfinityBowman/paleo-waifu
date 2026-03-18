@@ -44,7 +44,9 @@ describe('SSR content', () => {
 
   test('landing page has CDN preconnect link', async () => {
     const html = await fetch(`${BASE}/`).then((r) => r.text())
-    expect(html).toMatch(/rel="preconnect"[^>]*href="https:\/\/cdn\.paleowaifu\.com"/)
+    expect(html).toMatch(
+      /rel="preconnect"[^>]*href="https:\/\/cdn\.paleowaifu\.com"/,
+    )
   })
 
   test('landing page does NOT contain auth-only nav links', async () => {

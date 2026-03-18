@@ -190,9 +190,7 @@ const getAnalyticsData = createServerFn({ method: 'GET' }).handler(async () => {
     // ── Battle queries ──────────────────────────────────────
     db
       .select({
-        date: sql<string>`date(${battleLog.createdAt}, 'unixepoch')`.as(
-          'date',
-        ),
+        date: sql<string>`date(${battleLog.createdAt}, 'unixepoch')`.as('date'),
         mode: battleLog.mode,
         count: count(),
       })

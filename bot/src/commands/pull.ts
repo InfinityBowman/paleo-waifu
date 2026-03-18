@@ -1,22 +1,12 @@
 import { eq } from 'drizzle-orm'
-import {
-  MULTI_PULL_COUNT,
-  PULL_COST_MULTI,
-  PULL_COST_SINGLE,
-} from '@paleo-waifu/shared/types'
 import { banner } from '@paleo-waifu/shared/db/schema'
 import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import { creatureEmbed, multiPullEmbed } from '../lib/embeds'
 import type { Interaction } from '../lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
-import {
-  deductFossils,
-  ensureUserCurrency,
-  executePullBatch,
-  getFossils,
-  refundFossils,
-} from '@/lib/gacha'
+import { fossils, pull } from '@/lib/gacha'
+import { toCdnUrl } from '@/lib/utils'
 
 /** /pull or /pull10 — Gacha pull (deferred) */
 export function handlePull(
@@ -45,11 +35,11 @@ async function doPull(
     editDeferredResponse(env.DISCORD_APPLICATION_ID, interaction.token, body)
 
   try {
-    await ensureUserCurrency(db, appUser.id)
+    await fossils.ensure(db, appUser.id)
 
     // Find active banner
     const activeBanner = await db
-      .select({ id: banner.id, rateUpId: banner.rateUpId })
+      .select({ id: banner.id })
       .from(banner)
       .where(eq(banner.isActive, true))
       .get()
@@ -59,44 +49,33 @@ async function doPull(
       return
     }
 
-    const isMulti = count === 10
-    const cost = isMulti ? PULL_COST_MULTI : PULL_COST_SINGLE
-    const pullCount = isMulti ? MULTI_PULL_COUNT : 1
+    const outcome = await pull(db, appUser.id, {
+      mode: count === 10 ? 'multi' : 'single',
+      bannerId: activeBanner.id,
+      transformImageUrl: toCdnUrl,
+    })
 
-    // Deduct fossils
-    const afterDeduct = await deductFossils(db, appUser.id, cost)
-    if (afterDeduct == null) {
-      const fossils = await getFossils(db, appUser.id)
-      await edit({
-        content: `Not enough Fossils! You need **${cost}** but only have **${fossils}**.\nUse \`/daily\` to claim free Fossils!`,
-      })
+    if (!outcome.ok) {
+      if (outcome.reason === 'insufficient_fossils') {
+        await edit({
+          content: `Not enough Fossils! You have **${outcome.fossils}**.\nUse \`/daily\` to claim free Fossils!`,
+        })
+      } else if (outcome.reason === 'banner_not_found') {
+        await edit({ content: 'No active banner right now. Check back later!' })
+      } else {
+        await edit({
+          content: `Something went wrong with your pull. Your Fossils have been refunded.\n\uD83E\uDEA8 **Balance:** ${outcome.fossils} Fossils`,
+        })
+      }
       return
     }
 
-    // Execute pull
-    try {
-      const results = await executePullBatch(
-        db,
-        appUser.id,
-        activeBanner.id,
-        activeBanner.rateUpId,
-        pullCount,
-      )
-
-      if (isMulti) {
-        await edit({ embeds: [multiPullEmbed(results, afterDeduct)] })
-      } else {
-        const embed = creatureEmbed(results[0])
-        embed.footer = { text: `Balance: ${afterDeduct} Fossils` }
-        await edit({ embeds: [embed] })
-      }
-    } catch {
-      // Refund on failure
-      await refundFossils(db, appUser.id, cost)
-      const fossils = await getFossils(db, appUser.id)
-      await edit({
-        content: `Something went wrong with your pull. Your **${cost}** Fossils have been refunded.\n\uD83E\uDEA8 **Balance:** ${fossils} Fossils`,
-      })
+    if (count === 10) {
+      await edit({ embeds: [multiPullEmbed(outcome.results, outcome.fossils)] })
+    } else {
+      const embed = creatureEmbed(outcome.results[0])
+      embed.footer = { text: `Balance: ${outcome.fossils} Fossils` }
+      await edit({ embeds: [embed] })
     }
   } catch {
     await edit({

@@ -3,7 +3,7 @@ import { deferredResponse, editDeferredResponse } from '../lib/discord'
 import type { Interaction } from '../lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from '../lib/auth'
-import { claimDaily, ensureUserCurrency } from '@/lib/gacha'
+import { claimDaily, fossils } from '@/lib/gacha'
 
 /** /daily — Claim daily fossils (deferred) */
 export function handleDaily(
@@ -24,7 +24,7 @@ async function doDailyClaim(
   env: { DISCORD_APPLICATION_ID: string },
 ): Promise<void> {
   try {
-    await ensureUserCurrency(db, appUser.id)
+    await fossils.ensure(db, appUser.id)
     const result = await claimDaily(db, appUser.id)
 
     if (result.claimed) {

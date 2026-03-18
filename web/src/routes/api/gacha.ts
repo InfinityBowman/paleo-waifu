@@ -1,23 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { createDb } from '@paleo-waifu/shared/db/client'
-import { banner } from '@paleo-waifu/shared/db/schema'
-import {
-  MULTI_PULL_COUNT,
-  PULL_COST_MULTI,
-  PULL_COST_SINGLE,
-} from '@paleo-waifu/shared/types'
 import { getCfEnv } from '@/lib/env'
 import { createAuth } from '@/lib/auth'
-import {
-  claimDaily,
-  deductFossils,
-  executePullBatch,
-  getFossils,
-  refundFossils,
-} from '@/lib/gacha'
-import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { claimDaily, fossils, pull } from '@/lib/gacha'
+import { checkCsrfOrigin, jsonResponse, toCdnUrl } from '@/lib/utils'
 
 const GachaBody = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claim_daily') }),
@@ -60,54 +47,40 @@ export const Route = createFileRoute('/api/gacha')({
 
         // Daily claim
         if (body.action === 'claim_daily') {
+          await fossils.ensure(db, session.user.id)
           const result = await claimDaily(db, session.user.id)
           return jsonResponse(result)
         }
 
-        // Pull (only remaining actions after claim_daily are pull/pull_multi)
-        const bannerId = body.bannerId
+        // Pull
+        await fossils.ensure(db, session.user.id)
+        const outcome = await pull(db, session.user.id, {
+          mode: body.action === 'pull_multi' ? 'multi' : 'single',
+          bannerId: body.bannerId,
+          transformImageUrl: toCdnUrl,
+        })
 
-        // Validate banner exists and is active, fetch rateUpId for pulls
-        const bannerRow = await db
-          .select({ id: banner.id, rateUpId: banner.rateUpId })
-          .from(banner)
-          .where(and(eq(banner.id, bannerId), eq(banner.isActive, true)))
-          .get()
-
-        if (!bannerRow) {
-          return jsonResponse({ error: 'Banner not found or inactive' }, 400)
-        }
-
-        const isMulti = body.action === 'pull_multi'
-        const cost = isMulti ? PULL_COST_MULTI : PULL_COST_SINGLE
-        const pullCount = isMulti ? MULTI_PULL_COUNT : 1
-
-        // Deduct currency
-        const afterDeduct = await deductFossils(db, session.user.id, cost)
-        if (afterDeduct == null) {
-          const fossils = await getFossils(db, session.user.id)
-          return jsonResponse({ error: 'Insufficient fossils', fossils }, 402)
-        }
-
-        // Execute batched pulls — pity + creature inserts are atomic,
-        // so on failure nothing is written and we only need to refund fossils
-        try {
-          const results = await executePullBatch(
-            db,
-            session.user.id,
-            bannerId,
-            bannerRow.rateUpId,
-            pullCount,
-          )
-          return jsonResponse({ results, fossils: afterDeduct })
-        } catch {
-          await refundFossils(db, session.user.id, cost)
-          const fossils = await getFossils(db, session.user.id)
+        if (!outcome.ok) {
+          if (outcome.reason === 'insufficient_fossils')
+            return jsonResponse(
+              { error: 'Insufficient fossils', fossils: outcome.fossils },
+              402,
+            )
+          if (outcome.reason === 'banner_not_found')
+            return jsonResponse({ error: 'Banner not found or inactive' }, 400)
           return jsonResponse(
-            { error: 'Pull failed, fossils refunded', fossils },
+            {
+              error: 'Pull failed, fossils refunded',
+              fossils: outcome.fossils,
+            },
             500,
           )
         }
+
+        return jsonResponse({
+          results: outcome.results,
+          fossils: outcome.fossils,
+        })
       },
     },
   },

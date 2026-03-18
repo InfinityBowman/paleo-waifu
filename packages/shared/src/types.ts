@@ -24,6 +24,10 @@ export const SOFT_PITY_THRESHOLD = 75
 export const HARD_PITY_THRESHOLD = 90
 /** Per-pull legendary rate increase once soft pity kicks in (linear ramp) */
 export const SOFT_PITY_RATE_INCREMENT = 0.06
+/** Per-pull rare rate increase once soft pity kicks in */
+export const RARE_SOFT_PITY_INCREMENT = 0.03
+/** Per-pull epic rate increase once soft pity kicks in */
+export const EPIC_SOFT_PITY_INCREMENT = 0.02
 
 export const BASE_RATES: Record<Rarity, number> = {
   common: 0.5,

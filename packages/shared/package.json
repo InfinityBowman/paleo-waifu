@@ -2,6 +2,10 @@
   "name": "@paleo-waifu/shared",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
   "exports": {
     "./types": "./src/types.ts",
     "./xp": "./src/xp.ts",
@@ -15,13 +19,15 @@
     "./battle/abilities": "./src/battle/abilities.ts",
     "./battle/ai": "./src/battle/ai.ts",
     "./battle/engine": "./src/battle/engine.ts",
-    "./slug": "./src/slug.ts"
+    "./slug": "./src/slug.ts",
+    "./gacha": "./src/gacha/engine.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260310.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

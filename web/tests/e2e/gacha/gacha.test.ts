@@ -170,47 +170,6 @@ describe('gacha system', () => {
     expect(pity?.pulls_since_legendary).toBe(0)
   })
 
-  test('sequential pulls: legendary guaranteed within 90 pulls', async () => {
-    const cookie = await createSession(TEST_USER_ID)
-
-    await execute(
-      'UPDATE currency SET fossils = 100 WHERE user_id = ?',
-      TEST_USER_ID,
-    )
-    await execute(
-      `INSERT OR REPLACE INTO pity_counter (id, user_id, banner_id, pulls_since_rare, pulls_since_legendary, total_pulls)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      'pity-test-001',
-      TEST_USER_ID,
-      TEST_BANNER_ID,
-      0,
-      85,
-      85,
-    )
-
-    let foundLegendary = false
-    let legendaryPullNumber = -1
-
-    for (let i = 1; i <= 6; i++) {
-      const res = await authenticatedPost(
-        '/api/gacha',
-        { action: 'pull', bannerId: TEST_BANNER_ID },
-        cookie,
-      )
-      expect(res.status).toBe(200)
-      const body = (await res.json()) as PullResult
-
-      if (body.results[0].rarity === 'legendary') {
-        foundLegendary = true
-        legendaryPullNumber = 85 + i
-        break
-      }
-    }
-
-    expect(foundLegendary, 'legendary must appear within 90 pulls').toBe(true)
-    expect(legendaryPullNumber).toBeLessThanOrEqual(90)
-  })
-
   test('daily claim awards 3 fossils, double-claim rejected', async () => {
     const cookie = await createSession(TEST_USER_ID)
 

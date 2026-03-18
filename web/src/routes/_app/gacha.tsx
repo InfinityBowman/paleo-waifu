@@ -11,7 +11,7 @@ import {
   IconTreasureChest,
 } from '@/components/icons'
 import { getCfEnv } from '@/lib/env'
-import { ensureUserCurrency } from '@/lib/gacha'
+import { fossils as fossilOps } from '@/lib/gacha'
 import { PullButton } from '@/components/gacha/PullButton'
 import { PullAnimation } from '@/components/gacha/PullAnimation'
 import { PityCounter } from '@/components/gacha/PityCounter'
@@ -28,7 +28,7 @@ const getGachaData = createServerFn({ method: 'GET' })
   .handler(async ({ data: userId }) => {
     const db = await createDb(getCfEnv().DB)
 
-    await ensureUserCurrency(db, userId)
+    await fossilOps.ensure(db, userId)
 
     const [banners, currencyRow] = await Promise.all([
       db.select().from(banner).where(eq(banner.isActive, true)).all(),

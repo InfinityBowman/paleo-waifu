@@ -1,6 +1,7 @@
 import { and, eq, gte, inArray, sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import {
+  banner,
   bannerPool,
   creature,
   creatureBattleStats,
@@ -9,15 +10,17 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import {
-  BASE_RATES,
   DAILY_FOSSILS,
-  HARD_PITY_THRESHOLD,
+  MULTI_PULL_COUNT,
   NEW_USER_BONUS,
-  RATE_UP_SHARE,
-  SOFT_PITY_RATE_INCREMENT,
-  SOFT_PITY_THRESHOLD,
+  PULL_COST_MULTI,
+  PULL_COST_SINGLE,
 } from '@paleo-waifu/shared/types'
-import { toCdnUrl } from './utils'
+import {
+  calculateRarity,
+  selectCreatureFromPool,
+} from '@paleo-waifu/shared/gacha'
+import type { PoolCreature } from '@paleo-waifu/shared/gacha'
 import type { Rarity } from '@paleo-waifu/shared/types'
 import type { Database } from '@paleo-waifu/shared/db/client'
 
@@ -27,8 +30,12 @@ function secureRandom(): number {
   return array[0] / (0xffffffff + 1)
 }
 
+// ---------------------------------------------------------------------------
+// Currency operations
+// ---------------------------------------------------------------------------
+
 /** Ensure new user gets their starter Fossils */
-export async function ensureUserCurrency(db: Database, userId: string) {
+async function ensureUserCurrency(db: Database, userId: string) {
   await db
     .insert(currency)
     .values({
@@ -40,10 +47,7 @@ export async function ensureUserCurrency(db: Database, userId: string) {
 }
 
 /** Get user's current fossil count */
-export async function getFossils(
-  db: Database,
-  userId: string,
-): Promise<number> {
+async function getFossils(db: Database, userId: string): Promise<number> {
   const row = await db
     .select({ fossils: currency.fossils })
     .from(currency)
@@ -53,7 +57,7 @@ export async function getFossils(
 }
 
 /** Deduct fossils atomically — returns new balance, or null if insufficient */
-export async function deductFossils(
+async function deductFossils(
   db: Database,
   userId: string,
   amount: number,
@@ -71,7 +75,7 @@ export async function deductFossils(
 }
 
 /** Grant fossils as a reward (e.g. level-up bonus) */
-export async function grantFossils(
+async function grantFossils(
   db: Database,
   userId: string,
   amount: number,
@@ -86,13 +90,25 @@ export async function grantFossils(
 }
 
 /** Refund fossils (used when pulls fail after deduction) */
-export async function refundFossils(
+async function refundFossils(
   db: Database,
   userId: string,
   amount: number,
 ): Promise<void> {
   await grantFossils(db, userId, amount)
 }
+
+export const fossils = {
+  ensure: ensureUserCurrency,
+  get: getFossils,
+  deduct: deductFossils,
+  grant: grantFossils,
+  refund: refundFossils,
+}
+
+// ---------------------------------------------------------------------------
+// Daily claim
+// ---------------------------------------------------------------------------
 
 /** Claim daily fossils if not already claimed today */
 export async function claimDaily(
@@ -102,7 +118,6 @@ export async function claimDaily(
   const now = Math.floor(Date.now() / 1000)
   const startOfDay = now - (now % 86400)
 
-  // Try to update only if last claim was before today
   const result = await db
     .update(currency)
     .set({
@@ -126,88 +141,9 @@ export async function claimDaily(
   return { claimed: false, fossils: current }
 }
 
-/** Calculate adjusted rarity rates based on pity */
-function calculateRarity(
-  pullsSinceRare: number,
-  pullsSinceLegendary: number,
-): Rarity {
-  const rand = secureRandom()
-
-  // Hard pity: guaranteed legendary at 90
-  if (pullsSinceLegendary >= HARD_PITY_THRESHOLD) {
-    return 'legendary'
-  }
-
-  // Soft pity for legendary: linear ramp past threshold (+6% per pull, Genshin-style)
-  let legendaryRate = BASE_RATES.legendary
-  if (pullsSinceLegendary >= SOFT_PITY_THRESHOLD) {
-    const extraPulls = pullsSinceLegendary - SOFT_PITY_THRESHOLD
-    legendaryRate = BASE_RATES.legendary + extraPulls * SOFT_PITY_RATE_INCREMENT
-  }
-
-  // Soft pity for rare+: linear ramp past threshold (+3% per pull)
-  let rareRate = BASE_RATES.rare
-  let epicRate = BASE_RATES.epic
-  if (pullsSinceRare >= SOFT_PITY_THRESHOLD) {
-    const extraPulls = pullsSinceRare - SOFT_PITY_THRESHOLD
-    rareRate = BASE_RATES.rare + extraPulls * 0.03
-    epicRate = BASE_RATES.epic + extraPulls * 0.02
-  }
-
-  // Normalize and roll
-  const total =
-    BASE_RATES.common +
-    BASE_RATES.uncommon +
-    rareRate +
-    epicRate +
-    legendaryRate
-  const commonNorm = BASE_RATES.common / total
-  const uncommonNorm = BASE_RATES.uncommon / total
-  const rareNorm = rareRate / total
-  const epicNorm = epicRate / total
-
-  if (rand < commonNorm) return 'common'
-  if (rand < commonNorm + uncommonNorm) return 'uncommon'
-  if (rand < commonNorm + uncommonNorm + rareNorm) return 'rare'
-  if (rand < commonNorm + uncommonNorm + rareNorm + epicNorm) return 'epic'
-  return 'legendary'
-}
-
-interface PoolCreature {
-  creatureId: string
-  rarity: string
-  name: string
-  scientificName: string
-  imageUrl: string | null
-  description: string
-  era: string
-  imageAspectRatio: number | null
-  isBattleReady: boolean
-}
-
-/** Select a creature from pre-fetched pool data (no DB queries) */
-function selectCreatureFromPool(
-  poolByRarity: Map<string, Array<PoolCreature>>,
-  rarity: Rarity,
-  rateUpId: string | null,
-): string | null {
-  const pool = poolByRarity.get(rarity)
-  if (!pool || pool.length === 0) return null
-
-  if (rateUpId) {
-    // Rate-up rarity is derived from pool data — no extra DB query needed
-    const isRateUpInPool = pool.some((p) => p.creatureId === rateUpId)
-    if (isRateUpInPool) {
-      if (secureRandom() < RATE_UP_SHARE) return rateUpId
-      const others = pool.filter((p) => p.creatureId !== rateUpId)
-      if (others.length > 0) {
-        return others[Math.floor(secureRandom() * others.length)].creatureId
-      }
-    }
-  }
-
-  return pool[Math.floor(secureRandom() * pool.length)].creatureId
-}
+// ---------------------------------------------------------------------------
+// Pull types
+// ---------------------------------------------------------------------------
 
 export interface PullResult {
   userCreatureId: string
@@ -223,14 +159,92 @@ export interface PullResult {
   isBattleReady: boolean
 }
 
+export type PullOutcome =
+  | { ok: true; results: Array<PullResult>; fossils: number }
+  | { ok: false; reason: 'insufficient_fossils'; fossils: number }
+  | { ok: false; reason: 'banner_not_found' }
+  | { ok: false; reason: 'pull_error'; fossils: number }
+
+export interface PullOptions {
+  mode: 'single' | 'multi'
+  bannerId: string
+  /** Pass toCdnUrl for web; omit for bot (identity) */
+  transformImageUrl?: (url: string | null) => string | null
+  /** Injectable RNG for testing; defaults to secureRandom() */
+  rng?: () => number
+}
+
+// ---------------------------------------------------------------------------
+// Pull orchestration
+// ---------------------------------------------------------------------------
+
+/** Full pull flow: validate banner → deduct fossils → execute batch → refund on error */
+export async function pull(
+  db: Database,
+  userId: string,
+  options: PullOptions,
+): Promise<PullOutcome> {
+  const { mode, bannerId, transformImageUrl, rng } = options
+
+  // Validate banner exists and is active, fetch rateUpId
+  const bannerRow = await db
+    .select({ id: banner.id, rateUpId: banner.rateUpId })
+    .from(banner)
+    .where(and(eq(banner.id, bannerId), eq(banner.isActive, true)))
+    .get()
+
+  if (!bannerRow) {
+    return { ok: false, reason: 'banner_not_found' }
+  }
+
+  const isMulti = mode === 'multi'
+  const cost = isMulti ? PULL_COST_MULTI : PULL_COST_SINGLE
+  const pullCount = isMulti ? MULTI_PULL_COUNT : 1
+
+  // Deduct currency
+  const afterDeduct = await deductFossils(db, userId, cost)
+  if (afterDeduct == null) {
+    const balance = await getFossils(db, userId)
+    return { ok: false, reason: 'insufficient_fossils', fossils: balance }
+  }
+
+  // Execute batched pulls — pity + creature inserts are atomic,
+  // so on failure nothing is written and we only need to refund fossils
+  try {
+    const results = await executePullBatch(
+      db,
+      userId,
+      bannerId,
+      bannerRow.rateUpId,
+      pullCount,
+      transformImageUrl,
+      rng,
+    )
+    return { ok: true, results, fossils: afterDeduct }
+  } catch {
+    await refundFossils(db, userId, cost)
+    const balance = await getFossils(db, userId)
+    return { ok: false, reason: 'pull_error', fossils: balance }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Internal batch execution
+// ---------------------------------------------------------------------------
+
 /** Execute a batch of gacha pulls with minimal D1 round-trips (~7 vs ~90 for 10-pull) */
-export async function executePullBatch(
+async function executePullBatch(
   db: Database,
   userId: string,
   bannerId: string,
   rateUpId: string | null,
   count: number,
+  transformImageUrl?: (url: string | null) => string | null,
+  rng?: () => number,
 ): Promise<Array<PullResult>> {
+  const random = rng ?? secureRandom
+  const transformUrl = transformImageUrl ?? ((u: string | null) => u)
+
   // 1. Ensure pity counter exists
   await db
     .insert(pityCounter)
@@ -307,7 +321,7 @@ export async function executePullBatch(
     poolRows.map((p) => [p.creatureId, p]),
   )
 
-  // 3. In-memory pull loop — no DB queries
+  // 3. In-memory pull loop — no DB queries (except rare fallback)
   let pullsSinceRare = preBatchRare
   let pullsSinceLegendary = preBatchLegendary
 
@@ -319,13 +333,17 @@ export async function executePullBatch(
 
   for (let i = 0; i < count; i++) {
     // Increment BEFORE check so the counter represents "this is your Nth pull"
-    // e.g. after 89 non-legendary pulls, this becomes 90 → hard pity fires on pull 90
     pullsSinceRare++
     pullsSinceLegendary++
 
-    const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary)
+    const rarity = calculateRarity(pullsSinceRare, pullsSinceLegendary, random)
 
-    let creatureId = selectCreatureFromPool(poolByRarity, rarity, rateUpId)
+    let creatureId = selectCreatureFromPool(
+      poolByRarity,
+      rarity,
+      rateUpId,
+      random,
+    )
 
     // Fallback: pool missing this rarity (rare edge case)
     if (!creatureId) {
@@ -353,7 +371,7 @@ export async function executePullBatch(
         .all()
       if (fallback.length === 0)
         throw new Error(`No creatures of rarity: ${rarity}`)
-      const picked = fallback[Math.floor(secureRandom() * fallback.length)]
+      const picked = fallback[Math.floor(random() * fallback.length)]
       creatureId = picked.id
       creatureCache.set(creatureId, {
         creatureId,
@@ -395,7 +413,6 @@ export async function executePullBatch(
   )
 
   // 5. Write final pity state (with resets) + insert all creatures atomically
-  //    The initial atomic increment claimed our slots; now we correct for any resets
   await db.batch([
     db
       .update(pityCounter)
@@ -429,7 +446,7 @@ export async function executePullBatch(
       name: data.name,
       scientificName: data.scientificName,
       rarity: p.rarity,
-      imageUrl: toCdnUrl(data.imageUrl),
+      imageUrl: transformUrl(data.imageUrl),
       imageAspectRatio: data.imageAspectRatio,
       description: data.description,
       era: data.era,

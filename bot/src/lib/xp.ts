@@ -8,7 +8,7 @@ import {
   levelFromXp,
 } from '@paleo-waifu/shared/xp'
 import type { Database } from '@paleo-waifu/shared/db/client'
-import { ensureUserCurrency, grantFossils } from '@/lib/gacha'
+import { fossils } from '@/lib/gacha'
 
 export interface XpAwardResult {
   xp: number
@@ -70,8 +70,8 @@ export async function awardXp(
     for (let lvl = oldLevel + 1; lvl <= row.level; lvl++) {
       fossilsEarned += fossilsForLevel(lvl)
     }
-    await ensureUserCurrency(db, userId)
-    await grantFossils(db, userId, fossilsEarned)
+    await fossils.ensure(db, userId)
+    await fossils.grant(db, userId, fossilsEarned)
   }
 
   return {

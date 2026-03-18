@@ -90,8 +90,13 @@ Full JS virtualization (`@tanstack/react-virtual`) would be overkill unless coll
 
 ```tsx
 useEffect(() => {
-  if (!session) { setBadges(null); return }
-  getBadges().then(setBadges).catch(() => setBadges(null))
+  if (!session) {
+    setBadges(null)
+    return
+  }
+  getBadges()
+    .then(setBadges)
+    .catch(() => setBadges(null))
 }, [session, location.pathname])
 ```
 
@@ -148,7 +153,7 @@ No `build` block. Rollup's heuristic controls chunk splitting.
 
 **`collection.tsx:5,17`, `encyclopedia.tsx:5,214`, `battle.index.tsx:6,27`**
 
-`TEMPLATE_MAP` is declared at module scope as `new Map(ALL_ABILITY_TEMPLATES.map(...))`. It's only *used* inside `createServerFn` handlers. TanStack Start replaces server function bodies with proxies on the client, but module-scope declarations with side effects (like `new Map(...)`) may survive tree-shaking.
+`TEMPLATE_MAP` is declared at module scope as `new Map(ALL_ABILITY_TEMPLATES.map(...))`. It's only _used_ inside `createServerFn` handlers. TanStack Start replaces server function bodies with proxies on the client, but module-scope declarations with side effects (like `new Map(...)`) may survive tree-shaking.
 
 **Caveat:** This needs verification with a production build + bundle analysis. TanStack Start's server function extraction may or may not eliminate module-scope code that's only referenced by server handlers.
 
@@ -232,12 +237,12 @@ Merged `getFossils` and `lastDailyClaim` into a single `select({ fossils, lastDa
 
 ### 24. Missing database indexes — `[Medium]`
 
-| Table | Missing Index | Affected Query | Confidence |
-|-------|--------------|----------------|------------|
-| `battleTeam` | `slot` alone | `findArenaOpponents` | Medium — didn't verify the query directly |
-| `userCreature` | `(userId, creatureId)` | `existingCounts` in gacha | Medium |
-| `tradeOffer` | `offeredCreatureId` | `isCreatureInTrade` | High — verified the query |
-| `tradeProposal` | `proposerCreatureId` | `isCreatureInTrade` | High — verified the query |
+| Table           | Missing Index          | Affected Query            | Confidence                                |
+| --------------- | ---------------------- | ------------------------- | ----------------------------------------- |
+| `battleTeam`    | `slot` alone           | `findArenaOpponents`      | Medium — didn't verify the query directly |
+| `userCreature`  | `(userId, creatureId)` | `existingCounts` in gacha | Medium                                    |
+| `tradeOffer`    | `offeredCreatureId`    | `isCreatureInTrade`       | High — verified the query                 |
+| `tradeProposal` | `proposerCreatureId`   | `isCreatureInTrade`       | High — verified the query                 |
 
 **Caveat:** With a small user base, missing indexes have negligible impact. These matter as scale grows.
 
@@ -305,28 +310,28 @@ A minor CSS optimization. Real-world impact is negligible on modern browsers.
 
 ## LOW
 
-| # | Finding | Location | Confidence |
-|---|---------|----------|------------|
-| 34 | `router.invalidate()` flushes all loader caches after every pull | `gacha.tsx:133,205` | High |
-| 35 | `JSON.parse(funFacts)` in render without `useMemo` | `CreatureModal.tsx:97` | High |
-| 36 | `allCreatures` spread recreated every render | `EncyclopediaGrid.tsx:115` | High |
-| 37 | Particle `useMemo([], [])` could be module constants | `PullAnimation.tsx` | High |
-| 38 | No `defaultPendingMs`/`defaultPendingMinMs` on router | `router.tsx` | Verified |
-| 39 | Battle-specific CSS keyframes in global `styles.css` | `styles.css` | High |
-| 40 | No Wrangler `minify: true` for server bundle | `wrangler.jsonc` | Medium |
-| 41 | Redundant `X-Frame-Options` with CSP `frame-ancestors` | `__root.tsx` | High |
-| 42 | 6 admin `count(*)` queries could be 1 with CTEs | `admin/index.tsx` | High |
+| #   | Finding                                                          | Location                   | Confidence |
+| --- | ---------------------------------------------------------------- | -------------------------- | ---------- |
+| 34  | `router.invalidate()` flushes all loader caches after every pull | `gacha.tsx:133,205`        | High       |
+| 35  | `JSON.parse(funFacts)` in render without `useMemo`               | `CreatureModal.tsx:97`     | High       |
+| 36  | `allCreatures` spread recreated every render                     | `EncyclopediaGrid.tsx:115` | High       |
+| 37  | Particle `useMemo([], [])` could be module constants             | `PullAnimation.tsx`        | High       |
+| 38  | No `defaultPendingMs`/`defaultPendingMinMs` on router            | `router.tsx`               | Verified   |
+| 39  | Battle-specific CSS keyframes in global `styles.css`             | `styles.css`               | High       |
+| 40  | No Wrangler `minify: true` for server bundle                     | `wrangler.jsonc`           | Medium     |
+| 41  | Redundant `X-Frame-Options` with CSP `frame-ancestors`           | `__root.tsx`               | High       |
+| 42  | 6 admin `count(*)` queries could be 1 with CTEs                  | `admin/index.tsx`          | High       |
 
 ---
 
 ## Findings Removed or Corrected
 
-| # | Original Claim | Correction |
-|---|---------------|------------|
-| 20 | Bangers and Permanent Marker fonts unused | **WRONG** — both used in `BattleTransition.tsx` |
-| 2 | Memoize `createAuth` at module level | **Fix is risky** — `env` is request-scoped in CF Workers |
-| 1 | D1 enforces FKs without PRAGMA | **Uncertain** — SQLite default is OFF, D1 docs say ON, needs testing |
-| 15 | `verbatimModuleSyntax` affects bundle size | **Overstated** — esbuild ignores this setting |
+| #   | Original Claim                             | Correction                                                           |
+| --- | ------------------------------------------ | -------------------------------------------------------------------- |
+| 20  | Bangers and Permanent Marker fonts unused  | **WRONG** — both used in `BattleTransition.tsx`                      |
+| 2   | Memoize `createAuth` at module level       | **Fix is risky** — `env` is request-scoped in CF Workers             |
+| 1   | D1 enforces FKs without PRAGMA             | **Uncertain** — SQLite default is OFF, D1 docs say ON, needs testing |
+| 15  | `verbatimModuleSyntax` affects bundle size | **Overstated** — esbuild ignores this setting                        |
 
 ---
 
