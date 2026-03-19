@@ -1,10 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
-import { createDb } from '@paleo-waifu/shared/db/client'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
 import { claimDaily, fossils, pull } from '@/lib/gacha'
-import { checkCsrfOrigin, jsonResponse, toCdnUrl } from '@/lib/utils'
+import { apiHandler } from '@/lib/api-handler'
+import { jsonResponse, toCdnUrl } from '@/lib/utils'
 
 const GachaBody = z.discriminatedUnion('action', [
   z.object({ action: z.literal('claim_daily') }),
@@ -21,40 +19,17 @@ const GachaBody = z.discriminatedUnion('action', [
 export const Route = createFileRoute('/api/gacha')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const originError = checkCsrfOrigin(request)
-        if (originError) return originError
-
-        const cfEnv = getCfEnv()
-        const auth = await createAuth(cfEnv)
-        const session = await auth.api.getSession({ headers: request.headers })
-        if (!session) {
-          return jsonResponse({ error: 'Unauthorized' }, 401)
-        }
-
-        let rawBody: unknown
-        try {
-          rawBody = await request.json()
-        } catch {
-          return jsonResponse({ error: 'Invalid JSON' }, 400)
-        }
-        const parsed = GachaBody.safeParse(rawBody)
-        if (!parsed.success) {
-          return jsonResponse({ error: 'Invalid request body' }, 400)
-        }
-        const body = parsed.data
-        const db = await createDb(cfEnv.DB)
-
+      POST: apiHandler(GachaBody, async ({ db, userId }, body) => {
         // Daily claim
         if (body.action === 'claim_daily') {
-          await fossils.ensure(db, session.user.id)
-          const result = await claimDaily(db, session.user.id)
+          await fossils.ensure(db, userId)
+          const result = await claimDaily(db, userId)
           return jsonResponse(result)
         }
 
         // Pull
-        await fossils.ensure(db, session.user.id)
-        const outcome = await pull(db, session.user.id, {
+        await fossils.ensure(db, userId)
+        const outcome = await pull(db, userId, {
           mode: body.action === 'pull_multi' ? 'multi' : 'single',
           bannerId: body.bannerId,
           transformImageUrl: toCdnUrl,
@@ -81,7 +56,7 @@ export const Route = createFileRoute('/api/gacha')({
           results: outcome.results,
           fossils: outcome.fossils,
         })
-      },
+      }),
     },
   },
 })

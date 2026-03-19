@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { createDb } from '@paleo-waifu/shared/db/client'
 import { userCreature } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { apiHandler } from '@/lib/api-handler'
+import { jsonResponse } from '@/lib/utils'
 
 const FavoriteBody = z.object({
   action: z.literal('toggleFavorite'),
@@ -15,33 +13,14 @@ const FavoriteBody = z.object({
 export const Route = createFileRoute('/api/collection')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const originError = checkCsrfOrigin(request)
-        if (originError) return originError
-
-        const cfEnv = getCfEnv()
-        const auth = await createAuth(cfEnv)
-        const session = await auth.api.getSession({ headers: request.headers })
-        if (!session) {
-          return jsonResponse({ error: 'Unauthorized' }, 401)
-        }
-
-        let body: z.infer<typeof FavoriteBody>
-        try {
-          body = FavoriteBody.parse(await request.json())
-        } catch {
-          return jsonResponse({ error: 'Invalid request' }, 400)
-        }
-
-        const db = await createDb(cfEnv.DB)
-
+      POST: apiHandler(FavoriteBody, async ({ db, userId }, body) => {
         const [row] = await db
           .select({ isFavorite: userCreature.isFavorite })
           .from(userCreature)
           .where(
             and(
               eq(userCreature.id, body.userCreatureId),
-              eq(userCreature.userId, session.user.id),
+              eq(userCreature.userId, userId),
             ),
           )
           .limit(1)
@@ -57,7 +36,7 @@ export const Route = createFileRoute('/api/collection')({
           .where(eq(userCreature.id, body.userCreatureId))
 
         return jsonResponse({ isFavorite: !row.isFavorite })
-      },
+      }),
     },
   },
 })

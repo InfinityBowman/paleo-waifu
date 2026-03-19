@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 import {
+  TEST_USER_ID,
+  TEST_USER_ID_2,
   authenticate,
   resetTestData,
   seedTestData,
-  TEST_USER_ID,
-  TEST_USER_ID_2,
 } from './helpers'
 
 test.beforeEach(async () => {
@@ -53,21 +53,24 @@ test('full trade flow: create offer, propose, accept', async ({ browser }) => {
   await expect(pickerModal).not.toBeVisible({ timeout: 5_000 })
 
   // Verify trade appears — should see Tyrannosaurus in the marketplace
-  await expect(
-    userAPage.getByText('Tyrannosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userAPage.getByText('Tyrannosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // ── User B sees the trade and proposes ──────────────────────────
   await userBPage.goto('/trade')
   await expect(userBPage).toHaveURL('/trade')
 
   // User B should see User A's trade with Tyrannosaurus in marketplace
-  await expect(
-    userBPage.getByText('Tyrannosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userBPage.getByText('Tyrannosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // Click "Make Offer" on User A's trade
-  await userBPage.getByRole('button', { name: /Make Offer/i }).first().click()
+  await userBPage
+    .getByRole('button', { name: /Make Offer/i })
+    .first()
+    .click()
 
   // Creature picker opens for User B
   const userBPicker = userBPage.getByRole('dialog')
@@ -89,9 +92,9 @@ test('full trade flow: create offer, propose, accept', async ({ browser }) => {
 
   // User B should see their proposal in "My Offers" tab
   await userBPage.getByRole('tab', { name: /My Offers/i }).click()
-  await expect(
-    userBPage.getByText('Spinosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userBPage.getByText('Spinosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // ── User A sees the proposal and accepts ────────────────────────
   // Reload trade page so User A sees User B's proposal
@@ -101,15 +104,18 @@ test('full trade flow: create offer, propose, accept', async ({ browser }) => {
   await userAPage.getByRole('tab', { name: /My Offers/i }).click()
 
   // Should see incoming offer section with Spinosaurus
-  await expect(
-    userAPage.getByText('Incoming Offers'),
-  ).toBeVisible({ timeout: 5_000 })
-  await expect(
-    userAPage.getByText('Spinosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userAPage.getByText('Incoming Offers')).toBeVisible({
+    timeout: 5_000,
+  })
+  await expect(userAPage.getByText('Spinosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // Click Accept
-  await userAPage.getByRole('button', { name: /Accept/i }).first().click()
+  await userAPage
+    .getByRole('button', { name: /Accept/i })
+    .first()
+    .click()
 
   // Confirmation dialog appears
   const confirmDialog = userAPage.getByRole('alertdialog')
@@ -119,9 +125,7 @@ test('full trade flow: create offer, propose, accept', async ({ browser }) => {
   ).toBeVisible()
 
   // Confirm the trade
-  await confirmDialog
-    .getByRole('button', { name: /Accept Trade/i })
-    .click()
+  await confirmDialog.getByRole('button', { name: /Accept Trade/i }).click()
 
   // Dialog closes — trade is completed
   await expect(confirmDialog).not.toBeVisible({ timeout: 5_000 })
@@ -129,15 +133,15 @@ test('full trade flow: create offer, propose, accept', async ({ browser }) => {
   // ── Verify creatures swapped via collection pages ───────────────
   // User A should now own Spinosaurus (got from trade)
   await userAPage.goto('/collection')
-  await expect(
-    userAPage.getByText('Spinosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userAPage.getByText('Spinosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // User B should now own Tyrannosaurus (got from trade)
   await userBPage.goto('/collection')
-  await expect(
-    userBPage.getByText('Tyrannosaurus').first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userBPage.getByText('Tyrannosaurus').first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // Cleanup
   await userAContext.close()

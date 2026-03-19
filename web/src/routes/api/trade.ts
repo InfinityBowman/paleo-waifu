@@ -2,7 +2,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { and, count, eq, inArray, ne } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   battleTeam,
   tradeHistory,
@@ -11,9 +10,8 @@ import {
   userCreature,
 } from '@paleo-waifu/shared/db/schema'
 import type { Database } from '@paleo-waifu/shared/db/client'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { apiHandler } from '@/lib/api-handler'
+import { jsonResponse } from '@/lib/utils'
 import { isCreatureInTrade } from '@/lib/trade-locks'
 
 const idField = z.string().min(1).max(50)
@@ -59,31 +57,7 @@ const TradeBody = z.discriminatedUnion('action', [
 export const Route = createFileRoute('/api/trade')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const originError = checkCsrfOrigin(request)
-        if (originError) return originError
-
-        const cfEnv = getCfEnv()
-        const auth = await createAuth(cfEnv)
-        const session = await auth.api.getSession({ headers: request.headers })
-        if (!session) {
-          return jsonResponse({ error: 'Unauthorized' }, 401)
-        }
-
-        let rawBody: unknown
-        try {
-          rawBody = await request.json()
-        } catch {
-          return jsonResponse({ error: 'Invalid JSON' }, 400)
-        }
-        const parsed = TradeBody.safeParse(rawBody)
-        if (!parsed.success) {
-          return jsonResponse({ error: 'Invalid request body' }, 400)
-        }
-        const body = parsed.data
-        const db = await createDb(cfEnv.DB)
-        const userId = session.user.id
-
+      POST: apiHandler(TradeBody, async ({ db, userId }, body) => {
         // ── CREATE ────────────────────────────────────────────────
         if (body.action === 'create') {
           // Verify ownership
@@ -479,7 +453,7 @@ export const Route = createFileRoute('/api/trade')({
           .where(eq(tradeProposal.id, body.proposalId))
 
         return jsonResponse({ success: true })
-      },
+      }),
     },
   },
 })

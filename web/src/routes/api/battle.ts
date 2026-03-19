@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { and, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-import { createDb } from '@paleo-waifu/shared/db/client'
 import { battleTeam, userCreature } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { apiHandler } from '@/lib/api-handler'
+import { jsonResponse } from '@/lib/utils'
 import { getLockedCreatureIds } from '@/lib/trade-locks'
 import {
   deleteTeam,
@@ -55,31 +53,7 @@ const BattleBody = z.discriminatedUnion('action', [
 export const Route = createFileRoute('/api/battle')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const originError = checkCsrfOrigin(request)
-        if (originError) return originError
-
-        const cfEnv = getCfEnv()
-        const auth = await createAuth(cfEnv)
-        const session = await auth.api.getSession({ headers: request.headers })
-        if (!session) {
-          return jsonResponse({ error: 'Unauthorized' }, 401)
-        }
-
-        let rawBody: unknown
-        try {
-          rawBody = await request.json()
-        } catch {
-          return jsonResponse({ error: 'Invalid JSON' }, 400)
-        }
-        const parsed = BattleBody.safeParse(rawBody)
-        if (!parsed.success) {
-          return jsonResponse({ error: 'Invalid request body' }, 400)
-        }
-        const body = parsed.data
-        const db = await createDb(cfEnv.DB)
-        const userId = session.user.id
-
+      POST: apiHandler(BattleBody, async ({ db, userId }, body) => {
         // ── SET TEAM ──────────────────────────────────────────
         if (body.action === 'set_team') {
           // Validate unique creature species
@@ -233,7 +207,7 @@ export const Route = createFileRoute('/api/battle')({
           return jsonResponse({ error: result.error }, 400)
         }
         return jsonResponse(result)
-      },
+      }),
     },
   },
 })

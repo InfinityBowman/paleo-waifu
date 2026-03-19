@@ -2,12 +2,9 @@ import { createFileRoute } from '@tanstack/react-router'
 import { sql } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { z } from 'zod'
-import { createDb } from '@paleo-waifu/shared/db/client'
 import { currency } from '@paleo-waifu/shared/db/schema'
-import { getCfEnv } from '@/lib/env'
-import { createAuth } from '@/lib/auth'
-import { getUserRole } from '@/lib/auth-server'
-import { checkCsrfOrigin, jsonResponse } from '@/lib/utils'
+import { adminHandler } from '@/lib/api-handler'
+import { jsonResponse } from '@/lib/utils'
 
 const AdminBody = z.discriminatedUnion('action', [
   z.object({
@@ -35,39 +32,7 @@ const AdminBody = z.discriminatedUnion('action', [
 export const Route = createFileRoute('/api/admin')({
   server: {
     handlers: {
-      POST: async ({ request }) => {
-        const originError = checkCsrfOrigin(request)
-        if (originError) return originError
-
-        const cfEnv = getCfEnv()
-        const auth = await createAuth(cfEnv)
-        const session = await auth.api.getSession({
-          headers: request.headers,
-        })
-
-        if (!session) {
-          return jsonResponse({ error: 'Unauthorized' }, 401)
-        }
-
-        if (getUserRole(session.user) !== 'admin') {
-          return jsonResponse({ error: 'Forbidden' }, 403)
-        }
-
-        let rawBody: unknown
-        try {
-          rawBody = await request.json()
-        } catch {
-          return jsonResponse({ error: 'Invalid JSON' }, 400)
-        }
-
-        const parsed = AdminBody.safeParse(rawBody)
-        if (!parsed.success) {
-          return jsonResponse({ error: 'Invalid request body' }, 400)
-        }
-
-        const body = parsed.data
-        const db = await createDb(cfEnv.DB)
-
+      POST: adminHandler(AdminBody, async ({ db, auth, request }, body) => {
         if (body.action === 'adjust_fossils') {
           const result = await db
             .insert(currency)
@@ -120,7 +85,7 @@ export const Route = createFileRoute('/api/admin')({
           },
         })
         return jsonResponse({ success: true })
-      },
+      }),
     },
   },
 })

@@ -56,9 +56,9 @@ test('pull a creature and find it in collection', async ({ page, context }) => {
   await expect(page).toHaveURL('/collection')
 
   // The pulled creature should appear in the collection
-  await expect(
-    page.getByText(creatureName!).first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(page.getByText(creatureName!).first()).toBeVisible({
+    timeout: 5_000,
+  })
 })
 
 test('pull x10 shows multiple creature cards', async ({ page, context }) => {
@@ -84,9 +84,9 @@ test('pull x10 shows multiple creature cards', async ({ page, context }) => {
   const creatureNamePattern = new RegExp(creatureNames.join('|'))
 
   // Wait for the first creature to appear
-  await expect(
-    page.getByText(creatureNamePattern).first(),
-  ).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByText(creatureNamePattern).first()).toBeVisible({
+    timeout: 15_000,
+  })
 
   // Skip/advance through the reveal animation by clicking
   await page.locator('body').click()

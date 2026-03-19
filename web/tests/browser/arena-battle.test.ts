@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test'
 import {
+  TEST_USER_ID,
+  TEST_USER_ID_2,
   authenticate,
   resetTestData,
   seedTestData,
-  TEST_USER_ID,
-  TEST_USER_ID_2,
 } from './helpers'
 
 import type { BrowserContext } from '@playwright/test'
@@ -71,13 +71,11 @@ async function attackViaApi(
     const text = await res.text()
     throw new Error(`Arena attack failed: ${text}`)
   }
-  const data = await res.json()
+  const data: { battleId: string } = await res.json()
   return data.battleId
 }
 
-async function getSessionCookie(
-  context: BrowserContext,
-): Promise<string> {
+async function getSessionCookie(context: BrowserContext): Promise<string> {
   const cookies = await context.cookies()
   const sessionCookie = cookies.find(
     (c) => c.name === 'better-auth.session_token',
@@ -86,9 +84,7 @@ async function getSessionCookie(
   return `better-auth.session_token=${sessionCookie.value}`
 }
 
-test('arena: find opponents shows nearby players', async ({
-  browser,
-}) => {
+test('arena: find opponents shows nearby players', async ({ browser }) => {
   const userAContext = await browser.newContext()
   const userBContext = await browser.newContext()
 
@@ -102,22 +98,18 @@ test('arena: find opponents shows nearby players', async ({
   const userAPage = await userAContext.newPage()
 
   await userAPage.goto('/battle', { waitUntil: 'networkidle' })
-  await expect(
-    userAPage.getByRole('heading', { name: 'Arena' }),
-  ).toBeVisible()
+  await expect(userAPage.getByRole('heading', { name: 'Arena' })).toBeVisible()
 
   // Daily attack counter should show "5 of 5 remaining today"
-  await expect(
-    userAPage.getByText(/5 of 5 remaining/i),
-  ).toBeVisible()
+  await expect(userAPage.getByText(/5 of 5 remaining/i)).toBeVisible()
 
   // Click "Find Opponents"
   await userAPage.getByRole('button', { name: /Find Opponents/i }).click()
 
   // Should see TestUser2 as a potential opponent
-  await expect(
-    userAPage.getByText('TestUser2').first(),
-  ).toBeVisible({ timeout: 10_000 })
+  await expect(userAPage.getByText('TestUser2').first()).toBeVisible({
+    timeout: 10_000,
+  })
 
   // Attack button should be visible for the opponent
   await expect(
@@ -128,9 +120,7 @@ test('arena: find opponents shows nearby players', async ({
   await userBContext.close()
 })
 
-test('battle history and replay after arena attack', async ({
-  browser,
-}) => {
+test('battle history and replay after arena attack', async ({ browser }) => {
   const userAContext = await browser.newContext()
   const userBContext = await browser.newContext()
 
@@ -154,23 +144,22 @@ test('battle history and replay after arena attack', async ({
   await userAPage.getByRole('tab', { name: /History/i }).click()
 
   // Should see a battle result (WIN, LOSS, or DRAW)
-  await expect(
-    userAPage.getByText(/WIN|LOSS|DRAW/).first(),
-  ).toBeVisible({ timeout: 5_000 })
+  await expect(userAPage.getByText(/WIN|LOSS|DRAW/).first()).toBeVisible({
+    timeout: 5_000,
+  })
 
   // Should see TestUser2 as the opponent
-  await expect(
-    userAPage.getByText('TestUser2').first(),
-  ).toBeVisible()
+  await expect(userAPage.getByText('TestUser2').first()).toBeVisible()
 
   // Should show "arena" mode
-  await expect(
-    userAPage.getByText('arena').first(),
-  ).toBeVisible()
+  await expect(userAPage.getByText('arena').first()).toBeVisible()
 
   // ── Click to view battle replay ────────────────────────────────
   // History items are clickable links to /battle/$id
-  await userAPage.getByText(/WIN|LOSS|DRAW/).first().click()
+  await userAPage
+    .getByText(/WIN|LOSS|DRAW/)
+    .first()
+    .click()
 
   // Should navigate to battle detail page
   await expect(userAPage).toHaveURL(new RegExp(`/battle/${battleId}`), {
@@ -182,9 +171,7 @@ test('battle history and replay after arena attack', async ({
   await expect(userAPage.getByText('TestUser2').first()).toBeVisible()
 
   // Should have a "Back to Arena" link
-  await expect(
-    userAPage.getByText(/Back to Arena/i).first(),
-  ).toBeVisible()
+  await expect(userAPage.getByText(/Back to Arena/i).first()).toBeVisible()
 
   await userAContext.close()
   await userBContext.close()
