@@ -299,6 +299,28 @@ export async function seedTestData() {
             VALUES (?, ?, ?, ?, ?)`,
       params: ['e2e-xp-002', TEST_USER_ID_2, 0, 0, now],
     },
+
+    // Battle stats (needed for battle system)
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID, 'striker', 120, 140, 70, 90] },
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID_2, 'tank', 150, 80, 130, 60] },
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID_3, 'support', 130, 90, 100, 80] },
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID_4, 'striker', 100, 130, 60, 120] },
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID_5, 'bruiser', 140, 110, 90, 70] },
+    { sql: `INSERT OR REPLACE INTO creature_battle_stats (creature_id, role, hp, atk, def, spd) VALUES (?, ?, ?, ?, ?, ?)`, params: [TEST_CREATURE_ID_6, 'tank', 160, 70, 140, 50] },
+
+    // Creature abilities (active + passive per creature)
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-001', TEST_CREATURE_ID, 'bite', 'active', 'Crushing Bite'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-002', TEST_CREATURE_ID, 'intimidate', 'passive', 'Apex Predator'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-003', TEST_CREATURE_ID_2, 'charge', 'active', 'Horn Charge'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-004', TEST_CREATURE_ID_2, 'thick_hide', 'passive', 'Thick Hide'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-005', TEST_CREATURE_ID_3, 'tail_whip', 'active', 'Tail Whip'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-006', TEST_CREATURE_ID_3, 'plated_armor', 'passive', 'Plated Armor'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-007', TEST_CREATURE_ID_4, 'pounce', 'active', 'Pounce'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-008', TEST_CREATURE_ID_4, 'pack_hunter', 'passive', 'Pack Hunter'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-009', TEST_CREATURE_ID_5, 'aqua_slash', 'active', 'Aqua Slash'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-010', TEST_CREATURE_ID_5, 'sail_back', 'passive', 'Sail Back'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-011', TEST_CREATURE_ID_6, 'club_tail', 'active', 'Club Tail'] },
+    { sql: `INSERT OR REPLACE INTO creature_ability (id, creature_id, template_id, slot, display_name) VALUES (?, ?, ?, ?, ?)`, params: ['e2e-ca-012', TEST_CREATURE_ID_6, 'fortress', 'passive', 'Fortress'] },
   ])
 }
 
