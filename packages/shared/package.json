@@ -20,10 +20,12 @@
     "./battle/ai": "./src/battle/ai.ts",
     "./battle/engine": "./src/battle/engine.ts",
     "./slug": "./src/slug.ts",
-    "./gacha": "./src/gacha/engine.ts"
+    "./gacha": "./src/gacha/engine.ts",
+    "./logger": "./src/logger.ts"
   },
   "dependencies": {
-    "drizzle-orm": "^0.45.1"
+    "drizzle-orm": "^0.45.1",
+    "evlog": "^2.13.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260310.1",

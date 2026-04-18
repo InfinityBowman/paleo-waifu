@@ -7,6 +7,10 @@
   "assets": {
     "html_handling": "drop-trailing-slash",
   },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
 
   // ─── Development (default) ──────────────────────────────────────────
   "d1_databases": [
