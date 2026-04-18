@@ -1,7 +1,7 @@
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   createWorkersLogger,
-  initWorkersLog,
+  ensureWorkersLog,
 } from '@paleo-waifu/shared/logger'
 import {
   InteractionResponseType,
@@ -46,23 +46,13 @@ interface Env {
   ENVIRONMENT?: string
 }
 
-let loggerInitialized = false
-function ensureLogger(env: Env) {
-  if (loggerInitialized) return
-  initWorkersLog({
-    service: 'bot',
-    environment: env.ENVIRONMENT ?? 'development',
-  })
-  loggerInitialized = true
-}
-
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
-    ensureLogger(env)
+    ensureWorkersLog({ service: 'bot', environment: env.ENVIRONMENT })
     const log = createWorkersLogger(request)
 
     try {

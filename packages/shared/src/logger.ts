@@ -35,15 +35,27 @@ interface InitOptions {
   enabled?: boolean
 }
 
-export function initWorkersLog({
+let initialized = false
+
+/**
+ * Idempotent. Safe to call from every Worker fetch handler — first call wins,
+ * subsequent calls are no-ops. This shape is needed because some entry layouts
+ * (e.g. TanStack Start) don't reliably evaluate user module-scope code before
+ * the first route emit, so a "call once at top level" init can be missed and
+ * evlog falls back to its defaults (`service: 'app'`, `environment: 'development'`).
+ */
+export function ensureWorkersLog({
   service,
-  environment = 'production',
+  environment,
   enabled = true,
 }: InitOptions): void {
-  const isDev = environment !== 'production'
+  if (initialized) return
+  initialized = true
+  const env = environment ?? 'production'
+  const isDev = env !== 'production'
   initWorkersLogger({
     enabled,
-    env: { service, environment },
+    env: { service, environment: env },
     pretty: isDev,
     stringify: false,
     redact: !isDev,
