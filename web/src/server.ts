@@ -1,16 +1,16 @@
 import handler, { createServerEntry } from '@tanstack/react-start/server-entry'
-import { initWorkersLog } from '@paleo-waifu/shared/logger'
+import { ensureWorkersLog } from '@paleo-waifu/shared/logger'
 import { env } from 'cloudflare:workers'
-
-initWorkersLog({
-  service: 'web',
-  environment: (env as { ENVIRONMENT?: string }).ENVIRONMENT,
-})
 
 const CANONICAL_DOMAIN = 'paleowaifu.com'
 
 export default createServerEntry({
   async fetch(request, opts) {
+    ensureWorkersLog({
+      service: 'web',
+      environment: (env as { ENVIRONMENT?: string }).ENVIRONMENT,
+    })
+
     const url = new URL(request.url)
 
     // Redirect non-canonical domains to the canonical one (301 permanent)

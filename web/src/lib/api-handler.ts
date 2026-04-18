@@ -1,6 +1,7 @@
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
   createWorkersLogger,
+  ensureWorkersLog,
   identifyUser,
 } from '@paleo-waifu/shared/logger'
 import { getCfEnv } from './env'
@@ -34,6 +35,11 @@ export function apiHandler<T extends z.ZodType>(
   handler: (ctx: AuthedContext, body: z.infer<T>) => Promise<Response>,
 ): (args: { request: Request }) => Promise<Response> {
   return async ({ request }) => {
+    const cfEnv = getCfEnv()
+    ensureWorkersLog({
+      service: 'web',
+      environment: (cfEnv as { ENVIRONMENT?: string }).ENVIRONMENT,
+    })
     const log = createWorkersLogger(request)
     try {
       const originError = checkCsrfOrigin(request)
@@ -42,7 +48,6 @@ export function apiHandler<T extends z.ZodType>(
         return originError
       }
 
-      const cfEnv = getCfEnv()
       const auth = await createAuth(cfEnv)
       const session = await auth.api.getSession({ headers: request.headers })
       if (!session) {
