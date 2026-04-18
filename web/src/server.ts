@@ -4,8 +4,7 @@ import { env } from 'cloudflare:workers'
 
 initWorkersLog({
   service: 'web',
-  environment:
-    (env as { ENVIRONMENT?: string }).ENVIRONMENT ?? 'development',
+  environment: (env as { ENVIRONMENT?: string }).ENVIRONMENT,
 })
 
 const CANONICAL_DOMAIN = 'paleowaifu.com'

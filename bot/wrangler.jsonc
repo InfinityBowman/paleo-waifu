@@ -9,6 +9,9 @@
   },
 
   // ─── Development (default) ──────────────────────────────────────────
+  "vars": {
+    "ENVIRONMENT": "development",
+  },
   "d1_databases": [
     {
       "binding": "DB",
@@ -25,6 +28,9 @@
   "env": {
     "production": {
       "name": "paleo-waifu-bot-prod",
+      "vars": {
+        "ENVIRONMENT": "production",
+      },
       "d1_databases": [
         {
           "binding": "DB",

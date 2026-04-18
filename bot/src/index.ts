@@ -51,7 +51,7 @@ function ensureLogger(env: Env) {
   if (loggerInitialized) return
   initWorkersLog({
     service: 'bot',
-    environment: env.ENVIRONMENT ?? 'development',
+    environment: env.ENVIRONMENT,
   })
   loggerInitialized = true
 }
