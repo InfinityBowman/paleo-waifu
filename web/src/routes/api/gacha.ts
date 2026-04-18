@@ -19,15 +19,20 @@ const GachaBody = z.discriminatedUnion('action', [
 export const Route = createFileRoute('/api/gacha')({
   server: {
     handlers: {
-      POST: apiHandler(GachaBody, async ({ db, userId }, body) => {
-        // Daily claim
+      POST: apiHandler(GachaBody, async ({ db, userId, log }, body) => {
+        log.set({ action: body.action })
+
         if (body.action === 'claim_daily') {
           await fossils.ensure(db, userId)
           const result = await claimDaily(db, userId)
+          log.set({ daily: { claimed: result.claimed } })
           return jsonResponse(result)
         }
 
-        // Pull
+        log.set({
+          banner: body.bannerId,
+          mode: body.action === 'pull_multi' ? 'multi' : 'single',
+        })
         await fossils.ensure(db, userId)
         const outcome = await pull(db, userId, {
           mode: body.action === 'pull_multi' ? 'multi' : 'single',
@@ -36,6 +41,7 @@ export const Route = createFileRoute('/api/gacha')({
         })
 
         if (!outcome.ok) {
+          log.set({ outcome: { ok: false, reason: outcome.reason } })
           if (outcome.reason === 'insufficient_fossils')
             return jsonResponse(
               { error: 'Insufficient fossils', fossils: outcome.fossils },
@@ -52,6 +58,13 @@ export const Route = createFileRoute('/api/gacha')({
           )
         }
 
+        log.set({
+          outcome: {
+            ok: true,
+            pulls: outcome.results.length,
+            fossils: outcome.fossils,
+          },
+        })
         return jsonResponse({
           results: outcome.results,
           fossils: outcome.fossils,

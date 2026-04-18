@@ -1,5 +1,9 @@
 import { createDb } from '@paleo-waifu/shared/db/client'
 import {
+  createWorkersLogger,
+  initWorkersLog,
+} from '@paleo-waifu/shared/logger'
+import {
   InteractionResponseType,
   InteractionType,
   ephemeralResponse,
@@ -27,6 +31,7 @@ import { handleBattleAccept } from './components/battle-accept'
 import { handleBattleDecline } from './components/battle-decline'
 import { handleDefenderPreset } from './components/battle-defender-preset'
 import { awardXp } from './lib/xp'
+import type { RequestLogger } from '@paleo-waifu/shared/logger'
 import type { Interaction } from './lib/discord'
 import type { Database } from '@paleo-waifu/shared/db/client'
 import type { AppUser } from './lib/auth'
@@ -38,6 +43,17 @@ interface Env {
   DISCORD_BOT_TOKEN: string
   XP_API_SECRET: string
   TEST_MODE?: string
+  ENVIRONMENT?: string
+}
+
+let loggerInitialized = false
+function ensureLogger(env: Env) {
+  if (loggerInitialized) return
+  initWorkersLog({
+    service: 'bot',
+    environment: env.ENVIRONMENT ?? 'development',
+  })
+  loggerInitialized = true
 }
 
 export default {
@@ -46,84 +62,110 @@ export default {
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
-    if (request.method !== 'POST') {
-      return new Response('Method not allowed', { status: 405 })
+    ensureLogger(env)
+    const log = createWorkersLogger(request)
+
+    try {
+      const response = await route(request, env, ctx, log)
+      log.emit({ status: response.status })
+      return response
+    } catch (err) {
+      log.error(err as Error)
+      log.emit({ status: 500, reason: 'unhandled_exception' })
+      throw err
     }
-
-    const url = new URL(request.url)
-
-    // XP endpoint — shared secret auth, not Discord signature
-    if (url.pathname === '/api/xp') {
-      return handleXpRequest(request, env)
-    }
-
-    // Test-only DB endpoints — only available when TEST_MODE is set
-    if (env.TEST_MODE && url.pathname.startsWith('/api/test/')) {
-      return handleTestDb(request, url.pathname, env)
-    }
-
-    // All other routes: Discord interaction flow
-    const isValid = await verifySignature(request, env.DISCORD_PUBLIC_KEY)
-    if (!isValid) {
-      return new Response('Invalid signature', { status: 401 })
-    }
-
-    const interaction: Interaction = await request.json()
-
-    // Handle PING (endpoint verification)
-    if (interaction.type === InteractionType.PING) {
-      return jsonResponse({ type: InteractionResponseType.PONG })
-    }
-
-    // Handle MESSAGE_COMPONENT (buttons, select menus)
-    if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
-      return handleComponent(interaction, env, ctx)
-    }
-
-    // Handle APPLICATION_COMMAND
-    if (interaction.type !== InteractionType.APPLICATION_COMMAND) {
-      return new Response('Unknown interaction type', { status: 400 })
-    }
-
-    const commandName = interaction.data?.name
-    if (!commandName) {
-      return new Response('Missing command name', { status: 400 })
-    }
-
-    // Commands that don't require auth
-    if (commandName === 'help') {
-      return handleHelp()
-    }
-    if (commandName === 'leaderboard-xp') {
-      const db = await createDb(env.DB)
-      return handleLeaderboardXp(db)
-    }
-    if (commandName === 'leaderboard-collection') {
-      const db = await createDb(env.DB)
-      return handleLeaderboardCollection(db)
-    }
-
-    // Resolve Discord user to app user
-    const discordUser = getInteractionUser(interaction)
-    const db = await createDb(env.DB)
-    const appUser = await resolveDiscordUser(db, discordUser.id)
-
-    if (!appUser) {
-      return ephemeralResponse(UNLINKED_MESSAGE)
-    }
-
-    if (appUser.banned) {
-      return ephemeralResponse(BANNED_MESSAGE)
-    }
-
-    // Route to command handler
-    return routeCommand(commandName, interaction, db, appUser, env, ctx)
   },
 }
 
-async function handleXpRequest(request: Request, env: Env): Promise<Response> {
+async function route(
+  request: Request,
+  env: Env,
+  ctx: ExecutionContext,
+  log: RequestLogger,
+): Promise<Response> {
+  if (request.method !== 'POST') {
+    return new Response('Method not allowed', { status: 405 })
+  }
+
+  const url = new URL(request.url)
+
+  if (url.pathname === '/api/xp') {
+    log.set({ route: 'xp' })
+    return handleXpRequest(request, env, log)
+  }
+
+  if (env.TEST_MODE && url.pathname.startsWith('/api/test/')) {
+    log.set({ route: 'test_db', path: url.pathname })
+    return handleTestDb(request, url.pathname, env)
+  }
+
+  log.set({ route: 'discord_interaction' })
+  const isValid = await verifySignature(request, env.DISCORD_PUBLIC_KEY)
+  if (!isValid) {
+    log.set({ reason: 'bad_signature' })
+    return new Response('Invalid signature', { status: 401 })
+  }
+
+  const interaction: Interaction = await request.json()
+  log.set({ interactionType: interaction.type })
+
+  if (interaction.type === InteractionType.PING) {
+    return jsonResponse({ type: InteractionResponseType.PONG })
+  }
+
+  if (interaction.type === InteractionType.MESSAGE_COMPONENT) {
+    return handleComponent(interaction, env, ctx, log)
+  }
+
+  if (interaction.type !== InteractionType.APPLICATION_COMMAND) {
+    return new Response('Unknown interaction type', { status: 400 })
+  }
+
+  const commandName = interaction.data?.name
+  if (!commandName) {
+    return new Response('Missing command name', { status: 400 })
+  }
+  log.set({ command: commandName })
+
+  if (commandName === 'help') {
+    return handleHelp()
+  }
+  if (commandName === 'leaderboard-xp') {
+    const db = await createDb(env.DB)
+    return handleLeaderboardXp(db)
+  }
+  if (commandName === 'leaderboard-collection') {
+    const db = await createDb(env.DB)
+    return handleLeaderboardCollection(db)
+  }
+
+  const discordUser = getInteractionUser(interaction)
+  log.set({ discord: { userId: discordUser.id } })
+  const db = await createDb(env.DB)
+  const appUser = await resolveDiscordUser(db, discordUser.id)
+
+  if (!appUser) {
+    log.set({ reason: 'unlinked' })
+    return ephemeralResponse(UNLINKED_MESSAGE)
+  }
+
+  if (appUser.banned) {
+    log.set({ reason: 'banned' })
+    return ephemeralResponse(BANNED_MESSAGE)
+  }
+
+  log.set({ user: { id: appUser.id } })
+  return routeCommand(commandName, interaction, db, appUser, env, ctx)
+}
+
+async function handleXpRequest(
+  request: Request,
+  env: Env,
+  log: RequestLogger,
+): Promise<Response> {
   const auth = request.headers.get('Authorization')
   if (auth !== `Bearer ${env.XP_API_SECRET}`) {
+    log.set({ reason: 'bad_xp_secret' })
     return jsonResponse({ error: 'Unauthorized' }, 401)
   }
 
@@ -137,15 +179,26 @@ async function handleXpRequest(request: Request, env: Env): Promise<Response> {
   if (!body.discordUserId) {
     return jsonResponse({ error: 'Missing discordUserId' }, 400)
   }
+  log.set({ discord: { userId: body.discordUserId } })
 
   const db = await createDb(env.DB)
   const appUser = await resolveDiscordUser(db, body.discordUserId)
 
   if (!appUser) {
+    log.set({ reason: 'unlinked' })
     return jsonResponse({ error: 'User not linked' }, 404)
   }
+  log.set({ user: { id: appUser.id } })
 
   const result = await awardXp(db, appUser.id)
+  log.set({
+    xp: {
+      total: result.xp,
+      level: result.level,
+      leveledUp: result.leveledUp,
+      fossilsEarned: result.fossilsEarned,
+    },
+  })
   return jsonResponse(result)
 }
 
@@ -153,7 +206,9 @@ async function handleComponent(
   interaction: Interaction,
   env: Env,
   ctx: ExecutionContext,
+  log: RequestLogger,
 ): Promise<Response> {
+  log.set({ component: { customId: interaction.data?.custom_id } })
   const customId = interaction.data?.custom_id
   if (!customId) {
     return ephemeralResponse('Invalid component interaction.')

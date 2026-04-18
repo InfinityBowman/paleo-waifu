@@ -1,4 +1,12 @@
 import handler, { createServerEntry } from '@tanstack/react-start/server-entry'
+import { initWorkersLog } from '@paleo-waifu/shared/logger'
+import { env } from 'cloudflare:workers'
+
+initWorkersLog({
+  service: 'web',
+  environment:
+    (env as { ENVIRONMENT?: string }).ENVIRONMENT ?? 'development',
+})
 
 const CANONICAL_DOMAIN = 'paleowaifu.com'
 
