@@ -74,7 +74,7 @@ export const Route = createRootRoute({
     ],
     scripts: [
       {
-        src: 'https://plausible.jacobmaynard.dev/js/pa-3bdzy4_fgkECTn6E-iKcY.js',
+        src: 'https://plausible.jacobmaynard.dev/js/pa-mAB7PUQ2oYtGnJANBykmt.js',
         async: true,
       },
       {
